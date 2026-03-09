@@ -591,6 +591,11 @@
     return (u.searchParams.get("slug") || "").trim();
   }
 
+  function getPhoneFromUrl(){
+    const u = new URL(location.href);
+    return String(u.searchParams.get("phone") || "").replace(/[^\d]/g, "").trim();
+  }
+
   function buildUrl(base, params){
     const u = new URL(base, location.href);
     Object.entries(params || {}).forEach(([k, v]) => {
@@ -626,19 +631,10 @@
     $("prodGrid").innerHTML = `<div class="empty">Erreur produits : ${escapeHtml(msg)}</div>`;
     $("salesList").innerHTML = `<div class="empty">Erreur ventes : ${escapeHtml(msg)}</div>`;
     $("adminList").innerHTML = `<div class="empty">Erreur admin : ${escapeHtml(msg)}</div>`;
-  }
-
-  async function sbGetSubscriptionBySlug(pSlug){
-    const url = `${SUPABASE_URL}/rest/v1/digiy_subscriptions_public?select=phone,module,slug&slug=eq.${encodeURIComponent(pSlug)}&limit=1`;
-    const r = await fetch(url, {
-      headers: {
-        apikey: SUPABASE_ANON,
-        authorization: `Bearer ${SUPABASE_ANON}`
-      }
-    });
-    if(!r.ok) throw new Error("Cannot read digiy_subscriptions_public");
-    const data = await r.json();
-    return data[0] || null;
+    $("ctxStore").textContent = "Erreur";
+    $("ctxCity").textContent = "Erreur";
+    $("ctxWa").textContent = "Erreur";
+    $("ctxTva").textContent = "Erreur";
   }
 
   async function sbRpc(name, payload){
@@ -656,13 +652,12 @@
       return false;
     }
 
-    const sub = await sbGetSubscriptionBySlug(slug);
-    if(!sub?.phone){
-      setAccess(false, "slug inconnu");
-      return false;
-    }
+    phone = getPhoneFromUrl();
 
-    phone = sub.phone;
+    if(!phone){
+      setAccess(true, "slug actif");
+      return true;
+    }
 
     const res = await sbRpc("digiy_has_access", {
       p_phone: phone,
