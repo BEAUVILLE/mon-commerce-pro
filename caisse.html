@@ -221,7 +221,7 @@
     .prod .stock.low{color:#fde68a}
     .prod .stock.out{color:#fecaca}
 
-    .cartList,.salesList{
+    .cartList,.salesList,.adminList{
       display:grid;
       gap:10px;
       margin-top:10px;
@@ -242,8 +242,8 @@
       align-items:center;
       justify-content:flex-end;
     }
-    .qty button{
-      width:34px;height:34px;border-radius:10px;border:1px solid var(--line);
+    .qty button,.miniBtn{
+      min-width:34px;height:34px;border-radius:10px;border:1px solid var(--line);
       background:rgba(255,255,255,.06);color:var(--text);font-weight:1000;cursor:pointer;
     }
     .qtyValue{min-width:22px;text-align:center;font-weight:1000}
@@ -286,6 +286,32 @@
       position:sticky;
       top:14px;
       align-self:start;
+    }
+
+    .adminActions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+    }
+
+    .adminTag{
+      display:inline-flex;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+    }
+    .adminTag.ok{
+      color:#bbf7d0;
+      border-color:rgba(34,197,94,.35);
+    }
+    .adminTag.off{
+      color:#fecaca;
+      border-color:rgba(239,68,68,.35);
     }
 
     @media(max-width:1023px){
@@ -464,6 +490,62 @@
         </div>
       </div>
 
+      <div class="card">
+        <div class="row">
+          <div>
+            <h2>Admin produits</h2>
+            <div class="muted">Ajoute, modifie, active, désactive, ajuste le stock.</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <div class="muted">Nom produit</div>
+            <input class="in" id="adminName" placeholder="Ex: Jus de bissap" />
+          </div>
+          <div>
+            <div class="muted">Prix FCFA</div>
+            <input class="in" id="adminPrice" inputmode="numeric" placeholder="Ex: 1500" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <div class="muted">Stock</div>
+            <input class="in" id="adminStock" inputmode="numeric" placeholder="Ex: 20" />
+          </div>
+          <div>
+            <div class="muted">Catégorie</div>
+            <input class="in" id="adminCategory" placeholder="Ex: Boissons" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <div class="muted">Code-barres</div>
+            <input class="in" id="adminBarcode" placeholder="Optionnel" />
+          </div>
+          <div>
+            <div class="muted">Photo URL</div>
+            <input class="in" id="adminPhoto" placeholder="Optionnel" />
+          </div>
+        </div>
+
+        <input type="hidden" id="adminProductId" />
+
+        <div class="row" style="margin-top:12px">
+          <button class="btn primary" id="btnAdminSave" type="button">💾 Enregistrer produit</button>
+          <button class="btn" id="btnAdminReset" type="button">↺ Réinitialiser</button>
+          <button class="btn" id="btnAdminReload" type="button">↻ Recharger catalogue</button>
+        </div>
+
+        <div class="msg" id="adminMsg">Prêt.</div>
+
+        <div class="adminList" id="adminList" style="margin-top:14px">
+          <div class="empty">Chargement catalogue admin…</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -487,6 +569,7 @@
   let storeCtx = null;
   let products = [];
   let filteredProducts = [];
+  let adminProducts = [];
   let cart = [];
   let activeCat = "Tous";
 
@@ -522,10 +605,27 @@
     el.className = "msg " + (type || "");
   }
 
+  function setAdminMsg(txt, type){
+    const el = $("adminMsg");
+    el.textContent = txt;
+    el.className = "msg " + (type || "");
+  }
+
   function setAccess(ok, txt){
     const pill = $("accessPill");
     pill.className = "pill " + (ok ? "ok" : "bad");
     pill.textContent = "accès : " + txt;
+  }
+
+  function showFatal(err){
+    const msg = err?.message || String(err || "Erreur inconnue");
+    console.error("CAISSE FATAL:", err);
+    setAccess(false, "erreur");
+    setCartMsg("❌ " + msg, "bad");
+    setAdminMsg("❌ " + msg, "bad");
+    $("prodGrid").innerHTML = `<div class="empty">Erreur produits : ${escapeHtml(msg)}</div>`;
+    $("salesList").innerHTML = `<div class="empty">Erreur ventes : ${escapeHtml(msg)}</div>`;
+    $("adminList").innerHTML = `<div class="empty">Erreur admin : ${escapeHtml(msg)}</div>`;
   }
 
   async function sbGetSubscriptionBySlug(pSlug){
@@ -543,7 +643,10 @@
 
   async function sbRpc(name, payload){
     const { data, error } = await sb.rpc(name, payload || {});
-    if(error) throw error;
+    if(error){
+      console.error("RPC ERROR:", name, payload, error);
+      throw new Error(`${name}: ${error.message || error.code || "rpc_failed"}`);
+    }
     return data;
   }
 
@@ -613,6 +716,12 @@
     products = Array.isArray(data) ? data : [];
     renderCatChips();
     filterProducts();
+  }
+
+  async function loadAdminProducts(){
+    const data = await sbRpc("pos_admin_list_products_by_slug", { p_slug: slug });
+    adminProducts = Array.isArray(data) ? data : [];
+    renderAdminList();
   }
 
   async function loadSales(){
@@ -784,6 +893,178 @@
     `).join("");
   }
 
+  function renderAdminList(){
+    if(!adminProducts.length){
+      $("adminList").innerHTML = `<div class="empty">Aucun produit dans le catalogue</div>`;
+      return;
+    }
+
+    $("adminList").innerHTML = adminProducts.map(p => `
+      <div class="item">
+        <div>
+          <b>${escapeHtml(p.name || "—")}</b>
+          <div class="muted small">${escapeHtml(p.category || "Autre")} • ${money(p.price || 0)} • stock ${Number(p.stock || 0)}</div>
+          <div class="muted small" style="margin-top:6px">
+            <span class="adminTag ${p.is_active ? "ok" : "off"}">${p.is_active ? "ACTIF" : "OFF"}</span>
+          </div>
+        </div>
+        <div class="adminActions">
+          <button class="miniBtn" data-stock-minus="${p.id}">-1</button>
+          <button class="miniBtn" data-stock-plus="${p.id}">+1</button>
+          <button class="miniBtn" data-edit="${p.id}">✏️</button>
+          <button class="miniBtn" data-toggle="${p.id}">${p.is_active ? "OFF" : "ON"}</button>
+        </div>
+      </div>
+    `).join("");
+
+    [...$("adminList").querySelectorAll("[data-edit]")].forEach(btn => {
+      btn.addEventListener("click", () => fillAdminForm(btn.dataset.edit));
+    });
+
+    [...$("adminList").querySelectorAll("[data-toggle]")].forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const p = adminProducts.find(x => x.id === btn.dataset.toggle);
+        if(!p) return;
+        await toggleProduct(p.id, !p.is_active);
+      });
+    });
+
+    [...$("adminList").querySelectorAll("[data-stock-minus]")].forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const p = adminProducts.find(x => x.id === btn.dataset.stockMinus);
+        if(!p) return;
+        await updateStock(p.id, Math.max(0, Number(p.stock || 0) - 1));
+      });
+    });
+
+    [...$("adminList").querySelectorAll("[data-stock-plus]")].forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const p = adminProducts.find(x => x.id === btn.dataset.stockPlus);
+        if(!p) return;
+        await updateStock(p.id, Number(p.stock || 0) + 1);
+      });
+    });
+  }
+
+  function resetAdminForm(){
+    $("adminProductId").value = "";
+    $("adminName").value = "";
+    $("adminPrice").value = "";
+    $("adminStock").value = "";
+    $("adminCategory").value = "";
+    $("adminBarcode").value = "";
+    $("adminPhoto").value = "";
+    setAdminMsg("Formulaire réinitialisé.", "warn");
+  }
+
+  function fillAdminForm(productId){
+    const p = adminProducts.find(x => x.id === productId);
+    if(!p) return;
+
+    $("adminProductId").value = p.id || "";
+    $("adminName").value = p.name || "";
+    $("adminPrice").value = String(p.price || 0);
+    $("adminStock").value = String(p.stock || 0);
+    $("adminCategory").value = p.category || "";
+    $("adminBarcode").value = p.barcode || "";
+    $("adminPhoto").value = p.photo_url || "";
+    setAdminMsg("Produit chargé dans le formulaire.", "ok");
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  }
+
+  async function saveAdminProduct(){
+    try{
+      const productId = ($("adminProductId").value || "").trim() || null;
+      const name = ($("adminName").value || "").trim();
+      const price = parseInt(($("adminPrice").value || "0").replace(/[^\d]/g, ""), 10);
+      const stock = parseInt(($("adminStock").value || "0").replace(/[^\d]/g, ""), 10);
+      const category = ($("adminCategory").value || "").trim();
+      const barcode = ($("adminBarcode").value || "").trim();
+      const photo = ($("adminPhoto").value || "").trim();
+
+      if(!name){
+        setAdminMsg("❌ Nom produit requis", "bad");
+        return;
+      }
+      if(Number.isNaN(price) || price < 0){
+        setAdminMsg("❌ Prix invalide", "bad");
+        return;
+      }
+      if(Number.isNaN(stock) || stock < 0){
+        setAdminMsg("❌ Stock invalide", "bad");
+        return;
+      }
+
+      setAdminMsg("⏳ Enregistrement produit…", "warn");
+
+      const res = await sbRpc("pos_upsert_product_by_slug", {
+        p_slug: slug,
+        p_product_id: productId,
+        p_name: name,
+        p_price: price,
+        p_stock: stock,
+        p_category: category || null,
+        p_barcode: barcode || null,
+        p_photo_url: photo || null
+      });
+
+      if(!res?.ok){
+        throw new Error(res?.error || "save_product_failed");
+      }
+
+      await Promise.all([loadProducts(), loadAdminProducts()]);
+      resetAdminForm();
+      setAdminMsg(`✅ Produit ${res.mode === "insert" ? "ajouté" : "mis à jour"}`, "ok");
+    }catch(e){
+      console.error(e);
+      setAdminMsg("❌ " + (e?.message || "Erreur produit"), "bad");
+    }
+  }
+
+  async function updateStock(productId, newStock){
+    try{
+      setAdminMsg("⏳ Mise à jour stock…", "warn");
+
+      const res = await sbRpc("pos_update_stock_by_slug", {
+        p_slug: slug,
+        p_product_id: productId,
+        p_stock: newStock
+      });
+
+      if(!res?.ok){
+        throw new Error(res?.error || "stock_failed");
+      }
+
+      await Promise.all([loadProducts(), loadAdminProducts()]);
+      setAdminMsg(`✅ Stock mis à jour : ${res.stock}`, "ok");
+    }catch(e){
+      console.error(e);
+      setAdminMsg("❌ " + (e?.message || "Erreur stock"), "bad");
+    }
+  }
+
+  async function toggleProduct(productId, isActive){
+    try{
+      setAdminMsg("⏳ Changement statut…", "warn");
+
+      const res = await sbRpc("pos_toggle_product_active_by_slug", {
+        p_slug: slug,
+        p_product_id: productId,
+        p_is_active: isActive
+      });
+
+      if(!res?.ok){
+        throw new Error(res?.error || "toggle_failed");
+      }
+
+      await Promise.all([loadProducts(), loadAdminProducts()]);
+      setAdminMsg(`✅ Produit ${res.is_active ? "activé" : "désactivé"}`, "ok");
+    }catch(e){
+      console.error(e);
+      setAdminMsg("❌ " + (e?.message || "Erreur statut"), "bad");
+    }
+  }
+
   async function checkout(){
     try{
       if(!cart.length){
@@ -823,6 +1104,7 @@
 
       await Promise.all([
         loadProducts(),
+        loadAdminProducts(),
         loadSales(),
         loadStats()
       ]);
@@ -836,45 +1118,82 @@
   }
 
   async function init(){
-    slug = getSlug();
+    try{
+      slug = getSlug();
 
-    if(!slug){
-      setAccess(false, "slug manquant");
-      $("prodGrid").innerHTML = `<div class="empty">Ajoute ?slug=...</div>`;
-      $("salesList").innerHTML = `<div class="empty">Ajoute ?slug=...</div>`;
-      return;
-    }
+      if(!slug){
+        setAccess(false, "slug manquant");
+        $("prodGrid").innerHTML = `<div class="empty">Ajoute ?slug=...</div>`;
+        $("salesList").innerHTML = `<div class="empty">Ajoute ?slug=...</div>`;
+        $("adminList").innerHTML = `<div class="empty">Ajoute ?slug=...</div>`;
+        return;
+      }
 
-    const ok = await checkAccess();
-    if(!ok){
-      const go = buildUrl(ABOS_URL, {
-        base_module: "CAISSE",
-        module: MODULE_CODE,
-        phone,
-        slug
+      const ok = await checkAccess();
+      if(!ok){
+        const go = buildUrl(ABOS_URL, {
+          base_module: "CAISSE",
+          module: MODULE_CODE,
+          phone,
+          slug
+        });
+        $("prodGrid").innerHTML = `<div class="empty">Accès fermé • active ton module.</div>`;
+        $("salesList").innerHTML = `<div class="empty">Accès fermé • active ton module.</div>`;
+        $("adminList").innerHTML = `<div class="empty">Accès fermé • active ton module.</div>`;
+        setCartMsg("Accès fermé. Redirection tunnel ABOS disponible.", "bad");
+        setAdminMsg("Accès fermé.", "bad");
+        $("btnCheckout").onclick = () => location.href = go;
+        return;
+      }
+
+      await loadContext();
+      await loadStats();
+      await loadProducts();
+      await loadAdminProducts();
+      await loadSales();
+
+      $("searchProd").addEventListener("input", filterProducts);
+
+      $("btnReload").addEventListener("click", async () => {
+        try{
+          await loadContext();
+          await loadStats();
+          await loadProducts();
+          await loadAdminProducts();
+          await loadSales();
+          setCartMsg("↻ Données rafraîchies", "ok");
+          setAdminMsg("↻ Catalogue rechargé", "ok");
+        }catch(err){
+          showFatal(err);
+        }
       });
-      $("prodGrid").innerHTML = `<div class="empty">Accès fermé • active ton module.</div>`;
-      $("salesList").innerHTML = `<div class="empty">Accès fermé • active ton module.</div>`;
-      setCartMsg("Accès fermé. Redirection tunnel ABOS disponible.", "bad");
-      $("btnCheckout").onclick = () => location.href = go;
-      return;
+
+      $("btnReloadSales").addEventListener("click", async () => {
+        try{
+          await loadSales();
+        }catch(err){
+          showFatal(err);
+        }
+      });
+
+      $("btnClear").addEventListener("click", clearCart);
+      $("btnCheckout").addEventListener("click", checkout);
+
+      $("btnAdminSave").addEventListener("click", saveAdminProduct);
+      $("btnAdminReset").addEventListener("click", resetAdminForm);
+      $("btnAdminReload").addEventListener("click", async () => {
+        try{
+          await loadAdminProducts();
+          await loadProducts();
+          setAdminMsg("↻ Catalogue admin rechargé", "ok");
+        }catch(err){
+          showFatal(err);
+        }
+      });
+
+    }catch(err){
+      showFatal(err);
     }
-
-    await Promise.all([
-      loadContext(),
-      loadStats(),
-      loadProducts(),
-      loadSales()
-    ]);
-
-    $("searchProd").addEventListener("input", filterProducts);
-    $("btnReload").addEventListener("click", async () => {
-      await Promise.all([loadContext(), loadStats(), loadProducts(), loadSales()]);
-      setCartMsg("↻ Données rafraîchies", "ok");
-    });
-    $("btnReloadSales").addEventListener("click", loadSales);
-    $("btnClear").addEventListener("click", clearCart);
-    $("btnCheckout").addEventListener("click", checkout);
   }
 
   init();
