@@ -1,548 +1,236 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <meta name="theme-color" content="#04130d"/>
-  <title>DIGIY CAISSE PRO — Caisse</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DIGIY CAISSE PRO — Dashboard</title>
+  <meta name="theme-color" content="#0b1020" />
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
+    window.DIGIY_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Indlc3Ftd2pqdHNlZnlqbmx1b3NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzg4ODIsImV4cCI6MjA4MDc1NDg4Mn0.dZfYOc2iL2_wRYL3zExZFsFSBK6AbMeOid2LrIjcTdA";
+  </script>
 
   <style>
     :root{
-      --bg:#04130d;
-      --card:#0b2218;
-      --line:rgba(255,255,255,.10);
-      --text:#ecfdf5;
-      --muted:rgba(236,253,245,.72);
+      --bg:#0b1020;
+      --card:#121a33;
+      --muted:#a8b1d1;
+      --text:#eef1ff;
       --ok:#22c55e;
       --warn:#f59e0b;
-      --bad:#ef4444;
-      --gold:#facc15;
-      --shadow:0 18px 55px rgba(0,0,0,.38);
-      --r:18px;
-      --max:1200px;
+      --danger:#ef4444;
+      --accent:#6366f1;
+      --line:rgba(255,255,255,.09);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius:18px;
+      --pad:16px;
     }
-
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
     body{
       margin:0;
-      color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
       background:
-        radial-gradient(circle at top, rgba(34,197,94,.12), transparent 35%),
-        radial-gradient(circle at 80% 0%, rgba(250,204,21,.10), transparent 35%),
+        radial-gradient(1200px 700px at 20% -20%, rgba(99,102,241,.25), transparent 70%),
+        radial-gradient(900px 600px at 100% 0%, rgba(34,197,94,.15), transparent 55%),
         var(--bg);
-      padding:14px;
+      color:var(--text);
     }
-
-    .wrap{max-width:var(--max);margin:auto}
-    .top{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      border:1px solid var(--line);
-      border-radius:24px;
-      padding:14px;
-      background:rgba(255,255,255,.04);
-      box-shadow:var(--shadow);
+    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 34px}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;padding:10px 6px;margin-bottom:10px;
     }
-    h1{margin:0;font-size:24px;line-height:1.1}
-    h2{margin:0 0 12px 0;font-size:18px}
-    h3{margin:0;font-size:15px}
-    p{margin:0}
-    .muted{color:var(--muted);font-weight:800;font-size:13px}
-    .small{font-size:12px}
-
-    .rightMini{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:flex-start;
-      justify-content:flex-end;
-      flex:0 0 auto;
+    .brand{
+      display:flex;align-items:center;gap:10px;
+      font-weight:800;letter-spacing:.2px
     }
-
+    .brand .badge{
+      display:inline-flex;align-items:center;justify-content:center;
+      width:34px;height:34px;border-radius:11px;
+      background:rgba(99,102,241,.18);border:1px solid var(--line)
+    }
+    .right{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end
+    }
     .pill{
-      padding:10px 12px;
-      border-radius:999px;
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:999px;
+      background:rgba(255,255,255,.04);
       border:1px solid var(--line);
-      background:rgba(0,0,0,.18);
-      font-weight:900;
-      white-space:nowrap;
+      color:var(--muted);
+      font-weight:600;font-size:13px;
     }
-    .pill.ok{border-color:rgba(34,197,94,.35);color:#bbf7d0}
-    .pill.warn{border-color:rgba(245,158,11,.35);color:#fde68a}
-    .pill.bad{border-color:rgba(239,68,68,.35);color:#fecaca}
-
+    .pill b{color:var(--text);font-weight:800}
     .btn{
       border:1px solid var(--line);
-      background:rgba(255,255,255,.07);
+      background:rgba(255,255,255,.05);
       color:var(--text);
-      padding:10px 12px;
-      border-radius:14px;
-      font-weight:900;
-      cursor:pointer;
-      min-height:44px;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
+      padding:10px 12px;border-radius:12px;
+      font-weight:800;cursor:pointer;
       transition:.15s ease;
     }
     .btn:hover{transform:translateY(-1px)}
     .btn.primary{
-      background:linear-gradient(135deg,var(--ok),#16a34a);
-      color:#02150b;
-      border-color:transparent;
+      background:rgba(99,102,241,.22);
+      border-color:rgba(99,102,241,.35);
     }
-    .btn.gold{
-      background:linear-gradient(135deg,var(--gold),#f59e0b);
-      color:#1a1402;
-      border-color:transparent;
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:8px;
     }
-    .btn.ghost{background:transparent}
-    .btn.bad{
-      background:rgba(239,68,68,.12);
-      color:#fecaca;
+    @media(min-width:920px){
+      .grid{grid-template-columns:1.05fr .95fr}
     }
-    .btn:disabled{
-      opacity:.55;
-      cursor:not-allowed;
-      transform:none;
-    }
-
-    .stack{display:grid;gap:14px;margin-top:14px}
-    .grid2{display:grid;gap:14px}
-
-    @media(min-width:1024px){
-      .grid2{grid-template-columns:1.15fr .85fr}
-    }
-
     .card{
+      background:rgba(18,26,51,.92);
       border:1px solid var(--line);
-      border-radius:var(--r);
-      background:rgba(255,255,255,.05);
-      padding:14px;
+      border-radius:var(--radius);
       box-shadow:var(--shadow);
+      padding:var(--pad);
     }
-
-    .kpis{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-      margin-top:12px;
+    .card h3{margin:0 0 8px 0;font-size:15px;letter-spacing:.2px}
+    .muted{color:var(--muted)}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .statusDot{width:10px;height:10px;border-radius:999px;background:var(--warn)}
+    .statusDot.ok{background:var(--ok)}
+    .statusDot.bad{background:var(--danger)}
+    .bigMoney{
+      font-size:34px;font-weight:900;letter-spacing:-.8px;margin:6px 0 2px 0
     }
-    .kpi{
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      padding:12px;
-      background:rgba(0,0,0,.16);
+    .mini{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      font-size:13px;color:var(--muted);font-weight:650
     }
-    .kpi .label{
-      color:var(--muted);
-      font-size:12px;
-      font-weight:800;
-      margin-bottom:6px;
+    .hr{height:1px;background:var(--line);margin:12px 0}
+    .boostBox{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+      padding:12px;border-radius:16px;
+      background:rgba(99,102,241,.10);
+      border:1px solid rgba(99,102,241,.25);
     }
-    .kpi .value{
-      font-size:21px;
-      font-weight:1000;
+    .boostBox b{display:block;margin-bottom:4px}
+    .notifList{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+    .notif{
+      padding:10px 12px;border-radius:14px;border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      display:flex;align-items:flex-start;justify-content:space-between;gap:10px
     }
-
-    .in, .select{
-      width:100%;
-      padding:12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.12);
-      color:var(--text);
-      font-size:15px;
-      font-weight:900;
-      outline:none;
+    .tag{
+      font-size:12px;font-weight:900;
+      padding:6px 9px;border-radius:999px;border:1px solid var(--line);
+      color:var(--muted)
     }
-    .in::placeholder{color:rgba(236,253,245,.45)}
-
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .row > *{flex:1}
-
-    .prodHeader{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-bottom:10px;
+    .tag.warn{color:#ffe2b0;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.10)}
+    .tag.ok{color:#c9ffd9;border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08)}
+    .tag.info{color:#cfd6ff;border-color:rgba(99,102,241,.35);background:rgba(99,102,241,.10)}
+    .footer{
+      margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end
     }
-
-    .chips{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-    .chip{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.06);
-      color:var(--muted);
-      border-radius:999px;
-      padding:8px 10px;
-      font-size:12px;
-      font-weight:900;
-      cursor:pointer;
-    }
-    .chip.active{
-      color:#bbf7d0;
-      border-color:rgba(34,197,94,.35);
-      background:rgba(34,197,94,.10);
-    }
-
-    .prodGrid{
-      display:grid;
-      gap:10px;
-      grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-      margin-top:12px;
-    }
-    .prod{
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:16px;
-      padding:12px;
-      background:rgba(0,0,0,.16);
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .prod .name{font-weight:1000}
-    .prod .meta{font-size:12px;color:var(--muted);font-weight:800}
-    .prod .price{font-size:20px;font-weight:1000;color:var(--gold)}
-    .prod .stock.ok{color:#bbf7d0}
-    .prod .stock.low{color:#fde68a}
-    .prod .stock.out{color:#fecaca}
-
-    .cartList,.salesList,.adminList{
-      display:grid;
-      gap:10px;
-      margin-top:10px;
-    }
-    .item{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      padding:12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.16);
-    }
-
-    .qty{
-      display:flex;
-      gap:6px;
-      align-items:center;
-      justify-content:flex-end;
-    }
-    .qty button,.miniBtn{
-      min-width:34px;height:34px;border-radius:10px;border:1px solid var(--line);
-      background:rgba(255,255,255,.06);color:var(--text);font-weight:1000;cursor:pointer;
-    }
-    .qtyValue{min-width:22px;text-align:center;font-weight:1000}
-
-    .totalBox{
-      margin-top:12px;
-      border-top:1px solid var(--line);
-      padding-top:12px;
-    }
-    .totalRow{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      margin-top:6px;
-      font-weight:900;
-    }
-    .totalRow.big{
-      font-size:20px;
-      color:var(--gold);
-    }
-
-    .msg{
-      margin-top:10px;
-      font-weight:900;
-    }
-    .msg.ok{color:#86efac}
-    .msg.bad{color:#fca5a5}
-    .msg.warn{color:#fde68a}
-
-    .empty{
-      text-align:center;
-      color:var(--muted);
-      padding:20px;
-      border:1px dashed rgba(255,255,255,.12);
-      border-radius:16px;
-      font-weight:800;
-    }
-
-    .rightColSticky{
-      position:sticky;
-      top:14px;
-      align-self:start;
-    }
-
-    .adminActions{
-      display:flex;
-      gap:6px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      align-items:center;
-    }
-
-    .adminTag{
-      display:inline-flex;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      font-size:11px;
-      font-weight:900;
-      color:var(--muted);
-    }
-    .adminTag.ok{
-      color:#bbf7d0;
-      border-color:rgba(34,197,94,.35);
-    }
-    .adminTag.off{
-      color:#fecaca;
-      border-color:rgba(239,68,68,.35);
-    }
-
-    @media(max-width:1023px){
-      .rightColSticky{position:static}
-    }
+    .smallLink{color:var(--muted);text-decoration:none;font-weight:750}
+    .smallLink:hover{color:var(--text)}
   </style>
 </head>
+
 <body>
   <div class="wrap">
 
-    <div class="top">
-      <div>
-        <h1 id="titleMain">🏪 DIGIY CAISSE PRO</h1>
-        <div class="muted" id="subMain">Caisse boutique branchée au backend POS vivant.</div>
+    <div class="topbar">
+      <div class="brand">
+        <div class="badge">🏪</div>
+        <div>
+          <div id="brandTitle">DIGIY CAISSE PRO</div>
+          <div class="muted" style="font-size:12px;font-weight:700;margin-top:2px" id="brandSub">
+            Hall royal du module POS
+          </div>
+        </div>
       </div>
 
-      <div class="rightMini">
-        <div class="pill" id="slugPill">slug : —</div>
-        <div class="pill" id="storePill">commerce : —</div>
-        <div class="pill warn" id="accessPill">accès : contrôle…</div>
+      <div class="right">
+        <div class="pill" id="pillStatus">Statut : <b>…</b></div>
+        <button class="btn" id="btnSettings" type="button">⚙️ Paramètres</button>
       </div>
     </div>
 
-    <div class="stack">
+    <div class="grid">
 
-      <div class="card">
+      <div class="card" id="cardStatus">
+        <h3>Statut & sécurité</h3>
+
         <div class="row">
-          <div>
-            <h2>Tableau de caisse</h2>
-            <div class="muted">Produits, encaissement, ventes récentes, stock vivant.</div>
-          </div>
-          <div style="flex:0 0 auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-            <button class="btn" id="btnReload" type="button">↻ Rafraîchir</button>
-            <a class="btn" id="btnBackHall" href="#">↩️ Hall royal</a>
-            <a class="btn" id="btnSettings" href="#">⚙️ Paramètres</a>
+          <div class="statusDot" id="dot"></div>
+          <div style="flex:1">
+            <div style="font-weight:900" id="statusLine">Chargement…</div>
+            <div class="muted" style="font-weight:700;font-size:13px;margin-top:2px" id="expiryLine">—</div>
           </div>
         </div>
 
-        <div class="kpis">
-          <div class="kpi">
-            <div class="label">Aujourd’hui</div>
-            <div class="value" id="kpiToday">— FCFA</div>
+        <div class="hr"></div>
+
+        <div class="mini" id="metaLine">
+          <span>Plan : —</span>
+          <span>•</span>
+          <span>Paiement : —</span>
+        </div>
+
+        <div class="footer">
+          <button class="btn" id="btnManageSub" type="button">Gérer mon abonnement</button>
+        </div>
+      </div>
+
+      <div class="card" id="cardMoney">
+        <h3>Argent</h3>
+
+        <div class="bigMoney" id="moneyMonth">— FCFA</div>
+        <div class="mini" id="moneyMeta">
+          <span id="txCount">— transactions</span>
+          <span>•</span>
+          <span id="todayHint">—</span>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="boostBox">
+          <div>
+            <b>🚀 BOOST visibilité</b>
+            <div class="muted" style="font-weight:750;font-size:13px" id="boostText">
+              +50% d’apparition • 7 jours • 5 000 FCFA
+            </div>
+            <div class="muted" style="font-weight:750;font-size:12px;margin-top:6px" id="boostStatus">
+              Statut boost : —
+            </div>
           </div>
-          <div class="kpi">
-            <div class="label">Mois</div>
-            <div class="value" id="kpiMonth">— FCFA</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Ticket moyen</div>
-            <div class="value" id="kpiAvg">— FCFA</div>
+
+          <div style="display:flex;flex-direction:column;gap:8px;min-width:160px">
+            <button class="btn primary" id="btnBoost" type="button">Activer</button>
+            <button class="btn" id="btnBoostInfo" type="button">Détails</button>
           </div>
         </div>
       </div>
 
-      <div class="grid2">
-
-        <div class="card">
-          <div class="prodHeader">
-            <div>
-              <h2>Produits</h2>
-              <div class="muted" id="productCount">0 produit</div>
-            </div>
-            <div style="min-width:240px;flex:0 1 280px">
-              <input class="in" id="searchProd" placeholder="🔎 Rechercher un produit..." />
-            </div>
-          </div>
-
-          <div class="chips" id="catChips"></div>
-
-          <div class="prodGrid" id="prodGrid">
-            <div class="empty">Chargement produits…</div>
-          </div>
+      <div class="card" id="cardAction" style="grid-column:1/-1">
+        <h3>Action principale</h3>
+        <div class="muted" style="font-weight:750;margin-bottom:10px" id="actionDesc">
+          Une action. Simple. Efficace.
         </div>
 
-        <div class="rightColSticky">
-          <div class="card">
-            <h2>Panier</h2>
-
-            <div class="row" style="margin-top:10px">
-              <div>
-                <div class="muted">Client (optionnel)</div>
-                <input class="in" id="clientName" placeholder="Ex: Client comptoir" />
-              </div>
-            </div>
-
-            <div class="row" style="margin-top:10px">
-              <div>
-                <div class="muted">Téléphone client (optionnel)</div>
-                <input class="in" id="clientPhone" inputmode="numeric" placeholder="Ex: 22177..." />
-              </div>
-            </div>
-
-            <div class="row" style="margin-top:10px">
-              <div>
-                <div class="muted">Paiement</div>
-                <select class="select" id="paymentMethod">
-                  <option value="CASH">Cash</option>
-                  <option value="WAVE">Wave</option>
-                  <option value="OM">Orange Money</option>
-                  <option value="CREDIT">Crédit</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="cartList" id="cartList">
-              <div class="empty">Panier vide</div>
-            </div>
-
-            <div class="totalBox">
-              <div class="totalRow">
-                <span>Articles</span>
-                <span id="cartCount">0</span>
-              </div>
-              <div class="totalRow big">
-                <span>Total</span>
-                <span id="cartTotal">0 FCFA</span>
-              </div>
-            </div>
-
-            <div class="row" style="margin-top:12px">
-              <button class="btn bad" id="btnClear" type="button">🧹 Vider</button>
-              <button class="btn primary" id="btnCheckout" type="button">💳 Encaisser</button>
-            </div>
-
-            <div class="msg" id="cartMsg">Prêt.</div>
-          </div>
+        <div class="row" style="justify-content:space-between">
+          <div class="muted" style="font-weight:800" id="actionHint">—</div>
+          <button class="btn primary" id="btnPrimaryAction" type="button">…</button>
         </div>
 
-      </div>
+        <div class="hr"></div>
 
-      <div class="grid2">
-        <div class="card">
-          <div class="row">
-            <div>
-              <h2>Ventes récentes</h2>
-              <div class="muted">Les dernières ventes branchées sur le slug actif.</div>
-            </div>
-            <div style="flex:0 0 auto">
-              <button class="btn" id="btnReloadSales" type="button">↻ Rafraîchir ventes</button>
-            </div>
-          </div>
+        <h3>Notifications</h3>
+        <div class="notifList" id="notifList"></div>
 
-          <div class="salesList" id="salesList" style="margin-top:12px">
-            <div class="empty">Chargement ventes…</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>Contexte boutique</h2>
-          <div class="salesList" style="margin-top:12px">
-            <div class="item">
-              <div>
-                <b>Commerce</b>
-                <div class="muted small" id="ctxStore">—</div>
-              </div>
-            </div>
-            <div class="item">
-              <div>
-                <b>Ville</b>
-                <div class="muted small" id="ctxCity">—</div>
-              </div>
-            </div>
-            <div class="item">
-              <div>
-                <b>WhatsApp</b>
-                <div class="muted small" id="ctxWa">—</div>
-              </div>
-            </div>
-            <div class="item">
-              <div>
-                <b>TVA</b>
-                <div class="muted small" id="ctxTva">—</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="row">
-          <div>
-            <h2>Admin produits</h2>
-            <div class="muted">Ajoute, modifie, active, désactive, ajuste le stock.</div>
-          </div>
-        </div>
-
-        <div class="row" style="margin-top:10px">
-          <div>
-            <div class="muted">Nom produit</div>
-            <input class="in" id="adminName" placeholder="Ex: Jus de bissap" />
-          </div>
-          <div>
-            <div class="muted">Prix FCFA</div>
-            <input class="in" id="adminPrice" inputmode="numeric" placeholder="Ex: 1500" />
-          </div>
-        </div>
-
-        <div class="row" style="margin-top:10px">
-          <div>
-            <div class="muted">Stock</div>
-            <input class="in" id="adminStock" inputmode="numeric" placeholder="Ex: 20" />
-          </div>
-          <div>
-            <div class="muted">Catégorie</div>
-            <input class="in" id="adminCategory" placeholder="Ex: Boissons" />
-          </div>
-        </div>
-
-        <div class="row" style="margin-top:10px">
-          <div>
-            <div class="muted">Code-barres</div>
-            <input class="in" id="adminBarcode" placeholder="Optionnel" />
-          </div>
-          <div>
-            <div class="muted">Photo URL</div>
-            <input class="in" id="adminPhoto" placeholder="Optionnel" />
-          </div>
-        </div>
-
-        <input type="hidden" id="adminProductId" />
-
-        <div class="row" style="margin-top:12px">
-          <button class="btn primary" id="btnAdminSave" type="button">💾 Enregistrer produit</button>
-          <button class="btn" id="btnAdminReset" type="button">↺ Réinitialiser</button>
-          <button class="btn" id="btnAdminReload" type="button">↻ Recharger catalogue</button>
-        </div>
-
-        <div class="msg" id="adminMsg">Prêt.</div>
-
-        <div class="adminList" id="adminList" style="margin-top:14px">
-          <div class="empty">Chargement catalogue admin…</div>
+        <div class="footer">
+          <a class="smallLink" href="#" id="linkSupport">Support</a>
+          <a class="smallLink" href="#" id="linkPayments">Mes paiements</a>
         </div>
       </div>
 
@@ -554,36 +242,45 @@
   "use strict";
 
   const MODULE_CODE = "POS";
-  const SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
-  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6Indlc3Ftd2pqdHNlZnlqbmx1b3NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzg4ODIsImV4cCI6MjA4MDc1NDg4Mn0.dZfYOc2iL2_wRYL3zExZFsFSBK6AbMeOid2LrIjcTdA";
+  const MODULE_LABEL = "DIGIY CAISSE PRO";
+  const PRIMARY_ACTION_LABEL = "Ouvrir la caisse";
+  const PRIMARY_ACTION_HINT  = "Encaisse une vente, gère tes produits et ton stock.";
 
-  const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
-  const HALL_URL = "./dashboard-pro.html";
-  const SETTINGS_URL = "./settings.html";
+  const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
+  const SUPABASE_ANON = String(window.DIGIY_SUPABASE_ANON_KEY || "").trim();
 
-  const $ = (id) => document.getElementById(id);
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-  let slug = "";
-  let phone = "";
-  let storeCtx = null;
-  let products = [];
-  let filteredProducts = [];
-  let adminProducts = [];
-  let cart = [];
-  let activeCat = "Tous";
-
-  function money(n){
-    return Number(n || 0).toLocaleString("fr-FR") + " FCFA";
+  if (!SUPABASE_URL || !SUPABASE_ANON) {
+    console.error("Config Supabase manquante");
   }
 
-  function escapeHtml(str){
-    return String(str || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    }
+  });
+
+  const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
+  const CAISSE_URL = "./caisse.html";
+  const SETTINGS_URL = "./settings.html";
+  const SUPPORT_URL = "https://wa.me/221771342889?text=Bonjour%20JB%2C%20j%E2%80%99ai%20besoin%20d%E2%80%99aide%20pour%20DIGIY%20CAISSE%20PRO";
+
+  const BOOST = {
+    module: "BOOST",
+    plan: "boost_7d",
+    price_xof: 5000,
+    label: "BOOST visibilité",
+    duration_days: 7
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  function fmtDateFR(iso){
+    if(!iso) return "—";
+    const d = new Date(iso);
+    if(Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleDateString("fr-FR", { year:"numeric", month:"long", day:"numeric" });
   }
 
   function getSlug(){
@@ -591,607 +288,293 @@
     return (u.searchParams.get("slug") || "").trim();
   }
 
-  function getPhoneFromUrl(){
+  function getPhone(){
     const u = new URL(location.href);
-    return String(u.searchParams.get("phone") || "").replace(/[^\d]/g, "").trim();
+    return (u.searchParams.get("phone") || "").trim();
   }
 
   function buildUrl(base, params){
     const u = new URL(base, location.href);
     Object.entries(params || {}).forEach(([k, v]) => {
-      if(v !== null && v !== undefined && v !== "") u.searchParams.set(k, v);
+      if (v !== null && v !== undefined && v !== "") u.searchParams.set(k, v);
     });
     return u.toString();
   }
 
-  function setCartMsg(txt, type){
-    const el = $("cartMsg");
-    el.textContent = txt;
-    el.className = "msg " + (type || "");
+  function setNotifs(items){
+    const box = $("notifList");
+    box.innerHTML = "";
+    if(!items.length){
+      box.innerHTML = `<div class="notif"><div><b>Rien à signaler</b><div class="muted" style="font-weight:750;margin-top:2px">Tout roule.</div></div><div class="tag ok">OK</div></div>`;
+      return;
+    }
+    for(const it of items){
+      const tagClass = it.level === "warn" ? "warn" : it.level === "ok" ? "ok" : "info";
+      const div = document.createElement("div");
+      div.className = "notif";
+      div.innerHTML = `
+        <div>
+          <b>${it.title}</b>
+          <div class="muted" style="font-weight:750;margin-top:2px">${it.text}</div>
+        </div>
+        <div class="tag ${tagClass}">${it.tag}</div>
+      `;
+      box.appendChild(div);
+    }
   }
 
-  function setAdminMsg(txt, type){
-    const el = $("adminMsg");
-    el.textContent = txt;
-    el.className = "msg " + (type || "");
+  function daysBetween(aIso, bIso){
+    const a = new Date(aIso).getTime();
+    const b = new Date(bIso).getTime();
+    if (Number.isNaN(a) || Number.isNaN(b)) return null;
+    return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
   }
 
-  function setAccess(ok, txt){
-    const pill = $("accessPill");
-    pill.className = "pill " + (ok ? "ok" : "bad");
-    pill.textContent = "accès : " + txt;
-  }
+  async function sbGetSubscriptionBySlug(slug){
+    const { data, error } = await sb
+      .from("digiy_subscriptions_public")
+      .select("phone,module,slug")
+      .eq("slug", slug)
+      .limit(1)
+      .maybeSingle();
 
-  function showFatal(err){
-    const msg = err?.message || String(err || "Erreur inconnue");
-    console.error("CAISSE FATAL:", err);
-    setAccess(false, "erreur");
-    setCartMsg("❌ " + msg, "bad");
-    setAdminMsg("❌ " + msg, "bad");
-    $("prodGrid").innerHTML = `<div class="empty">Erreur produits : ${escapeHtml(msg)}</div>`;
-    $("salesList").innerHTML = `<div class="empty">Erreur ventes : ${escapeHtml(msg)}</div>`;
-    $("adminList").innerHTML = `<div class="empty">Erreur admin : ${escapeHtml(msg)}</div>`;
-    $("ctxStore").textContent = "Erreur";
-    $("ctxCity").textContent = "Erreur";
-    $("ctxWa").textContent = "Erreur";
-    $("ctxTva").textContent = "Erreur";
+    if (error) throw error;
+    return data || null;
   }
 
   async function sbRpc(name, payload){
     const { data, error } = await sb.rpc(name, payload || {});
-    if(error){
-      console.error("RPC ERROR:", name, payload, error);
-      throw new Error(`${name}: ${error.message || error.code || "rpc_failed"}`);
+    if (error) {
+      console.error("RPC ERROR:", name, error);
+      throw new Error(`${name}: ${error.message || "RPC failed"}`);
     }
     return data;
   }
 
-  async function checkAccess(){
+  async function digiyHasAccess(phone, module){
+    const res = await sbRpc("digiy_has_access", { p_phone: phone, p_module: module });
+    if(typeof res === "boolean") return res;
+    if(res && typeof res.ok === "boolean") return res.ok;
+    if(res && typeof res.has_access === "boolean") return res.has_access;
+    return !!res;
+  }
+
+  async function digiyGetSubscriptionFull(phone, module){
+    try{
+      return await sbRpc("digiy_get_subscription_status", { p_phone: phone, p_module: module });
+    }catch(_){
+      return null;
+    }
+  }
+
+  async function digiyGetDashboardStats(phone, module){
+    try{
+      return await sbRpc("digiy_get_dashboard_stats", { p_phone: phone, p_module: module });
+    }catch(_){
+      return { month_xof: null, tx_count: null, today_hint: "Aujourd’hui" };
+    }
+  }
+
+  async function digiyGetBoostStatus(phone){
+    try{
+      return await sbRpc("digiy_get_boost_status", { p_phone: phone });
+    }catch(_){
+      return null;
+    }
+  }
+
+  async function digiyBuildPayUrl(module, phone, plan){
+    return await sbRpc("digiy_build_pay_url", {
+      p_module: module,
+      p_phone: phone,
+      p_plan: plan
+    });
+  }
+
+  function buildAbosParams(phone, slug){
+    return {
+      base_module: "CAISSE",
+      module: MODULE_CODE,
+      phone,
+      slug
+    };
+  }
+
+  function bindCommonLinks(phone, slug){
+    $("btnManageSub").onclick = () => {
+      location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
+    };
+
+    $("btnSettings").onclick = () => {
+      location.href = buildUrl(SETTINGS_URL, { slug, phone });
+    };
+
+    $("linkSupport").onclick = (ev) => {
+      ev.preventDefault();
+      location.href = SUPPORT_URL;
+    };
+
+    $("linkPayments").onclick = (ev) => {
+      ev.preventDefault();
+      location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
+    };
+  }
+
+  (async function init(){
+    $("brandTitle").textContent = MODULE_LABEL;
+    $("brandSub").textContent = "Hall royal du module POS";
+    $("btnPrimaryAction").textContent = PRIMARY_ACTION_LABEL;
+    $("actionHint").textContent = PRIMARY_ACTION_HINT;
+    $("actionDesc").textContent = "Entre dans la caisse, pilote tes produits et ton stock depuis une seule porte.";
+    $("pillStatus").innerHTML = `Statut : <b>…</b>`;
+
+    const slug = getSlug();
+    const urlPhone = getPhone();
+
     if(!slug){
-      setAccess(false, "slug manquant");
-      return false;
+      $("statusLine").textContent = "Slug manquant";
+      $("expiryLine").textContent = "Ajoute ?slug=…";
+      $("dot").classList.add("bad");
+      $("pillStatus").innerHTML = `Statut : <b>Bloqué</b>`;
+      setNotifs([{level:"warn",tag:"ACTION",title:"Lien invalide",text:"Le lien doit contenir ?slug=…"}]);
+      return;
     }
 
-    phone = getPhoneFromUrl();
+    let phone = urlPhone;
 
     if(!phone){
-      setAccess(true, "slug actif");
-      return true;
+      try{
+        const subPublic = await sbGetSubscriptionBySlug(slug);
+        phone = (subPublic?.phone || "").trim();
+      }catch(err){
+        console.error("Lecture slug -> phone impossible:", err);
+      }
     }
 
-    const res = await sbRpc("digiy_has_access", {
-      p_phone: phone,
-      p_module: MODULE_CODE
-    });
+    if(!phone){
+      $("statusLine").textContent = "Téléphone introuvable";
+      $("expiryLine").textContent = "Ajoute ?phone=2217… ou repasse par le hall d’accès.";
+      $("dot").classList.add("bad");
+      $("pillStatus").innerHTML = `Statut : <b>Bloqué</b>`;
+      setNotifs([{level:"warn",tag:"PHONE",title:"Accès incomplet",text:"Le dashboard a besoin du phone pour transmettre proprement l’accès à la caisse."}]);
+      return;
+    }
 
-    const ok = (typeof res === "boolean")
-      ? res
-      : (res?.ok ?? res?.has_access ?? !!res);
+    bindCommonLinks(phone, slug);
+
+    let ok = false;
+    try{
+      ok = await digiyHasAccess(phone, MODULE_CODE);
+    }catch(err){
+      console.error("digiy_has_access failed:", err);
+      ok = false;
+    }
 
     if(!ok){
-      setAccess(false, "abonnement KO");
-      return false;
-    }
-
-    setAccess(true, "abonnement OK");
-    return true;
-  }
-
-  async function loadContext(){
-    const data = await sbRpc("pos_get_store_context_by_slug", { p_slug: slug });
-    if(!data?.ok) throw new Error(data?.error || "ctx_failed");
-
-    storeCtx = data;
-
-    $("titleMain").textContent = "🏪 " + (data.display_name || "DIGIY CAISSE PRO");
-    $("subMain").textContent = "Caisse boutique branchée au backend POS vivant.";
-    $("slugPill").textContent = "slug : " + slug;
-    $("storePill").textContent = "commerce : " + (data.display_name || "—");
-
-    $("ctxStore").textContent = data.display_name || data.store_name || "—";
-    $("ctxCity").textContent = data.city || "—";
-    $("ctxWa").textContent = data.whatsapp || "—";
-    $("ctxTva").textContent = (data.tva_assujeti ? "Oui" : "Non") + " • " + (data.tva_taux ?? 18) + "%";
-
-    $("btnBackHall").href = buildUrl(HALL_URL, { slug });
-    $("btnSettings").href = buildUrl(SETTINGS_URL, { slug });
-  }
-
-  async function loadStats(){
-    const data = await sbRpc("pos_stats_by_slug", { p_slug: slug });
-    if(!data?.ok) throw new Error(data?.error || "stats_failed");
-
-    $("kpiToday").textContent = money(data.today_total || 0);
-    $("kpiMonth").textContent = money(data.month_total || 0);
-    $("kpiAvg").textContent = money(data.avg_ticket || 0);
-  }
-
-  async function loadProducts(){
-    const data = await sbRpc("pos_list_products_by_slug", { p_slug: slug });
-    products = Array.isArray(data) ? data : [];
-    renderCatChips();
-    filterProducts();
-  }
-
-  async function loadAdminProducts(){
-    const data = await sbRpc("pos_admin_list_products_by_slug", { p_slug: slug });
-    adminProducts = Array.isArray(data) ? data : [];
-    renderAdminList();
-  }
-
-  async function loadSales(){
-    const data = await sbRpc("pos_list_recent_sales_by_slug", { p_slug: slug, p_limit: 12 });
-    renderSales(Array.isArray(data) ? data : []);
-  }
-
-  function renderCatChips(){
-    const cats = ["Tous", ...new Set(products.map(p => p.category || "Autre"))];
-
-    $("catChips").innerHTML = cats.map(cat => `
-      <button class="chip ${cat === activeCat ? "active" : ""}" data-cat="${escapeHtml(cat)}">${escapeHtml(cat)}</button>
-    `).join("");
-
-    [...$("catChips").querySelectorAll(".chip")].forEach(btn => {
-      btn.addEventListener("click", () => {
-        activeCat = btn.dataset.cat;
-        renderCatChips();
-        filterProducts();
-      });
-    });
-  }
-
-  function filterProducts(){
-    const q = ($("searchProd").value || "").trim().toLowerCase();
-    filteredProducts = products.filter(p => {
-      const catOk = activeCat === "Tous" || (p.category || "Autre") === activeCat;
-      const txt = [p.name, p.category, p.barcode].filter(Boolean).join(" ").toLowerCase();
-      return catOk && (!q || txt.includes(q));
-    });
-    renderProducts();
-  }
-
-  function renderProducts(){
-    $("productCount").textContent = filteredProducts.length + " produit" + (filteredProducts.length > 1 ? "s" : "");
-
-    if(!filteredProducts.length){
-      $("prodGrid").innerHTML = `<div class="empty">Aucun produit</div>`;
-      return;
-    }
-
-    $("prodGrid").innerHTML = filteredProducts.map(p => {
-      const stock = Number(p.stock || 0);
-      const stockClass = stock <= 0 ? "out" : stock <= 5 ? "low" : "ok";
-      return `
-        <div class="prod">
-          <div class="name">${escapeHtml(p.name || "—")}</div>
-          <div class="meta">${escapeHtml(p.category || "Autre")}</div>
-          <div class="price">${money(p.price || 0)}</div>
-          <div class="meta stock ${stockClass}">Stock : ${stock}</div>
-          <button class="btn ${stock <= 0 ? "bad" : "gold"}" data-add="${p.id}" ${stock <= 0 ? "disabled" : ""}>➕ Ajouter</button>
-        </div>
-      `;
-    }).join("");
-
-    [...$("prodGrid").querySelectorAll("[data-add]")].forEach(btn => {
-      btn.addEventListener("click", () => addToCart(btn.dataset.add));
-    });
-  }
-
-  function addToCart(productId){
-    const p = products.find(x => x.id === productId);
-    if(!p) return;
-
-    const stock = Number(p.stock || 0);
-    if(stock <= 0){
-      setCartMsg("❌ Produit en rupture", "bad");
-      return;
-    }
-
-    const found = cart.find(x => x.product_id === productId);
-    if(found){
-      if(found.qty >= stock){
-        setCartMsg("⚠️ Stock maximum atteint", "warn");
-        return;
-      }
-      found.qty += 1;
-    } else {
-      cart.push({
-        product_id: p.id,
-        name: p.name,
-        price: Number(p.price || 0),
-        category: p.category || null,
-        qty: 1,
-        stock
-      });
-    }
-
-    setCartMsg("✅ Produit ajouté", "ok");
-    renderCart();
-  }
-
-  function changeQty(productId, delta){
-    const item = cart.find(x => x.product_id === productId);
-    if(!item) return;
-
-    item.qty += delta;
-    if(item.qty <= 0){
-      cart = cart.filter(x => x.product_id !== productId);
-    } else if(item.qty > item.stock){
-      item.qty = item.stock;
-      setCartMsg("⚠️ Stock maximum atteint", "warn");
-    }
-
-    renderCart();
-  }
-
-  function clearCart(){
-    cart = [];
-    renderCart();
-    setCartMsg("Panier vidé.", "warn");
-  }
-
-  function renderCart(){
-    if(!cart.length){
-      $("cartList").innerHTML = `<div class="empty">Panier vide</div>`;
-      $("cartCount").textContent = "0";
-      $("cartTotal").textContent = money(0);
-      return;
-    }
-
-    $("cartList").innerHTML = cart.map(i => `
-      <div class="item">
-        <div>
-          <b>${escapeHtml(i.name)}</b>
-          <div class="muted small">${escapeHtml(i.category || "Autre")} • ${money(i.price)}</div>
-        </div>
-        <div style="text-align:right">
-          <div class="qty">
-            <button data-dec="${i.product_id}">−</button>
-            <div class="qtyValue">${i.qty}</div>
-            <button data-inc="${i.product_id}">+</button>
-          </div>
-          <div class="muted small" style="margin-top:6px">${money(i.price * i.qty)}</div>
-        </div>
-      </div>
-    `).join("");
-
-    [...$("cartList").querySelectorAll("[data-dec]")].forEach(btn => {
-      btn.addEventListener("click", () => changeQty(btn.dataset.dec, -1));
-    });
-    [...$("cartList").querySelectorAll("[data-inc]")].forEach(btn => {
-      btn.addEventListener("click", () => changeQty(btn.dataset.inc, 1));
-    });
-
-    const count = cart.reduce((s, i) => s + i.qty, 0);
-    const total = cart.reduce((s, i) => s + (i.qty * i.price), 0);
-    $("cartCount").textContent = String(count);
-    $("cartTotal").textContent = money(total);
-  }
-
-  function renderSales(rows){
-    if(!rows.length){
-      $("salesList").innerHTML = `<div class="empty">Aucune vente récente</div>`;
-      return;
-    }
-
-    $("salesList").innerHTML = rows.map(r => `
-      <div class="item">
-        <div>
-          <b>${escapeHtml(r.client_txn_id || "Vente")}</b>
-          <div class="muted small">${new Date(r.created_at).toLocaleString("fr-FR")}</div>
-          <div class="muted small">${escapeHtml(r.payment_method || "—")} • ${escapeHtml(r.client_name || "Client comptoir")}</div>
-        </div>
-        <div style="text-align:right">
-          <b>${money(r.total || 0)}</b>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function renderAdminList(){
-    if(!adminProducts.length){
-      $("adminList").innerHTML = `<div class="empty">Aucun produit dans le catalogue</div>`;
-      return;
-    }
-
-    $("adminList").innerHTML = adminProducts.map(p => `
-      <div class="item">
-        <div>
-          <b>${escapeHtml(p.name || "—")}</b>
-          <div class="muted small">${escapeHtml(p.category || "Autre")} • ${money(p.price || 0)} • stock ${Number(p.stock || 0)}</div>
-          <div class="muted small" style="margin-top:6px">
-            <span class="adminTag ${p.is_active ? "ok" : "off"}">${p.is_active ? "ACTIF" : "OFF"}</span>
-          </div>
-        </div>
-        <div class="adminActions">
-          <button class="miniBtn" data-stock-minus="${p.id}">-1</button>
-          <button class="miniBtn" data-stock-plus="${p.id}">+1</button>
-          <button class="miniBtn" data-edit="${p.id}">✏️</button>
-          <button class="miniBtn" data-toggle="${p.id}">${p.is_active ? "OFF" : "ON"}</button>
-        </div>
-      </div>
-    `).join("");
-
-    [...$("adminList").querySelectorAll("[data-edit]")].forEach(btn => {
-      btn.addEventListener("click", () => fillAdminForm(btn.dataset.edit));
-    });
-
-    [...$("adminList").querySelectorAll("[data-toggle]")].forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const p = adminProducts.find(x => x.id === btn.dataset.toggle);
-        if(!p) return;
-        await toggleProduct(p.id, !p.is_active);
-      });
-    });
-
-    [...$("adminList").querySelectorAll("[data-stock-minus]")].forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const p = adminProducts.find(x => x.id === btn.dataset.stockMinus);
-        if(!p) return;
-        await updateStock(p.id, Math.max(0, Number(p.stock || 0) - 1));
-      });
-    });
-
-    [...$("adminList").querySelectorAll("[data-stock-plus]")].forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const p = adminProducts.find(x => x.id === btn.dataset.stockPlus);
-        if(!p) return;
-        await updateStock(p.id, Number(p.stock || 0) + 1);
-      });
-    });
-  }
-
-  function resetAdminForm(){
-    $("adminProductId").value = "";
-    $("adminName").value = "";
-    $("adminPrice").value = "";
-    $("adminStock").value = "";
-    $("adminCategory").value = "";
-    $("adminBarcode").value = "";
-    $("adminPhoto").value = "";
-    setAdminMsg("Formulaire réinitialisé.", "warn");
-  }
-
-  function fillAdminForm(productId){
-    const p = adminProducts.find(x => x.id === productId);
-    if(!p) return;
-
-    $("adminProductId").value = p.id || "";
-    $("adminName").value = p.name || "";
-    $("adminPrice").value = String(p.price || 0);
-    $("adminStock").value = String(p.stock || 0);
-    $("adminCategory").value = p.category || "";
-    $("adminBarcode").value = p.barcode || "";
-    $("adminPhoto").value = p.photo_url || "";
-    setAdminMsg("Produit chargé dans le formulaire.", "ok");
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-  }
-
-  async function saveAdminProduct(){
-    try{
-      const productId = ($("adminProductId").value || "").trim() || null;
-      const name = ($("adminName").value || "").trim();
-      const price = parseInt(($("adminPrice").value || "0").replace(/[^\d]/g, ""), 10);
-      const stock = parseInt(($("adminStock").value || "0").replace(/[^\d]/g, ""), 10);
-      const category = ($("adminCategory").value || "").trim();
-      const barcode = ($("adminBarcode").value || "").trim();
-      const photo = ($("adminPhoto").value || "").trim();
-
-      if(!name){
-        setAdminMsg("❌ Nom produit requis", "bad");
-        return;
-      }
-      if(Number.isNaN(price) || price < 0){
-        setAdminMsg("❌ Prix invalide", "bad");
-        return;
-      }
-      if(Number.isNaN(stock) || stock < 0){
-        setAdminMsg("❌ Stock invalide", "bad");
-        return;
-      }
-
-      setAdminMsg("⏳ Enregistrement produit…", "warn");
-
-      const res = await sbRpc("pos_upsert_product_by_slug", {
-        p_slug: slug,
-        p_product_id: productId,
-        p_name: name,
-        p_price: price,
-        p_stock: stock,
-        p_category: category || null,
-        p_barcode: barcode || null,
-        p_photo_url: photo || null
-      });
-
-      if(!res?.ok){
-        throw new Error(res?.error || "save_product_failed");
-      }
-
-      await Promise.all([loadProducts(), loadAdminProducts()]);
-      resetAdminForm();
-      setAdminMsg(`✅ Produit ${res.mode === "insert" ? "ajouté" : "mis à jour"}`, "ok");
-    }catch(e){
-      console.error(e);
-      setAdminMsg("❌ " + (e?.message || "Erreur produit"), "bad");
-    }
-  }
-
-  async function updateStock(productId, newStock){
-    try{
-      setAdminMsg("⏳ Mise à jour stock…", "warn");
-
-      const res = await sbRpc("pos_update_stock_by_slug", {
-        p_slug: slug,
-        p_product_id: productId,
-        p_stock: newStock
-      });
-
-      if(!res?.ok){
-        throw new Error(res?.error || "stock_failed");
-      }
-
-      await Promise.all([loadProducts(), loadAdminProducts()]);
-      setAdminMsg(`✅ Stock mis à jour : ${res.stock}`, "ok");
-    }catch(e){
-      console.error(e);
-      setAdminMsg("❌ " + (e?.message || "Erreur stock"), "bad");
-    }
-  }
-
-  async function toggleProduct(productId, isActive){
-    try{
-      setAdminMsg("⏳ Changement statut…", "warn");
-
-      const res = await sbRpc("pos_toggle_product_active_by_slug", {
-        p_slug: slug,
-        p_product_id: productId,
-        p_is_active: isActive
-      });
-
-      if(!res?.ok){
-        throw new Error(res?.error || "toggle_failed");
-      }
-
-      await Promise.all([loadProducts(), loadAdminProducts()]);
-      setAdminMsg(`✅ Produit ${res.is_active ? "activé" : "désactivé"}`, "ok");
-    }catch(e){
-      console.error(e);
-      setAdminMsg("❌ " + (e?.message || "Erreur statut"), "bad");
-    }
-  }
-
-  async function checkout(){
-    try{
-      if(!cart.length){
-        setCartMsg("❌ Panier vide", "bad");
-        return;
-      }
-
-      const payloadItems = cart.map(i => ({
-        product_id: i.product_id,
-        qty: i.qty
-      }));
-
-      const clientName = ($("clientName").value || "").trim();
-      const clientPhone = ($("clientPhone").value || "").trim();
-      const paymentMethod = $("paymentMethod").value || "CASH";
-
-      setCartMsg("⏳ Encaissement…", "warn");
-      $("btnCheckout").disabled = true;
-
-      const res = await sbRpc("pos_create_sale_by_slug", {
-        p_slug: slug,
-        p_payment_method: paymentMethod,
-        p_client_name: clientName || null,
-        p_client_phone: clientPhone || null,
-        p_items: payloadItems
-      });
-
-      if(!res?.ok){
-        throw new Error(res?.error || "checkout_failed");
-      }
-
-      clearCart();
-      $("clientName").value = "";
-      $("clientPhone").value = "";
-
-      setCartMsg(`✅ Vente enregistrée • ${res.sale_ref} • ${money(res.total || 0)}`, "ok");
-
-      await Promise.all([
-        loadProducts(),
-        loadAdminProducts(),
-        loadSales(),
-        loadStats()
+      $("statusLine").textContent = "Abonnement requis";
+      $("expiryLine").textContent = "Active ton accès en 1 clic.";
+      $("dot").classList.add("bad");
+      $("pillStatus").innerHTML = `Statut : <b>Inactif</b>`;
+
+      setNotifs([
+        {level:"warn",tag:"ABO",title:"Accès fermé",text:"Ton abonnement n’est pas actif sur ce module."}
       ]);
 
-    }catch(e){
-      console.error(e);
-      setCartMsg("❌ " + (e?.message || "Erreur encaissement"), "bad");
-    }finally{
-      $("btnCheckout").disabled = false;
+      $("btnPrimaryAction").onclick = () => {
+        location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
+      };
+
+      return;
     }
-  }
 
-  async function init(){
-    try{
-      slug = getSlug();
+    const status = await digiyGetSubscriptionFull(phone, MODULE_CODE);
+    const expiresAt = status?.expires_at || status?.current_period_end || null;
+    const plan = status?.plan || "standard";
+    const pay = status?.payment_ref ? "validé" : "ok";
 
-      if(!slug){
-        setAccess(false, "slug manquant");
-        $("prodGrid").innerHTML = `<div class="empty">Ajoute ?slug=...</div>`;
-        $("salesList").innerHTML = `<div class="empty">Ajoute ?slug=...</div>`;
-        $("adminList").innerHTML = `<div class="empty">Ajoute ?slug=...</div>`;
-        return;
-      }
+    $("dot").classList.add("ok");
+    $("statusLine").textContent = "Abonnement actif";
+    $("expiryLine").textContent = expiresAt ? `Expire le ${fmtDateFR(expiresAt)}` : "Expiration : —";
+    $("pillStatus").innerHTML = `Statut : <b>Actif</b>`;
+    $("metaLine").innerHTML = `<span>Plan : ${plan}</span><span>•</span><span>Paiement : ${pay}</span>`;
 
-      const ok = await checkAccess();
-      if(!ok){
-        const go = buildUrl(ABOS_URL, {
-          base_module: "CAISSE",
-          module: MODULE_CODE,
-          phone,
-          slug
+    const stats = await digiyGetDashboardStats(phone, MODULE_CODE);
+    const month = stats?.month_xof ?? null;
+    const tx = stats?.tx_count ?? null;
+
+    $("moneyMonth").textContent = month !== null ? `${Number(month).toLocaleString("fr-FR")} FCFA` : "— FCFA";
+    $("txCount").textContent = tx !== null ? `${tx} transactions` : "— transactions";
+    $("todayHint").textContent = stats?.today_hint || "Aujourd’hui";
+
+    const notifs = [];
+
+    if(expiresAt){
+      const d = daysBetween(new Date().toISOString(), expiresAt);
+      if(d !== null && d <= 3){
+        notifs.push({
+          level:"warn",
+          tag:"J-3",
+          title:"Abonnement bientôt expiré",
+          text:`Expire dans ${d} jour(s). Renouvelle pour éviter la coupure.`
         });
-        $("prodGrid").innerHTML = `<div class="empty">Accès fermé • active ton module.</div>`;
-        $("salesList").innerHTML = `<div class="empty">Accès fermé • active ton module.</div>`;
-        $("adminList").innerHTML = `<div class="empty">Accès fermé • active ton module.</div>`;
-        setCartMsg("Accès fermé. Redirection tunnel ABOS disponible.", "bad");
-        setAdminMsg("Accès fermé.", "bad");
-        $("btnCheckout").onclick = () => location.href = go;
-        return;
+      } else {
+        notifs.push({
+          level:"ok",
+          tag:"OK",
+          title:"Abonnement",
+          text:"Actif — prochain contrôle : J-3."
+        });
       }
-
-      await loadContext();
-      await loadStats();
-      await loadProducts();
-      await loadAdminProducts();
-      await loadSales();
-
-      $("searchProd").addEventListener("input", filterProducts);
-
-      $("btnReload").addEventListener("click", async () => {
-        try{
-          await loadContext();
-          await loadStats();
-          await loadProducts();
-          await loadAdminProducts();
-          await loadSales();
-          setCartMsg("↻ Données rafraîchies", "ok");
-          setAdminMsg("↻ Catalogue rechargé", "ok");
-        }catch(err){
-          showFatal(err);
-        }
-      });
-
-      $("btnReloadSales").addEventListener("click", async () => {
-        try{
-          await loadSales();
-        }catch(err){
-          showFatal(err);
-        }
-      });
-
-      $("btnClear").addEventListener("click", clearCart);
-      $("btnCheckout").addEventListener("click", checkout);
-
-      $("btnAdminSave").addEventListener("click", saveAdminProduct);
-      $("btnAdminReset").addEventListener("click", resetAdminForm);
-      $("btnAdminReload").addEventListener("click", async () => {
-        try{
-          await loadAdminProducts();
-          await loadProducts();
-          setAdminMsg("↻ Catalogue admin rechargé", "ok");
-        }catch(err){
-          showFatal(err);
-        }
-      });
-
-    }catch(err){
-      showFatal(err);
     }
-  }
 
-  init();
+    const boost = await digiyGetBoostStatus(phone);
+    if(boost?.active){
+      $("boostStatus").textContent = `Statut boost : actif jusqu’au ${fmtDateFR(boost.expires_at)} • +${boost.views_today || 0} vues aujourd’hui`;
+      $("btnBoost").textContent = "Actif";
+      $("btnBoost").disabled = true;
+      notifs.push({level:"info",tag:"BOOST",title:"Boost actif",text:"Visibilité augmentée. Continue ton activité."});
+    } else {
+      $("boostStatus").textContent = "Statut boost : inactif";
+      notifs.push({level:"info",tag:"OPTION",title:"Boost disponible",text:"Active le BOOST si tu veux plus de visibilité."});
+    }
+
+    if(month === null || tx === null){
+      notifs.push({level:"info",tag:"DATA",title:"Stats à brancher",text:"Le hall est vivant, mais les chiffres réels attendent la RPC stats si elle n’est pas encore posée."});
+    }
+
+    setNotifs(notifs);
+
+    $("btnPrimaryAction").onclick = () => {
+      location.href = buildUrl(CAISSE_URL, { slug, phone });
+    };
+
+    $("btnBoostInfo").onclick = () => {
+      alert("BOOST : +50% d’apparition pendant 7 jours. Paiement direct. Aucun spam.");
+    };
+
+    $("btnBoost").onclick = async () => {
+      try{
+        $("btnBoost").disabled = true;
+        $("btnBoost").textContent = "…";
+
+        const payUrlPayload = await digiyBuildPayUrl(BOOST.module, phone, BOOST.plan);
+        const url = (typeof payUrlPayload === "string")
+          ? payUrlPayload
+          : (payUrlPayload?.url || payUrlPayload?.pay_url || null);
+
+        if(!url){
+          throw new Error("URL paiement BOOST manquante");
+        }
+
+        location.href = url;
+      }catch(e){
+        console.error(e);
+        alert("Impossible d’activer le BOOST. Vérifie la config ou la RPC digiy_build_pay_url.");
+        $("btnBoost").disabled = false;
+        $("btnBoost").textContent = "Activer";
+      }
+    };
+  })();
 })();
 </script>
 </body>
