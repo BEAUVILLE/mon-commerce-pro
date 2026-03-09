@@ -236,7 +236,7 @@
  * - Lit ?slug=
  * - Résout phone via digiy_subscriptions_public
  * - Vérifie accès via digiy_has_access(phone,module)
- * - Ouvre le cockpit métier actuel dashboard.html
+ * - Ouvre le cockpit métier caisse.html
  */
 
 const MODULE_CODE = "POS";
@@ -249,7 +249,7 @@ const SUPABASE_ANON =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indlc3Ftd2pqdHNlZnlqbmx1b3NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzg4ODIsImV4cCI6MjA4MDc1NDg4Mn0.dZfYOc2iL2_wRYL3zExZFsFSBK6AbMeOid2LrIjcTdA";
 
 const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
-const CAISSE_URL = "./caisse.html";  // quand le cockpit métier sera renommé, remplace par ./caisse.html
+const CAISSE_URL = "./caisse.html";
 const SETTINGS_URL = "./settings.html";
 const SUPPORT_URL = "https://wa.me/221771342889?text=Bonjour%20JB%2C%20j%E2%80%99ai%20besoin%20d%E2%80%99aide%20pour%20DIGIY%20CAISSE%20PRO";
 
@@ -380,6 +380,15 @@ async function digiyBuildPayUrl(module, phone, plan){
   return await sbRpc("digiy_build_pay_url", { p_module: module, p_phone: phone, p_plan_code: plan });
 }
 
+function buildAbosParams(phone, slug){
+  return {
+    base_module: "CAISSE",
+    module: MODULE_CODE,
+    phone,
+    slug
+  };
+}
+
 (async function init(){
   $("brandTitle").textContent = MODULE_LABEL;
   $("brandSub").textContent = "Hall royal du module POS";
@@ -439,15 +448,15 @@ async function digiyBuildPayUrl(module, phone, plan){
     ]);
 
     $("btnManageSub").onclick = () => {
-      location.href = buildUrl(ABOS_URL, { module: MODULE_CODE, phone, slug });
+      location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
     };
 
     $("btnPrimaryAction").onclick = () => {
-      location.href = buildUrl(ABOS_URL, { module: MODULE_CODE, phone, slug });
+      location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
     };
 
     $("btnSettings").onclick = () => {
-      location.href = buildUrl(ABOS_URL, { module: MODULE_CODE, phone, slug });
+      location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
     };
 
     $("linkSupport").onclick = (ev) => {
@@ -457,7 +466,7 @@ async function digiyBuildPayUrl(module, phone, plan){
 
     $("linkPayments").onclick = (ev) => {
       ev.preventDefault();
-      location.href = buildUrl(ABOS_URL, { module: MODULE_CODE, phone, slug });
+      location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
     };
 
     return;
@@ -521,7 +530,7 @@ async function digiyBuildPayUrl(module, phone, plan){
   setNotifs(notifs);
 
   $("btnManageSub").onclick = () => {
-    location.href = buildUrl(ABOS_URL, { module: MODULE_CODE, phone, slug });
+    location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
   };
 
   $("btnPrimaryAction").onclick = () => {
@@ -566,7 +575,7 @@ async function digiyBuildPayUrl(module, phone, plan){
 
   $("linkPayments").onclick = (ev) => {
     ev.preventDefault();
-    location.href = buildUrl(ABOS_URL, { module: MODULE_CODE, phone, slug });
+    location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
   };
 
 })();
