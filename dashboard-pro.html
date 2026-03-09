@@ -377,7 +377,11 @@ async function digiyGetBoostStatus(phone){
 }
 
 async function digiyBuildPayUrl(module, phone, plan){
-  return await sbRpc("digiy_build_pay_url", { p_module: module, p_phone: phone, p_plan_code: plan });
+  return await sbRpc("digiy_build_pay_url", {
+    p_module: module,
+    p_phone: phone,
+    p_plan: plan
+  });
 }
 
 function buildAbosParams(phone, slug){
