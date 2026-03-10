@@ -638,11 +638,11 @@
         const s = ctx && typeof ctx === "object" ? ctx : {};
         return {
           display_name: s.display_name || s.store_name || "DIGIY CAISSE PRO",
-          city: s.city || "—",
+          city: s.city || s.ville || "",
           phone: normPhone(s.phone || ""),
           whatsapp: normPhone(s.whatsapp || s.whatsapp_phone || ""),
           wave_phone: normPhone(s.wave_phone || s.wave || ""),
-          address: s.address || "",
+          address: s.address || s.adresse || "",
           bio: s.bio || s.tagline || "",
           tva_active: !!(s.tva_assujeti || s.tva_active),
           tva_taux: s.tva_taux ?? 18
@@ -872,7 +872,7 @@
               stock: row.stock,
               is_active: true,
               updated_at: new Date().toISOString()
-            }).eq("id", id).eq("slug", state.slug),
+            }).eq("id", id).eq("owner_id", state.phone),
             () => sb.from("caisse_products").update({
               nom: row.nom,
               categorie: row.categorie,
@@ -880,7 +880,7 @@
               stock: row.stock,
               is_active: true,
               updated_at: new Date().toISOString()
-            }).eq("id", id).eq("owner_id", state.phone)
+            }).eq("id", id).eq("slug", state.slug)
           ];
 
           let ok = false;
@@ -915,11 +915,11 @@
           () => sb.from("caisse_products").update({
             is_active: !!active,
             updated_at: new Date().toISOString()
-          }).eq("id", id).eq("slug", state.slug),
+          }).eq("id", id).eq("owner_id", state.phone),
           () => sb.from("caisse_products").update({
             is_active: !!active,
             updated_at: new Date().toISOString()
-          }).eq("id", id).eq("owner_id", state.phone)
+          }).eq("id", id).eq("slug", state.slug)
         ];
 
         let ok = false;
