@@ -926,7 +926,7 @@
 
           renderReady(storeContext, subscription);
         }catch(err){
-          log("Hydratation finale → erreur", { message: err?.message || String(err)) });
+          log("Hydratation finale → erreur", { message: err?.message || String(err) });
 
           setMainStatus("bad", "Erreur de contrôle", "La page a répondu, mais une brique technique coince encore.");
           setNotice("bad", `
