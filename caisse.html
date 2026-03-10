@@ -7,17 +7,10 @@
   <meta name="theme-color" content="#0b1020" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
-  window.DIGIY_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indlc3Ftd2pqdHNlZnlqbmx1b3NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzg4ODIsImV4cCI6MjA4MDc1NDg4Mn0.dZfYOc2iL2_wRYL3zExZFsFSBK6AbMeOid2LrIjcTdA";
-
-  const SUPABASE_URL = window.DIGIY_SUPABASE_URL;
-  const SUPABASE_ANON_KEY = window.DIGIY_SUPABASE_ANON_KEY;
-
-  console.log("SUPABASE_URL =", SUPABASE_URL);
-  console.log("SUPABASE_ANON prefix =", String(SUPABASE_ANON_KEY).slice(0, 24));
-  console.log("SUPABASE_ANON length =", String(SUPABASE_ANON_KEY).length);
-</script>
+  <script>
+    window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
+    window.DIGIY_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indlc3Ftd2pqdHNlZnlqbmx1b3NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzg4ODIsImV4cCI6MjA4MDc1NDg4Mn0.dZfYOc2iL2_wRYL3zExZFsFSBK6AbMeOid2LrIjcTdA";
+  </script>
 
   <style>
     :root{
@@ -444,7 +437,7 @@
           <button class="btn ok" type="button" id="btnCheck">✅ Vérifier mon accès</button>
           <button class="btn" type="button" id="btnReloadContext">🔄 Recharger contexte</button>
           <a class="btn warn" id="btnAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Abonnement</a>
-          <a class="btn" id="btnSupport" href="https://wa.me/221771342889?text=Bonjour%20JB%2C%20j%E2%80%99ai%20besoin%20d%E2%80%99aide%20pour%20DIGIY%20CAISSE%20PRO">🛟 Support</a>
+          <a class="btn" id="btnSupport" href="#" target="_blank" rel="noopener">🛟 Support</a>
         </div>
 
         <details>
@@ -531,6 +524,7 @@
 
       const MODULE_CODE = "POS";
       const SUPPORT_PHONE = "221771342889";
+      const SUPPORT_URL = `https://wa.me/${SUPPORT_PHONE}?text=Bonjour%20JB%2C%20j%E2%80%99ai%20besoin%20d%E2%80%99aide%20pour%20DIGIY%20CAISSE%20PRO`;
       const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
 
       const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
@@ -653,40 +647,40 @@
 
       const sb = ensureSupabase();
 
-     async function rpcFirstSuccess(name, payloads){
-  let lastError = null;
+      async function rpcFirstSuccess(name, payloads){
+        let lastError = null;
 
-  for (const payload of payloads){
-    try{
-      log(`RPC ${name} → tentative`, payload);
+        for (const payload of payloads){
+          try{
+            log(`RPC ${name} → tentative`, payload);
 
-      const { data, error } = await sb.rpc(name, payload);
+            const { data, error } = await sb.rpc(name, payload);
 
-      if (error){
-        lastError = error;
-        log(`RPC ${name} → erreur`, {
-          code: error.code || null,
-          message: error.message || null,
-          details: error.details || null,
-          hint: error.hint || null,
-          payload
-        });
-        continue;
+            if (error){
+              lastError = error;
+              log(`RPC ${name} → erreur`, {
+                code: error.code || null,
+                message: error.message || null,
+                details: error.details || null,
+                hint: error.hint || null,
+                payload
+              });
+              continue;
+            }
+
+            log(`RPC ${name} → OK`, data);
+            return data;
+          }catch(err){
+            lastError = err;
+            log(`RPC ${name} → exception`, {
+              message: err?.message || String(err),
+              payload
+            });
+          }
+        }
+
+        throw lastError || new Error(`RPC ${name} a échoué`);
       }
-
-      log(`RPC ${name} → OK`, data);
-      return data;
-    }catch(err){
-      lastError = err;
-      log(`RPC ${name} → exception`, {
-        message: err?.message || String(err),
-        payload
-      });
-    }
-  }
-
-  throw lastError || new Error(`RPC ${name} a échoué`);
-}
 
       async function getPhoneFromSlug(slug){
         const cleanSlug = String(slug || "").trim();
@@ -803,7 +797,7 @@
       function renderBlocked(phone, slug, extraMessage){
         const abosLink = buildUrl(ABOS_URL, {
           module: MODULE_CODE,
-          base_module: "CAISSE",
+          base_module: MODULE_CODE,
           phone,
           slug
         });
@@ -891,7 +885,7 @@
 
           const abosLink = buildUrl(ABOS_URL, {
             module: MODULE_CODE,
-            base_module: "CAISSE",
+            base_module: MODULE_CODE,
             phone,
             slug
           });
@@ -932,7 +926,7 @@
 
           renderReady(storeContext, subscription);
         }catch(err){
-          log("Hydratation finale → erreur", { message: err?.message || String(err) });
+          log("Hydratation finale → erreur", { message: err?.message || String(err)) });
 
           setMainStatus("bad", "Erreur de contrôle", "La page a répondu, mais une brique technique coince encore.");
           setNotice("bad", `
@@ -1003,6 +997,8 @@
       }
 
       function bindActions(){
+        qs("btnSupport").href = SUPPORT_URL;
+
         qs("btnCheck").addEventListener("click", async () => {
           qs("btnCheck").disabled = true;
           qs("btnCheck").textContent = "Contrôle…";
