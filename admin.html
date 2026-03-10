@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>DIGIY CAISSE PRO — Admin boutique</title>
   <meta name="theme-color" content="#0b1020" />
-  <meta name="description" content="DIGIY CAISSE PRO — administration boutique, TVA et produits." />
+  <meta name="description" content="DIGIY CAISSE PRO — administration boutique, TVA, produits et stock." />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -213,9 +213,7 @@
       padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);
     }
 
-    .list{
-      display:grid;gap:10px;
-    }
+    .list{display:grid;gap:10px}
     .prodCard{
       padding:14px;border-radius:14px;border:1px solid var(--line);
       background:rgba(255,255,255,.03);
@@ -655,11 +653,11 @@
         const s = ctx && typeof ctx === "object" ? ctx : {};
         return {
           display_name: s.display_name || s.store_name || "DIGIY CAISSE PRO",
-          city: s.city || "—",
+          city: s.city || s.ville || "",
           phone: normPhone(s.phone || ""),
           whatsapp: normPhone(s.whatsapp || s.whatsapp_phone || ""),
           wave_phone: normPhone(s.wave_phone || s.wave || ""),
-          address: s.address || "",
+          address: s.address || s.adresse || "",
           bio: s.bio || s.tagline || "",
           tva_active: !!(s.tva_assujeti || s.tva_active),
           tva_taux: s.tva_taux ?? 18
@@ -875,7 +873,7 @@
               updated_at: new Date().toISOString()
             })
             .eq("id", id)
-            .eq("slug", state.slug);
+            .eq("owner_id", state.phone);
 
           if(error) throw error;
         } else {
@@ -902,7 +900,7 @@
             updated_at: new Date().toISOString()
           })
           .eq("id", id)
-          .eq("slug", state.slug);
+          .eq("owner_id", state.phone);
 
         if(error) throw error;
         await loadProducts();
