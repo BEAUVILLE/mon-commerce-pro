@@ -1,169 +1,485 @@
+<!doctype html>
+<html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DIGIY CAISSE PRO — Dashboard</title>
-  <meta name="theme-color" content="#0b1020" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>MON COMMERCE — Dashboard Pro</title>
+  <meta name="theme-color" content="#07140f" />
+  <meta name="description" content="MON COMMERCE by DIGIY — dashboard pro POS : abonnement, activité, boost et action principale." />
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
-    window.DIGIY_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indlc3Ftd2pqdHNlZnlqbmx1b3NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNzg4ODIsImV4cCI6MjA4MDc1NDg4Mn0.dZfYOc2iL2_wRYL3zExZFsFSBK6AbMeOid2LrIjcTdA";
+    window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
+    window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
+    window.DIGIY_MODULE = "POS";
+
+    function digiyBasePath(){
+      const parts = location.pathname.split("/").filter(Boolean);
+      const isGh = /\.github\.io$/i.test(location.hostname);
+      if(isGh && parts.length > 0) return "/" + parts[0] + "/";
+      return "/";
+    }
+
+    function digiyLocal(path){
+      path = String(path || "").replace(/^\/+/,"");
+      return digiyBasePath() + path;
+    }
   </script>
 
   <style>
     :root{
-      --bg:#0b1020;
-      --card:#121a33;
-      --muted:#a8b1d1;
-      --text:#eef1ff;
+      --bg:#04110d;
+      --bg2:#071a14;
+      --card:rgba(8,24,18,.78);
+      --card2:rgba(9,28,21,.92);
+      --muted:#bfd3c8;
+      --text:#f7fbf8;
       --ok:#22c55e;
       --warn:#f59e0b;
       --danger:#ef4444;
-      --accent:#6366f1;
+      --accent:#60a5fa;
+      --gold:#facc15;
+      --gold2:#f59e0b;
       --line:rgba(255,255,255,.09);
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --radius:18px;
-      --pad:16px;
+      --line2:rgba(255,255,255,.14);
+      --shadow:0 22px 56px rgba(0,0,0,.28);
+      --shadow-soft:0 14px 34px rgba(0,0,0,.22);
+      --radius:26px;
+      --max:1120px;
     }
+
     *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    html{scroll-behavior:smooth}
+
     body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
       background:
-        radial-gradient(1200px 700px at 20% -20%, rgba(99,102,241,.25), transparent 70%),
-        radial-gradient(900px 600px at 100% 0%, rgba(34,197,94,.15), transparent 55%),
-        var(--bg);
+        radial-gradient(circle at top left, rgba(250,204,21,.10), transparent 28%),
+        radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 22%),
+        linear-gradient(180deg, #07140f 0%, #04110d 42%, #020906 100%);
       color:var(--text);
     }
-    .wrap{max-width:980px;margin:0 auto;padding:18px 14px 34px}
+
+    a{text-decoration:none;color:inherit}
+    button{font:inherit}
+
+    .wrap{
+      width:min(100%, var(--max));
+      margin:0 auto;
+      padding:16px 14px 92px;
+    }
+
+    .floating-site-btn{
+      position:fixed;
+      left:16px;
+      bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+      z-index:90;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:48px;
+      padding:14px 16px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(5,16,12,.88);
+      backdrop-filter:blur(10px);
+      color:var(--text);
+      font-size:13px;
+      font-weight:900;
+      box-shadow:0 16px 36px rgba(0,0,0,.28);
+      transition:transform .14s ease, border-color .14s ease, background .14s ease;
+    }
+    .floating-site-btn:hover{
+      transform:translateY(-1px);
+      border-color:rgba(250,204,21,.28);
+      background:rgba(8,20,15,.94);
+    }
+
     .topbar{
-      display:flex;align-items:center;justify-content:space-between;
-      gap:12px;padding:10px 6px;margin-bottom:10px;
+      position:sticky;
+      top:0;
+      z-index:70;
+      margin-bottom:12px;
+      backdrop-filter:blur(12px);
+      background:rgba(4,17,13,.76);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:24px;
+      box-shadow:var(--shadow-soft);
     }
+
+    .topbar-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:14px;
+    }
+
     .brand{
-      display:flex;align-items:center;gap:10px;
-      font-weight:800;letter-spacing:.2px
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
     }
-    .brand .badge{
-      display:inline-flex;align-items:center;justify-content:center;
-      width:34px;height:34px;border-radius:11px;
-      background:rgba(99,102,241,.18);border:1px solid var(--line)
+
+    .brand-badge{
+      width:48px;
+      height:48px;
+      border-radius:18px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.08));
+      border:1px solid rgba(250,204,21,.16);
+      box-shadow:0 16px 34px rgba(250,204,21,.10);
+      font-size:24px;
+      flex:0 0 auto;
     }
+
+    .brand-kicker{
+      color:var(--gold);
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      margin-bottom:3px;
+    }
+
+    .brand-title{
+      font-size:20px;
+      font-weight:1000;
+      line-height:1.08;
+      letter-spacing:-.02em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .brand-sub{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      margin-top:3px;
+      letter-spacing:.04em;
+    }
+
     .right{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
+
     .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 13px;
+      border-radius:999px;
       background:rgba(255,255,255,.04);
       border:1px solid var(--line);
       color:var(--muted);
-      font-weight:600;font-size:13px;
+      font-weight:900;
+      font-size:12px;
+      backdrop-filter:blur(10px);
     }
-    .pill b{color:var(--text);font-weight:800}
+
+    .pill b{color:var(--text);font-weight:950}
+
+    .btn,
+    .btn-outline,
+    .btn-ghost{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:46px;
+      padding:12px 16px;
+      border-radius:999px;
+      font-weight:900;
+      font-size:13px;
+      white-space:nowrap;
+      transition:.14s ease;
+    }
+
+    .btn:hover,
+    .btn-outline:hover,
+    .btn-ghost:hover{transform:translateY(-1px)}
+
+    .btn:disabled,
+    .btn-outline:disabled,
+    .btn-ghost:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+      transform:none;
+    }
+
     .btn{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.05);
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      color:#07110d;
+      box-shadow:0 14px 30px rgba(250,204,21,.18);
+    }
+
+    .btn-outline{
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line2);
       color:var(--text);
-      padding:10px 12px;border-radius:12px;
-      font-weight:800;cursor:pointer;
-      transition:.15s ease;
     }
-    .btn:hover{transform:translateY(-1px)}
-    .btn.primary{
-      background:rgba(99,102,241,.22);
-      border-color:rgba(99,102,241,.35);
+
+    .btn-ghost{
+      background:transparent;
+      border:1px solid var(--line2);
+      color:var(--muted);
     }
-    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
     .grid{
       display:grid;
-      grid-template-columns:1fr;
+      grid-template-columns:1.05fr .95fr;
       gap:12px;
       margin-top:8px;
     }
-    @media(min-width:920px){
-      .grid{grid-template-columns:1.05fr .95fr}
-    }
+
     .card{
-      background:rgba(18,26,51,.92);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+        var(--card);
       border:1px solid var(--line);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
-      padding:var(--pad);
+      padding:18px;
     }
-    .card h3{margin:0 0 8px 0;font-size:15px;letter-spacing:.2px}
+
+    .card h3{
+      margin:0 0 10px 0;
+      font-size:16px;
+      letter-spacing:.01em;
+      line-height:1.2;
+    }
+
+    .heroBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(250,204,21,.10);
+      border:1px solid rgba(250,204,21,.18);
+      color:var(--gold);
+      font-size:12px;
+      font-weight:950;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:14px;
+    }
+
     .muted{color:var(--muted)}
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .statusDot{width:10px;height:10px;border-radius:999px;background:var(--warn)}
+
+    .statusDot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:var(--warn);
+      box-shadow:0 0 0 4px rgba(255,255,255,.03);
+    }
     .statusDot.ok{background:var(--ok)}
     .statusDot.bad{background:var(--danger)}
+
     .bigMoney{
-      font-size:34px;font-weight:900;letter-spacing:-.8px;margin:6px 0 2px 0
+      font-size:38px;
+      font-weight:1000;
+      letter-spacing:-.04em;
+      margin:8px 0 4px 0;
+      line-height:1;
     }
+
     .mini{
-      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
-      font-size:13px;color:var(--muted);font-weight:650
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:800;
+      line-height:1.6;
     }
-    .hr{height:1px;background:var(--line);margin:12px 0}
+
+    .hr{
+      height:1px;
+      background:var(--line);
+      margin:14px 0;
+    }
+
     .boostBox{
-      display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
-      padding:12px;border-radius:16px;
-      background:rgba(99,102,241,.10);
-      border:1px solid rgba(99,102,241,.25);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px;
+      border-radius:20px;
+      background:rgba(96,165,250,.08);
+      border:1px solid rgba(96,165,250,.20);
     }
-    .boostBox b{display:block;margin-bottom:4px}
-    .notifList{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+
+    .boostBox b{
+      display:block;
+      margin-bottom:5px;
+      font-size:15px;
+    }
+
+    .notifList{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      margin-top:8px;
+    }
+
     .notif{
-      padding:10px 12px;border-radius:14px;border:1px solid var(--line);
+      padding:12px 13px;
+      border-radius:16px;
+      border:1px solid var(--line);
       background:rgba(255,255,255,.03);
-      display:flex;align-items:flex-start;justify-content:space-between;gap:10px
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
     }
+
     .tag{
-      font-size:12px;font-weight:900;
-      padding:6px 9px;border-radius:999px;border:1px solid var(--line);
-      color:var(--muted)
+      font-size:11px;
+      font-weight:950;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      white-space:nowrap;
     }
+
     .tag.warn{color:#ffe2b0;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.10)}
     .tag.ok{color:#c9ffd9;border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08)}
-    .tag.info{color:#cfd6ff;border-color:rgba(99,102,241,.35);background:rgba(99,102,241,.10)}
+    .tag.info{color:#cfd6ff;border-color:rgba(96,165,250,.35);background:rgba(96,165,250,.10)}
+
     .footer{
-      margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
-    .smallLink{color:var(--muted);text-decoration:none;font-weight:750}
+
+    .smallLink{
+      color:var(--muted);
+      text-decoration:none;
+      font-weight:850;
+    }
     .smallLink:hover{color:var(--text)}
+
+    .navRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .subPills{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+
+    .subPill{
+      padding:10px 12px;
+      border-radius:16px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+    }
+
+    @media(max-width:920px){
+      .grid{grid-template-columns:1fr}
+    }
+
+    @media(max-width:700px){
+      .wrap{padding:12px 12px 92px}
+      .topbar-inner{padding:12px}
+      .brand-title{white-space:normal}
+      .boostBox{flex-direction:column}
+      .floating-site-btn{
+        left:12px;
+        right:12px;
+        bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+        min-height:46px;
+        padding:14px 14px;
+        font-size:12px;
+      }
+    }
   </style>
 </head>
 
 <body>
+  <a
+    class="floating-site-btn"
+    href="https://digiylyfe.com/"
+    aria-label="Retour au site DIGIYLYFE"
+    title="Retour au site DIGIYLYFE"
+  >⬅️ Retour site DIGIYLYFE</a>
+
   <div class="wrap">
 
     <div class="topbar">
-      <div class="brand">
-        <div class="badge">🏪</div>
-        <div>
-          <div id="brandTitle">DIGIY CAISSE PRO</div>
-          <div class="muted" style="font-size:12px;font-weight:700;margin-top:2px" id="brandSub">
-            Hall royal du module POS
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-badge">🏪</div>
+          <div>
+            <div class="brand-kicker">DIGIYLYFE</div>
+            <div id="brandTitle" class="brand-title">MON COMMERCE — Dashboard Pro</div>
+            <div id="brandSub" class="brand-sub">Pilotage abonnement, activité et boost</div>
           </div>
         </div>
-      </div>
 
-      <div class="right">
-        <div class="pill" id="pillStatus">Statut : <b>…</b></div>
-        <button class="btn" id="btnSettings" type="button">⚙️ Paramètres</button>
+        <div class="right">
+          <div class="pill" id="pillStatus">Statut : <b>…</b></div>
+          <a class="btn-outline" id="btnSettings" href="./admin.html">⚙️ Admin</a>
+        </div>
       </div>
+    </div>
+
+    <div class="navRow">
+      <a class="btn-ghost" id="btnHall" href="./index.html">🏠 Hall</a>
+      <a class="btn-ghost" id="btnCaisse" href="./caisse.html">🧾 Caisse</a>
+      <a class="btn-ghost" id="btnAdmin" href="./admin.html">⚙️ Admin</a>
+      <a class="btn-outline" id="btnAbosTop" href="https://commencer-a-payer.digiylyfe.com/">💳 Abonnement</a>
+      <a class="btn-outline" id="btnSupportTop" href="#" target="_blank" rel="noopener">💬 Support</a>
     </div>
 
     <div class="grid">
 
       <div class="card" id="cardStatus">
+        <div class="heroBadge">dashboard pro • abonnement • argent • boost</div>
         <h3>Statut & sécurité</h3>
 
         <div class="row">
           <div class="statusDot" id="dot"></div>
           <div style="flex:1">
-            <div style="font-weight:900" id="statusLine">Chargement…</div>
-            <div class="muted" style="font-weight:700;font-size:13px;margin-top:2px" id="expiryLine">—</div>
+            <div style="font-weight:1000;font-size:18px;line-height:1.15" id="statusLine">Chargement…</div>
+            <div class="muted" style="font-weight:800;font-size:13px;margin-top:3px" id="expiryLine">—</div>
           </div>
+        </div>
+
+        <div class="subPills">
+          <div class="subPill">Slug : <b id="slugBox">—</b></div>
+          <div class="subPill">Téléphone : <b id="phoneBox">—</b></div>
+          <div class="subPill">Module : <b>POS</b></div>
         </div>
 
         <div class="hr"></div>
@@ -175,7 +491,7 @@
         </div>
 
         <div class="footer">
-          <button class="btn" id="btnManageSub" type="button">Gérer mon abonnement</button>
+          <button class="btn-outline" id="btnManageSub" type="button">Gérer mon abonnement</button>
         </div>
       </div>
 
@@ -194,30 +510,30 @@
         <div class="boostBox">
           <div>
             <b>🚀 BOOST visibilité</b>
-            <div class="muted" style="font-weight:750;font-size:13px" id="boostText">
+            <div class="muted" style="font-weight:800;font-size:13px" id="boostText">
               +50% d’apparition • 7 jours • 5 000 FCFA
             </div>
-            <div class="muted" style="font-weight:750;font-size:12px;margin-top:6px" id="boostStatus">
+            <div class="muted" style="font-weight:800;font-size:12px;margin-top:6px" id="boostStatus">
               Statut boost : —
             </div>
           </div>
 
-          <div style="display:flex;flex-direction:column;gap:8px;min-width:160px">
-            <button class="btn primary" id="btnBoost" type="button">Activer</button>
-            <button class="btn" id="btnBoostInfo" type="button">Détails</button>
+          <div style="display:flex;flex-direction:column;gap:8px;min-width:170px">
+            <button class="btn" id="btnBoost" type="button">Activer</button>
+            <button class="btn-outline" id="btnBoostInfo" type="button">Détails</button>
           </div>
         </div>
       </div>
 
       <div class="card" id="cardAction" style="grid-column:1/-1">
         <h3>Action principale</h3>
-        <div class="muted" style="font-weight:750;margin-bottom:10px" id="actionDesc">
+        <div class="muted" style="font-weight:800;margin-bottom:10px" id="actionDesc">
           Une action. Simple. Efficace.
         </div>
 
         <div class="row" style="justify-content:space-between">
-          <div class="muted" style="font-weight:800" id="actionHint">—</div>
-          <button class="btn primary" id="btnPrimaryAction" type="button">…</button>
+          <div class="muted" style="font-weight:900" id="actionHint">—</div>
+          <button class="btn" id="btnPrimaryAction" type="button">…</button>
         </div>
 
         <div class="hr"></div>
@@ -239,17 +555,17 @@
   "use strict";
 
   const MODULE_CODE = "POS";
-  const MODULE_LABEL = "DIGIY CAISSE PRO";
+  const MODULE_LABEL = "MON COMMERCE";
   const PRIMARY_ACTION_LABEL = "Ouvrir la caisse";
   const PRIMARY_ACTION_HINT  = "Encaisse une vente, gère tes produits et ton stock.";
 
- const SUPABASE_URL = window.DIGIY_SUPABASE_URL;
-const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
+  const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
+  const SUPABASE_ANON = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
 
   const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
-  const CAISSE_URL = "./caisse.html";
-  const SETTINGS_URL = "./settings.html";
-  const SUPPORT_URL = "https://wa.me/221771342889?text=Bonjour%20JB%2C%20j%E2%80%99ai%20besoin%20d%E2%80%99aide%20pour%20DIGIY%20CAISSE%20PRO";
+  const CAISSE_URL = digiyLocal("caisse.html");
+  const HALL_URL = digiyLocal("index.html");
+  const ADMIN_URL = digiyLocal("admin.html");
 
   const BOOST = {
     module: "BOOST",
@@ -268,24 +584,64 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
     return d.toLocaleDateString("fr-FR", { year:"numeric", month:"long", day:"numeric" });
   }
 
+  function cleanDigits(v){
+    return String(v || "").replace(/[^\d]/g, "");
+  }
+
   function getSlug(){
     const u = new URL(location.href);
-    return u.searchParams.get("slug") || "";
+    return String(
+      u.searchParams.get("slug") ||
+      localStorage.getItem("digiy_pos_last_slug") ||
+      sessionStorage.getItem("digiy_pos_last_slug") ||
+      ""
+    ).trim().toLowerCase();
+  }
+
+  function getPhone(){
+    const u = new URL(location.href);
+    return cleanDigits(
+      u.searchParams.get("phone") ||
+      localStorage.getItem("digiy_pos_last_phone") ||
+      sessionStorage.getItem("digiy_pos_last_phone") ||
+      ""
+    );
+  }
+
+  function saveLocalAccess(slug, phone){
+    if(slug){
+      localStorage.setItem("digiy_pos_last_slug", slug);
+      sessionStorage.setItem("digiy_pos_last_slug", slug);
+    }
+    if(phone){
+      localStorage.setItem("digiy_pos_last_phone", phone);
+      sessionStorage.setItem("digiy_pos_last_phone", phone);
+    }
   }
 
   function buildUrl(base, params){
     const u = new URL(base, location.href);
     Object.entries(params || {}).forEach(([k, v]) => {
-      if (v !== null && v !== undefined && v !== "") u.searchParams.set(k, v);
+      if(v !== null && v !== undefined && v !== "") u.searchParams.set(k, v);
     });
     return u.toString();
+  }
+
+  function buildSupportUrl(phone, slug){
+    const text = [
+      "Bonjour JB,",
+      "j’ai besoin d’aide pour MON COMMERCE by DIGIY.",
+      slug ? `Slug : ${slug}` : "",
+      phone ? `Téléphone : +${phone}` : ""
+    ].filter(Boolean).join(" ");
+    return `https://wa.me/221771342889?text=${encodeURIComponent(text)}`;
   }
 
   function setNotifs(items){
     const box = $("notifList");
     box.innerHTML = "";
     if(!items.length){
-      box.innerHTML = `<div class="notif"><div><b>Rien à signaler</b><div class="muted" style="font-weight:750;margin-top:2px">Tout roule.</div></div><div class="tag ok">OK</div></div>`;
+      box.innerHTML = `<div class="notif"><div><b>Rien à signaler</b><div class="muted" style="font-weight:800;margin-top:2px">Tout roule.</div></div><div class="tag ok">OK</div></div>`;
       return;
     }
     for(const it of items){
@@ -295,7 +651,7 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
       div.innerHTML = `
         <div>
           <b>${it.title}</b>
-          <div class="muted" style="font-weight:750;margin-top:2px">${it.text}</div>
+          <div class="muted" style="font-weight:800;margin-top:2px">${it.text}</div>
         </div>
         <div class="tag ${tagClass}">${it.tag}</div>
       `;
@@ -306,7 +662,7 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
   function daysBetween(aIso, bIso){
     const a = new Date(aIso).getTime();
     const b = new Date(bIso).getTime();
-    if (Number.isNaN(a) || Number.isNaN(b)) return null;
+    if(Number.isNaN(a) || Number.isNaN(b)) return null;
     return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
   }
 
@@ -384,29 +740,56 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
 
   function buildAbosParams(phone, slug){
     return {
-      base_module: "CAISSE",
+      base_module: MODULE_CODE,
       module: MODULE_CODE,
       phone,
       slug
     };
   }
 
+  function wireNav(phone, slug){
+    const q = { slug, phone, module: MODULE_CODE };
+
+    $("btnHall").href = buildUrl(HALL_URL, q);
+    $("btnCaisse").href = buildUrl(CAISSE_URL, q);
+    $("btnAdmin").href = buildUrl(ADMIN_URL, q);
+    $("btnSettings").href = buildUrl(ADMIN_URL, q);
+    $("btnAbosTop").href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
+    $("btnSupportTop").href = buildSupportUrl(phone, slug);
+    $("linkSupport").href = buildSupportUrl(phone, slug);
+    $("linkPayments").href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
+  }
+
   (async function init(){
-    $("brandTitle").textContent = MODULE_LABEL;
-    $("brandSub").textContent = "Hall royal du module POS";
+    $("brandTitle").textContent = `${MODULE_LABEL} — Dashboard Pro`;
+    $("brandSub").textContent = "Pilotage abonnement, activité et boost";
     $("btnPrimaryAction").textContent = PRIMARY_ACTION_LABEL;
     $("actionHint").textContent = PRIMARY_ACTION_HINT;
     $("actionDesc").textContent = "Entre dans la caisse, pilote tes produits et ton stock depuis une seule porte.";
     $("pillStatus").innerHTML = `Statut : <b>…</b>`;
 
     const slug = getSlug();
+    let phone = getPhone();
+
+    $("slugBox").textContent = slug || "—";
+    $("phoneBox").textContent = phone ? `+${phone}` : "—";
+    wireNav(phone, slug);
 
     if(!slug){
       $("statusLine").textContent = "Slug manquant";
-      $("expiryLine").textContent = "Ajoute ?slug=…";
+      $("expiryLine").textContent = "Repasse par le hall ou ajoute ?slug=…";
       $("dot").classList.add("bad");
       $("pillStatus").innerHTML = `Statut : <b>Bloqué</b>`;
-      setNotifs([{level:"warn",tag:"ACTION",title:"Lien invalide",text:"Le lien doit contenir ?slug=…"}]);
+      setNotifs([{level:"warn",tag:"ACTION",title:"Lien incomplet",text:"Le dashboard a besoin d’un slug valide pour ouvrir le bon rail."}]);
+
+      $("btnManageSub").onclick = () => {
+        location.href = HALL_URL;
+      };
+
+      $("btnPrimaryAction").onclick = () => {
+        location.href = HALL_URL;
+      };
+
       return;
     }
 
@@ -417,6 +800,7 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
       $("statusLine").textContent = "Erreur connexion";
       $("expiryLine").textContent = "Impossible de vérifier le compte.";
       $("dot").classList.add("bad");
+      $("pillStatus").innerHTML = `Statut : <b>Bloqué</b>`;
       setNotifs([{level:"warn",tag:"RÉSEAU",title:"Connexion",text:"Vérifie internet ou la config Supabase."}]);
       return;
     }
@@ -426,11 +810,14 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
       $("expiryLine").textContent = "Ce slug n’existe pas.";
       $("dot").classList.add("bad");
       $("pillStatus").innerHTML = `Statut : <b>Inconnu</b>`;
-      setNotifs([{level:"warn",tag:"INFO",title:"Slug inconnu",text:"Demande un nouveau lien d’accès."}]);
+      setNotifs([{level:"warn",tag:"INFO",title:"Slug inconnu",text:"Demande un nouveau lien d’accès ou repasse par le hall."}]);
       return;
     }
 
-    const phone = subPublic.phone;
+    phone = cleanDigits(subPublic.phone || phone);
+    saveLocalAccess(slug, phone);
+    $("phoneBox").textContent = phone ? `+${phone}` : "—";
+    wireNav(phone, slug);
 
     let ok = false;
     try{
@@ -441,7 +828,7 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
 
     if(!ok){
       $("statusLine").textContent = "Abonnement requis";
-      $("expiryLine").textContent = "Active ton accès en 1 clic.";
+      $("expiryLine").textContent = "Active ton accès pour ouvrir la caisse.";
       $("dot").classList.add("bad");
       $("pillStatus").innerHTML = `Statut : <b>Inactif</b>`;
 
@@ -457,26 +844,12 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
         location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
       };
 
-      $("btnSettings").onclick = () => {
-        location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
-      };
-
-      $("linkSupport").onclick = (ev) => {
-        ev.preventDefault();
-        location.href = SUPPORT_URL;
-      };
-
-      $("linkPayments").onclick = (ev) => {
-        ev.preventDefault();
-        location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
-      };
-
       return;
     }
 
     const status = await digiyGetSubscriptionFull(phone, MODULE_CODE);
     const expiresAt = status?.expires_at || status?.current_period_end || null;
-    const plan = status?.plan || "standard";
+    const plan = status?.plan || status?.plan_code || "standard";
     const pay = status?.payment_ref ? "validé" : "ok";
 
     $("dot").classList.add("ok");
@@ -526,7 +899,7 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
     }
 
     if(month === null || tx === null){
-      notifs.push({level:"info",tag:"DATA",title:"Stats à brancher",text:"Le dashboard est vivant, mais les chiffres réels attendent la RPC stats si elle n’est pas encore posée."});
+      notifs.push({level:"info",tag:"DATA",title:"Stats à brancher",text:"Le dashboard vit déjà, mais les chiffres réels attendent la RPC stats si elle n’est pas encore posée."});
     }
 
     setNotifs(notifs);
@@ -536,7 +909,7 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
     };
 
     $("btnPrimaryAction").onclick = () => {
-      location.href = buildUrl(CAISSE_URL, { slug, phone });
+      location.href = buildUrl(CAISSE_URL, { slug, phone, module: MODULE_CODE });
     };
 
     $("btnBoostInfo").onclick = () => {
@@ -564,20 +937,6 @@ const SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
         $("btnBoost").disabled = false;
         $("btnBoost").textContent = "Activer";
       }
-    };
-
-    $("btnSettings").onclick = () => {
-      location.href = buildUrl(SETTINGS_URL, { slug });
-    };
-
-    $("linkSupport").onclick = (ev) => {
-      ev.preventDefault();
-      location.href = SUPPORT_URL;
-    };
-
-    $("linkPayments").onclick = (ev) => {
-      ev.preventDefault();
-      location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
     };
 
   })();
