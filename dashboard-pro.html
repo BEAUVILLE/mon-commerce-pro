@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>MON COMMERCE — Dashboard Pro</title>
   <meta name="theme-color" content="#07140f" />
-  <meta name="description" content="MON COMMERCE by DIGIY — dashboard pro POS : abonnement, activité, boost et action principale." />
+  <meta
+    name="description"
+    content="MON COMMERCE by DIGIY — dashboard pro POS : abonnement, activité, boost et porte centrale vers la caisse."
+  />
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
     window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
     window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
     window.DIGIY_MODULE = "POS";
+    window.DIGIY_LOGIN_URL = "./pin.html";
+    document.documentElement.style.visibility = "hidden";
 
     function digiyBasePath(){
       const parts = location.pathname.split("/").filter(Boolean);
@@ -21,10 +26,13 @@
     }
 
     function digiyLocal(path){
-      path = String(path || "").replace(/^\/+/,"");
+      path = String(path || "").replace(/^\/+/, "");
       return digiyBasePath() + path;
     }
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./guard.js"></script>
 
   <style>
     :root{
@@ -51,7 +59,6 @@
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
     html{scroll-behavior:smooth}
-
     body{
       min-height:100vh;
       font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
@@ -70,6 +77,9 @@
       margin:0 auto;
       padding:16px 14px 92px;
     }
+
+    .app{display:none}
+    html.app-ready .app{display:block}
 
     .floating-site-btn{
       position:fixed;
@@ -311,6 +321,20 @@
       line-height:1.6;
     }
 
+    .diag{
+      margin-top:12px;
+      padding:12px;
+      border-radius:16px;
+      background:#081119;
+      border:1px solid var(--line);
+      color:#d8e1ff;
+      font:12px/1.58 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      white-space:pre-wrap;
+      word-break:break-word;
+      max-height:240px;
+      overflow:auto;
+    }
+
     .hr{
       height:1px;
       background:var(--line);
@@ -405,6 +429,37 @@
       font-weight:900;
     }
 
+    .shell{
+      min-height:280px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding:24px;
+    }
+
+    .shellCard{
+      max-width:640px;
+      padding:22px;
+      border-radius:22px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      box-shadow:var(--shadow-soft);
+    }
+
+    .shellTitle{
+      font-size:24px;
+      font-weight:1000;
+      margin-bottom:8px;
+      line-height:1.1;
+    }
+
+    .shellText{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.8;
+      font-weight:700;
+    }
+
     @media(max-width:920px){
       .grid{grid-template-columns:1fr}
     }
@@ -429,12 +484,13 @@
 <body>
   <a
     class="floating-site-btn"
-    href="https://digiylyfe.com/"
-    aria-label="Retour au site DIGIYLYFE"
-    title="Retour au site DIGIYLYFE"
-  >⬅️ Retour site DIGIYLYFE</a>
+    id="btnPublicFloating"
+    href="https://mon-commerce.digiylyfe.com/"
+    aria-label="Retour à la vitrine MON COMMERCE"
+    title="Retour à la vitrine MON COMMERCE"
+  >⬅️ Retour vitrine MON COMMERCE</a>
 
-  <div class="wrap">
+  <div class="wrap app">
 
     <div class="topbar">
       <div class="topbar-inner">
@@ -449,6 +505,7 @@
 
         <div class="right">
           <div class="pill" id="pillStatus">Statut : <b>…</b></div>
+          <a class="btn-outline" id="btnPinTop" href="./pin.html">🔐 PIN</a>
           <a class="btn-outline" id="btnSettings" href="./admin.html">⚙️ Admin</a>
         </div>
       </div>
@@ -462,92 +519,110 @@
       <a class="btn-outline" id="btnSupportTop" href="#" target="_blank" rel="noopener">💬 Support</a>
     </div>
 
-    <div class="grid">
-
-      <div class="card" id="cardStatus">
-        <div class="heroBadge">dashboard pro • abonnement • argent • boost</div>
-        <h3>Statut & sécurité</h3>
-
-        <div class="row">
-          <div class="statusDot" id="dot"></div>
-          <div style="flex:1">
-            <div style="font-weight:1000;font-size:18px;line-height:1.15" id="statusLine">Chargement…</div>
-            <div class="muted" style="font-weight:800;font-size:13px;margin-top:3px" id="expiryLine">—</div>
-          </div>
+    <div id="blockedShell" class="card shell" style="display:none">
+      <div class="shellCard">
+        <div class="shellTitle" id="blockedTitle">Accès contrôlé</div>
+        <div class="shellText" id="blockedText">
+          Cette porte demande un slug actif et un accès POS valide.
         </div>
-
-        <div class="subPills">
-          <div class="subPill">Slug : <b id="slugBox">—</b></div>
-          <div class="subPill">Téléphone : <b id="phoneBox">—</b></div>
-          <div class="subPill">Module : <b>POS</b></div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="mini" id="metaLine">
-          <span>Plan : —</span>
-          <span>•</span>
-          <span>Paiement : —</span>
-        </div>
-
-        <div class="footer">
-          <button class="btn-outline" id="btnManageSub" type="button">Gérer mon abonnement</button>
+        <div class="footer" style="justify-content:center;margin-top:18px">
+          <a class="btn-outline" id="btnBlockedPin" href="./pin.html">🔐 Ouvrir avec mon PIN</a>
+          <a class="btn" id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Gérer mon abonnement</a>
         </div>
       </div>
-
-      <div class="card" id="cardMoney">
-        <h3>Argent</h3>
-
-        <div class="bigMoney" id="moneyMonth">— FCFA</div>
-        <div class="mini" id="moneyMeta">
-          <span id="txCount">— transactions</span>
-          <span>•</span>
-          <span id="todayHint">—</span>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="boostBox">
-          <div>
-            <b>🚀 BOOST visibilité</b>
-            <div class="muted" style="font-weight:800;font-size:13px" id="boostText">
-              +50% d’apparition • 7 jours • 5 000 FCFA
-            </div>
-            <div class="muted" style="font-weight:800;font-size:12px;margin-top:6px" id="boostStatus">
-              Statut boost : —
-            </div>
-          </div>
-
-          <div style="display:flex;flex-direction:column;gap:8px;min-width:170px">
-            <button class="btn" id="btnBoost" type="button">Activer</button>
-            <button class="btn-outline" id="btnBoostInfo" type="button">Détails</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" id="cardAction" style="grid-column:1/-1">
-        <h3>Action principale</h3>
-        <div class="muted" style="font-weight:800;margin-bottom:10px" id="actionDesc">
-          Une action. Simple. Efficace.
-        </div>
-
-        <div class="row" style="justify-content:space-between">
-          <div class="muted" style="font-weight:900" id="actionHint">—</div>
-          <button class="btn" id="btnPrimaryAction" type="button">…</button>
-        </div>
-
-        <div class="hr"></div>
-
-        <h3>Notifications</h3>
-        <div class="notifList" id="notifList"></div>
-
-        <div class="footer">
-          <a class="smallLink" href="#" id="linkSupport">Support</a>
-          <a class="smallLink" href="#" id="linkPayments">Mes paiements</a>
-        </div>
-      </div>
-
     </div>
+
+    <div id="dashboardContent" style="display:none">
+      <div class="grid">
+
+        <div class="card" id="cardStatus">
+          <div class="heroBadge">dashboard pro • abonnement • argent • boost</div>
+          <h3>Statut & sécurité</h3>
+
+          <div class="row">
+            <div class="statusDot" id="dot"></div>
+            <div style="flex:1">
+              <div style="font-weight:1000;font-size:18px;line-height:1.15" id="statusLine">Chargement…</div>
+              <div class="muted" style="font-weight:800;font-size:13px;margin-top:3px" id="expiryLine">—</div>
+            </div>
+          </div>
+
+          <div class="subPills">
+            <div class="subPill">Slug : <b id="slugBox">—</b></div>
+            <div class="subPill">Téléphone : <b id="phoneBox">—</b></div>
+            <div class="subPill">Module : <b>POS</b></div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="mini" id="metaLine">
+            <span>Plan : —</span>
+            <span>•</span>
+            <span>Paiement : —</span>
+          </div>
+
+          <div class="diag" id="diagBox">Initialisation…</div>
+
+          <div class="footer">
+            <button class="btn-outline" id="btnManageSub" type="button">Gérer mon abonnement</button>
+          </div>
+        </div>
+
+        <div class="card" id="cardMoney">
+          <h3>Argent</h3>
+
+          <div class="bigMoney" id="moneyMonth">— FCFA</div>
+          <div class="mini" id="moneyMeta">
+            <span id="txCount">— transactions</span>
+            <span>•</span>
+            <span id="todayHint">—</span>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="boostBox">
+            <div>
+              <b>🚀 BOOST visibilité</b>
+              <div class="muted" style="font-weight:800;font-size:13px" id="boostText">
+                +50% d’apparition • 7 jours • 5 000 FCFA
+              </div>
+              <div class="muted" style="font-weight:800;font-size:12px;margin-top:6px" id="boostStatus">
+                Statut boost : —
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px;min-width:170px">
+              <button class="btn" id="btnBoost" type="button">Activer</button>
+              <button class="btn-outline" id="btnBoostInfo" type="button">Détails</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="cardAction" style="grid-column:1/-1">
+          <h3>Action principale</h3>
+          <div class="muted" style="font-weight:800;margin-bottom:10px" id="actionDesc">
+            Une action. Simple. Efficace.
+          </div>
+
+          <div class="row" style="justify-content:space-between">
+            <div class="muted" style="font-weight:900" id="actionHint">—</div>
+            <button class="btn" id="btnPrimaryAction" type="button">…</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <h3>Notifications</h3>
+          <div class="notifList" id="notifList"></div>
+
+          <div class="footer">
+            <a class="smallLink" href="#" id="linkSupport">Support</a>
+            <a class="smallLink" href="#" id="linkPayments">Mes paiements</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
 <script>
@@ -557,7 +632,8 @@
   const MODULE_CODE = "POS";
   const MODULE_LABEL = "MON COMMERCE";
   const PRIMARY_ACTION_LABEL = "Ouvrir la caisse";
-  const PRIMARY_ACTION_HINT  = "Encaisse une vente, gère tes produits et ton stock.";
+  const PRIMARY_ACTION_HINT = "Encaisse une vente, gère tes produits et ton stock.";
+  const SUPPORT_PHONE = "221771342889";
 
   const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
   const SUPABASE_ANON = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
@@ -566,6 +642,9 @@
   const CAISSE_URL = digiyLocal("caisse.html");
   const HALL_URL = digiyLocal("index.html");
   const ADMIN_URL = digiyLocal("admin.html");
+  const PIN_URL = digiyLocal("pin.html");
+  const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
+  const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
 
   const BOOST = {
     module: "BOOST",
@@ -576,6 +655,34 @@
   };
 
   const $ = (id) => document.getElementById(id);
+  const diagLines = [];
+  let sb = null;
+
+  const state = {
+    slug: "",
+    phone: "",
+    access: false,
+    storeName: "",
+    plan: "",
+    statusPayload: null
+  };
+
+  function reveal(){
+    document.documentElement.classList.add("app-ready");
+    document.documentElement.style.visibility = "";
+  }
+
+  function safeStringify(v){
+    try { return JSON.stringify(v, null, 2); }
+    catch(_) { return String(v); }
+  }
+
+  function log(msg, data){
+    const line = `[${new Date().toLocaleTimeString("fr-FR")}] ${msg}`;
+    diagLines.push(data === undefined ? line : `${line}\n${safeStringify(data)}`);
+    if ($("diagBox")) $("diagBox").textContent = diagLines.join("\n\n");
+    console.log("[DIGIY POS DASHBOARD]", msg, data ?? "");
+  }
 
   function fmtDateFR(iso){
     if(!iso) return "—";
@@ -588,41 +695,14 @@
     return String(v || "").replace(/[^\d]/g, "");
   }
 
-  function getSlug(){
-    const u = new URL(location.href);
-    return String(
-      u.searchParams.get("slug") ||
-      localStorage.getItem("digiy_pos_last_slug") ||
-      sessionStorage.getItem("digiy_pos_last_slug") ||
-      ""
-    ).trim().toLowerCase();
-  }
-
-  function getPhone(){
-    const u = new URL(location.href);
-    return cleanDigits(
-      u.searchParams.get("phone") ||
-      localStorage.getItem("digiy_pos_last_phone") ||
-      sessionStorage.getItem("digiy_pos_last_phone") ||
-      ""
-    );
-  }
-
-  function saveLocalAccess(slug, phone){
-    if(slug){
-      localStorage.setItem("digiy_pos_last_slug", slug);
-      sessionStorage.setItem("digiy_pos_last_slug", slug);
-    }
-    if(phone){
-      localStorage.setItem("digiy_pos_last_phone", phone);
-      sessionStorage.setItem("digiy_pos_last_phone", phone);
-    }
+  function normSlug(v){
+    return String(v || "").trim().toLowerCase();
   }
 
   function buildUrl(base, params){
     const u = new URL(base, location.href);
     Object.entries(params || {}).forEach(([k, v]) => {
-      if(v !== null && v !== undefined && v !== "") u.searchParams.set(k, v);
+      if(v !== null && v !== undefined && v !== "") u.searchParams.set(k, String(v));
     });
     return u.toString();
   }
@@ -634,16 +714,88 @@
       slug ? `Slug : ${slug}` : "",
       phone ? `Téléphone : +${phone}` : ""
     ].filter(Boolean).join(" ");
-    return `https://wa.me/221771342889?text=${encodeURIComponent(text)}`;
+    return `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(text)}`;
+  }
+
+  function buildAbosParams(phone, slug, moduleCode = MODULE_CODE){
+    return {
+      base_module: MODULE_CODE,
+      module: moduleCode,
+      phone,
+      slug
+    };
+  }
+
+  function saveLocalAccess(slug, phone){
+    if(slug){
+      localStorage.setItem("digiy_pos_last_slug", slug);
+      sessionStorage.setItem("digiy_pos_last_slug", slug);
+    }
+    if(phone){
+      localStorage.setItem("digiy_pos_last_phone", phone);
+      sessionStorage.setItem("digiy_pos_last_phone", phone);
+    }
+    const payload = {
+      slug: slug || "",
+      phone: phone || "",
+      module: MODULE_CODE,
+      verified: true,
+      ts: Date.now()
+    };
+    localStorage.setItem("DIGIY_POS_SESSION", JSON.stringify(payload));
+    localStorage.setItem("DIGIY_ACCESS", JSON.stringify(payload));
+  }
+
+  function getParam(name){
+    return new URL(location.href).searchParams.get(name) || "";
+  }
+
+  function getGuardSession(){
+    if (typeof window.DIGIY_GUARD?.getSession === "function") {
+      try { return window.DIGIY_GUARD.getSession() || {}; }
+      catch(_) {}
+    }
+    return window.DIGIY_GUARD?.state || {};
+  }
+
+  function getSlug(){
+    const gs = getGuardSession();
+    return normSlug(
+      getParam("slug") ||
+      gs.slug ||
+      localStorage.getItem("digiy_pos_last_slug") ||
+      sessionStorage.getItem("digiy_pos_last_slug") ||
+      ""
+    );
+  }
+
+  function getPhone(){
+    const gs = getGuardSession();
+    return cleanDigits(
+      getParam("phone") ||
+      gs.phone ||
+      localStorage.getItem("digiy_pos_last_phone") ||
+      sessionStorage.getItem("digiy_pos_last_phone") ||
+      ""
+    );
   }
 
   function setNotifs(items){
     const box = $("notifList");
     box.innerHTML = "";
     if(!items.length){
-      box.innerHTML = `<div class="notif"><div><b>Rien à signaler</b><div class="muted" style="font-weight:800;margin-top:2px">Tout roule.</div></div><div class="tag ok">OK</div></div>`;
+      box.innerHTML = `
+        <div class="notif">
+          <div>
+            <b>Rien à signaler</b>
+            <div class="muted" style="font-weight:800;margin-top:2px">Tout roule.</div>
+          </div>
+          <div class="tag ok">OK</div>
+        </div>
+      `;
       return;
     }
+
     for(const it of items){
       const tagClass = it.level === "warn" ? "warn" : it.level === "ok" ? "ok" : "info";
       const div = document.createElement("div");
@@ -666,85 +818,189 @@
     return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
   }
 
-  async function sbGetSubscriptionBySlug(slug){
-    const url = `${SUPABASE_URL}/rest/v1/digiy_subscriptions_public?select=phone,module,slug&slug=eq.${encodeURIComponent(slug)}&limit=1`;
-    const r = await fetch(url, {
-      headers: {
-        apikey: SUPABASE_ANON,
-        authorization: `Bearer ${SUPABASE_ANON}`
+  async function awaitGuardReady(){
+    try{
+      if(typeof window.DIGIY_GUARD?.ready === "function"){
+        await window.DIGIY_GUARD.ready();
+      } else if(window.DIGIY_GUARD?.ready && typeof window.DIGIY_GUARD.ready.then === "function"){
+        await window.DIGIY_GUARD.ready;
       }
-    });
-    if(!r.ok) throw new Error("Cannot read digiy_subscriptions_public");
-    const data = await r.json();
-    return data[0] || null;
+    } catch(err){
+      log("guard ready KO", { message: err?.message || String(err) });
+    }
   }
 
-  async function sbRpc(name, payload){
-    const url = `${SUPABASE_URL}/rest/v1/rpc/${name}`;
-    const r = await fetch(url, {
-      method:"POST",
-      headers: {
-        "content-type":"application/json",
-        apikey: SUPABASE_ANON,
-        authorization: `Bearer ${SUPABASE_ANON}`
-      },
-      body: JSON.stringify(payload || {})
-    });
+  async function bootGuard(){
+    if(typeof window.DIGIY_GUARD?.boot !== "function") return true;
 
-    if(!r.ok){
-      const t = await r.text().catch(()=> "");
-      throw new Error(`RPC ${name} failed: ${t || r.status}`);
+    try{
+      const res = await window.DIGIY_GUARD.boot({
+        module: MODULE_CODE,
+        dashboard: DASHBOARD_URL,
+        login: PIN_URL,
+        pay: ABOS_URL,
+        requireSlug: true,
+        checkSubscription: false
+      });
+
+      log("guard boot", res);
+      if(res && res.ok === false) return false;
+      return true;
+    } catch(err){
+      log("guard boot erreur", { message: err?.message || String(err) });
+      return true;
     }
-    return r.json();
+  }
+
+  function makeFallbackSb(){
+    if(window.supabase?.createClient && SUPABASE_URL && SUPABASE_ANON){
+      return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+        auth:{
+          persistSession:false,
+          autoRefreshToken:false,
+          detectSessionInUrl:false
+        }
+      });
+    }
+    return null;
+  }
+
+  async function getSb(){
+    if(sb) return sb;
+    if(typeof window.DIGIY_GUARD?.getSb === "function"){
+      try{
+        sb = window.DIGIY_GUARD.getSb();
+        if(sb) return sb;
+      } catch(err){
+        log("guard getSb erreur", { message: err?.message || String(err) });
+      }
+    }
+    sb = makeFallbackSb();
+    return sb;
+  }
+
+  async function rpcFirstSuccess(name, payloads){
+    const client = await getSb();
+    if(!client) throw new Error("supabase_not_ready");
+
+    let lastError = null;
+
+    for(const payload of payloads){
+      try{
+        log(`RPC ${name} tentative`, payload);
+        const { data, error } = await client.rpc(name, payload);
+        if(error){
+          lastError = error;
+          log(`RPC ${name} erreur`, {
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
+          continue;
+        }
+        log(`RPC ${name} OK`, data);
+        return data;
+      } catch(err){
+        lastError = err;
+        log(`RPC ${name} exception`, { message: err?.message || String(err) });
+      }
+    }
+
+    throw lastError || new Error(`RPC ${name} échouée`);
+  }
+
+  async function resolvePhoneFromSlug(slug){
+    const client = await getSb();
+    if(!client || !slug) return "";
+
+    const { data, error } = await client
+      .from("digiy_subscriptions_public")
+      .select("phone,module,slug")
+      .eq("slug", slug)
+      .limit(1)
+      .maybeSingle();
+
+    if(error) throw error;
+    return cleanDigits(data?.phone || "");
   }
 
   async function digiyHasAccess(phone, module){
-    const res = await sbRpc("digiy_has_access", { p_phone: phone, p_module: module });
+    const res = await rpcFirstSuccess("digiy_has_access", [
+      { p_phone: phone, p_module: module },
+      { phone, module }
+    ]);
+
     if(typeof res === "boolean") return res;
     if(res && typeof res.ok === "boolean") return res.ok;
     if(res && typeof res.has_access === "boolean") return res.has_access;
+    if(res && typeof res.allowed === "boolean") return res.allowed;
+    if(res && typeof res.access === "boolean") return res.access;
     return !!res;
   }
 
   async function digiyGetSubscriptionFull(phone, module){
     try{
-      return await sbRpc("digiy_get_subscription_status", { p_phone: phone, p_module: module });
-    }catch(_){
+      return await rpcFirstSuccess("digiy_get_subscription_status", [
+        { p_phone: phone, p_module: module },
+        { phone, module }
+      ]);
+    } catch(err){
+      log("digiy_get_subscription_status indisponible", { message: err?.message || String(err) });
       return null;
     }
   }
 
   async function digiyGetDashboardStats(phone, module){
     try{
-      return await sbRpc("digiy_get_dashboard_stats", { p_phone: phone, p_module: module });
-    }catch(_){
-      return { month_xof: null, tx_count: null, today_hint: "Aujourd’hui" };
+      return await rpcFirstSuccess("digiy_get_dashboard_stats", [
+        { p_phone: phone, p_module: module },
+        { phone, module }
+      ]);
+    } catch(err){
+      log("digiy_get_dashboard_stats indisponible", { message: err?.message || String(err) });
+      return { month_xof:null, tx_count:null, today_hint:"Aujourd’hui" };
     }
   }
 
   async function digiyGetBoostStatus(phone){
     try{
-      return await sbRpc("digiy_get_boost_status", { p_phone: phone });
-    }catch(_){
+      return await rpcFirstSuccess("digiy_get_boost_status", [
+        { p_phone: phone },
+        { phone }
+      ]);
+    } catch(err){
+      log("digiy_get_boost_status indisponible", { message: err?.message || String(err) });
       return null;
     }
   }
 
   async function digiyBuildPayUrl(module, phone, plan){
-    return await sbRpc("digiy_build_pay_url", {
-      p_module: module,
-      p_phone: phone,
-      p_plan: plan
-    });
+    return await rpcFirstSuccess("digiy_build_pay_url", [
+      { p_module: module, p_phone: phone, p_plan: plan },
+      { module, phone, plan }
+    ]);
   }
 
-  function buildAbosParams(phone, slug){
-    return {
-      base_module: MODULE_CODE,
-      module: MODULE_CODE,
-      phone,
-      slug
-    };
+  async function getStoreContext(slug){
+    try{
+      return await rpcFirstSuccess("digiy_pos_get_store_context_by_slug", [
+        { p_slug: slug },
+        { slug }
+      ]);
+    } catch(err1){
+      try{
+        return await rpcFirstSuccess("pos_get_store_context_by_slug", [
+          { p_slug: slug },
+          { slug }
+        ]);
+      } catch(err2){
+        log("store context indisponible", {
+          first: err1?.message || String(err1),
+          second: err2?.message || String(err2)
+        });
+        return null;
+      }
+    }
   }
 
   function wireNav(phone, slug){
@@ -758,9 +1014,26 @@
     $("btnSupportTop").href = buildSupportUrl(phone, slug);
     $("linkSupport").href = buildSupportUrl(phone, slug);
     $("linkPayments").href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
+    $("btnPinTop").href = buildUrl(PIN_URL, { slug, phone, module: MODULE_CODE, return: DASHBOARD_URL });
+    $("btnPublicFloating").href = buildUrl(PUBLIC_URL, { slug });
+    $("btnBlockedPin").href = buildUrl(PIN_URL, { slug, phone, module: MODULE_CODE, return: DASHBOARD_URL });
+    $("btnBlockedAbos").href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
   }
 
-  (async function init(){
+  function showBlocked(title, text, pill = "Bloqué"){
+    $("dashboardContent").style.display = "none";
+    $("blockedShell").style.display = "grid";
+    $("blockedTitle").textContent = title;
+    $("blockedText").innerHTML = text;
+    $("pillStatus").innerHTML = `Statut : <b>${pill}</b>`;
+  }
+
+  function showDashboard(){
+    $("blockedShell").style.display = "none";
+    $("dashboardContent").style.display = "block";
+  }
+
+  async function init(){
     $("brandTitle").textContent = `${MODULE_LABEL} — Dashboard Pro`;
     $("brandSub").textContent = "Pilotage abonnement, activité et boost";
     $("btnPrimaryAction").textContent = PRIMARY_ACTION_LABEL;
@@ -768,97 +1041,106 @@
     $("actionDesc").textContent = "Entre dans la caisse, pilote tes produits et ton stock depuis une seule porte.";
     $("pillStatus").innerHTML = `Statut : <b>…</b>`;
 
-    const slug = getSlug();
+    await awaitGuardReady();
+    await bootGuard();
+
+    let slug = getSlug();
     let phone = getPhone();
+
+    state.slug = slug;
+    state.phone = phone;
 
     $("slugBox").textContent = slug || "—";
     $("phoneBox").textContent = phone ? `+${phone}` : "—";
     wireNav(phone, slug);
+    reveal();
 
     if(!slug){
-      $("statusLine").textContent = "Slug manquant";
-      $("expiryLine").textContent = "Repasse par le hall ou ajoute ?slug=…";
-      $("dot").classList.add("bad");
-      $("pillStatus").innerHTML = `Statut : <b>Bloqué</b>`;
-      setNotifs([{level:"warn",tag:"ACTION",title:"Lien incomplet",text:"Le dashboard a besoin d’un slug valide pour ouvrir le bon rail."}]);
-
-      $("btnManageSub").onclick = () => {
-        location.href = HALL_URL;
-      };
-
-      $("btnPrimaryAction").onclick = () => {
-        location.href = HALL_URL;
-      };
-
+      log("slug manquant");
+      showBlocked(
+        "Slug manquant",
+        "Cette porte a besoin d’un <b>slug POS</b> valide. Passe par ton QR ou par <b>pin.html?slug=…</b> pour rouvrir le bon rail.",
+        "Bloqué"
+      );
       return;
     }
 
-    let subPublic = null;
     try{
-      subPublic = await sbGetSubscriptionBySlug(slug);
-    }catch(_){
-      $("statusLine").textContent = "Erreur connexion";
-      $("expiryLine").textContent = "Impossible de vérifier le compte.";
-      $("dot").classList.add("bad");
-      $("pillStatus").innerHTML = `Statut : <b>Bloqué</b>`;
-      setNotifs([{level:"warn",tag:"RÉSEAU",title:"Connexion",text:"Vérifie internet ou la config Supabase."}]);
+      if(!phone){
+        phone = await resolvePhoneFromSlug(slug);
+        log("phone résolu depuis slug", { slug, phone });
+      }
+    } catch(err){
+      log("resolvePhoneFromSlug KO", { message: err?.message || String(err) });
+    }
+
+    state.slug = slug;
+    state.phone = phone || "";
+    saveLocalAccess(slug, state.phone);
+
+    $("slugBox").textContent = slug || "—";
+    $("phoneBox").textContent = state.phone ? `+${state.phone}` : "—";
+    wireNav(state.phone, slug);
+
+    let access = false;
+    if(state.phone){
+      try{
+        access = await digiyHasAccess(state.phone, MODULE_CODE);
+      } catch(err){
+        log("digiyHasAccess KO", { message: err?.message || String(err) });
+        access = false;
+      }
+    }
+
+    state.access = !!access;
+
+    if(!state.phone){
+      showBlocked(
+        "Téléphone introuvable",
+        "Le slug est là, mais le téléphone n’a pas pu être résolu. Passe par le <b>PIN</b> pour reconstruire la session proprement.",
+        "Contrôle"
+      );
       return;
     }
 
-    if(!subPublic || !subPublic.phone){
-      $("statusLine").textContent = "Compte introuvable";
-      $("expiryLine").textContent = "Ce slug n’existe pas.";
-      $("dot").classList.add("bad");
-      $("pillStatus").innerHTML = `Statut : <b>Inconnu</b>`;
-      setNotifs([{level:"warn",tag:"INFO",title:"Slug inconnu",text:"Demande un nouveau lien d’accès ou repasse par le hall."}]);
+    if(!state.access){
+      showBlocked(
+        "Abonnement requis",
+        "Le contexte du commerce est bien reconnu, mais l’accès POS n’est pas actif. Active ton module ou repasse par le <b>PIN</b> pour vérifier ton accès.",
+        "Inactif"
+      );
       return;
     }
 
-    phone = cleanDigits(subPublic.phone || phone);
-    saveLocalAccess(slug, phone);
-    $("phoneBox").textContent = phone ? `+${phone}` : "—";
-    wireNav(phone, slug);
+    showDashboard();
 
-    let ok = false;
-    try{
-      ok = await digiyHasAccess(phone, MODULE_CODE);
-    }catch(_){
-      ok = false;
-    }
+    const storeCtx = await getStoreContext(slug);
+    state.storeName = String(
+      storeCtx?.shop_name ||
+      storeCtx?.display_name ||
+      storeCtx?.store?.name ||
+      storeCtx?.profile?.display_name ||
+      MODULE_LABEL
+    ).trim();
 
-    if(!ok){
-      $("statusLine").textContent = "Abonnement requis";
-      $("expiryLine").textContent = "Active ton accès pour ouvrir la caisse.";
-      $("dot").classList.add("bad");
-      $("pillStatus").innerHTML = `Statut : <b>Inactif</b>`;
+    const status = await digiyGetSubscriptionFull(state.phone, MODULE_CODE);
+    state.statusPayload = status || null;
 
-      setNotifs([
-        {level:"warn",tag:"ABO",title:"Accès fermé",text:"Ton abonnement n’est pas actif sur ce module."}
-      ]);
-
-      $("btnManageSub").onclick = () => {
-        location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
-      };
-
-      $("btnPrimaryAction").onclick = () => {
-        location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
-      };
-
-      return;
-    }
-
-    const status = await digiyGetSubscriptionFull(phone, MODULE_CODE);
     const expiresAt = status?.expires_at || status?.current_period_end || null;
     const plan = status?.plan || status?.plan_code || "standard";
     const pay = status?.payment_ref ? "validé" : "ok";
 
+    state.plan = plan;
+
+    $("dot").classList.remove("bad");
     $("dot").classList.add("ok");
     $("statusLine").textContent = "Abonnement actif";
     $("expiryLine").textContent = expiresAt ? `Expire le ${fmtDateFR(expiresAt)}` : "Expiration : —";
     $("pillStatus").innerHTML = `Statut : <b>Actif</b>`;
     $("metaLine").innerHTML = `<span>Plan : ${plan}</span><span>•</span><span>Paiement : ${pay}</span>`;
+    $("brandSub").textContent = `${state.storeName} • pilotage abonnement, activité et boost`;
 
-    const stats = await digiyGetDashboardStats(phone, MODULE_CODE);
+    const stats = await digiyGetDashboardStats(state.phone, MODULE_CODE);
     const month = stats?.month_xof ?? null;
     const tx = stats?.tx_count ?? null;
 
@@ -887,29 +1169,48 @@
       }
     }
 
-    const boost = await digiyGetBoostStatus(phone);
+    const boost = await digiyGetBoostStatus(state.phone);
     if(boost?.active){
       $("boostStatus").textContent = `Statut boost : actif jusqu’au ${fmtDateFR(boost.expires_at)} • +${boost.views_today || 0} vues aujourd’hui`;
       $("btnBoost").textContent = "Actif";
       $("btnBoost").disabled = true;
-      notifs.push({level:"info",tag:"BOOST",title:"Boost actif",text:"Visibilité augmentée. Continue ton activité."});
+      notifs.push({
+        level:"info",
+        tag:"BOOST",
+        title:"Boost actif",
+        text:"Visibilité augmentée. Continue ton activité."
+      });
     } else {
       $("boostStatus").textContent = "Statut boost : inactif";
-      notifs.push({level:"info",tag:"OPTION",title:"Boost disponible",text:"Active le BOOST si tu veux plus de visibilité."});
+      notifs.push({
+        level:"info",
+        tag:"OPTION",
+        title:"Boost disponible",
+        text:"Active le BOOST si tu veux plus de visibilité."
+      });
     }
 
     if(month === null || tx === null){
-      notifs.push({level:"info",tag:"DATA",title:"Stats à brancher",text:"Le dashboard vit déjà, mais les chiffres réels attendent la RPC stats si elle n’est pas encore posée."});
+      notifs.push({
+        level:"info",
+        tag:"DATA",
+        title:"Stats à brancher",
+        text:"Le dashboard vit déjà, mais les chiffres réels attendent la RPC stats si elle n’est pas encore posée."
+      });
     }
 
     setNotifs(notifs);
 
     $("btnManageSub").onclick = () => {
-      location.href = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
+      location.href = buildUrl(ABOS_URL, buildAbosParams(state.phone, slug));
     };
 
     $("btnPrimaryAction").onclick = () => {
-      location.href = buildUrl(CAISSE_URL, { slug, phone, module: MODULE_CODE });
+      location.href = buildUrl(CAISSE_URL, {
+        slug,
+        phone: state.phone,
+        module: MODULE_CODE
+      });
     };
 
     $("btnBoostInfo").onclick = () => {
@@ -921,17 +1222,15 @@
         $("btnBoost").disabled = true;
         $("btnBoost").textContent = "…";
 
-        const payUrlPayload = await digiyBuildPayUrl(BOOST.module, phone, BOOST.plan);
-        const url = (typeof payUrlPayload === "string")
-          ? payUrlPayload
-          : (payUrlPayload?.url || payUrlPayload?.pay_url || null);
+        const payUrlPayload = await digiyBuildPayUrl(BOOST.module, state.phone, BOOST.plan);
+        const url =
+          typeof payUrlPayload === "string"
+            ? payUrlPayload
+            : (payUrlPayload?.url || payUrlPayload?.pay_url || null);
 
-        if(!url){
-          throw new Error("URL paiement BOOST manquante");
-        }
-
+        if(!url) throw new Error("URL paiement BOOST manquante");
         location.href = url;
-      }catch(e){
+      } catch(e){
         console.error(e);
         alert("Impossible d’activer le BOOST. Vérifie la config ou la RPC digiy_build_pay_url.");
         $("btnBoost").disabled = false;
@@ -939,7 +1238,25 @@
       }
     };
 
-  })();
+    log("dashboard ready", {
+      slug,
+      phone: state.phone,
+      access: state.access,
+      plan: state.plan,
+      store: state.storeName
+    });
+  }
+
+  init().catch((err) => {
+    console.error(err);
+    log("init fatale", { message: err?.message || String(err) });
+    reveal();
+    showBlocked(
+      "Erreur de chargement",
+      "Le dashboard n’a pas pu finir sa lecture. Passe par le <b>PIN</b> ou relance avec un slug propre.",
+      "Erreur"
+    );
+  });
 })();
 </script>
 </body>
