@@ -5,40 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MON COMMERCE PRO — DIGIY CAISSE PRO</title>
   <meta name="theme-color" content="#07140f" />
-  <meta name="description" content="MON COMMERCE by DIGIY — hall d'entrée POS." />
+  <meta
+    name="description"
+    content="MON COMMERCE by DIGIY — hall d'entrée POS. Aperçu propre, accès réel protégé, activation simple."
+  />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
 
-  <!-- ✅ ÉTAPE 1 : config + anti-flash AVANT tout -->
   <script>
-    window.DIGIY_SUPABASE_URL     = "https://wesqmwjjtsefyjnluosj.supabase.co";
+    window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
     window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
-    window.DIGIY_SUPABASE_ANON    = window.DIGIY_SUPABASE_ANON_KEY;
-    window.DIGIY_MODULE           = "CAISSE";
-    window.DIGIY_LOGIN_URL        = "./pin.html";
+    window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
+    window.DIGIY_MODULE = "POS";
+    window.DIGIY_LOGIN_URL = "./pin.html";
     document.documentElement.style.visibility = "hidden";
-  </script>
 
-  <!-- ✅ ÉTAPE 2 : guard en 2e, avant supabase -->
-  <script src="./guard.js"></script>
-
-  <!-- ✅ ÉTAPE 3 : supabase et reste APRÈS guard -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-
-    function digiyBasePath(){
+    function digiyBasePath() {
       const parts = location.pathname.split("/").filter(Boolean);
       const isGh = /\.github\.io$/i.test(location.hostname);
-      if(isGh && parts.length > 0) return "/" + parts[0] + "/";
+      if (isGh && parts.length > 0) return "/" + parts[0] + "/";
       return "/";
     }
 
-    function digiyLocal(path){
-      path = String(path || "").replace(/^\/+/,"");
+    function digiyLocal(path) {
+      path = String(path || "").replace(/^\/+/, "");
       return digiyBasePath() + path;
     }
   </script>
+
+  <script src="./guard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -1213,6 +1213,7 @@
       const MODULE = "POS";
       const CAISSE_URL = digiyLocal("caisse.html");
       const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
+      const SUPPORT_PHONE = "221771342889";
 
       const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
       const SUPABASE_ANON_KEY =
@@ -1246,6 +1247,10 @@
       const $ = (id) => document.getElementById(id);
       const diagLines = [];
 
+      function revealPage() {
+        document.documentElement.style.visibility = "";
+      }
+
       function safeStringify(v){
         try { return JSON.stringify(v, null, 2); }
         catch(_) { return String(v); }
@@ -1254,7 +1259,7 @@
       function log(msg, data){
         const line = `[${new Date().toLocaleTimeString("fr-FR")}] ${msg}`;
         diagLines.push(data === undefined ? line : `${line}\n${safeStringify(data)}`);
-        $("diagBox").textContent = diagLines.join("\n\n");
+        if ($("diagBox")) $("diagBox").textContent = diagLines.join("\n\n");
         console.log("[DIGIY POS INDEX]", msg, data ?? "");
       }
 
@@ -1264,6 +1269,48 @@
 
       function normPhone(v){
         return String(v || "").replace(/[^\d]/g, "");
+      }
+
+      function normSlug(v){
+        return String(v || "").trim().toLowerCase();
+      }
+
+      function getGuardState(){
+        return window.DIGIY_GUARD?.state || {};
+      }
+
+      function getStoredSlug(){
+        const gs = getGuardState();
+        return normSlug(
+          getParam("slug") ||
+          gs.slug ||
+          localStorage.getItem("digiy_pos_last_slug") ||
+          sessionStorage.getItem("digiy_pos_last_slug") ||
+          ""
+        );
+      }
+
+      function getStoredPhone(){
+        const gs = getGuardState();
+        return normPhone(
+          getParam("phone") ||
+          getParam("tel") ||
+          gs.phone ||
+          localStorage.getItem("digiy_pos_last_phone") ||
+          sessionStorage.getItem("digiy_pos_last_phone") ||
+          ""
+        );
+      }
+
+      function remember(slug, phone){
+        if (slug) {
+          localStorage.setItem("digiy_pos_last_slug", slug);
+          sessionStorage.setItem("digiy_pos_last_slug", slug);
+        }
+        if (phone) {
+          localStorage.setItem("digiy_pos_last_phone", phone);
+          sessionStorage.setItem("digiy_pos_last_phone", phone);
+        }
       }
 
       function buildUrl(base, params){
@@ -1290,6 +1337,16 @@
           slug: state.slug || "",
           phone: state.phone || ""
         });
+      }
+
+      function buildSupportUrl(){
+        const text = [
+          "Bonjour JB,",
+          "j’ai besoin d’aide pour MON COMMERCE by DIGIY.",
+          state.slug ? `Slug : ${state.slug}` : "",
+          state.phone ? `Téléphone : +${state.phone}` : ""
+        ].filter(Boolean).join(" ");
+        return `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(text)}`;
       }
 
       function setDots(kind){
@@ -1325,6 +1382,7 @@
         $("btnTopAction").href = state.access ? caisse : abos;
         $("btnHeroPrimary").href = state.access ? caisse : abos;
         $("btnOpenCaisse").href = state.access ? caisse : abos;
+        $("btnCheck").setAttribute("data-support", buildSupportUrl());
 
         $("btnTopAction").textContent = state.access ? "🧾 Ouvrir la caisse" : "💳 Activer mon module";
         $("btnHeroPrimary").textContent = state.access ? "🧾 Entrer dans la caisse" : "💳 Activer mon module";
@@ -1332,6 +1390,7 @@
       }
 
       async function resolvePhoneFromSlug(slug){
+        if (!sb || !slug) return "";
         const { data, error } = await sb
           .from("digiy_subscriptions_public")
           .select("phone,module,slug")
@@ -1344,6 +1403,8 @@
       }
 
       async function rpcFirstSuccess(name, payloads){
+        if (!sb) throw new Error("supabase_not_ready");
+
         let lastError = null;
 
         for(const payload of payloads){
@@ -1371,6 +1432,8 @@
       }
 
       async function getAccess(phone){
+        if (!phone || !sb) return false;
+
         const res = await rpcFirstSuccess("digiy_has_access", [
           { p_phone: phone, p_module: MODULE },
           { phone, module: MODULE }
@@ -1380,10 +1443,13 @@
         if(res && typeof res.ok === "boolean") return res.ok;
         if(res && typeof res.has_access === "boolean") return res.has_access;
         if(res && typeof res.allowed === "boolean") return res.allowed;
+        if(res && typeof res.access === "boolean") return res.access;
         return !!res;
       }
 
       async function getSubscription(phone){
+        if (!phone || !sb) return null;
+
         try{
           const data = await rpcFirstSuccess("digiy_get_subscription_status", [
             { p_phone: phone, p_module: MODULE },
@@ -1397,95 +1463,113 @@
       }
 
       async function getStoreContext(slug){
-        try{
-          const data = await rpcFirstSuccess("pos_get_store_context_by_slug", [
-            { p_slug: slug },
-            { slug }
-          ]);
-          if(Array.isArray(data)) return data[0] || null;
-          return data || null;
-        }catch(err){
-          log("pos_get_store_context_by_slug indisponible", { message: err?.message || String(err) });
-          return null;
+        if (!slug || !sb) return null;
+
+        const attempts = [
+          ["pos_get_store_context_by_slug", [{ p_slug: slug }, { slug }]],
+          ["digiy_pos_get_store_context_by_slug", [{ p_slug: slug }, { slug }]]
+        ];
+
+        for (const [name, payloads] of attempts) {
+          try {
+            const data = await rpcFirstSuccess(name, payloads);
+            if (data) return data;
+          } catch (err) {
+            log(`${name} indisponible`, { message: err?.message || String(err) });
+          }
         }
+
+        return null;
       }
 
-      async function refreshStatus(){
-        if(state.loading) return;
+      async function hydrate(){
         state.loading = true;
+        revealPage();
 
         try{
-          state.slug = String(getParam("slug") || "").trim();
-          state.phone = normPhone(getParam("phone"));
-          state.access = false;
-          state.storeName = "";
-          state.plan = "";
+          let slug = getStoredSlug();
+          let phone = getStoredPhone();
+
+          state.slug = slug;
+          state.phone = phone;
           paintMeta();
           wireButtons();
 
-          if(!canUseSupabase){
+          log("Hydratation démarrée", { slug, phone });
+
+          if(!slug){
             setStatus(
               "warn",
-              "Aperçu public",
-              "Mode vitrine",
-              "La page de présentation fonctionne, mais Supabase n’est pas disponible pour vérifier l’accès.",
-              "L’aperçu cockpit reste visible. Pour le contrôle d’accès, vérifie la config Supabase dans l’en-tête."
+              "APERÇU LIBRE",
+              "Hall public prêt",
+              "Le hall montre la valeur du module. Le vrai travail s’ouvre avec un slug et un accès valide.",
+              "Passe par ton lien pro avec <b>?slug=...</b> ou active ton module pour ouvrir la vraie caisse."
             );
-            log("Supabase indisponible sur la page.");
-            return;
-          }
-
-          if(!state.slug){
-            setStatus(
-              "warn",
-              "Aperçu public",
-              "Hall prêt",
-              "La page de présentation fonctionne. Aucun slug n’a été reçu.",
-              "Tu peux déjà présenter le module. Avec <b>?slug=pos-2217...</b>, le hall saura reconnaître la boutique."
-            );
-            log("Aucun slug reçu : mode vitrine.");
-            return;
-          }
-
-          if(!state.phone){
-            try{
-              state.phone = await resolvePhoneFromSlug(state.slug);
-              paintMeta();
-            }catch(err){
-              log("Résolution slug → phone impossible", { message: err?.message || String(err) });
-            }
-          }
-
-          if(!state.phone){
-            setStatus(
-              "warn",
-              "Slug reconnu",
-              "Téléphone introuvable",
-              "Le hall voit le slug, mais il ne peut pas encore résoudre le téléphone de la boutique.",
-              "Ajoute <b>&phone=2217...</b> au lien, ou passe par la porte d’abonnement DIGIY."
-            );
+            state.storeName = "Aperçu public";
+            state.plan = "—";
+            paintMeta();
             wireButtons();
             return;
           }
 
-          const [access, store, sub] = await Promise.all([
-            getAccess(state.phone),
-            getStoreContext(state.slug),
-            getSubscription(state.phone)
-          ]);
+          if(!phone){
+            try{
+              phone = await resolvePhoneFromSlug(slug);
+              log("Téléphone résolu depuis slug", { slug, phone });
+            }catch(err){
+              log("resolvePhoneFromSlug KO", { message: err?.message || String(err) });
+            }
+          }
 
-          state.access = !!access;
-          state.storeName =
-            store?.display_name ||
-            store?.store_name ||
-            store?.nom ||
-            store?.title ||
-            "";
-          state.plan =
+          state.slug = slug;
+          state.phone = phone || "";
+          remember(state.slug, state.phone);
+
+          let storeCtx = null;
+          try{
+            storeCtx = await getStoreContext(slug);
+          }catch(err){
+            log("getStoreContext KO", { message: err?.message || String(err) });
+          }
+
+          if(storeCtx){
+            state.storeName =
+              String(
+                storeCtx?.shop_name ||
+                storeCtx?.display_name ||
+                storeCtx?.store?.name ||
+                storeCtx?.profile?.display_name ||
+                "Commerce actif"
+              ).trim();
+          } else {
+            state.storeName = "Commerce détecté";
+          }
+
+          let sub = null;
+          if(phone){
+            try{
+              state.access = await getAccess(phone);
+            }catch(err){
+              log("digiy_has_access KO", { message: err?.message || String(err) });
+              state.access = false;
+            }
+
+            try{
+              sub = await getSubscription(phone);
+            }catch(err){
+              log("getSubscription KO", { message: err?.message || String(err) });
+            }
+          } else {
+            state.access = false;
+          }
+
+          state.plan = String(
             sub?.plan ||
             sub?.plan_code ||
-            sub?.tier ||
-            (state.access ? "actif" : "—");
+            sub?.subscription_plan ||
+            sub?.status ||
+            (state.access ? "actif" : "—")
+          ).trim() || "—";
 
           paintMeta();
           wireButtons();
@@ -1493,47 +1577,75 @@
           if(state.access){
             setStatus(
               "ok",
-              "Accès actif",
-              "Module prêt",
-              "L’accès POS est validé. La vraie porte de travail peut s’ouvrir.",
-              "Tu peux maintenant entrer dans <b>caisse.html</b> avec le bon slug."
+              "ACCÈS OUVERT",
+              "Module reconnu",
+              "Ton commerce est reconnu. Tu peux entrer dans la vraie caisse.",
+              `Magasin détecté : <b>${state.storeName}</b><br>Le bouton principal t’ouvre maintenant <b>caisse.html</b> avec le bon contexte.`
             );
-            log("Accès validé", {
-              slug: state.slug,
-              phone: state.phone,
-              store: state.storeName,
-              plan: state.plan
-            });
           } else {
             setStatus(
-              "bad",
-              "Activation requise",
-              "Accès non actif",
-              "Le hall est bien là, mais la caisse réelle reste protégée tant que l’abonnement POS n’est pas actif.",
-              "La vitrine reste visible. Pour utiliser la caisse, active le module via DIGIY PAY."
+              "warn",
+              "APERÇU + CONTRÔLE",
+              "Commerce repéré, accès fermé",
+              "Le hall a reconnu le contexte, mais la vraie caisse reste protégée tant que l’accès POS n’est pas actif.",
+              `Slug reconnu : <b>${state.slug}</b>${state.phone ? `<br>Téléphone : <b>+${state.phone}</b>` : ""}<br>Tu peux activer le module pour ouvrir la vraie salle de travail.`
             );
-            log("Accès refusé / non actif", {
-              slug: state.slug,
-              phone: state.phone
-            });
           }
-        } catch(err){
+        }catch(err){
+          console.error(err);
+          log("Hydratation fatale", { message: err?.message || String(err) });
+
           setStatus(
             "bad",
-            "Blocage technique",
-            "Erreur de contrôle",
-            err?.message || "Impossible de vérifier l’accès pour le moment.",
-            "Regarde le diagnostic ci-dessus. Là, on verra tout de suite si c’est le lien, la RPC ou le contexte magasin."
+            "CONTRÔLE INCOMPLET",
+            "Le hall reste visible",
+            "Le décor public tient debout, mais la lecture technique du contexte a échoué.",
+            "Vérifie le slug, puis relance le contrôle. Le hall ne doit pas tomber juste parce qu’une couture SQL tousse."
           );
-          log("Erreur refreshStatus", { message: err?.message || String(err) });
-        } finally {
-          wireButtons();
+        }finally{
           state.loading = false;
+          paintMeta();
+          wireButtons();
+          revealPage();
         }
       }
 
-      $("btnCheck").addEventListener("click", refreshStatus);
-      refreshStatus();
+      async function bootGuardSoft(){
+        try{
+          const ready = window.DIGIY_GUARD?.ready;
+          if(!ready) return;
+          if(typeof ready === "function") {
+            await ready();
+            return;
+          }
+          await ready;
+        }catch(err){
+          log("guard ready KO", { message: err?.message || String(err) });
+        }
+      }
+
+      function bind(){
+        $("btnCheck").addEventListener("click", async () => {
+          const btn = $("btnCheck");
+          btn.disabled = true;
+          btn.textContent = "Contrôle…";
+          try{
+            await hydrate();
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "🔄 Vérifier mon accès";
+          }
+        });
+      }
+
+      async function init(){
+        revealPage();
+        bind();
+        await bootGuardSoft();
+        await hydrate();
+      }
+
+      init();
     })();
   </script>
 </body>
