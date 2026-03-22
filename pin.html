@@ -547,6 +547,54 @@
     return `https://wa.me/${SUPPORT_WA}?text=${encodeURIComponent(text)}`;
   }
 
+  function normalizeAccessResult(data, fallback = {}){
+    if(Array.isArray(data)){
+      return normalizeAccessResult(data[0] ?? null, fallback);
+    }
+
+    if(data === null || data === undefined){
+      return { ok:false, reason:"empty", ...fallback };
+    }
+
+    if(typeof data === "boolean"){
+      return { ok:data, ...fallback };
+    }
+
+    if(typeof data === "string"){
+      const raw = String(data);
+      const lowered = raw.toLowerCase();
+      return {
+        ok: lowered === "true" || lowered === "ok",
+        reason: lowered,
+        raw,
+        ...fallback
+      };
+    }
+
+    if(typeof data === "object"){
+      const ok = Boolean(
+        data.ok ??
+        data.success ??
+        data.allowed ??
+        data.verified ??
+        data.is_valid ??
+        false
+      );
+
+      return {
+        ...fallback,
+        ...data,
+        ok
+      };
+    }
+
+    return {
+      ok:false,
+      raw:data,
+      ...fallback
+    };
+  }
+
   const MODULE_ALIAS = {
     CAISSE: "POS",
     POINTDEVENTE: "POS",
@@ -684,7 +732,13 @@
     };
 
     localStorage.setItem("DIGIY_ACCESS", JSON.stringify(payload));
+    sessionStorage.setItem("DIGIY_ACCESS", JSON.stringify(payload));
+
     localStorage.setItem("DIGIY_POS_SESSION", JSON.stringify({
+      ...payload,
+      verified: true
+    }));
+    sessionStorage.setItem("DIGIY_POS_SESSION", JSON.stringify({
       ...payload,
       verified: true
     }));
@@ -725,50 +779,109 @@
     return cleanDigits(data?.phone || "");
   }
 
+  async function callVerifyPin(phone, pin, moduleCode){
+    const { data, error } = await sb.rpc("digiy_verify_pin", {
+      p_phone: phone,
+      p_module: moduleCode,
+      p_pin: pin
+    });
+
+    if(error) throw error;
+
+    return normalizeAccessResult(data, {
+      phone,
+      module: moduleCode,
+      slug: currentSlug || ""
+    });
+  }
+
+  async function callVerifyAccessBySlug(slug, pin, moduleCode){
+    const { data, error } = await sb.rpc("digiy_verify_access", {
+      p_slug: slug,
+      p_pin: pin,
+      p_module: moduleCode
+    });
+
+    if(error) throw error;
+
+    return normalizeAccessResult(data, {
+      slug,
+      module: moduleCode,
+      phone: currentPhone || ""
+    });
+  }
+
   async function verifyAccess(slug, pin, moduleCode){
-    try{
-      const { data, error } = await sb.rpc("digiy_verify_access", {
-        p_slug: slug,
-        p_pin: pin,
-        p_module: moduleCode
-      });
+    let phone = currentPhone;
 
-      if(error) throw error;
-      return data;
-    } catch(err){
-      log("digiy_verify_access indisponible ou en erreur", {
-        message: err?.message || String(err)
-      });
-
-      let phone = currentPhone;
-      if(!phone){
-        try{
-          phone = await resolvePhoneFromSlug(slug);
-        } catch(innerErr){
-          log("resolvePhoneFromSlug fallback erreur", {
-            message: innerErr?.message || String(innerErr)
-          });
+    if(!phone && slug){
+      try{
+        phone = await resolvePhoneFromSlug(slug);
+        if(phone && !currentPhone){
+          currentPhone = phone;
         }
+        if(phone){
+          log("Téléphone résolu depuis le slug", { slug, phone, module: moduleCode });
+        }
+      } catch(err){
+        log("Résolution slug → phone impossible avant contrôle", {
+          message: err?.message || String(err)
+        });
       }
-
-      if(!phone){
-        throw err;
-      }
-
-      const { data, error } = await sb.rpc("digiy_verify_pin", {
-        p_phone: phone,
-        p_module: moduleCode,
-        p_pin: pin
-      });
-
-      if(error) throw error;
-
-      if(data?.ok && !currentPhone){
-        currentPhone = phone;
-      }
-
-      return data;
     }
+
+    if(phone){
+      try{
+        log("Contrôle prioritaire par téléphone", {
+          phone,
+          module: moduleCode,
+          slug
+        });
+
+        const pinResult = await callVerifyPin(phone, pin, moduleCode);
+        log("digiy_verify_pin résultat", pinResult);
+
+        if(pinResult?.ok){
+          currentPhone = phone;
+          return pinResult;
+        }
+
+        return pinResult;
+      } catch(err){
+        log("digiy_verify_pin en erreur, fallback slug-only", {
+          message: err?.message || String(err)
+        });
+      }
+    }
+
+    if(!slug){
+      return {
+        ok:false,
+        reason:"missing_slug",
+        module: moduleCode,
+        phone: phone || ""
+      };
+    }
+
+    log("Fallback contrôle par slug", {
+      slug,
+      module: moduleCode
+    });
+
+    const accessResult = await callVerifyAccessBySlug(slug, pin, moduleCode);
+    log("digiy_verify_access résultat", accessResult);
+
+    if(accessResult?.ok && !currentPhone){
+      try{
+        currentPhone = await resolvePhoneFromSlug(slug);
+      } catch(err){
+        log("Résolution phone après fallback impossible", {
+          message: err?.message || String(err)
+        });
+      }
+    }
+
+    return accessResult;
   }
 
   async function enter(){
@@ -790,6 +903,7 @@
     try{
       log("Vérification PIN", {
         slug: currentSlug,
+        phone: currentPhone || null,
         module: TARGET_MODULE
       });
 
@@ -797,7 +911,16 @@
       log("Vérification PIN résultat", data);
 
       if(!data?.ok){
-        msg(`<span class="bad">Accès refusé.</span> Vérifie le PIN ou demande de l’aide.`);
+        const reason = String(data?.reason || "").toLowerCase();
+        let human = "Accès refusé.";
+
+        if(reason.includes("forbidden")) human = "Accès refusé par le rail demandé.";
+        else if(reason.includes("pin")) human = "PIN incorrect.";
+        else if(reason.includes("empty")) human = "Réponse vide du backend.";
+        else if(reason.includes("missing_phone")) human = "Téléphone introuvable pour ce slug.";
+        else if(reason.includes("missing_slug")) human = "Slug manquant.";
+
+        msg(`<span class="bad">${human}</span> Vérifie le PIN ou demande de l’aide.`);
         return;
       }
 
@@ -818,6 +941,9 @@
       setTimeout(goNext, 280);
     } catch(err){
       msg(`<span class="bad">Blocage technique.</span> ${String(err?.message || err)}`);
+      log("Erreur enter()", {
+        message: err?.message || String(err)
+      });
     } finally {
       $("go").disabled = false;
       $("go").textContent = "🚀 Entrer";
