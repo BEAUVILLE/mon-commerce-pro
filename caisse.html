@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="fr">
 <head>
@@ -6,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#07140f"/>
   <title>Ma caisse · MON COMMERCE by DIGIY</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — ma caisse boutique, catalogue, stock et préparation de vente."/>
+  <meta name="description" content="MON COMMERCE by DIGIY — ma caisse boutique, catalogue, stock et validation de vente."/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -300,7 +299,7 @@
             <div class="heroBadge">Caisse active</div>
             <h1 class="bigTitle"><span class="accent">Encaisser</span> maintenant</h1>
             <div class="mainSub">
-              Choisis tes articles, prépare le ticket et garde une lecture claire du stock sans te battre avec l’outil.
+              Choisis tes articles, valide le ticket et garde une lecture claire du stock sans te battre avec l’outil.
             </div>
 
             <div class="subInfo">
@@ -354,7 +353,7 @@
             </div>
 
             <div class="helper">
-              Ta caisse lit maintenant le catalogue réel `digiy_pos_products`. Si la connexion live saute, le dernier brouillon local reste visible.
+              Ta caisse lit le catalogue réel `digiy_pos_products` et valide maintenant la vente sur le rail SQL posé.
             </div>
           </div>
         </div>
@@ -416,12 +415,12 @@
             </div>
 
             <div class="actionRow">
-              <button class="btn" type="button" id="btnSaleReady">🧾 Préparer la vente</button>
+              <button class="btn" type="button" id="btnSaleReady">✅ Valider la vente</button>
               <button class="btn-ghost" type="button" id="btnClearSale">Effacer</button>
             </div>
 
             <div class="helper" id="saleHelper">
-              Choisis des articles ou remplis directement le ticket pour préparer proprement.
+              Choisis des articles ou remplis directement le ticket pour enregistrer une vraie vente.
             </div>
 
             <div class="notice info" id="salePreview" style="margin-top:12px">
@@ -438,7 +437,6 @@
       "use strict";
 
       const MODULE_CODE = "POS";
-      const SUPPORT_PHONE = "221771342889";
       const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
       const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
       const HALL_URL = digiyLocal("index.html");
@@ -447,6 +445,8 @@
       const PIN_URL = digiyLocal("pin.html");
       const PRODUCTS_CACHE_TTL_MS = 5 * 60 * 1000;
       const LOW_STOCK_LIMIT = 5;
+      const RPC_CATALOG_SALE = "zz_pos_sale_catalog_insert";
+      const RPC_MANUAL_SALE = "zz_pos_sale_manual_insert";
 
       const qs = (id) => document.getElementById(id);
       const DIAG = [];
@@ -460,7 +460,8 @@
         products: [],
         source: "none",
         fetchedAt: null,
-        cart: []
+        cart: [],
+        saleBusy: false
       };
 
       function reveal(){
@@ -515,6 +516,7 @@
 
       function normPhone(v){ return String(v || "").replace(/[^\d]/g, ""); }
       function normSlug(v){ return String(v || "").trim().toLowerCase(); }
+
       function money(n){
         const value = Number(n || 0);
         if(!Number.isFinite(value)) return "0 F";
@@ -817,6 +819,12 @@
         box.innerHTML = html;
       }
 
+      function setSalePreview(kind, html){
+        const box = qs("salePreview");
+        box.className = `notice ${kind || "info"}`;
+        box.innerHTML = html;
+      }
+
       function renderBlocked(text){
         qs("blockedText").textContent = text || "Entre avec ton code d'accès ou active ton abonnement pour ouvrir ta caisse.";
         qs("liveShell").style.display = "none";
@@ -941,8 +949,6 @@
       function syncSaleFieldsFromCart(){
         const lines = cartLineData();
         if(!lines.length){
-          if(!String(qs("saleAmount").value || "").trim()) qs("saleAmount").value = "";
-          if(!String(qs("saleLabel").value || "").trim()) qs("saleLabel").value = "";
           return;
         }
 
@@ -972,6 +978,127 @@
         qs("saleAmount").value = draft.amount || "";
         qs("saleLabel").value = draft.label || "";
         qs("saleMethod").value = draft.method || "cash";
+      }
+
+      function humanSaleError(reason){
+        switch(String(reason || "")){
+          case "aucune_ligne": return "Aucune ligne valide dans le ticket.";
+          case "ligne_invalide": return "Une ligne du ticket est invalide.";
+          case "produit_introuvable": return "Un article du ticket n’existe plus.";
+          case "stock_insuffisant": return "Stock insuffisant pour un des articles.";
+          default: return "Impossible d’enregistrer la vente pour le moment.";
+        }
+      }
+
+      function setSaleBusy(isBusy){
+        STATE.saleBusy = !!isBusy;
+        const btn = qs("btnSaleReady");
+        btn.disabled = !!isBusy;
+        btn.textContent = isBusy ? "⏳ Enregistrement…" : "✅ Valider la vente";
+      }
+
+      function resetSaleInputs(){
+        qs("saleAmount").value = "";
+        qs("saleLabel").value = "";
+        qs("saleMethod").value = "cash";
+        STATE.cart = [];
+        if(STATE.slug) clearSaleDraft(STATE.slug);
+      }
+
+      async function submitSale(){
+        if(STATE.saleBusy) return;
+
+        renderSalePreview();
+
+        const method = String(qs("saleMethod").value || "cash").trim();
+        const rawLabel = String(qs("saleLabel").value || "").trim();
+        const rawAmount = Number(qs("saleAmount").value || 0);
+        const cartLines = STATE.cart
+          .filter(line => line && line.product_id && Number(line.qty || 0) > 0)
+          .map(line => ({
+            product_id: String(line.product_id),
+            qty: Number(line.qty || 0)
+          }));
+
+        if(!STATE.slug || !STATE.phone){
+          qs("saleHelper").innerHTML = "Impossible de retrouver la boutique pour valider la vente.";
+          setSalePreview("bad", "Vente impossible : boutique introuvable.");
+          return;
+        }
+
+        const hasCart = cartLines.length > 0;
+        const saleLabel = rawLabel || (hasCart
+          ? cartLineData().map(line => `${line.item.name} x${line.qty}`).join(" • ")
+          : "");
+
+        if(!hasCart){
+          if(!(rawAmount > 0)){
+            qs("saleHelper").innerHTML = "Montant requis pour une vente manuelle.";
+            setSalePreview("bad", "Ajoute un montant ou choisis des articles.");
+            return;
+          }
+          if(!saleLabel){
+            qs("saleHelper").innerHTML = "Précise ce que tu vends pour une vente manuelle.";
+            setSalePreview("bad", "Description requise pour une vente manuelle.");
+            return;
+          }
+        }
+
+        try{
+          setSaleBusy(true);
+          let res;
+
+          if(hasCart){
+            res = await rpcFirstSuccess(RPC_CATALOG_SALE, [{
+              p_slug: STATE.slug,
+              p_owner_phone: STATE.phone,
+              p_payment_method: method,
+              p_label_text: saleLabel,
+              p_note_text: "caisse.html",
+              p_lines: cartLines
+            }]);
+          } else {
+            res = await rpcFirstSuccess(RPC_MANUAL_SALE, [{
+              p_slug: STATE.slug,
+              p_owner_phone: STATE.phone,
+              p_payment_method: method,
+              p_label_text: saleLabel,
+              p_note_text: "caisse.html",
+              p_amount_xof: rawAmount
+            }]);
+          }
+
+          if(!res || res.ok !== true){
+            const msg = humanSaleError(res?.reason);
+            qs("saleHelper").innerHTML = msg;
+            setSalePreview("bad", msg);
+            return;
+          }
+
+          const saleRef = String(res.sale_ref || "—");
+          const totalXof = Number(res.total_xof || (hasCart ? cartTotal() : rawAmount) || 0);
+          const itemsCount = Number(
+            res.items_count ||
+            (hasCart ? cartLines.reduce((sum, line) => sum + Number(line.qty || 0), 0) : 1)
+          );
+
+          resetSaleInputs();
+          await hydrate(true);
+
+          qs("saleHelper").innerHTML = `Vente enregistrée ✅ Réf : <b>${esc(saleRef)}</b>`;
+          setSalePreview(
+            "ok",
+            `Vente enregistrée ✅<br><b>Réf</b> : ${esc(saleRef)}<br><b>Total</b> : ${esc(money(totalXof))}<br><b>Articles</b> : ${esc(String(itemsCount))}<br><b>Paiement</b> : ${esc(method)}`
+          );
+          setNotice("ok", `Dernière vente enregistrée : <b>${esc(saleRef)}</b>. Le stock a été relu en direct.`);
+        }catch(err){
+          const msg = err?.message || String(err);
+          log("submitSale KO", { message: msg });
+          qs("saleHelper").innerHTML = "Impossible d’enregistrer la vente pour le moment.";
+          setSalePreview("bad", `Erreur vente : ${esc(msg)}`);
+        }finally{
+          setSaleBusy(false);
+        }
       }
 
       function renderProducts(){
@@ -1076,7 +1203,7 @@
         const lines = cartLineData();
 
         if(!amount && !label && !lines.length){
-          qs("salePreview").innerHTML = "Rien de préparé pour le moment.";
+          setSalePreview("info", "Rien de préparé pour le moment.");
           return;
         }
 
@@ -1086,12 +1213,13 @@
             ).join("")}</div>`
           : "";
 
-        qs("salePreview").innerHTML = `
-          <div><b>Montant</b> : ${esc(amount ? money(amount) : "—")}</div>
-          <div style="margin-top:6px"><b>Ce que tu vends</b> : ${esc(label || "—")}</div>
-          <div style="margin-top:6px"><b>Paiement</b> : ${esc(method || "cash")}</div>
-          ${linesHtml}
-        `;
+        setSalePreview(
+          "info",
+          `<div><b>Montant</b> : ${esc(amount ? money(amount) : "—")}</div>
+           <div style="margin-top:6px"><b>Ce que tu vends</b> : ${esc(label || "—")}</div>
+           <div style="margin-top:6px"><b>Paiement</b> : ${esc(method || "cash")}</div>
+           ${linesHtml}`
+        );
       }
 
       function renderKpis(){
@@ -1118,28 +1246,11 @@
         setNotice("ok", `Catalogue prêt : <b>${published}</b> article(s) visibles. Lecture : <b>${STATE.source}</b>.`);
       }
 
-      function prepareSale(){
-        persistDraft();
-        renderSalePreview();
-
-        const amount = String(qs("saleAmount").value || "").trim();
-        const label = String(qs("saleLabel").value || "").trim();
-
-        if(!amount || !label){
-          qs("saleHelper").innerHTML = "Complète le montant et ce que tu vends pour préparer une vente propre.";
-          return;
-        }
-
-        qs("saleHelper").innerHTML = `Préparation enregistrée pour <b>${esc(STATE.slug || "—")}</b>. Le ticket est prêt.`;
-      }
-
       function clearSaleForm(){
-        qs("saleAmount").value = "";
-        qs("saleLabel").value = "";
-        qs("saleMethod").value = "cash";
-        clearCart();
-        if(STATE.slug) clearSaleDraft(STATE.slug);
+        resetSaleInputs();
+        renderCart();
         renderSalePreview();
+        qs("saleHelper").innerHTML = "Ticket vidé.";
       }
 
       async function hydrate(forceLive = false){
@@ -1206,7 +1317,7 @@
           ensureSupabase();
 
           qs("btnReloadTop").addEventListener("click", () => hydrate(true));
-          qs("btnSaleReady").addEventListener("click", prepareSale);
+          qs("btnSaleReady").addEventListener("click", submitSale);
           qs("btnClearSale").addEventListener("click", clearSaleForm);
 
           ["saleAmount", "saleLabel", "saleMethod"].forEach(id => {
