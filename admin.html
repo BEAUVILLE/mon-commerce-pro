@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Mon espace de travail · MON COMMERCE by DIGIY</title>
-  <meta name="theme-color" content="#07140f" />
-  <meta name="description" content="MON COMMERCE by DIGIY — mon espace de travail : abonnement, activité, boost et accès à ma caisse." />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#07140f"/>
+  <title>Mes articles · MON COMMERCE by DIGIY</title>
+  <meta name="description" content="MON COMMERCE by DIGIY — mes articles, mes prix, mon stock."/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -15,18 +15,19 @@
     window.DIGIY_LOGIN_URL = "./pin.html";
     document.documentElement.style.visibility = "hidden";
 
-    function digiyBasePath() {
+    function digiyBasePath(){
       const parts = location.pathname.split("/").filter(Boolean);
       const isGh = /\.github\.io$/i.test(location.hostname);
       if (isGh && parts.length > 0) return "/" + parts[0] + "/";
       return "/";
     }
 
-    function digiyLocal(path) {
+    function digiyLocal(path){
       path = String(path || "").replace(/^\/+/, "");
       return digiyBasePath() + path;
     }
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./guard.js"></script>
   <script src="./claw-tools-pos.js"></script>
@@ -38,13 +39,14 @@
   <style>
     :root{
       --bg:#04110d;--bg2:#071a14;
-      --card:rgba(8,24,18,.78);--card2:rgba(9,28,21,.92);
-      --muted:#bfd3c8;--text:#f7fbf8;
-      --ok:#22c55e;--warn:#f59e0b;--danger:#ef4444;--accent:#60a5fa;
-      --gold:#facc15;--gold2:#f59e0b;
+      --card:rgba(8,24,18,.78);--card2:rgba(9,28,21,.92);--card3:rgba(255,255,255,.03);
+      --text:#f7fbf8;--muted:#bfd3c8;
       --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.14);
+      --gold:#facc15;--gold2:#f59e0b;
+      --green:#22c55e;--green2:#16a34a;
+      --warn:#f59e0b;--danger:#ef4444;--info:#60a5fa;
       --shadow:0 22px 56px rgba(0,0,0,.28);--shadow-soft:0 14px 34px rgba(0,0,0,.22);
-      --radius:26px;--max:1120px;
+      --radius:26px;--radius-sm:18px;--max:1200px;
       --fontA:"Outfit",system-ui,-apple-system,sans-serif;
     }
 
@@ -52,24 +54,21 @@
     html,body{margin:0;padding:0}
     html{scroll-behavior:smooth}
     body{
-      min-height:100vh;font-family:var(--fontA);
+      min-height:100vh;color:var(--text);font-family:var(--fontA);
       background:
         radial-gradient(circle at top left, rgba(250,204,21,.10), transparent 28%),
         radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 22%),
         linear-gradient(180deg, #07140f 0%, #04110d 42%, #020906 100%);
-      color:var(--text);
     }
 
     a{text-decoration:none;color:inherit}
-    button{font:inherit}
+    button,input,select,textarea{font:inherit}
 
-    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px 92px}
-
-    /* ━━━ ANTI-ÉCRAN NOIR ━━━ */
     .app{display:none}
     html.app-ready .app{display:block}
 
-    /* ── FLOAT ── */
+    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px 96px;}
+
     .floating-site-btn{
       position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:90;
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -79,679 +78,1104 @@
       box-shadow:0 16px 36px rgba(0,0,0,.28);
       transition:transform .14s ease, border-color .14s ease, background .14s ease;
     }
-    .floating-site-btn:hover{transform:translateY(-1px);border-color:rgba(250,204,21,.28);background:rgba(8,20,15,.94)}
+    .floating-site-btn:hover{transform:translateY(-1px);border-color:rgba(250,204,21,.28);background:rgba(8,20,15,.94);}
 
-    /* ── TOPBAR ── */
     .topbar{
-      position:sticky;top:0;z-index:70;margin-bottom:12px;
+      position:sticky;top:0;z-index:70;margin-bottom:14px;
       backdrop-filter:blur(12px);background:rgba(4,17,13,.76);
       border:1px solid rgba(255,255,255,.07);border-radius:24px;box-shadow:var(--shadow-soft);
     }
-    .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px}
+    .topbar-inner{padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}
-    .brand-badge{width:48px;height:48px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.08));border:1px solid rgba(250,204,21,.16);box-shadow:0 16px 34px rgba(250,204,21,.10);font-size:24px;flex:0 0 auto;}
-    .brand-kicker{color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px}
-    .brand-title{font-size:20px;font-weight:1000;line-height:1.08;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .brand-sub{color:var(--muted);font-size:12px;font-weight:800;margin-top:3px;letter-spacing:.04em}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0;}
+    .brandBadge{
+      width:48px;height:48px;border-radius:18px;display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.08));
+      border:1px solid rgba(250,204,21,.16);box-shadow:0 16px 34px rgba(250,204,21,.10);
+      font-size:24px;flex:0 0 auto;
+    }
+    .brandKicker{color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px;}
+    .brandTitle{font-size:20px;line-height:1.08;font-weight:1000;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .brandSub{color:var(--muted);font-size:12px;font-weight:800;margin-top:3px;letter-spacing:.04em;}
 
-    .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);font-weight:900;font-size:12px;backdrop-filter:blur(10px);}
-    .pill b{color:var(--text);font-weight:950}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;
+      background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);
+      font-weight:900;font-size:12px;backdrop-filter:blur(10px);
+    }
+    .pill strong{color:var(--text);font-weight:950;}
 
-    /* ── BOUTONS ── */
-    .btn,.btn-outline,.btn-ghost{
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--warn);flex:0 0 auto;box-shadow:0 0 0 4px rgba(255,255,255,.03);}
+    .dot.ok{background:var(--green)}
+    .dot.bad{background:var(--danger)}
+
+    .btn,.btn-outline,.btn-ghost,.btn-danger{
       appearance:none;border:none;cursor:pointer;
       display:inline-flex;align-items:center;justify-content:center;gap:10px;
       min-height:46px;padding:12px 16px;border-radius:999px;
-      font-weight:900;font-size:13px;white-space:nowrap;transition:.14s ease;
+      font-weight:900;font-size:13px;letter-spacing:.02em;white-space:nowrap;
+      transition:transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
     }
-    .btn:hover,.btn-outline:hover,.btn-ghost:hover{transform:translateY(-1px)}
-    .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled{opacity:.55;cursor:not-allowed;transform:none}
-    .btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07110d;box-shadow:0 14px 30px rgba(250,204,21,.18)}
-    .btn-outline{background:rgba(255,255,255,.04);border:1px solid var(--line2);color:var(--text)}
-    .btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--muted)}
-
-    /* ── LAYOUT ── */
-    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;margin-top:8px}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;}
-    .card h3{margin:0 0 10px 0;font-size:16px;letter-spacing:.01em;line-height:1.2}
-
-    .heroBadge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;}
-
-    .muted{color:var(--muted)}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-
-    .statusDot{width:10px;height:10px;border-radius:999px;background:var(--warn);box-shadow:0 0 0 4px rgba(255,255,255,.03)}
-    .statusDot.ok{background:var(--ok)}.statusDot.bad{background:var(--danger)}
-
-    .bigMoney{font-size:38px;font-weight:1000;letter-spacing:-.04em;margin:8px 0 4px 0;line-height:1}
-    .mini{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);font-weight:800;line-height:1.6}
-
-    .diag{margin-top:12px;padding:12px;border-radius:16px;background:#081119;border:1px solid var(--line);color:#d8e1ff;font:12px/1.58 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;}
-
-    .hr{height:1px;background:var(--line);margin:14px 0}
-
-    .boostBox{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px;border-radius:20px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20);}
-    .boostBox b{display:block;margin-bottom:5px;font-size:15px}
-
-    .notifList{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-    .notif{padding:12px 13px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-
-    .tag{font-size:11px;font-weight:950;padding:7px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-    .tag.warn{color:#ffe2b0;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.10)}
-    .tag.ok{color:#c9ffd9;border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08)}
-    .tag.info{color:#cfd6ff;border-color:rgba(96,165,250,.35);background:rgba(96,165,250,.10)}
-
-    .footer{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-    .smallLink{color:var(--muted);text-decoration:none;font-weight:850}.smallLink:hover{color:var(--text)}
+    .btn:hover,.btn-outline:hover,.btn-ghost:hover,.btn-danger:hover{transform:translateY(-1px)}
+    .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled,.btn-danger:disabled{opacity:.56;cursor:not-allowed;transform:none;}
+    .btn{color:#07110d;background:linear-gradient(135deg, var(--gold), var(--gold2));box-shadow:0 14px 30px rgba(250,204,21,.18);}
+    .btn-outline{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--line2);}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line2);}
+    .btn-danger{background:linear-gradient(135deg, rgba(239,68,68,.95), rgba(239,68,68,.72));color:#fff;}
 
     .navRow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 
-    .subPills{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .subPill{padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:12px;font-weight:900}
+    .hero{
+      display:grid;grid-template-columns:1.02fr .98fr;gap:12px;margin-bottom:12px;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);
+      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;
+    }
 
-    .shell{min-height:280px;display:grid;place-items:center;text-align:center;padding:24px}
-    .shellCard{max-width:640px;padding:22px;border-radius:22px;border:1px solid var(--line);background:rgba(255,255,255,.03);box-shadow:var(--shadow-soft)}
-    .shellTitle{font-size:24px;font-weight:1000;margin-bottom:8px;line-height:1.1}
-    .shellText{color:var(--muted);font-size:14px;line-height:1.8;font-weight:700}
+    .heroBadge{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+      background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);color:var(--gold);
+      font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;
+    }
 
-    @media(max-width:920px){.grid{grid-template-columns:1fr}}
+    .bigTitle{margin:0;font-size:clamp(30px, 5vw, 54px);line-height:.96;letter-spacing:-.04em;font-weight:1000;max-width:12ch;}
+    .bigTitle .accent{color:var(--gold);}
+    .mainSub{margin-top:10px;color:var(--muted);font-size:16px;line-height:1.7;font-weight:700;max-width:64ch;}
+
+    .subInfo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px;}
+    .miniCard{min-width:0;padding:13px 12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
+    .tiny{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:900;}
+    .value{font-size:20px;font-weight:950;margin-top:6px;line-height:1.1;word-break:break-word;letter-spacing:-.02em;}
+
+    .notice{padding:14px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);margin-top:14px;line-height:1.65;font-size:14px;font-weight:700;}
+    .notice.ok{border-color:rgba(34,197,94,.22);background:rgba(34,197,94,.08);}
+    .notice.warn{border-color:rgba(245,158,11,.22);background:rgba(245,158,11,.08);}
+    .notice.bad{border-color:rgba(239,68,68,.22);background:rgba(239,68,68,.08);}
+    .notice.info{border-color:rgba(96,165,250,.22);background:rgba(96,165,250,.08);}
+
+    .actionRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+    .helper{color:var(--muted);font-size:13px;font-weight:800;margin-top:10px;line-height:1.65;}
+
+    .kpiGrid{display:grid;gap:12px;grid-template-columns:repeat(3,1fr);margin-top:14px;}
+    .kpi{padding:13px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);}
+    .kpi .k{color:var(--muted);font-size:11px;font-weight:900;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;}
+    .kpi .v{font-size:24px;font-weight:1000;line-height:1;letter-spacing:-.03em;word-break:break-word;}
+
+    .sectionGrid{display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-top:12px;}
+
+    .field{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+    .field label{font-size:13px;font-weight:900;color:var(--muted);letter-spacing:.03em;}
+    .input,.select,.textarea{
+      width:100%;padding:14px 14px;border-radius:16px;border:1px solid var(--line);
+      background:rgba(255,255,255,.04);color:var(--text);outline:none;font-size:15px;font-weight:800;
+    }
+    .textarea{min-height:96px;resize:vertical}
+    .input::placeholder,.textarea::placeholder{color:#92a0c7}
+
+    .hr{height:1px;background:var(--line);margin:14px 0}
+
+    .tableWrap{
+      overflow:auto;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.03);
+    }
+    table{width:100%;border-collapse:collapse;min-width:780px;}
+    th,td{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;}
+    th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+    td{font-size:14px;font-weight:800;}
+    tr:last-child td{border-bottom:none;}
+
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;
+      font-size:12px;font-weight:950;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);
+    }
+    .badge.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#d7ffe1;}
+    .badge.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#ffe3b8;}
+    .badge.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.28);color:#ffd2d2;}
+    .badge.info{background:rgba(96,165,250,.10);border-color:rgba(96,165,250,.28);color:#d8ecff;}
+
+    .searchRow{
+      display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:10px;
+    }
+
+    .smallBtn{
+      min-height:38px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);
+      background:rgba(255,255,255,.04);color:var(--text);font-weight:900;cursor:pointer;
+    }
+
+    .empty{
+      color:var(--muted);font-weight:800;font-size:13px;line-height:1.6;padding:18px;
+    }
+
+    .blockedShell{display:none;min-height:320px;place-items:center;text-align:center;padding:24px;}
+    .blockedInner{max-width:680px;padding:22px;border-radius:22px;border:1px solid var(--line);background:rgba(255,255,255,.03);box-shadow:var(--shadow-soft);}
+    .blockedTitle{font-size:26px;font-weight:1000;margin-bottom:8px;line-height:1.1;}
+    .blockedText{color:var(--muted);font-size:14px;line-height:1.8;font-weight:700;}
+
+    .footerNote{margin-top:12px;color:var(--muted);font-size:12px;font-weight:800;line-height:1.6;}
+
+    @media(max-width:1020px){
+      .hero{grid-template-columns:1fr}
+      .subInfo{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .sectionGrid{grid-template-columns:1fr}
+    }
+    @media(max-width:760px){
+      .kpiGrid{grid-template-columns:repeat(2,1fr)}
+      .searchRow{grid-template-columns:1fr}
+    }
     @media(max-width:700px){
-      .wrap{padding:12px 12px 92px}.topbar-inner{padding:12px}.brand-title{white-space:normal}
-      .boostBox{flex-direction:column}
-      .floating-site-btn{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));min-height:46px;padding:14px;font-size:12px}
+      .wrap{padding:12px 12px 96px}
+      .topbar-inner{padding:12px}
+      .brandTitle{white-space:normal}
+      .subInfo{grid-template-columns:1fr}
+      .kpiGrid{grid-template-columns:1fr}
+      .floating-site-btn{
+        left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+        min-height:46px;padding:14px 14px;font-size:12px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <!-- ━━━ FLOAT : retour vitrine ━━━ -->
-  <a class="floating-site-btn" id="btnPublicFloating" href="https://mon-commerce.digiylyfe.com/" aria-label="Retour à la vitrine MON COMMERCE">⬅️ Retour à la vitrine</a>
+  <a class="floating-site-btn" href="./index.html" aria-label="Retour à la vitrine MON COMMERCE">⬅️ Retour à la vitrine</a>
 
-  <div class="wrap app">
-    <div class="topbar">
-      <div class="topbar-inner">
-        <div class="brand">
-          <div class="brand-badge">🏪</div>
-          <div>
-            <div class="brand-kicker">DIGIYLYFE</div>
-            <!-- ━━━ AVANT : "MON COMMERCE — Dashboard Pro" → banni ━━━ -->
-            <div id="brandTitle" class="brand-title">MON COMMERCE — Mon espace de travail</div>
-            <div id="brandSub" class="brand-sub">Mon activité · boutique · abonnement</div>
+  <div class="app" id="appRoot">
+    <div class="wrap">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="brand">
+            <div class="brandBadge">📦</div>
+            <div>
+              <div class="brandKicker">DIGIYLYFE</div>
+              <div class="brandTitle">MON COMMERCE — Mes articles</div>
+              <div class="brandSub">Mes produits · mes prix · mon stock</div>
+            </div>
           </div>
-        </div>
-        <div class="right">
-          <div class="pill" id="pillStatus">Statut : <b>…</b></div>
-          <a class="btn-outline" id="btnPinTop" href="./pin.html">🔐 Mon code d'accès</a>
-          <!-- ━━━ AVANT : "⚙️ Admin" → banni ━━━ -->
-          <a class="btn-outline" id="btnSettings" href="./dashboard-pro.html">⚙️ Mes réglages</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ━━━ NAV — doctrine façade ━━━ -->
-    <div class="navRow">
-      <!-- ━━━ "Hall" × 2 → "Accueil" ━━━ -->
-      <a class="btn-ghost"   id="btnHall"       href="./index.html">🏠 Accueil</a>
-      <a class="btn-ghost"   id="btnCaisse"     href="./caisse.html">🧾 Ma caisse</a>
-      <!-- ━━━ "Admin" × 2 → "Mes réglages" ━━━ -->
-      <a class="btn-ghost"   id="btnAdmin"      href="./dashboard-pro.html">⚙️ Mes réglages</a>
-      <a class="btn-outline" id="btnAbosTop"    href="https://commencer-a-payer.digiylyfe.com/">💳 Mon abonnement</a>
-      <a class="btn-outline" id="btnSupportTop" href="#" target="_blank" rel="noopener">💬 Support</a>
-    </div>
-
-    <!-- ━━━ ÉCRAN BLOQUÉ ━━━ -->
-    <div id="blockedShell" class="card shell" style="display:none">
-      <div class="shellCard">
-        <div class="shellTitle" id="blockedTitle">Accès requis</div>
-        <!-- ━━━ AVANT : "slug POS", "pin.html?slug=…" visibles → jargon banni ━━━ -->
-        <div class="shellText" id="blockedText">Entre avec ton code d'accès ou rejoins DIGIY pour accéder à ton espace.</div>
-        <div class="footer" style="justify-content:center;margin-top:18px">
-          <a class="btn-outline" id="btnBlockedPin"  href="./pin.html">🔐 Entrer avec mon code</a>
-          <a class="btn"         id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon abonnement</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ━━━ CONTENU PRINCIPAL ━━━ -->
-    <div id="dashboardContent" style="display:none">
-      <div class="grid">
-
-        <!-- CARTE STATUT -->
-        <div class="card" id="cardStatus">
-          <!-- ━━━ AVANT : "dashboard pro • abonnement • argent • boost" → banni ━━━ -->
-          <div class="heroBadge">Mon activité · abonnement · argent · boost</div>
-          <h3>Mon abonnement</h3>
 
           <div class="row">
-            <div class="statusDot" id="dot"></div>
-            <div style="flex:1">
-              <div style="font-weight:1000;font-size:18px;line-height:1.15" id="statusLine">Chargement…</div>
-              <div class="muted" style="font-weight:800;font-size:13px;margin-top:3px" id="expiryLine">—</div>
+            <div class="pill">
+              <span class="dot" id="dotAccess"></span>
+              <span id="pillAccess">Accès…</span>
             </div>
-          </div>
-
-          <div class="subPills">
-            <!-- ━━━ AVANT : "Slug :" → jargon technique, remplacé par "Identifiant :" ━━━ -->
-            <div class="subPill">Identifiant : <b id="slugBox">—</b></div>
-            <div class="subPill">Téléphone : <b id="phoneBox">—</b></div>
-            <div class="subPill">Service : <b>MON COMMERCE</b></div>
-          </div>
-
-          <div class="hr"></div>
-          <div class="mini" id="metaLine"><span>Abonnement : —</span><span>•</span><span>Paiement : —</span></div>
-
-          <div class="footer">
-            <button class="btn-outline" id="btnManageSub" type="button">Gérer mon abonnement</button>
+            <div class="pill">
+              <strong id="pillStore">Boutique…</strong>
+            </div>
+            <button class="btn-outline" type="button" id="btnReloadTop">🔄 Recharger</button>
           </div>
         </div>
+      </header>
 
-        <!-- CARTE ARGENT -->
-        <div class="card" id="cardMoney">
-          <h3>Ce qui est rentré</h3>
-          <div class="bigMoney" id="moneyMonth">— FCFA</div>
-          <div class="mini" id="moneyMeta">
-            <span id="txCount">— transactions</span>
-            <span>•</span>
-            <span id="todayHint">—</span>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="boostBox">
-            <div>
-              <b>🚀 BOOST visibilité</b>
-              <div class="muted" style="font-weight:800;font-size:13px" id="boostText">+50% d'apparition · 7 jours · 5 000 FCFA</div>
-              <div class="muted" style="font-weight:800;font-size:12px;margin-top:6px" id="boostStatus">Statut boost : —</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;min-width:170px">
-              <button class="btn"         id="btnBoost"     type="button">Activer</button>
-              <button class="btn-outline" id="btnBoostInfo" type="button">Détails</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- CARTE ACTION -->
-        <div class="card" id="cardAction" style="grid-column:1/-1">
-          <h3>Action principale</h3>
-          <div class="muted" style="font-weight:800;margin-bottom:10px" id="actionDesc">Une action. Simple. Efficace.</div>
-
-          <div class="row" style="justify-content:space-between">
-            <div class="muted" style="font-weight:900" id="actionHint">—</div>
-            <button class="btn" id="btnPrimaryAction" type="button">…</button>
-          </div>
-
-          <div class="hr"></div>
-
-          <h3>Notifications</h3>
-          <div class="notifList" id="notifList"></div>
-
-          <div class="footer">
-            <a class="smallLink" href="#" id="linkSupport">Support</a>
-            <a class="smallLink" href="#" id="linkPayments">Mes paiements</a>
-          </div>
-        </div>
-
+      <div class="navRow">
+        <a class="btn-ghost" href="./index.html" id="btnHall">🏠 Accueil</a>
+        <a class="btn-ghost" href="./dashboard-pro.html" id="btnDashboard">🧭 Mon espace de travail</a>
+        <a class="btn-ghost" href="./profile.html" id="btnProfile">🏪 Ma boutique</a>
+        <a class="btn-ghost" href="./caisse.html" id="btnCaisse">🧾 Ma caisse</a>
+        <a class="btn-outline" href="./pin.html" id="btnPin">🔐 Mon code d'accès</a>
       </div>
+
+      <section id="blockedShell" class="blockedShell">
+        <div class="blockedInner">
+          <div class="blockedTitle">Atelier protégé</div>
+          <div class="blockedText" id="blockedText">
+            Entre avec ton code d'accès ou active ton abonnement pour gérer tes articles.
+          </div>
+          <div class="actionRow" style="justify-content:center">
+            <a class="btn" id="btnBlockedPin" href="./pin.html">🔐 Entrer avec mon code</a>
+            <a class="btn-outline" id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon abonnement</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="liveShell">
+        <div class="hero">
+          <div class="card">
+            <div class="heroBadge">Atelier catalogue</div>
+            <h1 class="bigTitle"><span class="accent">Articles</span> prêts</h1>
+            <div class="mainSub">
+              Ici tu poses tes marchandises, leurs prix et leur stock. C’est le cœur du commerce réel.
+            </div>
+
+            <div class="subInfo">
+              <div class="miniCard">
+                <div class="tiny">Boutique</div>
+                <div class="value" id="metaStoreName">—</div>
+              </div>
+              <div class="miniCard">
+                <div class="tiny">Téléphone</div>
+                <div class="value" id="metaPhone">—</div>
+              </div>
+              <div class="miniCard">
+                <div class="tiny">Identifiant</div>
+                <div class="value" id="metaSlug">—</div>
+              </div>
+              <div class="miniCard">
+                <div class="tiny">Sauvegarde</div>
+                <div class="value" id="metaMode">—</div>
+              </div>
+            </div>
+
+            <div class="notice info" id="noticeBox">Chargement…</div>
+
+            <div class="actionRow">
+              <button class="btn" type="button" id="btnNew">➕ Nouvel article</button>
+              <button class="btn-outline" type="button" id="btnExport">📤 Exporter</button>
+              <button class="btn-outline" type="button" id="btnImport">📥 Importer</button>
+              <input type="file" id="fileImport" accept="application/json" style="display:none"/>
+            </div>
+
+            <div class="footerNote">
+              Si la table produits n’existe pas encore en base, l’atelier continue en local sur ce téléphone/ordinateur.
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="sideTitle">Lecture rapide</h2>
+
+            <div class="kpiGrid">
+              <div class="kpi">
+                <div class="k">Articles</div>
+                <div class="v" id="kpiCount">0</div>
+              </div>
+              <div class="kpi">
+                <div class="k">Stock total</div>
+                <div class="v" id="kpiStock">0</div>
+              </div>
+              <div class="kpi">
+                <div class="k">Valeur stock</div>
+                <div class="v" id="kpiValue">0 F</div>
+              </div>
+            </div>
+
+            <div class="hr"></div>
+
+            <div class="searchRow">
+              <input class="input" id="searchText" placeholder="Chercher un article…"/>
+              <select class="select" id="filterStatus">
+                <option value="all">Tous</option>
+                <option value="published">Publiés</option>
+                <option value="draft">Brouillons</option>
+                <option value="low">Stock faible</option>
+              </select>
+              <select class="select" id="sortBy">
+                <option value="recent">Plus récents</option>
+                <option value="name">Nom A→Z</option>
+                <option value="price_desc">Prix ↓</option>
+                <option value="price_asc">Prix ↑</option>
+                <option value="stock_desc">Stock ↓</option>
+                <option value="stock_asc">Stock ↑</option>
+              </select>
+            </div>
+
+            <div class="helper">
+              Stock faible = 5 ou moins. Tu peux changer ça plus tard si on veut.
+            </div>
+          </div>
+        </div>
+
+        <div class="sectionGrid">
+          <div class="card">
+            <h2 class="sideTitle" id="formTitle">Nouvel article</h2>
+
+            <div class="field">
+              <label for="productName">Nom de l’article</label>
+              <input class="input" id="productName" type="text" placeholder="Ex : Robe bleue / Parfum / Sac à main"/>
+            </div>
+
+            <div class="field">
+              <label for="productCategory">Catégorie</label>
+              <input class="input" id="productCategory" type="text" placeholder="Ex : Mode / Beauté / Accessoire / Alimentaire"/>
+            </div>
+
+            <div class="field">
+              <label for="productSku">Référence (optionnel)</label>
+              <input class="input" id="productSku" type="text" placeholder="Ex : RB-001"/>
+            </div>
+
+            <div class="sectionGrid" style="margin-top:0">
+              <div class="field" style="margin-top:0">
+                <label for="productPrice">Prix (FCFA)</label>
+                <input class="input" id="productPrice" type="number" min="0" step="1" placeholder="3500"/>
+              </div>
+
+              <div class="field" style="margin-top:0">
+                <label for="productStock">Stock</label>
+                <input class="input" id="productStock" type="number" min="0" step="1" placeholder="12"/>
+              </div>
+            </div>
+
+            <div class="sectionGrid" style="margin-top:0">
+              <div class="field" style="margin-top:0">
+                <label for="productPublished">Visible dans la boutique ?</label>
+                <select class="select" id="productPublished">
+                  <option value="true">Oui</option>
+                  <option value="false">Non</option>
+                </select>
+              </div>
+
+              <div class="field" style="margin-top:0">
+                <label for="productImage">Image (optionnel)</label>
+                <input class="input" id="productImage" type="text" placeholder="https://...jpg/png"/>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="productNote">Description courte (optionnel)</label>
+              <textarea class="textarea" id="productNote" placeholder="Ex : Tissu léger, très demandé, taille M à XL…"></textarea>
+            </div>
+
+            <div class="actionRow">
+              <button class="btn" type="button" id="btnSaveProduct">💾 Enregistrer l’article</button>
+              <button class="btn-outline" type="button" id="btnClearForm">Effacer</button>
+              <button class="btn-danger" type="button" id="btnDeleteProduct" style="display:none">🗑️ Supprimer</button>
+            </div>
+
+            <div class="notice" id="formNotice">Remplis les champs puis enregistre.</div>
+          </div>
+
+          <div class="card">
+            <h2 class="sideTitle">Mes articles</h2>
+
+            <div class="tableWrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Article</th>
+                    <th>Prix</th>
+                    <th>Stock</th>
+                    <th>Statut</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="productsBody">
+                  <tr>
+                    <td colspan="5" class="empty">Chargement des articles…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="helper" id="listHelper">
+              Clique sur “Modifier” pour reprendre un article existant.
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
+  </div>
 
-  </div><!-- /.wrap.app -->
+  <script>
+    (() => {
+      "use strict";
 
-<script>
-(() => {
-  "use strict";
+      const MODULE_CODE = "POS";
+      const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
+      const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
+      const HALL_URL = digiyLocal("index.html");
+      const PROFILE_URL = digiyLocal("profile.html");
+      const CAISSE_URL = digiyLocal("caisse.html");
+      const PIN_URL = digiyLocal("pin.html");
+      const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
+      const CACHE_PREFIX = "digiy_pos_products_local:";
+      const LOW_STOCK_LIMIT = 5;
 
-  const MODULE_CODE          = "POS";
-  const MODULE_LABEL         = "MON COMMERCE";
-  const PRIMARY_ACTION_LABEL = "Ouvrir ma caisse";
-  const PRIMARY_ACTION_HINT  = "Encaisse, gère tes produits et suis ton stock.";
-  const SUPPORT_PHONE        = "221771342889";
+      const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
+      const SUPABASE_ANON_KEY = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
 
-  const SUPABASE_URL  = String(window.DIGIY_SUPABASE_URL  || "").trim();
-  const SUPABASE_ANON = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
+      const qs = (id) => document.getElementById(id);
+      let STATE = {
+        slug: "",
+        phone: "",
+        access: false,
+        storeName: "MON COMMERCE",
+        mode: "none",
+        products: [],
+        editingId: null
+      };
+      let SB_CLIENT = null;
 
-  const ABOS_URL      = "https://commencer-a-payer.digiylyfe.com/";
-  const CAISSE_URL    = digiyLocal("caisse.html");
-  const HALL_URL      = digiyLocal("index.html");
-  const ADMIN_URL     = digiyLocal("dashboard-pro.html"); // réglages = même espace
-  const PIN_URL       = digiyLocal("pin.html");
-  const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
-  const PUBLIC_URL    = "https://mon-commerce.digiylyfe.com/";
-
-  const BOOST = { module:"BOOST", plan:"boost_7d", price_xof:5000, label:"BOOST visibilité", duration_days:7 };
-
-  const $ = (id) => document.getElementById(id);
-  const diagLines = [];
-  let sb = null;
-  const state = { slug:"", phone:"", access:false, storeName:"", plan:"", statusPayload:null };
-
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     ANTI-ÉCRAN NOIR
-     1. setTimeout(reveal, 2000) — filet absolu
-     2. reveal() au début de init()
-     3. reveal() dans le catch fatal
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  function reveal() {
-    document.documentElement.classList.add("app-ready");
-    document.documentElement.style.visibility = "";
-  }
-  setTimeout(reveal, 2000); // filet absolu
-
-  function safeStringify(v) { try { return JSON.stringify(v, null, 2); } catch(_) { return String(v); } }
-
-  function log(msg, data) {
-    const line = `[${new Date().toLocaleTimeString("fr-FR")}] ${msg}`;
-    diagLines.push(data === undefined ? line : `${line}\n${safeStringify(data)}`);
-    if ($("diagBox")) $("diagBox").textContent = diagLines.join("\n\n");
-    console.log("[DIGIY POS DASHBOARD]", msg, data ?? "");
-  }
-
-  function fmtDateFR(iso) {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "—";
-    return d.toLocaleDateString("fr-FR", { year:"numeric", month:"long", day:"numeric" });
-  }
-
-  function cleanDigits(v)  { return String(v || "").replace(/[^\d]/g, ""); }
-  function normSlug(v)     { return String(v || "").trim().toLowerCase(); }
-
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     buildUrl — VERSION BLINDÉE
-     new URL(relatif, location.href) fragile selon l'env.
-     On reconstruit l'origine manuellement.
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  function buildUrl(base, params) {
-    const baseStr = (base == null ? "" : String(base)).trim();
-    if (!baseStr) return location.href;
-    let u;
-    try {
-      if (/^https?:\/\//i.test(baseStr)) {
-        u = new URL(baseStr);
-      } else {
-        const origin = location.protocol + "//" + location.host;
-        const full   = baseStr.startsWith("/") ? origin + baseStr : origin + "/" + baseStr;
-        u = new URL(full);
+      function reveal(){
+        document.documentElement.classList.add("app-ready");
+        document.documentElement.style.visibility = "";
       }
-    } catch(e) {
-      log("buildUrl KO: " + baseStr + " — " + e.message);
-      return baseStr;
-    }
-    try {
-      Object.entries(params || {}).forEach(([k, v]) => {
-        if (v !== null && v !== undefined && v !== "") u.searchParams.set(k, String(v));
+      setTimeout(reveal, 2000);
+
+      function esc(v){
+        return String(v ?? "")
+          .replace(/&/g,"&amp;")
+          .replace(/</g,"&lt;")
+          .replace(/>/g,"&gt;")
+          .replace(/"/g,"&quot;")
+          .replace(/'/g,"&#39;");
+      }
+
+      function money(n){
+        const value = Number(n || 0);
+        if(!Number.isFinite(value)) return "0 F";
+        return `${value.toLocaleString("fr-FR")} F`;
+      }
+
+      function buildUrl(base, params){
+        const baseStr = (base == null ? "" : String(base)).trim();
+        if(!baseStr) return location.href;
+        let u;
+        try{
+          if(/^https?:\/\//i.test(baseStr)){
+            u = new URL(baseStr);
+          } else {
+            const origin = location.protocol + "//" + location.host;
+            const full = baseStr.startsWith("/") ? origin + baseStr : origin + "/" + baseStr;
+            u = new URL(full);
+          }
+        }catch(_){
+          return baseStr;
+        }
+        try{
+          Object.entries(params || {}).forEach(([k,v]) => {
+            if(v !== undefined && v !== null && String(v) !== "") u.searchParams.set(k, String(v));
+          });
+        }catch(_){}
+        return u.toString();
+      }
+
+      function normPhone(v){ return String(v || "").replace(/[^\d]/g,""); }
+      function normSlug(v){ return String(v || "").trim().toLowerCase(); }
+
+      function getParam(name){
+        return new URL(location.href).searchParams.get(name) || "";
+      }
+
+      function getGuardState(){
+        return window.DIGIY_GUARD?.state || {};
+      }
+
+      function getResolvedSlug(){
+        const gs = getGuardState();
+        return normSlug(
+          getParam("slug") || gs.slug || gs.session?.slug || gs.identity?.slug ||
+          sessionStorage.getItem("digiy_pos_last_slug") || localStorage.getItem("digiy_pos_last_slug") ||
+          sessionStorage.getItem("digiy_pos_slug") || localStorage.getItem("digiy_pos_slug") || ""
+        );
+      }
+
+      function getResolvedPhone(){
+        const gs = getGuardState();
+        return normPhone(
+          getParam("phone") || getParam("tel") || gs.phone || gs.session?.phone || gs.identity?.phone ||
+          sessionStorage.getItem("digiy_pos_last_phone") || localStorage.getItem("digiy_pos_last_phone") ||
+          sessionStorage.getItem("digiy_pos_phone") || localStorage.getItem("digiy_pos_phone") || ""
+        );
+      }
+
+      async function awaitGuardReady(){
+        try{
+          if(typeof window.DIGIY_GUARD?.ready === "function") await window.DIGIY_GUARD.ready();
+          else if(window.DIGIY_GUARD?.ready?.then) await window.DIGIY_GUARD.ready;
+        }catch(_){}
+      }
+
+      async function bootGuard(){
+        if(typeof window.DIGIY_GUARD?.boot !== "function") return true;
+        try{
+          const res = await window.DIGIY_GUARD.boot({
+            module: MODULE_CODE,
+            dashboard: DASHBOARD_URL,
+            login: PIN_URL,
+            pay: ABOS_URL,
+            requireSlug: true,
+            checkSubscription: false
+          });
+          if(res && res.ok === false) return false;
+          return true;
+        }catch(_){
+          return true;
+        }
+      }
+
+      function ensureSupabase(){
+        if(SB_CLIENT) return SB_CLIENT;
+        if(typeof window.DIGIY_GUARD?.getSb === "function"){
+          try{
+            const gsb = window.DIGIY_GUARD.getSb();
+            if(gsb){ SB_CLIENT = gsb; return SB_CLIENT; }
+          }catch(_){}
+        }
+        if(!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
+        if(!window.supabase || typeof window.supabase.createClient !== "function") return null;
+
+        SB_CLIENT = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false,
+            storage: {
+              getItem: () => null,
+              setItem: () => {},
+              removeItem: () => {}
+            }
+          },
+          global: {
+            fetch: (...args) => fetch(...args)
+          }
+        });
+        return SB_CLIENT;
+      }
+
+      async function rpcFirstSuccess(name, payloads){
+        const client = ensureSupabase();
+        if(!client) throw new Error("supabase_not_ready");
+        let lastError = null;
+        for(const args of payloads){
+          try{
+            const { data, error } = await client.rpc(name, args);
+            if(error){ lastError = error; continue; }
+            return data;
+          }catch(err){ lastError = err; }
+        }
+        throw lastError || new Error(`RPC ${name} échouée`);
+      }
+
+      async function resolvePhoneFromSlug(slug){
+        const client = ensureSupabase();
+        if(!client || !slug) return "";
+        const { data, error } = await client
+          .from("digiy_subscriptions_public")
+          .select("phone,slug,module")
+          .eq("slug", slug)
+          .limit(1)
+          .maybeSingle();
+        if(error) throw error;
+        return normPhone(data?.phone || "");
+      }
+
+      async function getAccess(phone){
+        if(!phone) return false;
+        try{
+          const res = await rpcFirstSuccess("digiy_has_access", [
+            { p_phone: phone, p_module: MODULE_CODE },
+            { phone, module: MODULE_CODE }
+          ]);
+          if(typeof res === "boolean") return res;
+          if(res && typeof res.ok === "boolean") return res.ok;
+          if(res && typeof res.has_access === "boolean") return res.has_access;
+          if(res && typeof res.allowed === "boolean") return res.allowed;
+          if(res && typeof res.access === "boolean") return res.access;
+          return !!res;
+        }catch(_){
+          return false;
+        }
+      }
+
+      async function getStoreContext(slug){
+        const client = ensureSupabase();
+        if(!client || !slug) return null;
+
+        try{
+          const { data, error } = await client
+            .from("digiy_pos_public_profiles")
+            .select("*")
+            .eq("slug", slug)
+            .maybeSingle();
+          if(!error && data) return data;
+        }catch(_){}
+
+        try{
+          const data = await rpcFirstSuccess("digiy_pos_get_caisse_by_slug", [{ p_slug: slug }, { slug }]);
+          if(data && data.ok === true){
+            return data.profile || data.store || data;
+          }
+        }catch(_){}
+
+        return null;
+      }
+
+      function cacheKey(slug){
+        return `${CACHE_PREFIX}${slug || "unknown"}`;
+      }
+
+      function readLocalProducts(slug){
+        try{
+          const raw = localStorage.getItem(cacheKey(slug));
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        }catch(_){
+          return [];
+        }
+      }
+
+      function writeLocalProducts(slug, items){
+        try{
+          localStorage.setItem(cacheKey(slug), JSON.stringify(Array.isArray(items) ? items : []));
+        }catch(_){}
+      }
+
+      function makeId(){
+        return "prd_" + Math.random().toString(36).slice(2, 10);
+      }
+
+      function normalizeProduct(row){
+        const r = row || {};
+        return {
+          id: String(r.id || r.product_id || makeId()),
+          slug: normSlug(r.slug || STATE.slug || ""),
+          owner_phone: normPhone(r.owner_phone || r.phone || STATE.phone || ""),
+          name: String(r.name || r.product_name || "").trim(),
+          category: String(r.category || "").trim(),
+          sku: String(r.sku || "").trim(),
+          price_xof: Number(r.price_xof ?? r.price ?? 0) || 0,
+          stock_qty: Number(r.stock_qty ?? r.stock ?? 0) || 0,
+          note_text: String(r.note_text || r.note || r.description || "").trim(),
+          image_url: String(r.image_url || r.photo_url || "").trim(),
+          is_published: typeof r.is_published === "boolean" ? r.is_published : !!r.published,
+          created_at: r.created_at || new Date().toISOString(),
+          updated_at: r.updated_at || new Date().toISOString()
+        };
+      }
+
+      async function loadProducts(slug){
+        const client = ensureSupabase();
+        if(client){
+          try{
+            const { data, error } = await client
+              .from("digiy_pos_products")
+              .select("*")
+              .eq("slug", slug)
+              .order("updated_at", { ascending: false });
+
+            if(!error && Array.isArray(data)){
+              STATE.mode = "Supabase";
+              return data.map(normalizeProduct);
+            }
+          }catch(_){}
+        }
+
+        STATE.mode = "Local";
+        return readLocalProducts(slug).map(normalizeProduct);
+      }
+
+      async function saveProduct(product){
+        const item = normalizeProduct(product);
+        item.updated_at = new Date().toISOString();
+
+        const client = ensureSupabase();
+        if(client){
+          try{
+            let res;
+            if(item.id && !String(item.id).startsWith("prd_")){
+              res = await client
+                .from("digiy_pos_products")
+                .upsert(item, { onConflict: "id" })
+                .select("*")
+                .maybeSingle();
+            } else {
+              res = await client
+                .from("digiy_pos_products")
+                .insert(item)
+                .select("*")
+                .maybeSingle();
+            }
+
+            if(!res?.error){
+              STATE.mode = "Supabase";
+              return normalizeProduct(res.data || item);
+            }
+          }catch(_){}
+        }
+
+        const items = readLocalProducts(STATE.slug).map(normalizeProduct);
+        const existingIndex = items.findIndex(x => x.id === item.id);
+        if(existingIndex >= 0) items[existingIndex] = item;
+        else items.unshift(item);
+        writeLocalProducts(STATE.slug, items);
+        STATE.mode = "Local";
+        return item;
+      }
+
+      async function deleteProduct(id){
+        const client = ensureSupabase();
+        if(client && id && !String(id).startsWith("prd_")){
+          try{
+            const { error } = await client.from("digiy_pos_products").delete().eq("id", id);
+            if(!error){
+              STATE.mode = "Supabase";
+              return true;
+            }
+          }catch(_){}
+        }
+
+        const items = readLocalProducts(STATE.slug).map(normalizeProduct).filter(x => x.id !== id);
+        writeLocalProducts(STATE.slug, items);
+        STATE.mode = "Local";
+        return true;
+      }
+
+      function setNotice(kind, html){
+        const box = qs("noticeBox");
+        box.className = `notice ${kind || "info"}`;
+        box.innerHTML = html;
+      }
+
+      function setFormNotice(text, ok=true){
+        const box = qs("formNotice");
+        box.className = `notice ${ok ? "ok" : "bad"}`;
+        box.textContent = text;
+      }
+
+      function updateHeader(){
+        qs("pillAccess").textContent = STATE.access ? "Accès actif" : "Accès requis";
+        qs("dotAccess").classList.toggle("ok", !!STATE.access);
+        qs("dotAccess").classList.toggle("bad", !STATE.access);
+        qs("pillStore").textContent = STATE.storeName || "Boutique";
+        qs("metaStoreName").textContent = STATE.storeName || "—";
+        qs("metaPhone").textContent = STATE.phone ? `+${STATE.phone}` : "—";
+        qs("metaSlug").textContent = STATE.slug || "—";
+        qs("metaMode").textContent = STATE.mode || "—";
+
+        const q = { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE };
+        qs("btnHall").href = buildUrl(HALL_URL, q);
+        qs("btnDashboard").href = buildUrl(DASHBOARD_URL, q);
+        qs("btnProfile").href = buildUrl(PROFILE_URL, q);
+        qs("btnCaisse").href = buildUrl(CAISSE_URL, q);
+        qs("btnPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
+        qs("btnBlockedPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
+        qs("btnBlockedAbos").href = buildUrl(ABOS_URL, { base_module: MODULE_CODE, module: MODULE_CODE, phone: STATE.phone, slug: STATE.slug });
+      }
+
+      function renderBlocked(text){
+        qs("blockedText").textContent = text || "Entre avec ton code d'accès ou active ton abonnement pour gérer tes articles.";
+        qs("liveShell").style.display = "none";
+        qs("blockedShell").style.display = "grid";
+      }
+
+      function renderLive(){
+        qs("blockedShell").style.display = "none";
+        qs("liveShell").style.display = "";
+      }
+
+      function currentFormProduct(){
+        return normalizeProduct({
+          id: STATE.editingId || makeId(),
+          slug: STATE.slug,
+          owner_phone: STATE.phone,
+          name: qs("productName").value.trim(),
+          category: qs("productCategory").value.trim(),
+          sku: qs("productSku").value.trim(),
+          price_xof: Number(qs("productPrice").value || 0),
+          stock_qty: Number(qs("productStock").value || 0),
+          note_text: qs("productNote").value.trim(),
+          image_url: qs("productImage").value.trim(),
+          is_published: qs("productPublished").value === "true"
+        });
+      }
+
+      function clearForm(){
+        STATE.editingId = null;
+        qs("formTitle").textContent = "Nouvel article";
+        qs("productName").value = "";
+        qs("productCategory").value = "";
+        qs("productSku").value = "";
+        qs("productPrice").value = "";
+        qs("productStock").value = "";
+        qs("productNote").value = "";
+        qs("productImage").value = "";
+        qs("productPublished").value = "true";
+        qs("btnDeleteProduct").style.display = "none";
+        setFormNotice("Remplis les champs puis enregistre.", true);
+      }
+
+      function fillForm(item){
+        STATE.editingId = item.id;
+        qs("formTitle").textContent = "Modifier l’article";
+        qs("productName").value = item.name || "";
+        qs("productCategory").value = item.category || "";
+        qs("productSku").value = item.sku || "";
+        qs("productPrice").value = item.price_xof || "";
+        qs("productStock").value = item.stock_qty || "";
+        qs("productNote").value = item.note_text || "";
+        qs("productImage").value = item.image_url || "";
+        qs("productPublished").value = item.is_published ? "true" : "false";
+        qs("btnDeleteProduct").style.display = "inline-flex";
+        setFormNotice("Article chargé. Tu peux corriger puis enregistrer.", true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function filteredProducts(){
+        const text = String(qs("searchText").value || "").trim().toLowerCase();
+        const status = qs("filterStatus").value;
+        const sortBy = qs("sortBy").value;
+
+        let items = [...STATE.products];
+
+        if(text){
+          items = items.filter(item =>
+            item.name.toLowerCase().includes(text) ||
+            item.category.toLowerCase().includes(text) ||
+            item.sku.toLowerCase().includes(text) ||
+            item.note_text.toLowerCase().includes(text)
+          );
+        }
+
+        if(status === "published") items = items.filter(item => item.is_published);
+        if(status === "draft") items = items.filter(item => !item.is_published);
+        if(status === "low") items = items.filter(item => Number(item.stock_qty || 0) <= LOW_STOCK_LIMIT);
+
+        if(sortBy === "name") items.sort((a,b) => a.name.localeCompare(b.name, "fr"));
+        if(sortBy === "price_desc") items.sort((a,b) => Number(b.price_xof || 0) - Number(a.price_xof || 0));
+        if(sortBy === "price_asc") items.sort((a,b) => Number(a.price_xof || 0) - Number(b.price_xof || 0));
+        if(sortBy === "stock_desc") items.sort((a,b) => Number(b.stock_qty || 0) - Number(a.stock_qty || 0));
+        if(sortBy === "stock_asc") items.sort((a,b) => Number(a.stock_qty || 0) - Number(b.stock_qty || 0));
+        if(sortBy === "recent") items.sort((a,b) => new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime());
+
+        return items;
+      }
+
+      function renderKpis(){
+        const items = STATE.products;
+        const count = items.length;
+        const stock = items.reduce((sum, item) => sum + (Number(item.stock_qty || 0)), 0);
+        const value = items.reduce((sum, item) => sum + (Number(item.stock_qty || 0) * Number(item.price_xof || 0)), 0);
+
+        qs("kpiCount").textContent = String(count);
+        qs("kpiStock").textContent = String(stock);
+        qs("kpiValue").textContent = money(value);
+
+        const published = items.filter(x => x.is_published).length;
+        const low = items.filter(x => Number(x.stock_qty || 0) <= LOW_STOCK_LIMIT).length;
+
+        setNotice(
+          low > 0 ? "warn" : "ok",
+          low > 0
+            ? `Tu as <b>${low}</b> article(s) en stock faible. <b>${published}</b> article(s) sont visibles dans la boutique. Sauvegarde : <b>${STATE.mode}</b>.`
+            : `Catalogue prêt. <b>${published}</b> article(s) visibles. Sauvegarde : <b>${STATE.mode}</b>.`
+        );
+      }
+
+      function renderList(){
+        const body = qs("productsBody");
+        const items = filteredProducts();
+
+        if(!items.length){
+          body.innerHTML = `<tr><td colspan="5" class="empty">Aucun article pour l’instant.</td></tr>`;
+          qs("listHelper").textContent = "Ajoute ton premier article pour commencer.";
+          renderKpis();
+          return;
+        }
+
+        body.innerHTML = items.map(item => {
+          const stock = Number(item.stock_qty || 0);
+          const stockBadge =
+            stock <= 0
+              ? `<span class="badge bad">Rupture</span>`
+              : stock <= LOW_STOCK_LIMIT
+              ? `<span class="badge warn">Stock faible</span>`
+              : `<span class="badge ok">En stock</span>`;
+
+          const pubBadge = item.is_published
+            ? `<span class="badge ok">Visible</span>`
+            : `<span class="badge info">Brouillon</span>`;
+
+          return `
+            <tr>
+              <td>
+                <div style="font-weight:950">${esc(item.name || "—")}</div>
+                <div style="margin-top:4px;color:var(--muted);font-size:12px;font-weight:800">
+                  ${esc(item.category || "Sans catégorie")}
+                  ${item.sku ? ` • ${esc(item.sku)}` : ""}
+                </div>
+              </td>
+              <td>${money(item.price_xof || 0)}</td>
+              <td>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <span>${Number(item.stock_qty || 0)}</span>
+                  ${stockBadge}
+                </div>
+              </td>
+              <td>${pubBadge}</td>
+              <td>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <button class="smallBtn" data-edit="${esc(item.id)}">Modifier</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+        body.querySelectorAll("[data-edit]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const item = STATE.products.find(x => x.id === btn.getAttribute("data-edit"));
+            if(item) fillForm(item);
+          });
+        });
+
+        qs("listHelper").textContent = `${items.length} article(s) affiché(s).`;
+        renderKpis();
+      }
+
+      async function hydrate(){
+        await awaitGuardReady();
+        await bootGuard();
+
+        let slug = getResolvedSlug();
+        let phone = getResolvedPhone();
+
+        if(!slug){
+          reveal();
+          renderBlocked("Ta boutique n’a pas pu être identifiée. Passe par ton lien pro ou ton QR DIGIY.");
+          return;
+        }
+
+        if(!phone){
+          try{ phone = await resolvePhoneFromSlug(slug); }catch(_){}
+        }
+
+        STATE.slug = slug;
+        STATE.phone = phone || "";
+        STATE.access = await getAccess(STATE.phone);
+
+        if(!STATE.phone || !STATE.access){
+          reveal();
+          updateHeader();
+          renderBlocked("Entre avec ton code d’accès ou active ton abonnement pour ouvrir cet atelier.");
+          return;
+        }
+
+        const ctx = await getStoreContext(slug);
+        STATE.storeName = String(
+          ctx?.display_name ||
+          ctx?.shop_name ||
+          ctx?.store_name ||
+          ctx?.name ||
+          "MON COMMERCE"
+        ).trim();
+
+        STATE.products = await loadProducts(slug);
+        updateHeader();
+        renderLive();
+        renderList();
+        reveal();
+      }
+
+      async function saveCurrentProduct(){
+        const item = currentFormProduct();
+
+        if(!item.name){
+          setFormNotice("Nom de l’article requis.", false);
+          return;
+        }
+        if(item.price_xof < 0){
+          setFormNotice("Prix invalide.", false);
+          return;
+        }
+        if(item.stock_qty < 0){
+          setFormNotice("Stock invalide.", false);
+          return;
+        }
+
+        const saved = await saveProduct(item);
+        const idx = STATE.products.findIndex(x => x.id === saved.id);
+        if(idx >= 0) STATE.products[idx] = normalizeProduct(saved);
+        else STATE.products.unshift(normalizeProduct(saved));
+
+        clearForm();
+        renderList();
+        updateHeader();
+        setFormNotice(`Article enregistré ✅ — sauvegarde ${STATE.mode}.`, true);
+      }
+
+      async function deleteCurrentProduct(){
+        if(!STATE.editingId) return;
+        const current = STATE.products.find(x => x.id === STATE.editingId);
+        if(!current) return;
+
+        const ok = confirm(`Supprimer "${current.name}" ?`);
+        if(!ok) return;
+
+        await deleteProduct(current.id);
+        STATE.products = STATE.products.filter(x => x.id !== current.id);
+        clearForm();
+        renderList();
+        updateHeader();
+        setFormNotice("Article supprimé ✅", true);
+      }
+
+      function exportProducts(){
+        const payload = {
+          slug: STATE.slug,
+          phone: STATE.phone,
+          storeName: STATE.storeName,
+          exported_at: new Date().toISOString(),
+          products: STATE.products
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `digiy-pos-${STATE.slug || "catalogue"}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      async function importProducts(file){
+        if(!file) return;
+        try{
+          const text = await file.text();
+          const json = JSON.parse(text);
+          const rows = Array.isArray(json) ? json : Array.isArray(json.products) ? json.products : [];
+          if(!rows.length){
+            setFormNotice("Import vide.", false);
+            return;
+          }
+
+          const normalized = rows.map(normalizeProduct).map(item => ({
+            ...item,
+            slug: STATE.slug,
+            owner_phone: STATE.phone
+          }));
+
+          for(const item of normalized){
+            const saved = await saveProduct(item);
+            const idx = STATE.products.findIndex(x => x.id === saved.id);
+            if(idx >= 0) STATE.products[idx] = normalizeProduct(saved);
+            else STATE.products.unshift(normalizeProduct(saved));
+          }
+
+          renderList();
+          updateHeader();
+          setFormNotice(`Import terminé ✅ — ${normalized.length} article(s).`, true);
+        }catch(err){
+          setFormNotice("Import impossible : fichier invalide.", false);
+        } finally {
+          qs("fileImport").value = "";
+        }
+      }
+
+      async function boot(){
+        reveal();
+
+        qs("btnReloadTop").addEventListener("click", () => hydrate());
+        qs("btnNew").addEventListener("click", clearForm);
+        qs("btnSaveProduct").addEventListener("click", saveCurrentProduct);
+        qs("btnClearForm").addEventListener("click", clearForm);
+        qs("btnDeleteProduct").addEventListener("click", deleteCurrentProduct);
+        qs("btnExport").addEventListener("click", exportProducts);
+        qs("btnImport").addEventListener("click", () => qs("fileImport").click());
+        qs("fileImport").addEventListener("change", (e) => importProducts(e.target.files?.[0] || null));
+
+        ["searchText", "filterStatus", "sortBy"].forEach(id => {
+          qs(id).addEventListener("input", renderList);
+          qs(id).addEventListener("change", renderList);
+        });
+
+        clearForm();
+        await hydrate();
+      }
+
+      boot().catch(() => {
+        reveal();
+        renderBlocked("Problème technique. Entre avec ton code ou recharge la page.");
       });
-    } catch(e) { /* silencieux */ }
-    return u.toString();
-  }
-
-  function buildSupportUrl(phone, slug) {
-    const text = ["Bonjour JB,", "j'ai besoin d'aide pour MON COMMERCE by DIGIY.",
-      slug  ? `Slug : ${slug}`        : "",
-      phone ? `Téléphone : +${phone}` : ""
-    ].filter(Boolean).join(" ");
-    return `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(text)}`;
-  }
-
-  function buildAbosParams(phone, slug, moduleCode = MODULE_CODE) {
-    return { base_module: MODULE_CODE, module: moduleCode, phone, slug };
-  }
-
-  function saveLocalAccess(slug, phone) {
-    if (slug)  { localStorage.setItem("digiy_pos_last_slug",  slug);  sessionStorage.setItem("digiy_pos_last_slug",  slug); }
-    if (phone) { localStorage.setItem("digiy_pos_last_phone", phone); sessionStorage.setItem("digiy_pos_last_phone", phone); }
-    const payload = { slug: slug||"", phone: phone||"", module: MODULE_CODE, verified:true, ts: Date.now() };
-    localStorage.setItem("DIGIY_POS_SESSION", JSON.stringify(payload));
-    localStorage.setItem("DIGIY_ACCESS",      JSON.stringify(payload));
-  }
-
-  function getParam(name) { return new URL(location.href).searchParams.get(name) || ""; }
-
-  function getGuardSession() {
-    if (typeof window.DIGIY_GUARD?.getSession === "function") {
-      try { return window.DIGIY_GUARD.getSession() || {}; } catch(_) {}
-    }
-    return window.DIGIY_GUARD?.state || {};
-  }
-
-  function getSlug() {
-    const gs = getGuardSession();
-    return normSlug(
-      getParam("slug") || gs.slug ||
-      sessionStorage.getItem("digiy_pos_last_slug") || localStorage.getItem("digiy_pos_last_slug") ||
-      sessionStorage.getItem("digiy_pos_slug")      || localStorage.getItem("digiy_pos_slug") || ""
-    );
-  }
-
-  function getPhone() {
-    const gs = getGuardSession();
-    return cleanDigits(
-      getParam("phone") || getParam("tel") || gs.phone ||
-      sessionStorage.getItem("digiy_pos_last_phone") || localStorage.getItem("digiy_pos_last_phone") ||
-      sessionStorage.getItem("digiy_pos_phone")       || localStorage.getItem("digiy_pos_phone") || ""
-    );
-  }
-
-  function setNotifs(items) {
-    const box = $("notifList");
-    box.innerHTML = "";
-    if (!items.length) {
-      box.innerHTML = `<div class="notif"><div><b>Rien à signaler</b><div class="muted" style="font-weight:800;margin-top:2px">Tout roule.</div></div><div class="tag ok">OK</div></div>`;
-      return;
-    }
-    for (const it of items) {
-      const tagClass = it.level === "warn" ? "warn" : it.level === "ok" ? "ok" : "info";
-      const div = document.createElement("div");
-      div.className = "notif";
-      div.innerHTML = `<div><b>${it.title}</b><div class="muted" style="font-weight:800;margin-top:2px">${it.text}</div></div><div class="tag ${tagClass}">${it.tag}</div>`;
-      box.appendChild(div);
-    }
-  }
-
-  function daysBetween(aIso, bIso) {
-    const a = new Date(aIso).getTime(), b = new Date(bIso).getTime();
-    if (Number.isNaN(a) || Number.isNaN(b)) return null;
-    return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
-  }
-
-  async function awaitGuardReady() {
-    try {
-      if (typeof window.DIGIY_GUARD?.ready === "function") await window.DIGIY_GUARD.ready();
-      else if (window.DIGIY_GUARD?.ready?.then) await window.DIGIY_GUARD.ready;
-    } catch(err) { log("guard ready KO", { message: err?.message || String(err) }); }
-  }
-
-  async function bootGuard() {
-    if (typeof window.DIGIY_GUARD?.boot !== "function") return true;
-    try {
-      const res = await window.DIGIY_GUARD.boot({ module: MODULE_CODE, dashboard: DASHBOARD_URL, login: PIN_URL, pay: ABOS_URL, requireSlug:true, checkSubscription:false });
-      log("guard boot", res);
-      if (res && res.ok === false) return false;
-      return true;
-    } catch(err) { log("guard boot erreur", { message: err?.message || String(err) }); return true; }
-  }
-
-  function makeFallbackSb() {
-    if (window.supabase?.createClient && SUPABASE_URL && SUPABASE_ANON) {
-      return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, { auth:{ persistSession:false, autoRefreshToken:false, detectSessionInUrl:false } });
-    }
-    return null;
-  }
-
-  async function getSb() {
-    if (sb) return sb;
-    if (typeof window.DIGIY_GUARD?.getSb === "function") {
-      try { sb = window.DIGIY_GUARD.getSb(); if (sb) return sb; } catch(err) { log("guard getSb erreur", { message: err?.message || String(err) }); }
-    }
-    sb = makeFallbackSb();
-    return sb;
-  }
-
-  async function rpcFirstSuccess(name, payloads) {
-    const client = await getSb();
-    if (!client) throw new Error("supabase_not_ready");
-    let lastError = null;
-    for (const payload of payloads) {
-      try {
-        log(`RPC ${name} tentative`, payload);
-        const { data, error } = await client.rpc(name, payload);
-        if (error) { lastError = error; log(`RPC ${name} erreur`, { message: error.message, details: error.details, hint: error.hint }); continue; }
-        log(`RPC ${name} OK`, data);
-        return data;
-      } catch(err) { lastError = err; log(`RPC ${name} exception`, { message: err?.message || String(err) }); }
-    }
-    throw lastError || new Error(`RPC ${name} échouée`);
-  }
-
-  async function resolvePhoneFromSlug(slug) {
-    const client = await getSb();
-    if (!client || !slug) return "";
-    const { data, error } = await client.from("digiy_subscriptions_public").select("phone,module,slug").eq("slug", slug).limit(1).maybeSingle();
-    if (error) throw error;
-    return cleanDigits(data?.phone || "");
-  }
-
-  async function digiyHasAccess(phone, module) {
-    const res = await rpcFirstSuccess("digiy_has_access", [{ p_phone: phone, p_module: module }, { phone, module }]);
-    if (typeof res === "boolean") return res;
-    if (res && typeof res.ok         === "boolean") return res.ok;
-    if (res && typeof res.has_access === "boolean") return res.has_access;
-    if (res && typeof res.allowed    === "boolean") return res.allowed;
-    if (res && typeof res.access     === "boolean") return res.access;
-    return !!res;
-  }
-
-  async function digiyGetSubscriptionFull(phone, module) {
-    try { return await rpcFirstSuccess("digiy_get_subscription_status", [{ p_phone: phone, p_module: module }, { phone, module }]); }
-    catch(err) { log("digiy_get_subscription_status indisponible", { message: err?.message || String(err) }); return null; }
-  }
-
-  async function digiyGetDashboardStats(phone, module) {
-    try { return await rpcFirstSuccess("digiy_get_dashboard_stats", [{ p_phone: phone, p_module: module }, { phone, module }]); }
-    catch(err) { log("digiy_get_dashboard_stats indisponible", { message: err?.message || String(err) }); return { month_xof:null, tx_count:null, today_hint:"Aujourd'hui" }; }
-  }
-
-  async function digiyGetBoostStatus(phone) {
-    try { return await rpcFirstSuccess("digiy_get_boost_status", [{ p_phone: phone }, { phone }]); }
-    catch(err) { log("digiy_get_boost_status indisponible", { message: err?.message || String(err) }); return null; }
-  }
-
-  async function digiyBuildPayUrl(module, phone, plan) {
-    return await rpcFirstSuccess("digiy_build_pay_url", [{ p_module: module, p_phone: phone, p_plan: plan }, { module, phone, plan }]);
-  }
-
-  async function getStoreContext(slug) {
-    try { return await rpcFirstSuccess("digiy_pos_get_store_context_by_slug", [{ p_slug: slug }, { slug }]); }
-    catch(err1) {
-      try { return await rpcFirstSuccess("pos_get_store_context_by_slug", [{ p_slug: slug }, { slug }]); }
-      catch(err2) { log("store context indisponible", { first: err1?.message || String(err1), second: err2?.message || String(err2) }); return null; }
-    }
-  }
-
-  /* ━━━ wireNav : try/catch pour ne jamais faire tomber init() ━━━ */
-  function wireNav(phone, slug) {
-    try {
-      const q = { slug, phone, module: MODULE_CODE };
-      $("btnHall").href          = buildUrl(HALL_URL,  q);
-      $("btnCaisse").href        = buildUrl(CAISSE_URL, q);
-      $("btnAdmin").href         = buildUrl(ADMIN_URL,  q);
-      $("btnSettings").href      = buildUrl(ADMIN_URL,  q);
-      $("btnAbosTop").href       = buildUrl(ABOS_URL,   buildAbosParams(phone, slug));
-      $("btnSupportTop").href    = buildSupportUrl(phone, slug);
-      $("linkSupport").href      = buildSupportUrl(phone, slug);
-      $("linkPayments").href     = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
-      $("btnPinTop").href        = buildUrl(PIN_URL, { slug, phone, module: MODULE_CODE, "return": DASHBOARD_URL });
-      $("btnPublicFloating").href = buildUrl(PUBLIC_URL, { slug });
-      $("btnBlockedPin").href    = buildUrl(PIN_URL, { slug, phone, module: MODULE_CODE, "return": DASHBOARD_URL });
-      $("btnBlockedAbos").href   = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
-    } catch(e) {
-      log("wireNav erreur silencieuse", { message: e.message || String(e) });
-    }
-  }
-
-  /* ━━━ showBlocked : langage humain, pills sans jargon ━━━ */
-  function showBlocked(title, text, pill) {
-    $("dashboardContent").style.display = "none";
-    $("blockedShell").style.display     = "grid";
-    $("blockedTitle").textContent        = title;
-    $("blockedText").innerHTML           = text;
-    /* ━━━ AVANT : "Bloqué", "Contrôle", "Inactif" → jargon banni ━━━ */
-    const pillLabel = pill || "Accès requis";
-    $("pillStatus").innerHTML = `Statut : <b>${pillLabel}</b>`;
-  }
-
-  function showDashboard() {
-    $("blockedShell").style.display     = "none";
-    $("dashboardContent").style.display = "block";
-  }
-
-  async function init() {
-    reveal(); // filet 1 : on révèle dès le départ
-
-    /* ━━━ Textes JS — doctrine façade ━━━ */
-    $("brandTitle").textContent       = `${MODULE_LABEL} — Mon espace de travail`;
-    $("brandSub").textContent         = "Mon activité · boutique · abonnement";
-    $("btnPrimaryAction").textContent = PRIMARY_ACTION_LABEL;
-    $("actionHint").textContent       = PRIMARY_ACTION_HINT;
-    $("actionDesc").textContent       = "Entre dans ta caisse, pilote tes produits et ton stock depuis un seul endroit.";
-    $("pillStatus").innerHTML         = `Statut : <b>…</b>`;
-
-    await awaitGuardReady();
-    await bootGuard();
-
-    let slug  = getSlug();
-    let phone = getPhone();
-
-    state.slug  = slug;
-    state.phone = phone;
-
-    $("slugBox").textContent  = slug  || "—";
-    $("phoneBox").textContent = phone ? `+${phone}` : "—";
-    wireNav(phone, slug);
-
-    if (!slug) {
-      log("slug manquant");
-      /* ━━━ AVANT : "slug POS", "pin.html?slug=…" → jargon banni ━━━ */
-      showBlocked(
-        "Identifiant manquant",
-        "Entre avec ton code d'accès ou passe par ton lien d'accès pour ouvrir ton espace.",
-        "Accès requis"
-      );
-      return;
-    }
-
-    try {
-      if (!phone) { phone = await resolvePhoneFromSlug(slug); log("phone résolu depuis slug", { slug, phone }); }
-    } catch(err) { log("resolvePhoneFromSlug KO", { message: err?.message || String(err) }); }
-
-    state.slug  = slug;
-    state.phone = phone || "";
-    saveLocalAccess(slug, state.phone);
-
-    $("slugBox").textContent  = slug  || "—";
-    $("phoneBox").textContent = state.phone ? `+${state.phone}` : "—";
-    wireNav(state.phone, slug);
-
-    let access = false;
-    if (state.phone) {
-      try { access = await digiyHasAccess(state.phone, MODULE_CODE); }
-      catch(err) { log("digiyHasAccess KO", { message: err?.message || String(err) }); }
-    }
-    state.access = !!access;
-
-    if (!state.phone) {
-      showBlocked(
-        "Boutique introuvable",
-        "Le lien n'a pas permis d'identifier ta boutique. Entre avec ton code pour reconstruire ta session.",
-        "En attente"
-      );
-      return;
-    }
-
-    if (!state.access) {
-      showBlocked(
-        "Abonnement requis",
-        "Ta boutique est reconnue, mais ton accès MON COMMERCE n'est pas encore actif. Active ton abonnement ou entre par ton PIN.",
-        "À activer"
-      );
-      return;
-    }
-
-    showDashboard();
-
-    const storeCtx = await getStoreContext(slug);
-    state.storeName = String(storeCtx?.shop_name || storeCtx?.display_name || storeCtx?.store?.name || storeCtx?.profile?.display_name || MODULE_LABEL).trim();
-
-    const status = await digiyGetSubscriptionFull(state.phone, MODULE_CODE);
-    state.statusPayload = status || null;
-
-    const expiresAt = status?.expires_at || status?.current_period_end || null;
-    const plan      = status?.plan || status?.plan_code || "";
-    const pay       = status?.payment_ref ? "validé" : "ok";
-    state.plan      = plan;
-
-    $("dot").classList.remove("bad");
-    $("dot").classList.add("ok");
-    $("statusLine").textContent = "Abonnement actif";
-    $("expiryLine").textContent = expiresAt ? `Expire le ${fmtDateFR(expiresAt)}` : "Expiration : —";
-    $("pillStatus").innerHTML   = `Statut : <b>Actif</b>`;
-    $("metaLine").innerHTML     = plan
-      ? `<span>Abonnement : ${plan}</span><span>•</span><span>Paiement : ${pay}</span>`
-      : `<span>Abonnement actif</span><span>•</span><span>Paiement : ${pay}</span>`;
-    /* ━━━ brandSub dynamique : nom boutique, pas jargon ━━━ */
-    $("brandSub").textContent   = state.storeName ? `${state.storeName} · mon espace de travail` : "Mon espace de travail · boutique active";
-
-    const stats = await digiyGetDashboardStats(state.phone, MODULE_CODE);
-    const month = stats?.month_xof ?? null;
-    const tx    = stats?.tx_count  ?? null;
-
-    $("moneyMonth").textContent = month !== null ? `${Number(month).toLocaleString("fr-FR")} FCFA` : "— FCFA";
-    $("txCount").textContent    = tx    !== null ? `${tx} transactions` : "— transactions";
-    $("todayHint").textContent  = stats?.today_hint || "Aujourd'hui";
-
-    const notifs = [];
-
-    if (expiresAt) {
-      const d = daysBetween(new Date().toISOString(), expiresAt);
-      notifs.push(d !== null && d <= 3
-        ? { level:"warn", tag:"J-3",   title:"Abonnement bientôt expiré",  text:`Expire dans ${d} jour(s). Renouvelle pour éviter la coupure.` }
-        : { level:"ok",   tag:"OK",    title:"Abonnement",                  text:"Actif — prochain contrôle : J-3." }
-      );
-    }
-
-    const boost = await digiyGetBoostStatus(state.phone);
-    if (boost?.active) {
-      $("boostStatus").textContent = `Statut boost : actif jusqu'au ${fmtDateFR(boost.expires_at)} · +${boost.views_today || 0} vues aujourd'hui`;
-      $("btnBoost").textContent    = "Actif";
-      $("btnBoost").disabled       = true;
-      notifs.push({ level:"info", tag:"BOOST",  title:"Boost actif",      text:"Visibilité augmentée. Continue ton activité." });
-    } else {
-      $("boostStatus").textContent = "Statut boost : inactif";
-      notifs.push({ level:"info", tag:"OPTION", title:"Boost disponible", text:"Active le BOOST si tu veux plus de visibilité." });
-    }
-
-    if (month === null || tx === null) {
-      notifs.push({ level:"info", tag:"DATA", title:"Stats à brancher", text:"Le chiffre exact arrive dès que la connexion données est posée." });
-    }
-
-    setNotifs(notifs);
-
-    $("btnManageSub").onclick     = () => { location.href = buildUrl(ABOS_URL, buildAbosParams(state.phone, slug)); };
-    $("btnPrimaryAction").onclick = () => { location.href = buildUrl(CAISSE_URL, { slug, phone: state.phone, module: MODULE_CODE }); };
-    $("btnBoostInfo").onclick     = () => { alert("BOOST : +50% d'apparition pendant 7 jours. Paiement direct. Aucun spam."); };
-
-    $("btnBoost").onclick = async () => {
-      try {
-        $("btnBoost").disabled    = true;
-        $("btnBoost").textContent = "…";
-        const payUrlPayload = await digiyBuildPayUrl(BOOST.module, state.phone, BOOST.plan);
-        const url = typeof payUrlPayload === "string" ? payUrlPayload : (payUrlPayload?.url || payUrlPayload?.pay_url || null);
-        if (!url) throw new Error("URL paiement BOOST manquante");
-        location.href = url;
-      } catch(e) {
-        console.error(e);
-        alert("Impossible d'activer le BOOST pour le moment. Réessaie ou contacte le support.");
-        $("btnBoost").disabled    = false;
-        $("btnBoost").textContent = "Activer";
-      }
-    };
-
-    log("dashboard ready", { slug, phone: state.phone, access: state.access, plan: state.plan, store: state.storeName });
-  }
-
-  init().catch((err) => {
-    console.error(err);
-    log("init fatale", { message: err?.message || String(err) });
-    reveal(); // filet 2 : catch fatal
-    showBlocked(
-      "Problème technique",
-      "Ton espace n'a pas pu finir de charger. Entre avec ton code ou contacte le support.",
-      "Erreur"
-    );
-  });
-})();
-</script>
+    })();
+  </script>
 </body>
 </html>
