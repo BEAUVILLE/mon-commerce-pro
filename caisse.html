@@ -1,11 +1,12 @@
+
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#07140f"/>
   <title>Ma caisse · MON COMMERCE by DIGIY</title>
-  <meta name="theme-color" content="#07140f" />
-  <meta name="description" content="MON COMMERCE by DIGIY — ma caisse boutique, encaissement rapide, accès sécurisé." />
+  <meta name="description" content="MON COMMERCE by DIGIY — ma caisse boutique, catalogue, stock et préparation de vente."/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -27,6 +28,7 @@
       return digiyBasePath() + path;
     }
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./guard.js"></script>
   <script src="./claw-tools-pos.js"></script>
@@ -45,7 +47,7 @@
       --green:#22c55e;--green2:#16a34a;
       --warn:#f59e0b;--danger:#ef4444;--info:#60a5fa;
       --shadow:0 22px 56px rgba(0,0,0,.28);--shadow-soft:0 14px 34px rgba(0,0,0,.22);
-      --radius:26px;--radius-sm:18px;--max:1180px;
+      --radius:26px;--radius-sm:18px;--max:1240px;
       --fontA:"Outfit",system-ui,-apple-system,sans-serif;
     }
 
@@ -61,18 +63,13 @@
     }
 
     a{text-decoration:none;color:inherit}
-    button,input,select{font:inherit}
+    button,input,select,textarea{font:inherit}
 
-    /* ━━━ ANTI-ÉCRAN NOIR
-       .app était display:none révélé par classe.
-       On garde la classe pour compatibilité guard,
-       mais on ajoute le filet setTimeout côté JS. ━━━ */
     .app{display:none}
     html.app-ready .app{display:block}
 
-    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px 92px;}
+    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px 96px;}
 
-    /* ── FLOAT ── */
     .floating-site-btn{
       position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:90;
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -84,7 +81,6 @@
     }
     .floating-site-btn:hover{transform:translateY(-1px);border-color:rgba(250,204,21,.28);background:rgba(8,20,15,.94);}
 
-    /* ── TOPBAR ── */
     .topbar{
       position:sticky;top:0;z-index:70;margin-bottom:14px;
       backdrop-filter:blur(12px);background:rgba(4,17,13,.76);
@@ -93,46 +89,60 @@
     .topbar-inner{padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 
     .brand{display:flex;align-items:center;gap:12px;min-width:0;}
-    .brandBadge{width:48px;height:48px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.08));border:1px solid rgba(250,204,21,.16);box-shadow:0 16px 34px rgba(250,204,21,.10);font-size:24px;flex:0 0 auto;}
+    .brandBadge{
+      width:48px;height:48px;border-radius:18px;display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.08));
+      border:1px solid rgba(250,204,21,.16);box-shadow:0 16px 34px rgba(250,204,21,.10);
+      font-size:24px;flex:0 0 auto;
+    }
     .brandKicker{color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px;}
     .brandTitle{font-size:20px;line-height:1.08;font-weight:1000;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .brandSub{color:var(--muted);font-size:12px;font-weight:800;margin-top:3px;letter-spacing:.04em;}
 
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .navRow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);font-weight:900;font-size:12px;backdrop-filter:blur(10px);}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;
+      background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);
+      font-weight:900;font-size:12px;backdrop-filter:blur(10px);
+    }
     .pill strong{color:var(--text);font-weight:950;}
-
     .dot{width:10px;height:10px;border-radius:999px;background:var(--warn);flex:0 0 auto;box-shadow:0 0 0 4px rgba(255,255,255,.03);}
-    .dot.ok{background:var(--green)}.dot.bad{background:var(--danger)}
+    .dot.ok{background:var(--green)}
+    .dot.bad{background:var(--danger)}
 
-    /* ── BOUTONS ── */
-    .btn,.btn-outline,.btn-ghost{
+    .btn,.btn-outline,.btn-ghost,.btn-danger,.smallBtn{
       appearance:none;border:none;cursor:pointer;
       display:inline-flex;align-items:center;justify-content:center;gap:10px;
       min-height:46px;padding:12px 16px;border-radius:999px;
       font-weight:900;font-size:13px;letter-spacing:.02em;white-space:nowrap;
       transition:transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
     }
-    .btn:hover,.btn-outline:hover,.btn-ghost:hover{transform:translateY(-1px)}
-    .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled{opacity:.56;cursor:not-allowed;transform:none;}
+    .btn:hover,.btn-outline:hover,.btn-ghost:hover,.btn-danger:hover,.smallBtn:hover{transform:translateY(-1px)}
+    .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled,.btn-danger:disabled,.smallBtn:disabled{opacity:.56;cursor:not-allowed;transform:none;}
     .btn{color:#07110d;background:linear-gradient(135deg, var(--gold), var(--gold2));box-shadow:0 14px 30px rgba(250,204,21,.18);}
     .btn-outline{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--line2);}
     .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line2);}
+    .btn-danger{background:linear-gradient(135deg, rgba(239,68,68,.95), rgba(239,68,68,.72));color:#fff;}
+    .smallBtn{
+      min-height:38px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);
+      background:rgba(255,255,255,.04);color:var(--text);
+    }
 
-    /* ── HERO GRID ── */
-    .hero{display:grid;grid-template-columns:1.08fr .92fr;gap:12px;margin-bottom:12px;}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;overflow:hidden;}
-    .heroMain{position:relative;}
-    .heroMain::after{content:"";position:absolute;right:-90px;bottom:-100px;width:240px;height:240px;border-radius:999px;background:radial-gradient(circle, rgba(34,197,94,.14), transparent 70%);pointer-events:none;}
-
-    .heroBadge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;}
-
-    .statusLine{display:flex;align-items:flex-start;gap:10px;}
-
-    .bigTitle{margin:0;font-size:clamp(30px, 5vw, 56px);line-height:.96;letter-spacing:-.04em;font-weight:1000;max-width:11ch;}
+    .hero{display:grid;grid-template-columns:1.04fr .96fr;gap:12px;margin-bottom:12px;}
+    .sectionGrid{display:grid;gap:12px;grid-template-columns:1.08fr .92fr;margin-top:12px;}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);
+      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;overflow:hidden;
+    }
+    .heroBadge{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+      background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);color:var(--gold);
+      font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;
+    }
+    .bigTitle{margin:0;font-size:clamp(30px, 5vw, 54px);line-height:.96;letter-spacing:-.04em;font-weight:1000;max-width:12ch;}
     .bigTitle .accent{color:var(--gold);}
-
     .mainSub{margin-top:10px;color:var(--muted);font-size:16px;line-height:1.7;font-weight:700;max-width:64ch;}
 
     .subInfo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px;}
@@ -149,54 +159,92 @@
     .actionRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
     .helper{color:var(--muted);font-size:13px;font-weight:800;margin-top:10px;line-height:1.65;}
 
-    details{margin-top:12px;}
-    summary{cursor:pointer;font-weight:950;color:var(--text);outline:none;}
-
-    .logBox{margin-top:10px;background:#081119;color:#d8e1ff;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px;font:12px/1.58 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;}
-
-    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;font-size:12px;font-weight:950;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);}
-    .badge.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#d7ffe1;}
-    .badge.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#ffe3b8;}
-    .badge.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.28);color:#ffd2d2;}
-    .badge.info{background:rgba(96,165,250,.10);border-color:rgba(96,165,250,.28);color:#d8ecff;}
-
-    .sectionGrid{display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-top:12px;}
-
-    .field{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
-    .field label{font-size:13px;font-weight:900;color:var(--muted);letter-spacing:.03em;}
-    .input,.select{width:100%;padding:14px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);outline:none;font-size:16px;font-weight:800;}
-    .input::placeholder{color:#92a0c7}
-
-    .hr{height:1px;background:var(--line);margin:14px 0;}
-    .empty{color:var(--muted);font-weight:800;font-size:13px;line-height:1.6;}
-
-    .kpiGrid{display:grid;gap:12px;grid-template-columns:repeat(3,1fr);margin-top:14px;}
+    .kpiGrid{display:grid;gap:12px;grid-template-columns:repeat(4,1fr);margin-top:14px;}
     .kpi{padding:13px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);}
     .kpi .k{color:var(--muted);font-size:11px;font-weight:900;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;}
     .kpi .v{font-size:24px;font-weight:1000;line-height:1;letter-spacing:-.03em;word-break:break-word;}
 
-    .moduleNav{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
-    .sideTitle{font-size:18px;font-weight:950;margin:0 0 10px 0;line-height:1.15;}
-    .cashHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
-    .cashHeaderText{color:var(--muted);font-size:14px;line-height:1.65;font-weight:700;max-width:64ch;}
+    .searchRow{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:10px;}
+    .field{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+    .field label{font-size:13px;font-weight:900;color:var(--muted);letter-spacing:.03em;}
+    .input,.select,.textarea{
+      width:100%;padding:14px 14px;border-radius:16px;border:1px solid var(--line);
+      background:rgba(255,255,255,.04);color:var(--text);outline:none;font-size:15px;font-weight:800;
+    }
+    .textarea{min-height:96px;resize:vertical}
+    .input::placeholder,.textarea::placeholder{color:#92a0c7}
+    .hr{height:1px;background:var(--line);margin:14px 0}
 
+    .productsGrid{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px;
+    }
+    .productCard{
+      padding:14px;border-radius:20px;border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:10px;
+      box-shadow:var(--shadow-soft);
+    }
+    .productTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+    .productName{font-size:16px;font-weight:950;line-height:1.2;}
+    .productMeta{color:var(--muted);font-size:12px;font-weight:800;line-height:1.5;}
+    .productPrice{font-size:22px;font-weight:1000;letter-spacing:-.03em;color:var(--gold);}
+    .productStock{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;
+      font-size:12px;font-weight:950;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);
+    }
+    .badge.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#d7ffe1;}
+    .badge.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#ffe3b8;}
+    .badge.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.28);color:#ffd2d2;}
+    .badge.info{background:rgba(96,165,250,.10);border-color:rgba(96,165,250,.28);color:#d8ecff;}
+    .productActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;}
+
+    .cartList{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+    .cartItem{
+      padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+    }
+    .cartMain{display:flex;flex-direction:column;gap:4px;min-width:0}
+    .cartTitle{font-weight:950;font-size:14px;line-height:1.25}
+    .cartSub{color:var(--muted);font-size:12px;font-weight:800}
+    .cartControls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .qtyBtn{
+      width:34px;height:34px;border-radius:12px;border:1px solid var(--line2);
+      background:rgba(255,255,255,.04);color:var(--text);font-weight:1000;cursor:pointer;
+    }
+    .qty{min-width:28px;text-align:center;font-weight:950}
+
+    .empty{color:var(--muted);font-weight:800;font-size:13px;line-height:1.6;padding:18px}
     .blockedShell{display:none;min-height:320px;place-items:center;text-align:center;padding:24px;}
     .blockedInner{max-width:680px;padding:22px;border-radius:22px;border:1px solid var(--line);background:rgba(255,255,255,.03);box-shadow:var(--shadow-soft);}
     .blockedTitle{font-size:26px;font-weight:1000;margin-bottom:8px;line-height:1.1;}
     .blockedText{color:var(--muted);font-size:14px;line-height:1.8;font-weight:700;}
+    .footerNote{margin-top:12px;color:var(--muted);font-size:12px;font-weight:800;line-height:1.6;}
 
-    @media(max-width:1020px){.hero{grid-template-columns:1fr}.bigTitle{max-width:none}.subInfo{grid-template-columns:repeat(2,minmax(0,1fr))}.sectionGrid{grid-template-columns:1fr}}
-    @media(max-width:760px){.kpiGrid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:1100px){
+      .hero{grid-template-columns:1fr}
+      .sectionGrid{grid-template-columns:1fr}
+      .subInfo{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media(max-width:820px){
+      .productsGrid{grid-template-columns:1fr}
+      .searchRow{grid-template-columns:1fr}
+      .kpiGrid{grid-template-columns:repeat(2,1fr)}
+    }
     @media(max-width:700px){
-      .wrap{padding:12px 12px 96px}.topbar-inner{padding:12px}.heroMain,.card{padding:16px}
-      .brandTitle{white-space:normal}.subInfo{grid-template-columns:1fr}.kpiGrid{grid-template-columns:1fr}
-      .floating-site-btn{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));min-height:46px;padding:14px 14px;font-size:12px;}
+      .wrap{padding:12px 12px 96px}
+      .topbar-inner{padding:12px}
+      .brandTitle{white-space:normal}
+      .subInfo{grid-template-columns:1fr}
+      .kpiGrid{grid-template-columns:1fr}
+      .floating-site-btn{
+        left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+        min-height:46px;padding:14px 14px;font-size:12px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <!-- ━━━ FLOAT : retour vitrine ━━━ -->
   <a class="floating-site-btn" href="./index.html" aria-label="Retour à la vitrine MON COMMERCE">⬅️ Retour à la vitrine</a>
 
   <div class="app" id="appRoot">
@@ -208,8 +256,7 @@
             <div>
               <div class="brandKicker">DIGIYLYFE</div>
               <div class="brandTitle">MON COMMERCE</div>
-              <!-- ━━━ AVANT : "DIGIY CAISSE PRO • travail réel • lecture locale" → jargon banni ━━━ -->
-              <div class="brandSub">Ma caisse · encaissement rapide</div>
+              <div class="brandSub">Ma caisse · mes articles · encaissement rapide</div>
             </div>
           </div>
 
@@ -226,47 +273,37 @@
         </div>
       </header>
 
-      <!-- ━━━ ÉCRAN BLOQUÉ — langage humain, zéro jargon technique visible ━━━ -->
+      <div class="navRow">
+        <a class="btn-ghost" href="./index.html" id="btnHall">🏠 Accueil</a>
+        <a class="btn-ghost" href="./dashboard-pro.html" id="btnDashboard">🧭 Mon espace de travail</a>
+        <a class="btn-ghost" href="./admin.html" id="btnAdmin">📦 Mes articles</a>
+        <a class="btn-ghost" href="./profile.html" id="btnProfile">🏪 Ma boutique</a>
+        <a class="btn-outline" href="./pin.html" id="btnPin">🔐 Mon code d'accès</a>
+      </div>
+
       <section id="blockedShell" class="blockedShell">
         <div class="blockedInner">
           <div class="blockedTitle">Caisse protégée</div>
           <div class="blockedText" id="blockedText">
-            Ta caisse attend ton accès. Entre avec ton code ou rejoins DIGIY pour commencer.
+            Entre avec ton code d'accès ou active ton abonnement pour ouvrir ta caisse.
           </div>
-
           <div class="actionRow" style="justify-content:center">
             <a class="btn" id="btnBlockedPin" href="./pin.html">🔐 Entrer avec mon code</a>
             <a class="btn-outline" id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon abonnement</a>
-            <!-- ━━━ AVANT : "🧭 Dashboard Pro" → banni ━━━ -->
-            <a class="btn-ghost" id="btnBlockedDash" href="./dashboard-pro.html">🧭 Mon espace de travail</a>
           </div>
         </div>
       </section>
 
-      <!-- ━━━ ÉCRAN LIVE ━━━ -->
       <section id="liveShell">
         <div class="hero">
-          <div class="card heroMain">
-            <!-- ━━━ AVANT : "DIGIY CAISSE PRO" → banni en façade ━━━ -->
-            <div class="heroBadge">Ma caisse active</div>
-
-            <div class="statusLine">
-              <div>
-                <h1 class="bigTitle"><span class="accent">Caisse</span> prête</h1>
-                <!-- ━━━ mainSub : langage humain, pas description technique ━━━ -->
-                <div class="mainSub">
-                  Ta boutique est reconnue. Encaisse, suis tes ventes et travaille proprement.
-                </div>
-              </div>
-            </div>
-
-            <div class="actionRow">
-              <a class="btn" href="#saleAmount">🧾 Encaisser maintenant</a>
-              <a class="btn-outline" id="btnGoDashboard" href="./dashboard-pro.html">🧭 Mon espace de travail</a>
+          <div class="card">
+            <div class="heroBadge">Caisse active</div>
+            <h1 class="bigTitle"><span class="accent">Encaisser</span> maintenant</h1>
+            <div class="mainSub">
+              Choisis tes articles, prépare le ticket et garde une lecture claire du stock sans te battre avec l’outil.
             </div>
 
             <div class="subInfo">
-              <!-- ━━━ AVANT : "Slug" → "Identifiant" · "Source" reste pour l'info cache ━━━ -->
               <div class="miniCard">
                 <div class="tiny">Boutique</div>
                 <div class="value" id="metaStoreName">—</div>
@@ -287,58 +324,76 @@
 
             <div class="notice info" id="noticeBox">Initialisation…</div>
 
-            <div class="moduleNav">
-              <span class="badge" id="badgeAccess">Accès…</span>
-              <span class="badge" id="badgeStore">Boutique…</span>
-              <span class="badge" id="badgeCache">Lecture…</span>
-              <span class="badge" id="badgePlan">Abonnement…</span>
-            </div>
-
             <div class="actionRow">
-              <a class="btn-outline" id="btnGoPin" href="./pin.html">🔐 Mon code d'accès</a>
-              <a class="btn-outline" id="btnGoAdmin" href="./dashboard-pro.html">⚙️ Mes réglages</a>
-              <a class="btn-ghost" id="btnGoHall" href="./index.html">🏠 Accueil</a>
+              <a class="btn-outline" id="btnGoDashboard" href="./dashboard-pro.html">🧭 Mon espace de travail</a>
+              <a class="btn-outline" id="btnGoAdmin" href="./admin.html">📦 Mes articles</a>
+              <a class="btn-outline" id="btnGoProfile" href="./profile.html">🏪 Ma boutique</a>
             </div>
-
           </div>
 
           <div class="card">
-            <h2 class="sideTitle">Ma boutique en direct</h2>
-            <div id="storeContextBox" class="notice">Chargement…</div>
+            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Lecture rapide</h2>
 
             <div class="kpiGrid">
               <div class="kpi">
-                <div class="k">Produits actifs</div>
+                <div class="k">Articles visibles</div>
                 <div class="v" id="kpiProducts">0</div>
               </div>
               <div class="kpi">
-                <div class="k">Ventes du jour</div>
-                <div class="v" id="kpiSales">0</div>
+                <div class="k">Stock total</div>
+                <div class="v" id="kpiStock">0</div>
               </div>
               <div class="kpi">
-                <div class="k">Recette du jour</div>
-                <div class="v" id="kpiRevenue">0 F</div>
+                <div class="k">Valeur stock</div>
+                <div class="v" id="kpiValue">0 F</div>
+              </div>
+              <div class="kpi">
+                <div class="k">Ticket en cours</div>
+                <div class="v" id="kpiCart">0 F</div>
               </div>
             </div>
 
             <div class="helper">
-              Lecture simple : accès, boutique, abonnement, derniers repères enregistrés.
+              Ta caisse lit maintenant le catalogue réel `digiy_pos_products`. Si la connexion live saute, le dernier brouillon local reste visible.
             </div>
           </div>
         </div>
 
-        <!-- ━━━ VENTE ━━━ -->
         <div class="sectionGrid">
           <div class="card">
-            <div class="cashHeader">
-              <div>
-                <!-- ━━━ DOCTRINE : titre = moment humain ━━━ -->
-                <h2 class="sideTitle">Préparer une vente</h2>
-                <div class="cashHeaderText">
-                  Remplis le montant et le libellé. La vente est prête à être enregistrée.
-                </div>
-              </div>
+            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Mes articles du jour</h2>
+
+            <div class="searchRow">
+              <input class="input" id="searchText" placeholder="Chercher un article…"/>
+              <select class="select" id="filterStatus">
+                <option value="all">Tous</option>
+                <option value="published">Visibles</option>
+                <option value="draft">Brouillons</option>
+                <option value="low">Stock faible</option>
+              </select>
+              <select class="select" id="sortBy">
+                <option value="recent">Plus récents</option>
+                <option value="name">Nom A→Z</option>
+                <option value="price_desc">Prix ↓</option>
+                <option value="price_asc">Prix ↑</option>
+                <option value="stock_desc">Stock ↓</option>
+                <option value="stock_asc">Stock ↑</option>
+              </select>
             </div>
+
+            <div id="productsGrid" class="productsGrid">
+              <div class="empty">Chargement des articles…</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Ticket en cours</h2>
+
+            <div id="cartList" class="cartList">
+              <div class="empty">Aucun article dans le ticket.</div>
+            </div>
+
+            <div class="hr"></div>
 
             <div class="field">
               <label for="saleAmount">Montant (FCFA)</label>
@@ -347,7 +402,7 @@
 
             <div class="field">
               <label for="saleLabel">Ce que tu vends</label>
-              <input class="input" id="saleLabel" type="text" placeholder="Ex : Robe bleue / Plat du jour / Recharge"/>
+              <textarea class="textarea" id="saleLabel" placeholder="Résumé de la vente…"></textarea>
             </div>
 
             <div class="field">
@@ -361,26 +416,16 @@
             </div>
 
             <div class="actionRow">
-              <!-- ━━━ DOCTRINE BOUTON : moment humain ━━━ -->
               <button class="btn" type="button" id="btnSaleReady">🧾 Préparer la vente</button>
               <button class="btn-ghost" type="button" id="btnClearSale">Effacer</button>
             </div>
 
             <div class="helper" id="saleHelper">
-              Complète le montant et ce que tu vends pour préparer proprement.
+              Choisis des articles ou remplis directement le ticket pour préparer proprement.
             </div>
-          </div>
 
-          <div class="card">
-            <h2 class="sideTitle">Résumé de la vente</h2>
-            <div id="salePreview" class="empty">Rien de préparé pour le moment.</div>
-
-            <div class="hr"></div>
-
-            <h2 class="sideTitle">Comment ça marche</h2>
-            <div class="helper">
-              Tu prépares la vente ici. Elle est enregistrée localement et prête à être validée.
-              L'encaissement réel suit dans la prochaine étape.
+            <div class="notice info" id="salePreview" style="margin-top:12px">
+              Rien de préparé pour le moment.
             </div>
           </div>
         </div>
@@ -397,51 +442,53 @@
       const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
       const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
       const HALL_URL = digiyLocal("index.html");
-      const ADMIN_URL = digiyLocal("dashboard-pro.html"); // réglages = même espace de travail
+      const ADMIN_URL = digiyLocal("admin.html");
+      const PROFILE_URL = digiyLocal("profile.html");
       const PIN_URL = digiyLocal("pin.html");
-      const CACHE_TTL_MS = 5 * 60 * 1000;
-
-      const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
-      const SUPABASE_ANON_KEY = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
+      const PRODUCTS_CACHE_TTL_MS = 5 * 60 * 1000;
+      const LOW_STOCK_LIMIT = 5;
 
       const qs = (id) => document.getElementById(id);
       const DIAG = [];
-      let STATE = { slug: "", phone: "", access: false, caisse: null, source: "none", cachedAt: null };
       let SB_CLIENT = null;
 
-      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         ANTI-ÉCRAN NOIR
-         guard.js + la classe .app masquent la page.
-         Trois filets de sécurité :
-         1. setTimeout 2s → révèle quoi qu'il arrive
-         2. reveal() appelé au début de boot()
-         3. reveal() dans le finally de boot()
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+      const STATE = {
+        slug: "",
+        phone: "",
+        access: false,
+        storeName: "MON COMMERCE",
+        products: [],
+        source: "none",
+        fetchedAt: null,
+        cart: []
+      };
+
       function reveal(){
         document.documentElement.classList.add("app-ready");
         document.documentElement.style.visibility = "";
       }
-      setTimeout(reveal, 2000); // filet absolu
+      setTimeout(reveal, 2000);
 
       function log(msg, data){
         const line = `[${new Date().toLocaleTimeString("fr-FR")}] ${msg}`;
         DIAG.push(data === undefined ? line : `${line}\n${safeStringify(data)}`);
-        const box = qs("diagBox");
-        if(box) box.textContent = DIAG.join("\n\n");
         console.log("[DIGIY POS CAISSE]", msg, data ?? "");
       }
 
-      function safeStringify(v){ try{ return JSON.stringify(v, null, 2); } catch(_){ return String(v); } }
-
-      function esc(v){
-        return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+      function safeStringify(v){
+        try { return JSON.stringify(v, null, 2); }
+        catch(_) { return String(v); }
       }
 
-      /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         buildUrl — VERSION BLINDÉE
-         new URL(relatif, location.href) fragile selon
-         l'environnement. On reconstruit l'origine manuellement.
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+      function esc(v){
+        return String(v ?? "")
+          .replace(/&/g,"&amp;")
+          .replace(/</g,"&lt;")
+          .replace(/>/g,"&gt;")
+          .replace(/"/g,"&quot;")
+          .replace(/'/g,"&#39;");
+      }
+
       function buildUrl(base, params){
         const baseStr = (base == null ? "" : String(base)).trim();
         if(!baseStr) return location.href;
@@ -455,89 +502,115 @@
             u = new URL(full);
           }
         }catch(e){
-          log("buildUrl KO: " + baseStr + " — " + e.message);
+          log("buildUrl KO", { base: baseStr, message: e.message });
           return baseStr;
         }
         try{
           Object.entries(params || {}).forEach(([k,v]) => {
             if(v !== undefined && v !== null && String(v) !== "") u.searchParams.set(k, String(v));
           });
-        }catch(e){}
+        }catch(_){}
         return u.toString();
       }
 
-      function normPhone(v){ return String(v || "").replace(/[^\d]/g,"").slice(0,15); }
-
+      function normPhone(v){ return String(v || "").replace(/[^\d]/g, ""); }
+      function normSlug(v){ return String(v || "").trim().toLowerCase(); }
       function money(n){
         const value = Number(n || 0);
         if(!Number.isFinite(value)) return "0 F";
         return `${value.toLocaleString("fr-FR")} F`;
       }
 
-      function setNotice(kind, html){
-        const box = qs("noticeBox");
-        if(!box) return;
-        box.className = `notice ${kind || "info"}`;
-        box.innerHTML = html;
+      function getParam(name){
+        return new URL(location.href).searchParams.get(name) || "";
       }
 
-      function setBadge(id, text, tone){
-        const el = qs(id);
-        if(!el) return;
-        el.className = `badge ${tone || ""}`.trim();
-        el.textContent = text;
+      function getGuardState(){
+        return window.DIGIY_GUARD?.state || {};
       }
 
-      /* ━━━ CACHE ━━━ */
-      function cacheKey(slug){ return `digiy_pos_caisse_cache:${slug}`; }
-      function draftKey(slug){ return `digiy_pos_caisse_draft:${slug}`; }
-
-      function writeCache(slug, payload){
-        try{ localStorage.setItem(cacheKey(slug), JSON.stringify({ ts: Date.now(), payload })); }catch(_){}
+      function getResolvedSlug(){
+        const gs = getGuardState();
+        return normSlug(
+          getParam("slug") || gs.slug || gs.session?.slug || gs.identity?.slug ||
+          sessionStorage.getItem("digiy_pos_last_slug") || localStorage.getItem("digiy_pos_last_slug") ||
+          sessionStorage.getItem("digiy_pos_slug") || localStorage.getItem("digiy_pos_slug") || ""
+        );
       }
 
-      function useCachedPayload(slug){
-        try{
-          const raw = localStorage.getItem(cacheKey(slug));
-          if(!raw) return null;
-          const parsed = JSON.parse(raw);
-          if(!parsed || !parsed.payload) return null;
-          const ts = Number(parsed.ts || 0);
-          return { ts, payload: parsed.payload, fresh: !!ts && (Date.now() - ts) < CACHE_TTL_MS };
-        }catch(_){ return null; }
+      function getResolvedPhone(){
+        const gs = getGuardState();
+        return normPhone(
+          getParam("phone") || getParam("tel") || gs.phone || gs.session?.phone || gs.identity?.phone ||
+          sessionStorage.getItem("digiy_pos_last_phone") || localStorage.getItem("digiy_pos_last_phone") ||
+          sessionStorage.getItem("digiy_pos_phone") || localStorage.getItem("digiy_pos_phone") || ""
+        );
       }
 
-      function writeDraft(slug, payload){ try{ localStorage.setItem(draftKey(slug), JSON.stringify(payload || {})); }catch(_){} }
-      function readDraft(slug){ try{ const raw = localStorage.getItem(draftKey(slug)); return raw ? JSON.parse(raw) : null; }catch(_){ return null; } }
-      function clearDraft(slug){ try{ localStorage.removeItem(draftKey(slug)); }catch(_){} }
-
-      /* ━━━ GUARD ━━━ */
       async function awaitGuardReady(){
         try{
           if(typeof window.DIGIY_GUARD?.ready === "function") await window.DIGIY_GUARD.ready();
           else if(window.DIGIY_GUARD?.ready?.then) await window.DIGIY_GUARD.ready;
-        }catch(err){ log("guard ready KO", { message: err?.message || String(err) }); }
+        }catch(err){
+          log("guard ready KO", { message: err?.message || String(err) });
+        }
       }
 
       async function bootGuard(){
         if(typeof window.DIGIY_GUARD?.boot !== "function") return true;
         try{
-          const res = await window.DIGIY_GUARD.boot({ module: MODULE_CODE, dashboard: DASHBOARD_URL, login: PIN_URL, pay: ABOS_URL, requireSlug: true, checkSubscription: false });
+          const res = await window.DIGIY_GUARD.boot({
+            module: MODULE_CODE,
+            dashboard: DASHBOARD_URL,
+            login: PIN_URL,
+            pay: ABOS_URL,
+            requireSlug: true,
+            checkSubscription: false
+          });
           log("guard boot", res);
           if(res && res.ok === false) return false;
           return true;
-        }catch(err){ log("guard boot erreur", { message: err?.message || String(err) }); return true; }
+        }catch(err){
+          log("guard boot erreur", { message: err?.message || String(err) });
+          return true;
+        }
       }
 
       function ensureSupabase(){
         if(SB_CLIENT) return SB_CLIENT;
+
         if(typeof window.DIGIY_GUARD?.getSb === "function"){
-          try{ const gsb = window.DIGIY_GUARD.getSb(); if(gsb){ SB_CLIENT = gsb; return SB_CLIENT; } }catch(err){ log("guard getSb erreur", { message: err?.message || String(err) }); }
+          try{
+            const gsb = window.DIGIY_GUARD.getSb();
+            if(gsb){
+              SB_CLIENT = gsb;
+              return SB_CLIENT;
+            }
+          }catch(err){
+            log("guard getSb erreur", { message: err?.message || String(err) });
+          }
         }
-        if(!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error("Configuration Supabase manquante");
-        if(!window.supabase || typeof window.supabase.createClient !== "function") throw new Error("Librairie Supabase non chargée");
-        SB_CLIENT = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false, storageKey: "digiy-pos-caisse-boutique-v4" }
+
+        const url = String(window.DIGIY_SUPABASE_URL || "").trim();
+        const key = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
+
+        if(!url || !key) throw new Error("configuration_supabase_manquante");
+        if(!window.supabase || typeof window.supabase.createClient !== "function") throw new Error("lib_supabase_absente");
+
+        SB_CLIENT = window.supabase.createClient(url, key, {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false,
+            storage: {
+              getItem: () => null,
+              setItem: () => {},
+              removeItem: () => {}
+            }
+          },
+          global: {
+            fetch: (...args) => fetch(...args)
+          }
         });
         return SB_CLIENT;
       }
@@ -547,224 +620,526 @@
         let lastError = null;
         for(const args of payloads){
           try{
-            log(`RPC ${name} tentative`, args);
             const { data, error } = await client.rpc(name, args);
-            if(error){ lastError = error; log(`RPC ${name} erreur`, { message: error.message, details: error.details, hint: error.hint }); continue; }
-            log(`RPC ${name} OK`, data);
+            if(error){
+              lastError = error;
+              continue;
+            }
             return data;
-          }catch(err){ lastError = err; log(`RPC ${name} exception`, { message: err?.message || String(err) }); }
+          }catch(err){
+            lastError = err;
+          }
         }
-        throw lastError || new Error(`RPC ${name} échouée`);
-      }
-
-      function normalizeContext(ctx){
-        const s = ctx && typeof ctx === "object" ? ctx : {};
-        return { display_name: s.display_name || s.store_name || "MON COMMERCE", city: s.city || s.ville || "", phone: normPhone(s.phone || ""), whatsapp: normPhone(s.whatsapp || s.whatsapp_phone || ""), wave_phone: normPhone(s.wave_phone || s.wave || ""), address: s.address || s.adresse || "", bio: s.bio || s.tagline || "", tva_active: !!(s.tva_assujeti || s.tva_active), tva_taux: s.tva_taux ?? 18 };
-      }
-
-      function mergeShopData(row, ctx){
-        const r = row || {}, c = normalizeContext(ctx);
-        return { nom_boutique: r.nom_boutique || c.display_name || "MON COMMERCE", city: r.city || c.city || "", telephone: normPhone(r.telephone || c.phone || STATE.phone || ""), whatsapp_phone: normPhone(r.whatsapp_phone || c.whatsapp || STATE.phone || ""), wave_phone: normPhone(r.wave_phone || c.wave_phone || ""), adresse: r.adresse || c.address || "", tagline: r.tagline || c.bio || "", tva_active: typeof r.tva_active === "boolean" ? r.tva_active : !!c.tva_active, tva_taux: Number(r.tva_taux ?? c.tva_taux ?? 18), tva_mode: r.tva_mode || "excl" };
-      }
-
-      function getUrlParam(name){ return new URL(location.href).searchParams.get(name); }
-
-      function getResolvedSlug(){
-        const gs = window.DIGIY_GUARD?.state || {};
-        return String(
-          getUrlParam("slug") || gs.slug || gs.session?.slug || gs.identity?.slug ||
-          sessionStorage.getItem("digiy_pos_last_slug") || localStorage.getItem("digiy_pos_last_slug") ||
-          sessionStorage.getItem("digiy_pos_slug")      || localStorage.getItem("digiy_pos_slug") || ""
-        ).trim().toLowerCase();
-      }
-
-      function getResolvedPhone(){
-        const gs = window.DIGIY_GUARD?.state || {};
-        return normPhone(
-          getUrlParam("phone") || getUrlParam("tel") ||
-          gs.phone || gs.session?.phone || gs.identity?.phone ||
-          sessionStorage.getItem("digiy_pos_last_phone") || localStorage.getItem("digiy_pos_last_phone") ||
-          sessionStorage.getItem("digiy_pos_phone")       || localStorage.getItem("digiy_pos_phone") || ""
-        );
+        throw lastError || new Error(`rpc_${name}_failed`);
       }
 
       async function resolvePhoneFromSlug(slug){
         const client = ensureSupabase();
         if(!slug) return "";
-        const { data, error } = await client.from("digiy_subscriptions_public").select("phone,slug,module").eq("slug", slug).limit(1).maybeSingle();
+        const { data, error } = await client
+          .from("digiy_subscriptions_public")
+          .select("phone,slug,module")
+          .eq("slug", slug)
+          .limit(1)
+          .maybeSingle();
         if(error) throw error;
         return normPhone(data?.phone || "");
       }
 
       async function getAccess(phone){
         if(!phone) return false;
-        const res = await rpcFirstSuccess("digiy_has_access", [{ p_phone: phone, p_module: MODULE_CODE }, { phone, module: MODULE_CODE }]);
-        if(typeof res === "boolean") return res;
-        if(res && typeof res.ok === "boolean") return res.ok;
-        if(res && typeof res.has_access === "boolean") return res.has_access;
-        if(res && typeof res.allowed === "boolean") return res.allowed;
-        if(res && typeof res.access === "boolean") return res.access;
-        return !!res;
-      }
-
-      async function getSubscription(phone){
-        try{ const data = await rpcFirstSuccess("digiy_get_subscription_status", [{ p_phone: phone, p_module: MODULE_CODE }, { phone, module: MODULE_CODE }]); return data || null; }
-        catch(err){ log("digiy_get_subscription_status indisponible", { message: err?.message || String(err) }); return null; }
-      }
-
-      async function getStoreContextFallback(slug){
-        try{ const data = await rpcFirstSuccess("pos_get_store_context_by_slug", [{ p_slug: slug }, { slug }]); if(Array.isArray(data)) return data[0] || null; return data || null; }
-        catch(err){ log("pos_get_store_context_by_slug indisponible", { message: err?.message || String(err) }); return null; }
-      }
-
-      async function loadCaisseSettingsFallback(slug, phone){
-        const client = ensureSupabase();
-        const tries = [
-          () => client.from("caisse_settings").select("*").eq("slug", slug).limit(1).maybeSingle(),
-          () => client.from("caisse_settings").select("*").eq("owner_id", phone).limit(1).maybeSingle()
-        ];
-        for(const run of tries){
-          try{ const { data, error } = await run(); if(!error && data) return data; if(error) log("Lecture caisse_settings erreur", { message: error.message }); }
-          catch(err){ log("Lecture caisse_settings exception", { message: err?.message || String(err) }); }
-        }
-        return null;
-      }
-
-      function paintPills(access, storeName){
-        const dot = qs("dotAccess"), pill = qs("pillAccess"), pillStore = qs("pillStore");
-        dot.className = `dot ${access ? "ok" : "bad"}`;
-        pill.textContent = access ? "ACCÈS OK" : "ACCÈS BLOQUÉ";
-        pillStore.textContent = storeName || "MON COMMERCE";
-      }
-
-      /* ━━━ renderBlocked : langage humain, zéro jargon technique ━━━ */
-      function renderBlocked(slug, phone, reason){
-        qs("liveShell").style.display = "none";
-        qs("blockedShell").style.display = "grid";
-
-        /* ━━━ AVANT : affichait Slug, Source, "Bloqué" → jargon visible ━━━ */
-        qs("blockedText").innerHTML = `
-          <div style="margin-bottom:12px">${esc(reason || "Ta caisse attend ton accès.")}</div>
-          ${phone ? `<div><b>Téléphone :</b> +${esc(phone)}</div>` : ""}
-          <div style="margin-top:12px">Entre avec ton code ou rejoins DIGIY pour commencer.</div>
-        `;
-
-        const q = { slug: slug || "", phone: phone || "", module: MODULE_CODE };
-        qs("btnBlockedPin").href  = buildUrl(PIN_URL, { ...q, target: "caisse" });
-        qs("btnBlockedAbos").href = buildUrl(ABOS_URL, q);
-        qs("btnBlockedDash").href = buildUrl(DASHBOARD_URL, q);
-
-        paintPills(false, "Boutique fermée");
-        reveal();
-      }
-
-      /* ━━━ renderReady : storeContextBox nettoyé de Store ID / Statut store ━━━ */
-      function renderReady(payload, source, fetchedAt){
-        qs("blockedShell").style.display = "none";
-        qs("liveShell").style.display = "block";
-
-        STATE.caisse = payload;
-        STATE.source = source || "live";
-        STATE.cachedAt = fetchedAt || null;
-        STATE.slug = String(payload.slug || payload.workspace_slug || STATE.slug || "").toLowerCase();
-        STATE.phone = normPhone(payload.__phone || payload.store?.owner_phone || STATE.phone || "");
-        STATE.access = !!payload.__has_access;
-
-        const store = payload.store || {};
-        const profile = payload.profile || {};
-        const stats = payload.stats || {};
-        const subscription = payload.__subscription || {};
-
-        const shopName = payload.shop_name || store.name || profile.display_name || "MON COMMERCE";
-        const city = store.city || profile.city || "—";
-
-        qs("metaSlug").textContent = STATE.slug || "—";
-        qs("metaPhone").textContent = STATE.phone ? `+${STATE.phone}` : "—";
-        qs("metaStoreName").textContent = shopName;
-        qs("metaSource").textContent = source === "cache" ? "repères enregistrés" : "mise à jour directe";
-
-        paintPills(STATE.access, shopName);
-
-        setBadge("badgeAccess", STATE.access ? "ACCÈS OK" : "ACCÈS BLOQUÉ", STATE.access ? "ok" : "bad");
-        setBadge("badgeStore", shopName ? "BOUTIQUE OK" : "BOUTIQUE MINIMALE", shopName ? "ok" : "warn");
-        setBadge("badgeCache", source === "cache" ? "CACHE LOCAL" : "EN DIRECT", source === "cache" ? "info" : "ok");
-        setBadge("badgePlan", subscription?.plan || subscription?.plan_code ? "Abonnement réglé" : "Abonnement actif", "info");
-
-        /* ━━━ AVANT : affichait "Store ID", "Statut store" → jargon technique banni ━━━ */
-        qs("storeContextBox").innerHTML = `
-          <div class="notice ok">
-            <div><b>Boutique</b> : ${esc(shopName)}</div>
-            <div style="margin-top:6px"><b>Ville</b> : ${esc(city)}</div>
-            <div style="margin-top:6px"><b>Adresse</b> : ${esc(store.address || profile.address || "—")}</div>
-            <div style="margin-top:6px"><b>WhatsApp</b> : ${esc(STATE.phone ? `+${STATE.phone}` : "—")}</div>
-          </div>
-        `;
-
-        qs("kpiProducts").textContent = String(stats.active_products ?? stats.total_products ?? 0);
-        qs("kpiSales").textContent = String(stats.today_sales ?? stats.total_sales ?? 0);
-        qs("kpiRevenue").textContent = money(stats.today_revenue ?? stats.total_revenue ?? 0);
-
-        const freshness = fetchedAt ? new Date(fetchedAt).toLocaleString("fr-FR") : "maintenant";
-        setNotice(
-          source === "cache" ? "warn" : "ok",
-          `<div><b>${source === "cache" ? "Lecture locale" : "Lecture en direct"}</b></div>
-           <div style="margin-top:6px">Boutique : <b>${esc(shopName)}</b></div>
-           <div style="margin-top:6px">Mise à jour : <b>${esc(freshness)}</b></div>`
-        );
-
-        wireNav();
-        restoreDraft();
-        renderSalePreview();
-        reveal();
-      }
-
-      function wireNav(){
         try{
-          const q = { slug: STATE.slug || "", phone: STATE.phone || "", module: MODULE_CODE };
-          qs("btnGoPin").href       = buildUrl(PIN_URL, { ...q, target: "caisse" });
-          qs("btnGoDashboard").href = buildUrl(DASHBOARD_URL, q);
-          qs("btnGoAdmin").href     = buildUrl(ADMIN_URL, q);
-          qs("btnGoHall").href      = buildUrl(HALL_URL, q);
-        }catch(e){ log("wireNav erreur silencieuse", { message: e.message || String(e) }); }
+          const res = await rpcFirstSuccess("digiy_has_access", [
+            { p_phone: phone, p_module: MODULE_CODE },
+            { phone, module: MODULE_CODE }
+          ]);
+          if(typeof res === "boolean") return res;
+          if(res && typeof res.ok === "boolean") return res.ok;
+          if(res && typeof res.has_access === "boolean") return res.has_access;
+          if(res && typeof res.allowed === "boolean") return res.allowed;
+          if(res && typeof res.access === "boolean") return res.access;
+          return !!res;
+        }catch(err){
+          log("digiy_has_access KO", { message: err?.message || String(err) });
+          return false;
+        }
       }
 
-      async function fetchLivePayload(slug){
-        let phone = STATE.phone || "";
-        if(!phone) phone = await resolvePhoneFromSlug(slug);
+      async function getStoreContext(slug){
+        const client = ensureSupabase();
+        if(!slug) return null;
 
-        const access = await getAccess(phone);
-        if(!access) throw new Error("forbidden");
-
-        let subscription = null;
-        try{ subscription = await getSubscription(phone); }catch(_){}
+        try{
+          const { data, error } = await client
+            .from("digiy_pos_public_profiles")
+            .select("*")
+            .eq("slug", slug)
+            .maybeSingle();
+          if(!error && data) return data;
+        }catch(_){}
 
         try{
           const caisse = await rpcFirstSuccess("digiy_pos_get_caisse_by_slug", [{ p_slug: slug }, { slug }]);
           if(caisse && caisse.ok === true){
-            const resolvedPhone = normPhone(caisse?.store?.owner_phone || caisse?.profile?.owner_phone || caisse?.profile?.whatsapp || phone || "") || phone;
-            const payload = { ...caisse, slug: caisse.slug || slug, workspace_slug: caisse.workspace_slug || slug, __phone: resolvedPhone, __has_access: true, __subscription: subscription, __fetched_at: new Date().toISOString() };
-            writeCache(slug, payload);
-            localStorage.setItem("digiy_pos_last_slug", slug);
-            sessionStorage.setItem("digiy_pos_last_slug", slug);
-            if(resolvedPhone){ localStorage.setItem("digiy_pos_last_phone", resolvedPhone); sessionStorage.setItem("digiy_pos_last_phone", resolvedPhone); }
-            return payload;
+            return caisse.profile || caisse.store || caisse;
           }
-          log("digiy_pos_get_caisse_by_slug fallback", caisse);
-        }catch(err){ log("digiy_pos_get_caisse_by_slug KO, fallback contexte", { message: err?.message || String(err) }); }
+        }catch(err){
+          log("digiy_pos_get_caisse_by_slug fallback", { message: err?.message || String(err) });
+        }
 
-        const ctx = await getStoreContextFallback(slug);
-        const row = await loadCaisseSettingsFallback(slug, phone);
-        if(!ctx && !row) throw new Error("profile_not_found");
+        return null;
+      }
 
-        const merged = mergeShopData(row, ctx);
-        const displayName = merged.nom_boutique || "MON COMMERCE";
-        const payload = { ok: true, slug, workspace_slug: slug, shop_name: displayName, profile: { display_name: displayName, city: merged.city, whatsapp: normPhone(merged.whatsapp_phone || phone), address: merged.adresse || "", bio: merged.tagline || "" }, store: { name: displayName, city: merged.city, owner_phone: phone, whatsapp_phone: normPhone(merged.whatsapp_phone || phone), wave_phone: normPhone(merged.wave_phone || ""), address: merged.adresse || "", tagline: merged.tagline || "", store_id: row?.id || row?.store_id || "LOCAL", subscription_status: subscription?.status || subscription?.plan_status || "active" }, stats: { active_products: 0, total_products: 0, total_sales: 0, total_revenue: 0, today_sales: 0, today_revenue: 0 }, __phone: phone, __has_access: true, __subscription: subscription, __fetched_at: new Date().toISOString() };
+      function productsCacheKey(slug){
+        return `digiy_pos_products_cache:${slug || "unknown"}`;
+      }
 
-        writeCache(slug, payload);
-        localStorage.setItem("digiy_pos_last_slug", slug);
-        sessionStorage.setItem("digiy_pos_last_slug", slug);
-        if(phone){ localStorage.setItem("digiy_pos_last_phone", phone); sessionStorage.setItem("digiy_pos_last_phone", phone); }
-        return payload;
+      function saleDraftKey(slug){
+        return `digiy_pos_sale_draft:${slug || "unknown"}`;
+      }
+
+      function normalizeProduct(row){
+        const r = row || {};
+        return {
+          id: String(r.id || ""),
+          slug: normSlug(r.slug || STATE.slug || ""),
+          owner_phone: normPhone(r.owner_phone || r.phone || STATE.phone || ""),
+          name: String(r.name || "").trim(),
+          category: String(r.category || "").trim(),
+          sku: String(r.sku || "").trim(),
+          price_xof: Number(r.price_xof ?? r.price ?? 0) || 0,
+          stock_qty: Number(r.stock_qty ?? r.stock ?? 0) || 0,
+          note_text: String(r.note_text || r.note || "").trim(),
+          image_url: String(r.image_url || "").trim(),
+          is_published: typeof r.is_published === "boolean" ? r.is_published : !!r.published,
+          created_at: r.created_at || "",
+          updated_at: r.updated_at || ""
+        };
+      }
+
+      function writeProductsCache(slug, products){
+        try{
+          localStorage.setItem(
+            productsCacheKey(slug),
+            JSON.stringify({
+              ts: Date.now(),
+              products: Array.isArray(products) ? products : []
+            })
+          );
+        }catch(_){}
+      }
+
+      function readProductsCache(slug){
+        try{
+          const raw = localStorage.getItem(productsCacheKey(slug));
+          if(!raw) return null;
+          const parsed = JSON.parse(raw);
+          if(!parsed || !Array.isArray(parsed.products)) return null;
+          return {
+            ts: Number(parsed.ts || 0),
+            products: parsed.products.map(normalizeProduct)
+          };
+        }catch(_){
+          return null;
+        }
+      }
+
+      function writeSaleDraft(slug, draft){
+        try{
+          localStorage.setItem(saleDraftKey(slug), JSON.stringify(draft || {}));
+        }catch(_){}
+      }
+
+      function readSaleDraft(slug){
+        try{
+          const raw = localStorage.getItem(saleDraftKey(slug));
+          return raw ? JSON.parse(raw) : null;
+        }catch(_){
+          return null;
+        }
+      }
+
+      function clearSaleDraft(slug){
+        try{
+          localStorage.removeItem(saleDraftKey(slug));
+        }catch(_){}
+      }
+
+      async function loadProductsLive(slug){
+        const client = ensureSupabase();
+        const { data, error } = await client
+          .from("digiy_pos_products")
+          .select("*")
+          .eq("slug", slug)
+          .order("updated_at", { ascending: false });
+
+        if(error) throw error;
+        return Array.isArray(data) ? data.map(normalizeProduct) : [];
+      }
+
+      async function hydrateProducts(slug){
+        const cached = readProductsCache(slug);
+        if(cached && cached.ts && (Date.now() - cached.ts) < PRODUCTS_CACHE_TTL_MS){
+          STATE.products = cached.products;
+          STATE.source = "cache";
+          STATE.fetchedAt = cached.ts;
+          log("Produits depuis cache frais", { slug, count: STATE.products.length });
+          return;
+        }
+
+        if(cached && cached.products.length){
+          STATE.products = cached.products;
+          STATE.source = "cache";
+          STATE.fetchedAt = cached.ts;
+          log("Produits depuis cache vieilli", { slug, count: STATE.products.length });
+        }
+
+        try{
+          const live = await loadProductsLive(slug);
+          STATE.products = live;
+          STATE.source = "live";
+          STATE.fetchedAt = Date.now();
+          writeProductsCache(slug, live);
+          log("Produits live chargés", { slug, count: live.length });
+        }catch(err){
+          log("Produits live KO", { message: err?.message || String(err) });
+          if(!cached){
+            STATE.products = [];
+            STATE.source = "vide";
+            STATE.fetchedAt = null;
+          }
+        }
+      }
+
+      function setNotice(kind, html){
+        const box = qs("noticeBox");
+        box.className = `notice ${kind || "info"}`;
+        box.innerHTML = html;
+      }
+
+      function renderBlocked(text){
+        qs("blockedText").textContent = text || "Entre avec ton code d'accès ou active ton abonnement pour ouvrir ta caisse.";
+        qs("liveShell").style.display = "none";
+        qs("blockedShell").style.display = "grid";
+      }
+
+      function renderLive(){
+        qs("blockedShell").style.display = "none";
+        qs("liveShell").style.display = "";
+      }
+
+      function updateHeader(){
+        qs("pillAccess").textContent = STATE.access ? "Accès actif" : "Accès requis";
+        qs("dotAccess").classList.toggle("ok", !!STATE.access);
+        qs("dotAccess").classList.toggle("bad", !STATE.access);
+        qs("pillStore").textContent = STATE.storeName || "Boutique";
+        qs("metaStoreName").textContent = STATE.storeName || "—";
+        qs("metaPhone").textContent = STATE.phone ? `+${STATE.phone}` : "—";
+        qs("metaSlug").textContent = STATE.slug || "—";
+        qs("metaSource").textContent = STATE.source || "—";
+
+        const q = { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE };
+        qs("btnHall").href = buildUrl(HALL_URL, q);
+        qs("btnDashboard").href = buildUrl(DASHBOARD_URL, q);
+        qs("btnAdmin").href = buildUrl(ADMIN_URL, q);
+        qs("btnProfile").href = buildUrl(PROFILE_URL, q);
+        qs("btnPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
+        qs("btnBlockedPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
+        qs("btnBlockedAbos").href = buildUrl(ABOS_URL, { base_module: MODULE_CODE, module: MODULE_CODE, phone: STATE.phone, slug: STATE.slug });
+        qs("btnGoDashboard").href = buildUrl(DASHBOARD_URL, q);
+        qs("btnGoAdmin").href = buildUrl(ADMIN_URL, q);
+        qs("btnGoProfile").href = buildUrl(PROFILE_URL, q);
+      }
+
+      function filteredProducts(){
+        const text = String(qs("searchText").value || "").trim().toLowerCase();
+        const status = qs("filterStatus").value;
+        const sortBy = qs("sortBy").value;
+
+        let items = [...STATE.products];
+
+        if(text){
+          items = items.filter(item =>
+            item.name.toLowerCase().includes(text) ||
+            item.category.toLowerCase().includes(text) ||
+            item.sku.toLowerCase().includes(text) ||
+            item.note_text.toLowerCase().includes(text)
+          );
+        }
+
+        if(status === "published") items = items.filter(item => item.is_published);
+        if(status === "draft") items = items.filter(item => !item.is_published);
+        if(status === "low") items = items.filter(item => Number(item.stock_qty || 0) <= LOW_STOCK_LIMIT);
+
+        if(sortBy === "name") items.sort((a,b) => a.name.localeCompare(b.name, "fr"));
+        if(sortBy === "price_desc") items.sort((a,b) => Number(b.price_xof || 0) - Number(a.price_xof || 0));
+        if(sortBy === "price_asc") items.sort((a,b) => Number(a.price_xof || 0) - Number(b.price_xof || 0));
+        if(sortBy === "stock_desc") items.sort((a,b) => Number(b.stock_qty || 0) - Number(a.stock_qty || 0));
+        if(sortBy === "stock_asc") items.sort((a,b) => Number(a.stock_qty || 0) - Number(b.stock_qty || 0));
+        if(sortBy === "recent") items.sort((a,b) => new Date(b.updated_at || b.created_at || 0).getTime() - new Date(a.updated_at || a.created_at || 0).getTime());
+
+        return items;
+      }
+
+      function addToCart(productId){
+        const item = STATE.products.find(x => x.id === productId);
+        if(!item) return;
+        if(Number(item.stock_qty || 0) <= 0) return;
+
+        const found = STATE.cart.find(x => x.product_id === productId);
+        if(found){
+          if(found.qty < Number(item.stock_qty || 0)) found.qty += 1;
+        } else {
+          STATE.cart.push({ product_id: productId, qty: 1 });
+        }
+
+        persistDraft();
+        syncSaleFieldsFromCart();
+        renderCart();
+      }
+
+      function changeQty(productId, delta){
+        const item = STATE.products.find(x => x.id === productId);
+        const found = STATE.cart.find(x => x.product_id === productId);
+        if(!item || !found) return;
+
+        found.qty += delta;
+        if(found.qty <= 0){
+          STATE.cart = STATE.cart.filter(x => x.product_id !== productId);
+        } else if(found.qty > Number(item.stock_qty || 0)){
+          found.qty = Number(item.stock_qty || 0);
+        }
+
+        persistDraft();
+        syncSaleFieldsFromCart();
+        renderCart();
+      }
+
+      function clearCart(){
+        STATE.cart = [];
+        persistDraft();
+        syncSaleFieldsFromCart();
+        renderCart();
+      }
+
+      function cartLineData(){
+        return STATE.cart.map(line => {
+          const item = STATE.products.find(x => x.id === line.product_id);
+          if(!item) return null;
+          return {
+            ...line,
+            item,
+            total_xof: Number(line.qty || 0) * Number(item.price_xof || 0)
+          };
+        }).filter(Boolean);
+      }
+
+      function cartTotal(){
+        return cartLineData().reduce((sum, line) => sum + Number(line.total_xof || 0), 0);
+      }
+
+      function syncSaleFieldsFromCart(){
+        const lines = cartLineData();
+        if(!lines.length){
+          if(!String(qs("saleAmount").value || "").trim()) qs("saleAmount").value = "";
+          if(!String(qs("saleLabel").value || "").trim()) qs("saleLabel").value = "";
+          return;
+        }
+
+        qs("saleAmount").value = String(cartTotal());
+        qs("saleLabel").value = lines.map(line => `${line.item.name} x${line.qty}`).join(" • ");
+      }
+
+      function currentDraft(){
+        return {
+          cart: STATE.cart,
+          amount: qs("saleAmount").value || "",
+          label: qs("saleLabel").value || "",
+          method: qs("saleMethod").value || "cash"
+        };
+      }
+
+      function persistDraft(){
+        if(!STATE.slug) return;
+        writeSaleDraft(STATE.slug, currentDraft());
+      }
+
+      function restoreDraft(){
+        if(!STATE.slug) return;
+        const draft = readSaleDraft(STATE.slug);
+        if(!draft) return;
+        STATE.cart = Array.isArray(draft.cart) ? draft.cart : [];
+        qs("saleAmount").value = draft.amount || "";
+        qs("saleLabel").value = draft.label || "";
+        qs("saleMethod").value = draft.method || "cash";
+      }
+
+      function renderProducts(){
+        const box = qs("productsGrid");
+        const items = filteredProducts();
+
+        if(!items.length){
+          box.innerHTML = `<div class="empty">Aucun article à afficher pour l’instant.</div>`;
+          renderKpis();
+          return;
+        }
+
+        box.innerHTML = items.map(item => {
+          const stock = Number(item.stock_qty || 0);
+          const stockBadge = stock <= 0
+            ? `<span class="badge bad">Rupture</span>`
+            : stock <= LOW_STOCK_LIMIT
+            ? `<span class="badge warn">Stock faible</span>`
+            : `<span class="badge ok">En stock</span>`;
+
+          const pubBadge = item.is_published
+            ? `<span class="badge ok">Visible</span>`
+            : `<span class="badge info">Brouillon</span>`;
+
+          const inCart = STATE.cart.find(x => x.product_id === item.id);
+          const inCartText = inCart ? `Dans le ticket : ${inCart.qty}` : "Pas encore dans le ticket";
+
+          return `
+            <article class="productCard">
+              <div class="productTop">
+                <div>
+                  <div class="productName">${esc(item.name || "Article")}</div>
+                  <div class="productMeta">
+                    ${esc(item.category || "Sans catégorie")}
+                    ${item.sku ? ` • ${esc(item.sku)}` : ""}
+                  </div>
+                </div>
+                <div class="productPrice">${money(item.price_xof || 0)}</div>
+              </div>
+
+              <div class="productStock">
+                ${stockBadge}
+                ${pubBadge}
+                <span class="badge info">Stock : ${stock}</span>
+              </div>
+
+              <div class="helper" style="margin-top:0">${esc(item.note_text || inCartText)}</div>
+
+              <div class="productActions">
+                <button class="smallBtn" data-add="${esc(item.id)}" ${stock <= 0 ? "disabled" : ""}>➕ Ajouter</button>
+                <a class="smallBtn" href="${buildUrl(ADMIN_URL, { slug: STATE.slug, phone: STATE.phone, edit: item.id })}">✏️ Modifier</a>
+              </div>
+            </article>
+          `;
+        }).join("");
+
+        box.querySelectorAll("[data-add]").forEach(btn => {
+          btn.addEventListener("click", () => addToCart(btn.getAttribute("data-add")));
+        });
+
+        renderKpis();
+      }
+
+      function renderCart(){
+        const box = qs("cartList");
+        const lines = cartLineData();
+
+        if(!lines.length){
+          box.innerHTML = `<div class="empty">Aucun article dans le ticket.</div>`;
+          qs("kpiCart").textContent = money(0);
+          renderSalePreview();
+          return;
+        }
+
+        box.innerHTML = lines.map(line => `
+          <div class="cartItem">
+            <div class="cartMain">
+              <div class="cartTitle">${esc(line.item.name)}</div>
+              <div class="cartSub">${money(line.item.price_xof)} × ${line.qty} = ${money(line.total_xof)}</div>
+            </div>
+            <div class="cartControls">
+              <button class="qtyBtn" data-dec="${esc(line.item.id)}">−</button>
+              <div class="qty">${line.qty}</div>
+              <button class="qtyBtn" data-inc="${esc(line.item.id)}">+</button>
+              <button class="qtyBtn" data-del="${esc(line.item.id)}">✕</button>
+            </div>
+          </div>
+        `).join("");
+
+        box.querySelectorAll("[data-dec]").forEach(btn => btn.addEventListener("click", () => changeQty(btn.getAttribute("data-dec"), -1)));
+        box.querySelectorAll("[data-inc]").forEach(btn => btn.addEventListener("click", () => changeQty(btn.getAttribute("data-inc"), +1)));
+        box.querySelectorAll("[data-del]").forEach(btn => btn.addEventListener("click", () => changeQty(btn.getAttribute("data-del"), -999)));
+
+        qs("kpiCart").textContent = money(cartTotal());
+        renderSalePreview();
+      }
+
+      function renderSalePreview(){
+        const amount = String(qs("saleAmount").value || "").trim();
+        const label = String(qs("saleLabel").value || "").trim();
+        const method = String(qs("saleMethod").value || "").trim();
+        const lines = cartLineData();
+
+        if(!amount && !label && !lines.length){
+          qs("salePreview").innerHTML = "Rien de préparé pour le moment.";
+          return;
+        }
+
+        const linesHtml = lines.length
+          ? `<div style="margin-top:8px">${lines.map(line =>
+              `<div style="margin-top:4px">• ${esc(line.item.name)} x${line.qty} = <b>${money(line.total_xof)}</b></div>`
+            ).join("")}</div>`
+          : "";
+
+        qs("salePreview").innerHTML = `
+          <div><b>Montant</b> : ${esc(amount ? money(amount) : "—")}</div>
+          <div style="margin-top:6px"><b>Ce que tu vends</b> : ${esc(label || "—")}</div>
+          <div style="margin-top:6px"><b>Paiement</b> : ${esc(method || "cash")}</div>
+          ${linesHtml}
+        `;
+      }
+
+      function renderKpis(){
+        const items = STATE.products;
+        const published = items.filter(x => x.is_published).length;
+        const stock = items.reduce((sum, item) => sum + Number(item.stock_qty || 0), 0);
+        const value = items.reduce((sum, item) => sum + (Number(item.stock_qty || 0) * Number(item.price_xof || 0)), 0);
+        const low = items.filter(x => Number(x.stock_qty || 0) <= LOW_STOCK_LIMIT).length;
+
+        qs("kpiProducts").textContent = String(published);
+        qs("kpiStock").textContent = String(stock);
+        qs("kpiValue").textContent = money(value);
+
+        if(items.length === 0){
+          setNotice("warn", "Aucun article encore posé. Passe par <b>Mes articles</b> pour remplir ton catalogue.");
+          return;
+        }
+
+        if(low > 0){
+          setNotice("warn", `Tu as <b>${low}</b> article(s) en stock faible. Catalogue chargé depuis <b>${STATE.source}</b>.`);
+          return;
+        }
+
+        setNotice("ok", `Catalogue prêt : <b>${published}</b> article(s) visibles. Lecture : <b>${STATE.source}</b>.`);
+      }
+
+      function prepareSale(){
+        persistDraft();
+        renderSalePreview();
+
+        const amount = String(qs("saleAmount").value || "").trim();
+        const label = String(qs("saleLabel").value || "").trim();
+
+        if(!amount || !label){
+          qs("saleHelper").innerHTML = "Complète le montant et ce que tu vends pour préparer une vente propre.";
+          return;
+        }
+
+        qs("saleHelper").innerHTML = `Préparation enregistrée pour <b>${esc(STATE.slug || "—")}</b>. Le ticket est prêt.`;
+      }
+
+      function clearSaleForm(){
+        qs("saleAmount").value = "";
+        qs("saleLabel").value = "";
+        qs("saleMethod").value = "cash";
+        clearCart();
+        if(STATE.slug) clearSaleDraft(STATE.slug);
+        renderSalePreview();
       }
 
       async function hydrate(forceLive = false){
@@ -772,92 +1147,58 @@
         let phone = getResolvedPhone();
 
         if(!slug){
-          renderBlocked("", phone, "Ta caisse n'a pas pu identifier ta boutique. Passe par ton lien pro ou ton QR DIGIY.");
+          renderBlocked("Ta caisse n'a pas pu identifier ta boutique. Passe par ton lien pro ou ton QR DIGIY.");
           return;
         }
 
-        STATE.slug = slug; STATE.phone = phone;
+        if(!phone){
+          try{
+            phone = await resolvePhoneFromSlug(slug);
+          }catch(err){
+            log("resolvePhoneFromSlug KO", { message: err?.message || String(err) });
+          }
+        }
+
+        STATE.slug = slug;
+        STATE.phone = phone || "";
         localStorage.setItem("digiy_pos_last_slug", slug);
         sessionStorage.setItem("digiy_pos_last_slug", slug);
-        if(phone){ localStorage.setItem("digiy_pos_last_phone", phone); sessionStorage.setItem("digiy_pos_last_phone", phone); }
+        if(phone){
+          localStorage.setItem("digiy_pos_last_phone", phone);
+          sessionStorage.setItem("digiy_pos_last_phone", phone);
+        }
 
-        const cached = useCachedPayload(slug);
-
-        if(!forceLive && cached && cached.fresh){
-          renderReady(cached.payload, "cache", cached.ts);
-          log("Boot sans appel Supabase grâce au cache local", { slug, cached_at: new Date(cached.ts).toISOString() });
+        STATE.access = await getAccess(STATE.phone);
+        if(!STATE.phone || !STATE.access){
+          updateHeader();
+          renderBlocked("Entre avec ton code d’accès ou active ton abonnement pour ouvrir ta caisse.");
           return;
         }
 
-        if(!forceLive && cached && !cached.fresh){
-          renderReady(cached.payload, "cache", cached.ts);
-          log("Cache local affiché, mais vieilli", { slug, cached_at: new Date(cached.ts).toISOString() });
+        const ctx = await getStoreContext(slug);
+        STATE.storeName = String(
+          ctx?.display_name ||
+          ctx?.shop_name ||
+          ctx?.store_name ||
+          ctx?.name ||
+          "MON COMMERCE"
+        ).trim() || "MON COMMERCE";
+
+        if(forceLive){
+          try{ localStorage.removeItem(productsCacheKey(slug)); }catch(_){}
         }
 
-        try{
-          const payload = await fetchLivePayload(slug);
-          renderReady(payload, "live", payload.__fetched_at);
-        }catch(err){
-          log("Hydratation live KO", { message: err?.message || String(err) });
-          if(cached){
-            renderReady(cached.payload, "cache", cached.ts);
-            setNotice("warn", `<div><b>Lecture locale reprise.</b></div><div style="margin-top:6px">La connexion en direct a échoué. Les données affichées viennent de la dernière synchro.</div>`);
-            return;
-          }
-          renderBlocked(slug, phone, err?.message || "Impossible de charger ta caisse");
-        }
-      }
-
-      function currentDraft(){ return { amount: qs("saleAmount").value || "", label: qs("saleLabel").value || "", method: qs("saleMethod").value || "cash" }; }
-
-      function restoreDraft(){
-        const slug = STATE.slug || getResolvedSlug();
-        if(!slug) return;
-        const draft = readDraft(slug);
-        if(!draft) return;
-        qs("saleAmount").value = draft.amount || "";
-        qs("saleLabel").value = draft.label || "";
-        qs("saleMethod").value = draft.method || "cash";
-      }
-
-      function persistDraft(){
-        const slug = STATE.slug || getResolvedSlug();
-        if(!slug) return;
-        writeDraft(slug, currentDraft());
-      }
-
-      function renderSalePreview(){
-        const amount = String(qs("saleAmount").value || "").trim();
-        const label = String(qs("saleLabel").value || "").trim();
-        const method = String(qs("saleMethod").value || "").trim();
-        if(!amount && !label){ qs("salePreview").innerHTML = `<span class="empty">Rien de préparé pour le moment.</span>`; return; }
-        qs("salePreview").innerHTML = `
-          <div class="notice info" style="margin-top:0">
-            <div><b>Montant</b> : ${esc(amount ? money(amount) : "—")}</div>
-            <div style="margin-top:6px"><b>Ce que tu vends</b> : ${esc(label || "—")}</div>
-            <div style="margin-top:6px"><b>Paiement</b> : ${esc(method || "cash")}</div>
-          </div>`;
-      }
-
-      function clearSaleForm(){
-        qs("saleAmount").value = "";
-        qs("saleLabel").value = "";
-        qs("saleMethod").value = "cash";
-        if(STATE.slug) clearDraft(STATE.slug);
-        renderSalePreview();
-      }
-
-      function prepareSale(){
-        persistDraft();
-        renderSalePreview();
-        const amount = String(qs("saleAmount").value || "").trim();
-        const label = String(qs("saleLabel").value || "").trim();
-        if(!amount || !label){ qs("saleHelper").innerHTML = `Complète le montant et ce que tu vends pour préparer une vente propre.`; return; }
-        qs("saleHelper").innerHTML = `Préparation enregistrée pour <b>${esc(STATE.slug || "—")}</b>. La vente est prête.`;
+        await hydrateProducts(slug);
+        updateHeader();
+        renderLive();
+        restoreDraft();
+        syncSaleFieldsFromCart();
+        renderProducts();
+        renderCart();
       }
 
       async function boot(){
-        reveal(); // filet 1 : on révèle dès le début
+        reveal();
         try{
           log("Boot caisse POS", { href: location.href, module: MODULE_CODE });
           await awaitGuardReady();
@@ -867,16 +1208,23 @@
           qs("btnReloadTop").addEventListener("click", () => hydrate(true));
           qs("btnSaleReady").addEventListener("click", prepareSale);
           qs("btnClearSale").addEventListener("click", clearSaleForm);
+
           ["saleAmount", "saleLabel", "saleMethod"].forEach(id => {
             qs(id).addEventListener("input", () => { persistDraft(); renderSalePreview(); });
+            qs(id).addEventListener("change", () => { persistDraft(); renderSalePreview(); });
+          });
+
+          ["searchText", "filterStatus", "sortBy"].forEach(id => {
+            qs(id).addEventListener("input", renderProducts);
+            qs(id).addEventListener("change", renderProducts);
           });
 
           await hydrate(false);
         }catch(err){
           log("Boot général KO", { message: err?.message || String(err) });
-          renderBlocked(getResolvedSlug(), getResolvedPhone(), err?.message || "Erreur au démarrage de ta caisse");
+          renderBlocked("Erreur au démarrage de ta caisse.");
         }finally{
-          reveal(); // filet 2 : quoi qu'il arrive
+          reveal();
         }
       }
 
