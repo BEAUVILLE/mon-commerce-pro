@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <meta name="theme-color" content="#07140f"/>
+  <meta name="theme-color" content="#0f172a"/>
   <title>Mes articles · MON COMMERCE by DIGIY</title>
   <meta name="description" content="MON COMMERCE by DIGIY — mes articles, mes prix, mon stock."/>
 
@@ -38,14 +38,14 @@
 
   <style>
     :root{
-      --bg:#04110d;--bg2:#071a14;
-      --card:rgba(8,24,18,.78);--card2:rgba(9,28,21,.92);--card3:rgba(255,255,255,.03);
-      --text:#f7fbf8;--muted:#bfd3c8;
-      --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.14);
+      --bg:#0f172a;--bg2:#162033;
+      --card:rgba(22,32,51,.88);--card2:rgba(28,40,62,.94);--card3:rgba(255,255,255,.05);
+      --text:#f8fafc;--muted:#d6e0ea;
+      --line:rgba(255,255,255,.12);--line2:rgba(255,255,255,.16);
       --gold:#facc15;--gold2:#f59e0b;
       --green:#22c55e;--green2:#16a34a;
       --warn:#f59e0b;--danger:#ef4444;--info:#60a5fa;
-      --shadow:0 22px 56px rgba(0,0,0,.28);--shadow-soft:0 14px 34px rgba(0,0,0,.22);
+      --shadow:0 22px 56px rgba(0,0,0,.22);--shadow-soft:0 14px 34px rgba(0,0,0,.18);
       --radius:26px;--radius-sm:18px;--max:1200px;
       --fontA:"Outfit",system-ui,-apple-system,sans-serif;
     }
@@ -56,9 +56,9 @@
     body{
       min-height:100vh;color:var(--text);font-family:var(--fontA);
       background:
-        radial-gradient(circle at top left, rgba(250,204,21,.10), transparent 28%),
-        radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 22%),
-        linear-gradient(180deg, #07140f 0%, #04110d 42%, #020906 100%);
+        radial-gradient(circle at top left, rgba(250,204,21,.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(96,165,250,.10), transparent 22%),
+        linear-gradient(180deg, #1e293b 0%, #0f172a 42%, #0b1220 100%);
     }
 
     a{text-decoration:none;color:inherit}
@@ -73,19 +73,19 @@
       position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:90;
       display:inline-flex;align-items:center;justify-content:center;gap:8px;
       min-height:48px;padding:14px 16px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);background:rgba(5,16,12,.88);
+      border:1px solid rgba(255,255,255,.12);background:rgba(15,23,42,.86);
       backdrop-filter:blur(10px);color:var(--text);font-size:13px;font-weight:900;
-      box-shadow:0 16px 36px rgba(0,0,0,.28);
+      box-shadow:0 16px 36px rgba(0,0,0,.22);
       transition:transform .14s ease, border-color .14s ease, background .14s ease;
     }
-    .floating-site-btn:hover{transform:translateY(-1px);border-color:rgba(250,204,21,.28);background:rgba(8,20,15,.94);}
+    .floating-site-btn:hover{transform:translateY(-1px);border-color:rgba(250,204,21,.28);background:rgba(22,32,51,.94);}
 
     .topbar{
       position:sticky;top:0;z-index:70;margin-bottom:14px;
-      backdrop-filter:blur(12px);background:rgba(4,17,13,.76);
-      border:1px solid rgba(255,255,255,.07);border-radius:24px;box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(12px);background:rgba(15,23,42,.82);
+      border:1px solid rgba(255,255,255,.08);border-radius:24px;box-shadow:var(--shadow-soft);
     }
-    .topbar-inner{padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    .topbar-inner{padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 
     .brand{display:flex;align-items:center;gap:12px;min-width:0;}
     .brandBadge{
@@ -95,14 +95,14 @@
       font-size:24px;flex:0 0 auto;
     }
     .brandKicker{color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px;}
-    .brandTitle{font-size:20px;line-height:1.08;font-weight:1000;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .brandSub{color:var(--muted);font-size:12px;font-weight:800;margin-top:3px;letter-spacing:.04em;}
+    .brandTitle{font-size:22px;line-height:1.08;font-weight:1000;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .brandSub{color:var(--muted);font-size:13px;font-weight:800;margin-top:3px;letter-spacing:.04em;}
 
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 
     .pill{
       display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;
-      background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);
+      background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);
       font-weight:900;font-size:12px;backdrop-filter:blur(10px);
     }
     .pill strong{color:var(--text);font-weight:950;}
@@ -114,14 +114,14 @@
     .btn,.btn-outline,.btn-ghost,.btn-danger{
       appearance:none;border:none;cursor:pointer;
       display:inline-flex;align-items:center;justify-content:center;gap:10px;
-      min-height:46px;padding:12px 16px;border-radius:999px;
-      font-weight:900;font-size:13px;letter-spacing:.02em;white-space:nowrap;
+      min-height:48px;padding:14px 18px;border-radius:999px;
+      font-weight:900;font-size:15px;letter-spacing:.02em;white-space:nowrap;
       transition:transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
     }
     .btn:hover,.btn-outline:hover,.btn-ghost:hover,.btn-danger:hover{transform:translateY(-1px)}
     .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled,.btn-danger:disabled{opacity:.56;cursor:not-allowed;transform:none;}
     .btn{color:#07110d;background:linear-gradient(135deg, var(--gold), var(--gold2));box-shadow:0 14px 30px rgba(250,204,21,.18);}
-    .btn-outline{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--line2);}
+    .btn-outline{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--line2);}
     .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line2);}
     .btn-danger{background:linear-gradient(135deg, rgba(239,68,68,.95), rgba(239,68,68,.72));color:#fff;}
 
@@ -131,8 +131,8 @@
       display:grid;grid-template-columns:1.02fr .98fr;gap:12px;margin-bottom:12px;
     }
     .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);
-      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03)),var(--card);
+      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;
     }
 
     .heroBadge{
@@ -141,54 +141,54 @@
       font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;
     }
 
-    .bigTitle{margin:0;font-size:clamp(30px, 5vw, 54px);line-height:.96;letter-spacing:-.04em;font-weight:1000;max-width:12ch;}
+    .bigTitle{margin:0;font-size:clamp(34px, 5vw, 56px);line-height:.96;letter-spacing:-.04em;font-weight:1000;max-width:12ch;}
     .bigTitle .accent{color:var(--gold);}
-    .mainSub{margin-top:10px;color:var(--muted);font-size:16px;line-height:1.7;font-weight:700;max-width:64ch;}
+    .mainSub{margin-top:12px;color:var(--muted);font-size:17px;line-height:1.75;font-weight:700;max-width:64ch;}
 
     .subInfo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px;}
-    .miniCard{min-width:0;padding:13px 12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
+    .miniCard{min-width:0;padding:15px 14px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);}
     .tiny{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:900;}
     .value{font-size:20px;font-weight:950;margin-top:6px;line-height:1.1;word-break:break-word;letter-spacing:-.02em;}
 
-    .notice{padding:14px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);margin-top:14px;line-height:1.65;font-size:14px;font-weight:700;}
+    .notice{padding:15px 16px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.04);margin-top:14px;line-height:1.7;font-size:15px;font-weight:700;}
     .notice.ok{border-color:rgba(34,197,94,.22);background:rgba(34,197,94,.08);}
     .notice.warn{border-color:rgba(245,158,11,.22);background:rgba(245,158,11,.08);}
     .notice.bad{border-color:rgba(239,68,68,.22);background:rgba(239,68,68,.08);}
     .notice.info{border-color:rgba(96,165,250,.22);background:rgba(96,165,250,.08);}
 
     .actionRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
-    .helper{color:var(--muted);font-size:13px;font-weight:800;margin-top:10px;line-height:1.65;}
+    .helper{color:var(--muted);font-size:14px;font-weight:800;margin-top:10px;line-height:1.7;}
 
     .kpiGrid{display:grid;gap:12px;grid-template-columns:repeat(3,1fr);margin-top:14px;}
-    .kpi{padding:13px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);}
+    .kpi{padding:15px 14px;border-radius:18px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);}
     .kpi .k{color:var(--muted);font-size:11px;font-weight:900;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;}
-    .kpi .v{font-size:24px;font-weight:1000;line-height:1;letter-spacing:-.03em;word-break:break-word;}
+    .kpi .v{font-size:25px;font-weight:1000;line-height:1;letter-spacing:-.03em;word-break:break-word;}
 
     .sectionGrid{display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-top:12px;}
 
-    .field{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
-    .field label{font-size:13px;font-weight:900;color:var(--muted);letter-spacing:.03em;}
+    .field{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+    .field label{font-size:15px;font-weight:900;color:var(--text);letter-spacing:.03em;}
     .input,.select,.textarea{
-      width:100%;padding:14px 14px;border-radius:16px;border:1px solid var(--line);
-      background:rgba(255,255,255,.04);color:var(--text);outline:none;font-size:15px;font-weight:800;
+      width:100%;padding:16px 16px;border-radius:16px;border:1px solid var(--line2);
+      background:rgba(255,255,255,.08);color:var(--text);outline:none;font-size:17px;font-weight:800;
     }
-    .textarea{min-height:96px;resize:vertical}
-    .input::placeholder,.textarea::placeholder{color:#92a0c7}
+    .textarea{min-height:110px;resize:vertical;line-height:1.6}
+    .input::placeholder,.textarea::placeholder{color:#c2d0f0;font-size:15px}
 
     .hr{height:1px;background:var(--line);margin:14px 0}
 
     .tableWrap{
-      overflow:auto;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.03);
+      overflow:auto;border:1px solid var(--line);border-radius:20px;background:rgba(255,255,255,.04);
     }
     table{width:100%;border-collapse:collapse;min-width:780px;}
-    th,td{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;}
+    th,td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;}
     th{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
-    td{font-size:14px;font-weight:800;}
+    td{font-size:15px;font-weight:800;}
     tr:last-child td{border-bottom:none;}
 
     .badge{
       display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;
-      font-size:12px;font-weight:950;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);
+      font-size:12px;font-weight:950;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--muted);
     }
     .badge.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#d7ffe1;}
     .badge.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#ffe3b8;}
@@ -200,20 +200,23 @@
     }
 
     .smallBtn{
-      min-height:38px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);
-      background:rgba(255,255,255,.04);color:var(--text);font-weight:900;cursor:pointer;
+      min-height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);
+      background:rgba(255,255,255,.05);color:var(--text);font-weight:900;cursor:pointer;
+      font-size:14px;
     }
 
     .empty{
-      color:var(--muted);font-weight:800;font-size:13px;line-height:1.6;padding:18px;
+      color:var(--muted);font-weight:800;font-size:14px;line-height:1.7;padding:18px;
     }
 
     .blockedShell{display:none;min-height:320px;place-items:center;text-align:center;padding:24px;}
-    .blockedInner{max-width:680px;padding:22px;border-radius:22px;border:1px solid var(--line);background:rgba(255,255,255,.03);box-shadow:var(--shadow-soft);}
-    .blockedTitle{font-size:26px;font-weight:1000;margin-bottom:8px;line-height:1.1;}
-    .blockedText{color:var(--muted);font-size:14px;line-height:1.8;font-weight:700;}
+    .blockedInner{max-width:680px;padding:24px;border-radius:22px;border:1px solid var(--line);background:rgba(255,255,255,.04);box-shadow:var(--shadow-soft);}
+    .blockedTitle{font-size:28px;font-weight:1000;margin-bottom:8px;line-height:1.1;}
+    .blockedText{color:var(--muted);font-size:15px;line-height:1.8;font-weight:700;}
 
-    .footerNote{margin-top:12px;color:var(--muted);font-size:12px;font-weight:800;line-height:1.6;}
+    .footerNote{margin-top:12px;color:var(--muted);font-size:13px;font-weight:800;line-height:1.7;}
+
+    .sideTitle{margin:0 0 10px 0;font-size:22px;font-weight:950;}
 
     @media(max-width:1020px){
       .hero{grid-template-columns:1fr}
@@ -226,10 +229,17 @@
     }
     @media(max-width:700px){
       .wrap{padding:12px 12px 96px}
-      .topbar-inner{padding:12px}
-      .brandTitle{white-space:normal}
+      .topbar-inner{padding:14px}
+      .brandTitle{white-space:normal;font-size:21px}
+      .brandSub{font-size:13px}
       .subInfo{grid-template-columns:1fr}
       .kpiGrid{grid-template-columns:1fr}
+      .card{padding:18px}
+      .bigTitle{font-size:32px}
+      .mainSub{font-size:16px}
+      .field label{font-size:16px}
+      .input,.select,.textarea{font-size:18px;padding:18px}
+      .notice{font-size:15px}
       .floating-site-btn{
         left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));
         min-height:46px;padding:14px 14px;font-size:12px;
@@ -979,7 +989,7 @@
             <tr>
               <td>
                 <div style="font-weight:950">${esc(item.name || "—")}</div>
-                <div style="margin-top:4px;color:var(--muted);font-size:12px;font-weight:800">
+                <div style="margin-top:4px;color:var(--muted);font-size:13px;font-weight:800;line-height:1.5">
                   ${esc(item.category || "Sans catégorie")}
                   ${item.sku ? ` • ${esc(item.sku)}` : ""}
                 </div>
