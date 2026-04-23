@@ -118,7 +118,6 @@
       background:linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.08));
       box-shadow:0 16px 34px rgba(250,204,21,.10);
     }
-    /* ━━━ DOCTRINE : kicker = positionnement humain, pas code interne ━━━ */
     .brand-kicker{
       color:var(--gold);font-size:12px;letter-spacing:.14em;
       text-transform:uppercase;font-weight:900;margin-bottom:3px;
@@ -269,7 +268,6 @@
       color:#d7ceff;font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;
     }
 
-    /* ━━━ ZONE DEMO — "cockpit" interne, "Ma caisse" en façade ━━━ */
     .cockpit{
       background:var(--card2);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px;
     }
@@ -375,6 +373,49 @@
     .footer{border-top:1px solid rgba(255,255,255,.07);padding:20px 0 40px;color:var(--muted);font-size:12px;}
     .footer-inner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;line-height:1.7;font-weight:800;}
 
+    /* ── AUDIO ── */
+    #digiy-audio-btn{
+      position:fixed;
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      padding:16px 26px;
+      border:none;
+      border-radius:999px;
+      cursor:pointer;
+      font-family:'Outfit',sans-serif;
+      font-weight:900;
+      font-size:17px;
+      line-height:1;
+      -webkit-tap-highlight-color:transparent;
+      user-select:none;
+      transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;
+      z-index:99999;
+    }
+    #digiy-audio-btn:hover{transform:translateY(-2px)}
+    #digiy-audio-btn:active{transform:scale(.97)}
+    #digiy-audio-btn:disabled{opacity:.65;cursor:not-allowed}
+    #digiy-audio-btn .digiy-audio-ico{
+      font-size:18px;
+      line-height:1;
+    }
+    #digiy-audio-progress-wrap{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      height:3px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .25s ease;
+      z-index:99998;
+    }
+    #digiy-audio-progress{
+      width:0%;
+      height:100%;
+      transition:width .18s linear;
+    }
+
     /* ── RESPONSIVE ── */
     @media(max-width:980px){
       .hero-grid{grid-template-columns:1fr}
@@ -385,7 +426,15 @@
       .hero-mini-grid,.status-meta,.demo-stats,.sale-form{grid-template-columns:1fr;}
     }
     @media(max-width:700px){
-      .floating-site-btn{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));min-height:46px;padding:14px 14px;font-size:12px;justify-content:center;}
+      .floating-site-btn{
+        left:12px;
+        right:12px;
+        bottom:calc(78px + env(safe-area-inset-bottom, 0px));
+        min-height:46px;
+        padding:14px 14px;
+        font-size:12px;
+        justify-content:center;
+      }
       .wrap{padding:0 12px}
       .topbar-inner{padding:12px}
       .brand-title{font-size:24px}
@@ -393,11 +442,24 @@
       .hero-side{padding:14px}
       .preview-shell,.section-card,.price-card{border-radius:22px}
     }
+    @media (max-width:600px){
+      #digiy-audio-btn{
+        left:12px !important;
+        right:12px !important;
+        bottom:12px !important;
+        justify-content:center;
+        font-size:16px;
+        padding:15px 18px;
+        gap:11px;
+      }
+      #digiy-audio-btn .digiy-audio-ico{
+        font-size:17px;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <!-- ━━━ FLOAT : retour vitrine ━━━ -->
   <a
     class="floating-site-btn"
     id="btnBackPublic"
@@ -405,11 +467,6 @@
     aria-label="Retour à la vitrine MON COMMERCE"
   >⬅️ Retour à la vitrine</a>
 
-  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       TOPBAR — doctrine façade appliquée
-       brand-sub = ce que c'est pour l'humain
-       pas le nom interne du rail technique
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
   <header class="topbar">
     <div class="topbar-inner">
       <div class="brand">
@@ -417,7 +474,6 @@
         <div>
           <div class="brand-kicker">DIGIYLYFE</div>
           <div class="brand-title">MON COMMERCE</div>
-          <!-- ━━━ AVANT : "DIGIY CAISSE PRO • hall d'entrée POS" → jargon banni ━━━ -->
           <div class="brand-sub">Ma caisse élégante • accès sécurisé</div>
         </div>
       </div>
@@ -427,11 +483,8 @@
           <span id="statusDot" class="dot"></span>
           <span id="statusPillText">Chargement…</span>
         </div>
-        <!-- ━━━ "PIN PRO" → "Mon accès PIN" ━━━ -->
         <a class="btn-ghost" id="btnPinTop" href="./pin.html">🔐 Mon code d'accès</a>
-        <!-- ━━━ "Vérifier mon accès" → intention humaine, on garde ━━━ -->
         <button class="btn-outline" id="btnCheck" type="button">🔄 Vérifier mon accès</button>
-        <!-- ━━━ AVANT : "Activer mon module" × 4 → "Je commence" ━━━ -->
         <a class="btn" id="btnTopAction" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence</a>
       </div>
     </div>
@@ -441,18 +494,13 @@
     <section class="hero">
       <div class="hero-grid">
         <div class="panel hero-main">
-
-          <!-- ━━━ badge hero : on parle valeur, pas jargon ━━━ -->
           <div class="hero-badge">0% commission · accès libre · usage sécurisé</div>
 
-          <!-- ━━━ TITRE : Cormorant Garamond, ton boutique ━━━ -->
           <h1 class="hero-title">
             La caisse qui élève
             <em>ta boutique.</em>
           </h1>
 
-          <!-- ━━━ AVANT : "PIN puis dashboard pro" → banni
-               MAINTENANT : on décrit le moment, pas le système ━━━ -->
           <p class="hero-sub">
             MON COMMERCE te donne une caisse propre pour encaisser, suivre ton stock et lire ton activité
             sans te battre avec l'outil.
@@ -466,30 +514,15 @@
             <div class="hero-point">🔐 Accès sécurisé</div>
           </div>
 
-          <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-               CTA HERO — doctrine "moment humain"
-               AVANT :
-                 "💳 Activer mon module"     → banni
-                 "🧭 Dashboard Pro"           → banni
-                 "🧾 Ouvrir la caisse"        → OK (moment humain)
-                 "🔐 Ouvrir avec mon PIN"     → OK
-               APRÈS :
-                 "💰 Ouvrir ma caisse"        → moment
-                 "🧭 Mon espace de travail"   → identité métier
-                 "🧾 Ouvrir ma caisse"        → moment
-                 "🔐 Entrer avec mon PIN"     → action directe
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
           <div class="hero-actions">
             <a class="btn" id="btnHeroPrimary" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence</a>
             <a class="btn-ghost" id="btnOpenPin" href="./pin.html">🔐 Entrer avec mon code</a>
           </div>
 
-          <!-- ━━━ helper : on parle chemin humain, pas nom de fichier ━━━ -->
           <div class="helper">
             Tu vois d'abord. Tu entres ensuite par ton accès sécurisé — proprement, sans détour.
           </div>
 
-          <!-- ━━━ mini-grid : même logique, même valeur ━━━ -->
           <div class="hero-mini-grid">
             <div class="mini-box">
               <div class="mini-label">Positionnement</div>
@@ -506,7 +539,6 @@
           </div>
         </div>
 
-        <!-- ━━━ PANNEAU STATUT — langage de confiance, pas de diagnostic ━━━ -->
         <aside class="panel hero-side">
           <div class="status-box">
             <div class="status-top">
@@ -538,20 +570,14 @@
               </div>
             </div>
 
-            <!-- ━━━ helper : on parle au pro, pas au développeur ━━━ -->
             <div class="helper" id="statusHelper">
               Passe par ton lien pro pour que ta boutique soit reconnue automatiquement.
             </div>
-
           </div>
         </aside>
       </div>
     </section>
 
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         APERÇU CAISSE — "Aperçu cockpit" → banni
-         MAINTENANT : "Aperçu de ta caisse"
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <section class="section" id="apercu-cockpit">
       <div class="section-head">
         <div class="section-kicker">Aperçu de ta caisse</div>
@@ -572,7 +598,6 @@
         <div class="cockpit">
           <div class="cockpit-head">
             <div>
-              <!-- ━━━ AVANT : "DIGIY CAISSE PRO — Cockpit boutique" → double jargon banni ━━━ -->
               <div class="cockpit-title">Ma caisse — exemple boutique</div>
               <div class="cockpit-sub">Aperçu visuel pour montrer comment tu travailles</div>
             </div>
@@ -584,7 +609,6 @@
 
           <div class="cockpit-grid">
             <div class="pane">
-              <!-- ━━━ "Aujourd'hui" : moment humain, on garde ━━━ -->
               <div class="pane-title">Aujourd'hui</div>
 
               <div class="demo-stats">
@@ -602,7 +626,6 @@
                 </div>
               </div>
 
-              <!-- ━━━ "Nouvelle vente — Appuyer ici" : doctrine bouton ━━━ -->
               <div class="pane-title">Nouvelle vente</div>
               <div class="sale-form">
                 <div class="mock-field">Produit / service</div>
@@ -667,11 +690,6 @@
       </div>
     </section>
 
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         CE QUE TU GAGNES
-         AVANT : "Ce que le module apporte au commerçant" → "module" banni
-         MAINTENANT : "Ce que tu gagnes"
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <section class="section">
       <div class="section-head">
         <div class="section-kicker">Ce que tu gagnes</div>
@@ -717,10 +735,6 @@
       </div>
     </section>
 
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         PARCOURS — "Tu vois. Tu actives. Tu entres proprement."
-         Étape 3 : supprimer les noms de fichiers visibles
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <section class="section">
       <div class="section-head">
         <div class="section-kicker">Comment ça marche</div>
@@ -757,22 +771,15 @@
       </div>
     </section>
 
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         TARIF
-         AVANT : "DIGIY CAISSE PRO" + "Activer mon module" × 2 → bannis
-         MAINTENANT : "Mon commerce" + "Je commence"
-    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <section class="pricing">
       <div class="price-wrap">
         <div class="price-card">
           <div class="price-badge">Abonnement direct</div>
-          <!-- ━━━ AVANT : "DIGIY CAISSE PRO" → nom interne banni en façade ━━━ -->
           <div class="price-name">Mon commerce</div>
           <div class="price-amount">19 900 F</div>
           <div class="price-period">CFA / mois · 0% commission</div>
 
           <ul class="price-list">
-            <!-- ━━━ "Accès réel au dashboard pro" → "Accès à mon espace de travail" ━━━ -->
             <li>✓ Accès à mon espace de travail</li>
             <li>✓ Ma caisse, prête à encaisser</li>
             <li>✓ Catalogue et suivi du stock</li>
@@ -781,7 +788,6 @@
           </ul>
 
           <div class="cta-box">
-            <!-- ━━━ AVANT : "💳 Activer mon module" → banni ━━━ -->
             <a class="btn" id="btnPriceAction" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence maintenant</a>
             <a
               class="btn-outline"
@@ -802,14 +808,6 @@
     </footer>
   </main>
 
-  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       JS INTERNE — LOGIQUE GUARD + SUPABASE INTACTE
-       Seuls les textes dynamiques des boutons sont mis à jour
-       selon la doctrine façade :
-         "Activer mon module"   → "Je commence" (sans accès)
-         "Dashboard Pro"        → "Mon espace de travail" (avec accès)
-         "Caisse via PIN"       → "Ma caisse via PIN"
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
   <script>
     (() => {
       "use strict";
@@ -876,19 +874,14 @@
       }
 
       function buildUrl(base, params){
-        // ━━━ DÉFENSE TOTALE ━━━
-        // Étape 1 : normaliser base en string propre
         const baseStr = (base == null ? "" : String(base)).trim();
         if(!baseStr) return location.href;
 
         let u;
         try {
-          // Cas 1 : URL absolue (http/https) → on la parse directement
           if(/^https?:\/\//i.test(baseStr)){
             u = new URL(baseStr);
-          }
-          // Cas 2 : chemin relatif ou absolu → on reconstruit depuis l'origine
-          else {
+          } else {
             const origin = location.protocol + "//" + location.host;
             const full = baseStr.startsWith("/")
               ? origin + baseStr
@@ -897,16 +890,15 @@
           }
         } catch(e){
           log("buildUrl KO: " + baseStr + " — " + e.message);
-          return baseStr; // retourner tel quel plutôt que planter
+          return baseStr;
         }
 
-        // Étape 2 : ajouter les paramètres
         try {
           Object.entries(params || {}).forEach(([k, v]) => {
             if(v !== undefined && v !== null && String(v) !== "")
               u.searchParams.set(k, String(v));
           });
-        } catch(e){ /* silencieux */ }
+        } catch(e){}
 
         return u.toString();
       }
@@ -943,42 +935,88 @@
         $("metaPlan").textContent = state.plan || "—";
       }
 
-      function wireButtons(){
-        // ━━━ DÉFENSE : wireButtons ne doit jamais faire tomber hydrate ━━━
-        try {
-        const abos = buildAbosUrl();
-        const dashboard = buildDashboardUrl();
-        const caisse = buildCaisseUrl();
-        const pinDefault = buildPinUrl({ "return": DASHBOARD_URL });
-        const pinForCaisse = buildPinUrl({ target: "caisse" });
-        const publicUrl = buildPublicUrl();
+      function digiyPosAudio(){
+        const hasSlug = !!state.slug;
+        const hasAccess = !!state.access;
 
-        $("btnBackPublic").href = publicUrl;
-        $("btnPriceAction").href = abos;
-        $("btnPinTop").href = pinDefault;
-        $("btnOpenPin").href = pinDefault;
-
-        if(state.access){
-          $("btnTopAction").href = dashboard;
-          $("btnHeroPrimary").href = dashboard;
-          $("btnOpenDashboard").href = dashboard;
-          $("btnOpenCaisse").href = caisse;
-          $("btnTopAction").textContent = "🧭 Mon espace de travail";
-          $("btnHeroPrimary").textContent = "🧭 Entrer dans mon espace";
-          $("btnOpenDashboard").textContent = "🧭 Mon espace de travail";
-          $("btnOpenCaisse").textContent = "🧾 Ouvrir ma caisse";
-        } else {
-          $("btnTopAction").href = abos;
-          $("btnHeroPrimary").href = abos;
-          $("btnOpenDashboard").href = pinDefault;
-          $("btnOpenCaisse").href = pinForCaisse;
-          $("btnTopAction").textContent = "💳 Je commence";
-          $("btnHeroPrimary").textContent = "💳 Je commence maintenant";
-          $("btnOpenDashboard").textContent = "🔐 Mon espace via PIN";
-          $("btnOpenCaisse").textContent = "🔐 Ma caisse via PIN";
+        if(!hasSlug){
+          return "Entre dans ton commerce avec ton identifiant pour commencer.";
         }
 
-        try { $("btnCheck").setAttribute("data-support", buildSupportUrl()); } catch(e){}
+        if(!hasAccess){
+          return "Ta caisse est prête. Tu peux activer ton accès pour commencer à encaisser.";
+        }
+
+        return "Ta caisse est prête. Tu peux encaisser maintenant ou consulter ton activité.";
+      }
+
+      function refreshPosAudioText(){
+        window.DIGIY_POS_AUDIO_TEXT = digiyPosAudio();
+      }
+
+      function wireButtons(){
+        try {
+          const abos = buildAbosUrl();
+          const dashboard = buildDashboardUrl();
+          const caisse = buildCaisseUrl();
+          const pinDefault = buildPinUrl({ "return": DASHBOARD_URL });
+          const pinForCaisse = buildPinUrl({ target: "caisse" });
+          const publicUrl = buildPublicUrl();
+
+          const btnBackPublic = $("btnBackPublic");
+          const btnPriceAction = $("btnPriceAction");
+          const btnPinTop = $("btnPinTop");
+          const btnOpenPin = $("btnOpenPin");
+          const btnTopAction = $("btnTopAction");
+          const btnHeroPrimary = $("btnHeroPrimary");
+          const btnOpenDashboard = $("btnOpenDashboard");
+          const btnOpenCaisse = $("btnOpenCaisse");
+
+          if (btnBackPublic) btnBackPublic.href = publicUrl;
+          if (btnPriceAction) btnPriceAction.href = abos;
+          if (btnPinTop) btnPinTop.href = pinDefault;
+          if (btnOpenPin) btnOpenPin.href = pinDefault;
+
+          if(state.access){
+            if (btnTopAction) {
+              btnTopAction.href = dashboard;
+              btnTopAction.textContent = "🧭 Mon espace de travail";
+            }
+            if (btnHeroPrimary) {
+              btnHeroPrimary.href = caisse;
+              btnHeroPrimary.textContent = "💰 Ouvrir ma caisse";
+            }
+            if (btnOpenDashboard) {
+              btnOpenDashboard.href = dashboard;
+              btnOpenDashboard.textContent = "🧭 Mon espace de travail";
+            }
+            if (btnOpenCaisse) {
+              btnOpenCaisse.href = caisse;
+              btnOpenCaisse.textContent = "🧾 Ouvrir ma caisse";
+            }
+          } else {
+            if (btnTopAction) {
+              btnTopAction.href = abos;
+              btnTopAction.textContent = "💳 Je commence";
+            }
+            if (btnHeroPrimary) {
+              btnHeroPrimary.href = abos;
+              btnHeroPrimary.textContent = "💳 Je commence maintenant";
+            }
+            if (btnOpenDashboard) {
+              btnOpenDashboard.href = pinDefault;
+              btnOpenDashboard.textContent = "🔐 Mon espace via PIN";
+            }
+            if (btnOpenCaisse) {
+              btnOpenCaisse.href = pinForCaisse;
+              btnOpenCaisse.textContent = "🔐 Ma caisse via PIN";
+            }
+          }
+
+          try {
+            const btnCheck = $("btnCheck");
+            if (btnCheck) btnCheck.setAttribute("data-support", buildSupportUrl());
+          } catch(e){}
         } catch(e) {
           log("wireButtons: erreur silencieuse", { message: e.message || String(e) });
         }
@@ -1060,16 +1098,24 @@
               "La page montre la valeur. Le vrai travail s'ouvre avec ton identifiant et ton accès actif.",
               "Passe par ton lien d'accès ou rejoins DIGIY pour commencer. L'entrée normale se fait par <b>QR → code d'accès → espace de travail</b>."
             );
-            state.storeName = "Aperçu libre"; state.plan = "—";
-            paintMeta(); wireButtons(); return;
+            state.storeName = "Aperçu libre";
+            state.plan = "—";
+            paintMeta();
+            wireButtons();
+            return;
           }
 
           if(!phone){
-            try{ phone = await resolvePhoneFromSlug(slug); log("Téléphone résolu depuis slug", { slug, phone }); }
-            catch(err){ log("resolvePhoneFromSlug KO", { message: err?.message || String(err) }); }
+            try{
+              phone = await resolvePhoneFromSlug(slug);
+              log("Téléphone résolu depuis slug", { slug, phone });
+            } catch(err){
+              log("resolvePhoneFromSlug KO", { message: err?.message || String(err) });
+            }
           }
 
-          state.slug = slug; state.phone = phone || "";
+          state.slug = slug;
+          state.phone = phone || "";
           remember(state.slug, state.phone);
 
           let storeCtx = null;
@@ -1077,8 +1123,16 @@
           catch(err){ log("getStoreContext KO", { message: err?.message || String(err) }); }
 
           if(storeCtx){
-            state.storeName = String(storeCtx?.shop_name || storeCtx?.display_name || storeCtx?.store?.name || storeCtx?.profile?.display_name || "Boutique active").trim();
-          } else { state.storeName = "Boutique détectée"; }
+            state.storeName = String(
+              storeCtx?.shop_name ||
+              storeCtx?.display_name ||
+              storeCtx?.store?.name ||
+              storeCtx?.profile?.display_name ||
+              "Boutique active"
+            ).trim();
+          } else {
+            state.storeName = "Boutique détectée";
+          }
 
           let sub = null;
           if(phone){
@@ -1086,16 +1140,26 @@
             catch(err){ log("digiy_has_access KO", { message: err?.message || String(err) }); state.access = false; }
             try{ sub = await getSubscription(phone); }
             catch(err){ log("getSubscription KO", { message: err?.message || String(err) }); }
-          } else { state.access = false; }
+          } else {
+            state.access = false;
+          }
 
-          state.plan = String(sub?.plan || sub?.plan_code || sub?.subscription_plan || sub?.status || (state.access ? "actif" : "—")).trim() || "—";
-          paintMeta(); wireButtons();
+          state.plan = String(
+            sub?.plan ||
+            sub?.plan_code ||
+            sub?.subscription_plan ||
+            sub?.status ||
+            (state.access ? "actif" : "—")
+          ).trim() || "—";
+
+          paintMeta();
+          wireButtons();
 
           if(state.access){
             setStatus(
               "ok", "ACCÈS OUVERT", "Ta boutique est reconnue",
-              "Ton accès est actif. Le bouton principal ouvre ton espace de travail.",
-              `Boutique : <b>${state.storeName}</b><br>Ton espace de travail et ta caisse sont prêts.`
+              "Ton accès est actif. Le bouton principal ouvre maintenant ta caisse.",
+              `Boutique : <b>${state.storeName}</b><br>Ta caisse et ton espace de travail sont prêts.`
             );
           } else {
             setStatus(
@@ -1113,7 +1177,11 @@
             "Vérifie ton identifiant, puis relance le contrôle."
           );
         }finally{
-          state.loading = false; paintMeta(); wireButtons(); revealPage();
+          state.loading = false;
+          paintMeta();
+          wireButtons();
+          revealPage();
+          refreshPosAudioText();
         }
       }
 
@@ -1127,15 +1195,255 @@
       }
 
       function bind(){
-        $("btnCheck").addEventListener("click", async () => {
-          const btn = $("btnCheck");
-          btn.disabled = true; btn.textContent = "Contrôle…";
-          try{ await hydrate(); } finally { btn.disabled = false; btn.textContent = "🔄 Vérifier mon accès"; }
-        });
+        const btnCheck = $("btnCheck");
+        if (btnCheck) {
+          btnCheck.addEventListener("click", async () => {
+            btnCheck.disabled = true;
+            btnCheck.textContent = "Contrôle…";
+            try{
+              await hydrate();
+            } finally {
+              btnCheck.disabled = false;
+              btnCheck.textContent = "🔄 Vérifier mon accès";
+            }
+          });
+        }
       }
 
-      async function init(){ revealPage(); bind(); await bootGuardSoft(); await hydrate(); }
+      async function init(){
+        revealPage();
+        bind();
+        await bootGuardSoft();
+        await hydrate();
+      }
+
       init();
+    })();
+  </script>
+
+  <script>
+    window.DIGIY_AUDIO_CONFIG = {
+      label: "Écouter",
+      stopLabel: "Arrêter",
+      text: window.DIGIY_POS_AUDIO_TEXT || "Tu peux ouvrir ta caisse.",
+      buttonBg: "linear-gradient(135deg,#facc15,#f59e0b)",
+      buttonColor: "#07110d",
+      bottom: "24px",
+      left: "24px",
+      rate: 0.82,
+      pitch: 1,
+      volume: 1,
+      zIndex: 99999,
+      shadow: "0 10px 30px rgba(0,0,0,.26)"
+    };
+  </script>
+
+  <button id="digiy-audio-btn" type="button" aria-label="Écouter">
+    <span class="digiy-audio-ico">&#9654;</span>
+    <span class="digiy-audio-lbl">Écouter</span>
+  </button>
+
+  <div id="digiy-audio-progress-wrap" aria-hidden="true">
+    <div id="digiy-audio-progress"></div>
+  </div>
+
+  <script>
+    (function(){
+      var cfg = window.DIGIY_AUDIO_CONFIG || {};
+
+      var config = {
+        label: cfg.label || "Écouter DIGIY",
+        stopLabel: cfg.stopLabel || "Arrêter",
+        text: cfg.text || "Bienvenue sur DIGIYLYFE.",
+        buttonBg: cfg.buttonBg || "linear-gradient(135deg,#d4af37,#b78b34)",
+        buttonColor: cfg.buttonColor || "#111827",
+        bottom: cfg.bottom || "24px",
+        left: cfg.left || "24px",
+        right: cfg.right || null,
+        rate: typeof cfg.rate === "number" ? cfg.rate : 0.82,
+        pitch: typeof cfg.pitch === "number" ? cfg.pitch : 1,
+        volume: typeof cfg.volume === "number" ? cfg.volume : 1,
+        zIndex: cfg.zIndex || 99999,
+        shadow: cfg.shadow || "0 8px 28px rgba(0,0,0,.24)"
+      };
+
+      var btn = document.getElementById("digiy-audio-btn");
+      var lbl = btn ? btn.querySelector(".digiy-audio-lbl") : null;
+      var ico = btn ? btn.querySelector(".digiy-audio-ico") : null;
+      var progressWrap = document.getElementById("digiy-audio-progress-wrap");
+      var progressBar = document.getElementById("digiy-audio-progress");
+
+      if (!btn || !lbl || !ico || !progressWrap || !progressBar) return;
+
+      btn.style.bottom = config.bottom;
+      btn.style.left = config.left ? config.left : "auto";
+      btn.style.right = config.right ? config.right : "auto";
+      btn.style.background = config.buttonBg;
+      btn.style.color = config.buttonColor;
+      btn.style.boxShadow = config.shadow;
+      btn.style.zIndex = String(config.zIndex);
+
+      progressWrap.style.background = "rgba(212,175,55,.2)";
+      progressBar.style.background = "linear-gradient(90deg,#d4af37,#b78b34)";
+
+      if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+        btn.style.display = "none";
+        return;
+      }
+
+      var synth = window.speechSynthesis;
+      var utterance = null;
+      var playing = false;
+      var timer = null;
+      var launchId = 0;
+
+      function currentAudioText(){
+        return window.DIGIY_POS_AUDIO_TEXT || config.text;
+      }
+
+      function getFrenchVoice(){
+        var voices = synth.getVoices() || [];
+        if (!voices.length) return null;
+
+        return (
+          voices.find(function(v){ return /fr[-_]?FR/i.test(v.lang) && /google/i.test(v.name); }) ||
+          voices.find(function(v){ return /fr[-_]?FR/i.test(v.lang); }) ||
+          voices.find(function(v){ return /^fr/i.test(v.lang); }) ||
+          null
+        );
+      }
+
+      function setIdle(){
+        playing = false;
+        ico.innerHTML = "&#9654;";
+        lbl.textContent = config.label;
+        btn.setAttribute("aria-label", config.label);
+        clearInterval(timer);
+        timer = null;
+        progressWrap.style.opacity = "0";
+        progressBar.style.width = "0%";
+      }
+
+      function setPlaying(){
+        playing = true;
+        ico.innerHTML = "&#9632;";
+        lbl.textContent = config.stopLabel;
+        btn.setAttribute("aria-label", config.stopLabel);
+      }
+
+      function stop(){
+        clearInterval(timer);
+        timer = null;
+        try { synth.cancel(); } catch(e){}
+        utterance = null;
+        setIdle();
+      }
+
+      function startProgress(text, currentId){
+        var words = (text.trim().match(/\S+/g) || []).length;
+        var estimatedDuration = Math.max(2500, words * 520);
+        var elapsed = 0;
+
+        clearInterval(timer);
+        progressBar.style.width = "0%";
+        progressWrap.style.opacity = "1";
+
+        timer = setInterval(function(){
+          if (!playing || currentId !== launchId) {
+            clearInterval(timer);
+            timer = null;
+            return;
+          }
+          elapsed += 150;
+          var pct = Math.min((elapsed / estimatedDuration) * 100, 97);
+          progressBar.style.width = pct + "%";
+        }, 150);
+      }
+
+      function launch(){
+        launchId += 1;
+        var currentId = launchId;
+        var smartText = currentAudioText();
+
+        try { synth.cancel(); } catch(e){}
+
+        utterance = new SpeechSynthesisUtterance(smartText);
+        utterance.lang = "fr-FR";
+        utterance.rate = config.rate;
+        utterance.pitch = config.pitch;
+        utterance.volume = config.volume;
+
+        var voice = getFrenchVoice();
+        if (voice) utterance.voice = voice;
+
+        utterance.onstart = function(){
+          if (currentId !== launchId) return;
+          setPlaying();
+          startProgress(smartText, currentId);
+        };
+
+        utterance.onend = function(){
+          if (currentId !== launchId) return;
+          clearInterval(timer);
+          timer = null;
+          progressBar.style.width = "100%";
+          setTimeout(function(){
+            if (currentId === launchId) setIdle();
+          }, 250);
+        };
+
+        utterance.onerror = function(){
+          if (currentId !== launchId) return;
+          stop();
+        };
+
+        synth.speak(utterance);
+      }
+
+      function play(){
+        if (playing) return;
+
+        if (synth.speaking || synth.pending) {
+          try { synth.cancel(); } catch(e){}
+        }
+
+        var voices = synth.getVoices();
+        if (voices && voices.length) {
+          launch();
+          return;
+        }
+
+        var launched = false;
+
+        function handleVoicesChanged(){
+          if (launched) return;
+          launched = true;
+          synth.removeEventListener("voiceschanged", handleVoicesChanged);
+          launch();
+        }
+
+        synth.addEventListener("voiceschanged", handleVoicesChanged);
+
+        setTimeout(function(){
+          if (launched) return;
+          launched = true;
+          synth.removeEventListener("voiceschanged", handleVoicesChanged);
+          launch();
+        }, 700);
+      }
+
+      btn.addEventListener("click", function(){
+        if (playing) stop();
+        else play();
+      });
+
+      window.addEventListener("beforeunload", stop);
+
+      document.addEventListener("visibilitychange", function(){
+        if (document.hidden && playing) stop();
+      });
+
+      setIdle();
     })();
   </script>
 </body>
