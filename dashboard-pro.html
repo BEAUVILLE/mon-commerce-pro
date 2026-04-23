@@ -753,5 +753,43 @@
   });
 })();
 </script>
+  <button id="digiy-audio-btn" type="button">
+  🔊 Écouter
+</button>
+
+<script>
+(function(){
+  const btn = document.getElementById("digiy-audio-btn");
+  if(!btn) return;
+
+  const synth = window.speechSynthesis;
+  let playing = false;
+
+  function getText(){
+    if(typeof window.DIGIY_GET_AUDIO_TEXT === "function"){
+      return window.DIGIY_GET_AUDIO_TEXT();
+    }
+    return "Bienvenue dans ton espace.";
+  }
+
+  function speak(){
+    const text = getText();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "fr-FR";
+    synth.cancel();
+    synth.speak(u);
+    playing = true;
+  }
+
+  btn.onclick = function(){
+    if(playing){
+      synth.cancel();
+      playing = false;
+    } else {
+      speak();
+    }
+  };
+})();
+</script>
 </body>
 </html>
