@@ -951,8 +951,17 @@
 }
 
       function refreshPosAudioText(){
-        window.DIGIY_POS_AUDIO_TEXT = digiyPosAudio();
-      }
+  const nextText = digiyPosAudio();
+  window.DIGIY_POS_AUDIO_TEXT = nextText;
+
+  if (!window.DIGIY_AUDIO_CONFIG) {
+    window.DIGIY_AUDIO_CONFIG = {};
+  }
+
+  window.DIGIY_AUDIO_CONFIG.text = nextText;
+
+  console.log("[DIGIY POS AUDIO TEXT]", nextText);
+}
 
       function wireButtons(){
         try {
