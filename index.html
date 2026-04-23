@@ -936,19 +936,19 @@
       }
 
       function digiyPosAudio(){
-        const hasSlug = !!state.slug;
-        const hasAccess = !!state.access;
+  const hasSlug = !!state.slug;
+  const hasAccess = !!state.access;
 
-        if(!hasSlug){
-          return "Entre dans ton commerce avec ton identifiant pour commencer.";
-        }
+  if(!hasSlug){
+    return "Entre dans ton commerce avec ton identifiant pour commencer.";
+  }
 
-        if(!hasAccess){
-          return "Ta caisse est prête. Tu peux activer ton accès pour commencer à encaisser.";
-        }
+  if(!hasAccess){
+    return "Ton commerce est reconnu, mais il faut d’abord ouvrir ton accès avant de préparer ta caisse.";
+  }
 
-        return "Ta caisse est prête. Tu peux encaisser maintenant ou consulter ton activité.";
-      }
+  return "Avant d’encaisser, ajoute d’abord tes produits un par un. Mets le nom du produit, son prix de vente, puis la quantité que tu as en stock.";
+}
 
       function refreshPosAudioText(){
         window.DIGIY_POS_AUDIO_TEXT = digiyPosAudio();
