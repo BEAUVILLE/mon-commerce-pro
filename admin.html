@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="fr">
 <head>
@@ -111,19 +112,23 @@
     .dot.ok{background:var(--green)}
     .dot.bad{background:var(--danger)}
 
-    .btn,.btn-outline,.btn-ghost,.btn-danger{
+    .btn,.btn-outline,.btn-ghost,.btn-danger,.smallBtn{
       appearance:none;border:none;cursor:pointer;
       display:inline-flex;align-items:center;justify-content:center;gap:10px;
       min-height:48px;padding:14px 18px;border-radius:999px;
       font-weight:900;font-size:15px;letter-spacing:.02em;white-space:nowrap;
       transition:transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
     }
-    .btn:hover,.btn-outline:hover,.btn-ghost:hover,.btn-danger:hover{transform:translateY(-1px)}
-    .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled,.btn-danger:disabled{opacity:.56;cursor:not-allowed;transform:none;}
+    .btn:hover,.btn-outline:hover,.btn-ghost:hover,.btn-danger:hover,.smallBtn:hover{transform:translateY(-1px)}
+    .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled,.btn-danger:disabled,.smallBtn:disabled{opacity:.56;cursor:not-allowed;transform:none;}
     .btn{color:#07110d;background:linear-gradient(135deg, var(--gold), var(--gold2));box-shadow:0 14px 30px rgba(250,204,21,.18);}
     .btn-outline{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--line2);}
     .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line2);}
     .btn-danger{background:linear-gradient(135deg, rgba(239,68,68,.95), rgba(239,68,68,.72));color:#fff;}
+    .smallBtn{
+      min-height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);
+      background:rgba(255,255,255,.05);color:var(--text);font-weight:900;font-size:14px;
+    }
 
     .navRow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 
@@ -138,7 +143,7 @@
     .heroBadge{
       display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
       background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);color:var(--gold);
-      font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;
+      font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;
     }
 
     .bigTitle{margin:0;font-size:clamp(34px, 5vw, 56px);line-height:.96;letter-spacing:-.04em;font-weight:1000;max-width:12ch;}
@@ -199,12 +204,6 @@
       display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:10px;
     }
 
-    .smallBtn{
-      min-height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--line2);
-      background:rgba(255,255,255,.05);color:var(--text);font-weight:900;cursor:pointer;
-      font-size:14px;
-    }
-
     .empty{
       color:var(--muted);font-weight:800;font-size:14px;line-height:1.7;padding:18px;
     }
@@ -217,6 +216,8 @@
     .footerNote{margin-top:12px;color:var(--muted);font-size:13px;font-weight:800;line-height:1.7;}
 
     .sideTitle{margin:0 0 10px 0;font-size:22px;font-weight:950;}
+
+    #digiy-help-panel{display:none}
 
     @media(max-width:1020px){
       .hero{grid-template-columns:1fr}
@@ -301,10 +302,15 @@
       <section id="liveShell">
         <div class="hero">
           <div class="card">
-            <div class="heroBadge">Atelier catalogue</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+              <div class="heroBadge">Atelier catalogue</div>
+              <button id="digiy-help-btn" class="smallBtn" type="button">❓ Comment utiliser mes articles</button>
+              <button id="digiy-audio-btn" class="smallBtn" type="button">🔊 Écouter</button>
+            </div>
+
             <h1 class="bigTitle"><span class="accent">Articles</span> prêts</h1>
             <div class="mainSub">
-              Ici tu poses tes marchandises, leurs prix et leur stock. C’est le cœur du commerce réel.
+              Ici tu poses ce que tu vends, le bon prix et la quantité disponible. C’est la base de ta boutique et de ta caisse.
             </div>
 
             <div class="subInfo">
@@ -329,14 +335,14 @@
             <div class="notice info" id="noticeBox">Chargement…</div>
 
             <div class="actionRow">
-              <button class="btn" type="button" id="btnNew">➕ Nouvel article</button>
-              <button class="btn-outline" type="button" id="btnExport">📤 Exporter</button>
-              <button class="btn-outline" type="button" id="btnImport">📥 Importer</button>
+              <button class="btn" type="button" id="btnNew">➕ Ajouter un article</button>
+              <button class="btn-outline" type="button" id="btnExport">📤 Télécharger mes articles</button>
+              <button class="btn-outline" type="button" id="btnImport">📥 Ajouter un fichier</button>
               <input type="file" id="fileImport" accept="application/json" style="display:none"/>
             </div>
 
             <div class="footerNote">
-              Si la table produits n’existe pas encore en base, l’atelier continue en local sur ce téléphone/ordinateur.
+              Si la table produits n’existe pas encore en base, l’atelier continue en local sur ce téléphone ou cet ordinateur.
             </div>
           </div>
 
@@ -345,15 +351,15 @@
 
             <div class="kpiGrid">
               <div class="kpi">
-                <div class="k">Articles</div>
+                <div class="k">Articles en place</div>
                 <div class="v" id="kpiCount">0</div>
               </div>
               <div class="kpi">
-                <div class="k">Stock total</div>
+                <div class="k">Quantité disponible</div>
                 <div class="v" id="kpiStock">0</div>
               </div>
               <div class="kpi">
-                <div class="k">Valeur stock</div>
+                <div class="k">Valeur de mon stock</div>
                 <div class="v" id="kpiValue">0 F</div>
               </div>
             </div>
@@ -361,12 +367,12 @@
             <div class="hr"></div>
 
             <div class="searchRow">
-              <input class="input" id="searchText" placeholder="Chercher un article…"/>
+              <input class="input" id="searchText" placeholder="🔍 Trouver un article…"/>
               <select class="select" id="filterStatus">
-                <option value="all">Tous</option>
-                <option value="published">Publiés</option>
-                <option value="draft">Brouillons</option>
-                <option value="low">Stock faible</option>
+                <option value="all">Tous mes articles</option>
+                <option value="published">Visible en boutique</option>
+                <option value="draft">Non visible</option>
+                <option value="low">Stock presque fini</option>
               </select>
               <select class="select" id="sortBy">
                 <option value="recent">Plus récents</option>
@@ -379,45 +385,56 @@
             </div>
 
             <div class="helper">
-              Stock faible = 5 ou moins. Tu peux changer ça plus tard si on veut.
+              Stock presque fini = 5 ou moins. On pourra changer ce seuil plus tard si tu veux.
             </div>
+          </div>
+        </div>
+
+        <div id="digiy-help-panel" class="card" style="margin-bottom:12px">
+          <h2 class="sideTitle" style="margin-bottom:12px">Comment utiliser mes articles</h2>
+          <div class="helper" style="margin-top:0;color:var(--text)">
+            <p style="margin:0 0 10px 0"><b>1. Ajouter un article</b><br>Écris son nom, son prix et la quantité disponible.</p>
+            <p style="margin:0 0 10px 0"><b>2. Organiser</b><br>Tu peux ajouter un type d’article, un code et un petit détail.</p>
+            <p style="margin:0 0 10px 0"><b>3. Choisir la visibilité</b><br><b>Visible</b> = l’article peut apparaître dans ta boutique. <b>Non visible</b> = il reste caché.</p>
+            <p style="margin:0 0 10px 0"><b>4. Enregistrer</b><br>Ton article rejoint la liste et pourra servir dans la caisse.</p>
+            <p style="margin:0"><b>5. Modifier plus tard</b><br>Tu peux revenir à tout moment pour corriger le prix, le stock ou supprimer l’article.</p>
           </div>
         </div>
 
         <div class="sectionGrid">
           <div class="card">
-            <h2 class="sideTitle" id="formTitle">Nouvel article</h2>
+            <h2 class="sideTitle" id="formTitle">Ajouter un article</h2>
 
             <div class="field">
-              <label for="productName">Nom de l’article</label>
+              <label for="productName">Nom</label>
               <input class="input" id="productName" type="text" placeholder="Ex : Robe bleue / Parfum / Sac à main"/>
             </div>
 
             <div class="field">
-              <label for="productCategory">Catégorie</label>
+              <label for="productCategory">Type d’article</label>
               <input class="input" id="productCategory" type="text" placeholder="Ex : Mode / Beauté / Accessoire / Alimentaire"/>
             </div>
 
             <div class="field">
-              <label for="productSku">Référence (optionnel)</label>
+              <label for="productSku">Code (optionnel)</label>
               <input class="input" id="productSku" type="text" placeholder="Ex : RB-001"/>
             </div>
 
             <div class="sectionGrid" style="margin-top:0">
               <div class="field" style="margin-top:0">
-                <label for="productPrice">Prix (FCFA)</label>
+                <label for="productPrice">Prix</label>
                 <input class="input" id="productPrice" type="number" min="0" step="1" placeholder="3500"/>
               </div>
 
               <div class="field" style="margin-top:0">
-                <label for="productStock">Stock</label>
+                <label for="productStock">Quantité disponible</label>
                 <input class="input" id="productStock" type="number" min="0" step="1" placeholder="12"/>
               </div>
             </div>
 
             <div class="sectionGrid" style="margin-top:0">
               <div class="field" style="margin-top:0">
-                <label for="productPublished">Visible dans la boutique ?</label>
+                <label for="productPublished">Afficher dans ma boutique ?</label>
                 <select class="select" id="productPublished">
                   <option value="true">Oui</option>
                   <option value="false">Non</option>
@@ -431,14 +448,14 @@
             </div>
 
             <div class="field">
-              <label for="productNote">Description courte (optionnel)</label>
+              <label for="productNote">Petit détail (optionnel)</label>
               <textarea class="textarea" id="productNote" placeholder="Ex : Tissu léger, très demandé, taille M à XL…"></textarea>
             </div>
 
             <div class="actionRow">
-              <button class="btn" type="button" id="btnSaveProduct">💾 Enregistrer l’article</button>
-              <button class="btn-outline" type="button" id="btnClearForm">Effacer</button>
-              <button class="btn-danger" type="button" id="btnDeleteProduct" style="display:none">🗑️ Supprimer</button>
+              <button class="btn" type="button" id="btnSaveProduct">💾 Enregistrer</button>
+              <button class="btn-outline" type="button" id="btnClearForm">🧹 Réinitialiser</button>
+              <button class="btn-danger" type="button" id="btnDeleteProduct" style="display:none">🗑️ Supprimer cet article</button>
             </div>
 
             <div class="notice" id="formNotice">Remplis les champs puis enregistre.</div>
@@ -451,23 +468,23 @@
               <table>
                 <thead>
                   <tr>
-                    <th>Article</th>
-                    <th>Prix</th>
-                    <th>Stock</th>
-                    <th>Statut</th>
-                    <th>Action</th>
+                    <th>Nom</th>
+                    <th>Prix de vente</th>
+                    <th>Quantité</th>
+                    <th>Visibilité</th>
+                    <th>Modifier</th>
                   </tr>
                 </thead>
                 <tbody id="productsBody">
                   <tr>
-                    <td colspan="5" class="empty">Chargement des articles…</td>
+                    <td colspan="5" class="empty">Chargement de tes articles…</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             <div class="helper" id="listHelper">
-              Clique sur “Modifier” pour reprendre un article existant.
+              Appuie sur “Modifier” pour corriger un article.
             </div>
           </div>
         </div>
@@ -486,7 +503,6 @@
       const PROFILE_URL = digiyLocal("profile.html");
       const CAISSE_URL = digiyLocal("caisse.html");
       const PIN_URL = digiyLocal("pin.html");
-      const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
       const CACHE_PREFIX = "digiy_pos_products_local:";
       const LOW_STOCK_LIMIT = 5;
 
@@ -503,6 +519,7 @@
         products: [],
         editingId: null
       };
+      window.STATE = STATE;
       let SB_CLIENT = null;
 
       function reveal(){
@@ -881,7 +898,7 @@
 
       function clearForm(){
         STATE.editingId = null;
-        qs("formTitle").textContent = "Nouvel article";
+        qs("formTitle").textContent = "Ajouter un article";
         qs("productName").value = "";
         qs("productCategory").value = "";
         qs("productSku").value = "";
@@ -896,7 +913,7 @@
 
       function fillForm(item){
         STATE.editingId = item.id;
-        qs("formTitle").textContent = "Modifier l’article";
+        qs("formTitle").textContent = "Modifier un article";
         qs("productName").value = item.name || "";
         qs("productCategory").value = item.category || "";
         qs("productSku").value = item.sku || "";
@@ -956,8 +973,8 @@
         setNotice(
           low > 0 ? "warn" : "ok",
           low > 0
-            ? `Tu as <b>${low}</b> article(s) en stock faible. <b>${published}</b> article(s) sont visibles dans la boutique. Sauvegarde : <b>${STATE.mode}</b>.`
-            : `Catalogue prêt. <b>${published}</b> article(s) visibles. Sauvegarde : <b>${STATE.mode}</b>.`
+            ? `Tu as <b>${low}</b> article(s) bientôt finis. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${STATE.mode}</b>.`
+            : `Catalogue prêt. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${STATE.mode}</b>.`
         );
       }
 
@@ -966,8 +983,8 @@
         const items = filteredProducts();
 
         if(!items.length){
-          body.innerHTML = `<tr><td colspan="5" class="empty">Aucun article pour l’instant.</td></tr>`;
-          qs("listHelper").textContent = "Ajoute ton premier article pour commencer.";
+          body.innerHTML = `<tr><td colspan="5" class="empty">Tu n’as pas encore d’article</td></tr>`;
+          qs("listHelper").textContent = "Commence par ajouter ton premier article.";
           renderKpis();
           return;
         }
@@ -976,14 +993,14 @@
           const stock = Number(item.stock_qty || 0);
           const stockBadge =
             stock <= 0
-              ? `<span class="badge bad">Rupture</span>`
+              ? `<span class="badge bad">Plus en stock</span>`
               : stock <= LOW_STOCK_LIMIT
-              ? `<span class="badge warn">Stock faible</span>`
+              ? `<span class="badge warn">Bientôt fini</span>`
               : `<span class="badge ok">En stock</span>`;
 
           const pubBadge = item.is_published
-            ? `<span class="badge ok">Visible</span>`
-            : `<span class="badge info">Brouillon</span>`;
+            ? `<span class="badge ok">En vente</span>`
+            : `<span class="badge info">Caché</span>`;
 
           return `
             <tr>
@@ -1060,6 +1077,7 @@
         ).trim();
 
         STATE.products = await loadProducts(slug);
+        window.STATE = STATE;
         updateHeader();
         renderLive();
         renderList();
@@ -1087,6 +1105,7 @@
         if(idx >= 0) STATE.products[idx] = normalizeProduct(saved);
         else STATE.products.unshift(normalizeProduct(saved));
 
+        window.STATE = STATE;
         clearForm();
         renderList();
         updateHeader();
@@ -1103,6 +1122,7 @@
 
         await deleteProduct(current.id);
         STATE.products = STATE.products.filter(x => x.id !== current.id);
+        window.STATE = STATE;
         clearForm();
         renderList();
         updateHeader();
@@ -1133,7 +1153,7 @@
           const json = JSON.parse(text);
           const rows = Array.isArray(json) ? json : Array.isArray(json.products) ? json.products : [];
           if(!rows.length){
-            setFormNotice("Import vide.", false);
+            setFormNotice("Fichier vide.", false);
             return;
           }
 
@@ -1150,14 +1170,103 @@
             else STATE.products.unshift(normalizeProduct(saved));
           }
 
+          window.STATE = STATE;
           renderList();
           updateHeader();
-          setFormNotice(`Import terminé ✅ — ${normalized.length} article(s).`, true);
+          setFormNotice(`Fichier ajouté ✅ — ${normalized.length} article(s).`, true);
         }catch(err){
-          setFormNotice("Import impossible : fichier invalide.", false);
+          setFormNotice("Ajout impossible : fichier invalide.", false);
         } finally {
           qs("fileImport").value = "";
         }
+      }
+
+      function bindHelpAndAudio(){
+        const helpBtn = qs("digiy-help-btn");
+        const helpPanel = qs("digiy-help-panel");
+        const audioBtn = qs("digiy-audio-btn");
+        const synth = window.speechSynthesis;
+        let playing = false;
+
+        if(helpBtn && helpPanel){
+          helpBtn.addEventListener("click", () => {
+            helpPanel.style.display = helpPanel.style.display === "none" || !helpPanel.style.display ? "block" : "none";
+          });
+        }
+
+        function getAudioText(){
+          const state = window.STATE || {};
+          const products = Array.isArray(state.products) ? state.products : [];
+          const count = products.length;
+          const low = products.filter(p => Number(p?.stock_qty || 0) > 0 && Number(p?.stock_qty || 0) <= LOW_STOCK_LIMIT).length;
+          const editing = !!state.editingId;
+
+          if(editing){
+            return "Tu es en train de corriger un article. Vérifie les informations puis enregistre.";
+          }
+
+          if(count === 0){
+            return "Tu n’as pas encore d’article. Commence par écrire le nom, le prix et la quantité disponible.";
+          }
+
+          if(count > 0 && count < 5){
+            return "Tes premiers articles sont en place. Tu peux en ajouter d’autres ou corriger les informations.";
+          }
+
+          if(low > 0){
+            return "Ton catalogue est prêt. Attention, certains articles sont bientôt finis. Pense à vérifier le stock.";
+          }
+
+          return "Ton catalogue est prêt. Tu peux gérer ton stock et vendre facilement avec la caisse.";
+        }
+
+        function updateAudioBtn(){
+          if(!audioBtn) return;
+          audioBtn.textContent = playing ? "⏹️ Stop" : "🔊 Écouter";
+        }
+
+        function speak(){
+          if(!synth || typeof window.SpeechSynthesisUtterance !== "function") return;
+          const u = new SpeechSynthesisUtterance(getAudioText());
+          u.lang = "fr-FR";
+          u.rate = 1;
+          u.pitch = 1;
+
+          u.onstart = function(){
+            playing = true;
+            updateAudioBtn();
+          };
+          u.onend = function(){
+            playing = false;
+            updateAudioBtn();
+          };
+          u.onerror = function(){
+            playing = false;
+            updateAudioBtn();
+          };
+
+          synth.cancel();
+          synth.speak(u);
+        }
+
+        if(audioBtn){
+          audioBtn.addEventListener("click", () => {
+            if(!synth) return;
+            if(playing){
+              synth.cancel();
+              playing = false;
+              updateAudioBtn();
+            } else {
+              speak();
+            }
+          });
+        }
+
+        window.addEventListener("beforeunload", () => {
+          try{ synth && synth.cancel(); }catch(_){}
+        });
+
+        updateAudioBtn();
       }
 
       async function boot(){
@@ -1177,6 +1286,7 @@
           qs(id).addEventListener("change", renderList);
         });
 
+        bindHelpAndAudio();
         clearForm();
         await hydrate();
       }
