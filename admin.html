@@ -1352,7 +1352,7 @@
         qs("productImage").value = item.image_url || "";
         qs("productPublished").value = item.is_published ? "true" : "false";
         qs("btnDeleteProduct").style.display = "inline-flex";
-        setFormNotice("Article chargé. Tu peux corriger puis enregistrer.", true);
+        setFormNotice("Article chargé. Tu peux corriger puis enregistre.", true);
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
@@ -1642,28 +1642,24 @@
           if(editing){
             return "Tu modifies un article. Vérifie puis enregistre.";
           }
-
           if(count === 0){
-            return "Aucun article. Ajoute ton premier produit avec nom, prix et quantité.";
+            return "Tu n’as pas encore d’article. Commence par écrire le nom, le prix et la quantité disponible.";
           }
-
           if(count < 5){
-            return "Tes premiers articles sont prêts. Continue ou corrige si besoin.";
+            return "Tes premiers articles sont en place. Tu peux en ajouter d’autres ou corriger les informations.";
           }
-
           if(low > 0){
-            return "Attention, certains articles sont presque finis.";
+            return "Ton catalogue est prêt. Attention, certains articles sont bientôt finis.";
           }
-
-          return "Catalogue prêt. Tu peux vendre avec la caisse.";
+          return "Ton catalogue est prêt. Tu peux gérer ton stock et vendre facilement avec la caisse.";
         }
 
         function speak(){
           if(!synth || typeof window.SpeechSynthesisUtterance !== "function") return;
           const u = new SpeechSynthesisUtterance(getAudioText());
           u.lang = "fr-FR";
-          synth.cancel();
-          synth.speak(u);
+          u.rate = 1;
+          u.pitch = 1;
 
           u.onstart = function(){
             playing = true;
@@ -1677,6 +1673,9 @@
             playing = false;
             updateAudioBtn();
           };
+
+          synth.cancel();
+          synth.speak(u);
         }
 
         if(audioBtn){
