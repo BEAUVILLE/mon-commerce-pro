@@ -962,6 +962,21 @@
 
   console.log("[DIGIY POS AUDIO TEXT]", nextText);
 }
+      function refreshPosAudioText(){
+  const nextText = digiyPosAudio();
+  window.DIGIY_POS_AUDIO_TEXT = nextText;
+
+  if (!window.DIGIY_AUDIO_CONFIG) {
+    window.DIGIY_AUDIO_CONFIG = {};
+  }
+  window.DIGIY_AUDIO_CONFIG.text = nextText;
+
+  console.log("[DIGIY POS AUDIO TEXT]", nextText);
+}
+
+window.DIGIY_GET_AUDIO_TEXT = function(){
+  return digiyPosAudio();
+};
 
       function wireButtons(){
         try {
