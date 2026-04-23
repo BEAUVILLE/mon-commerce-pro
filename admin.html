@@ -714,8 +714,8 @@
           <div class="card">
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
               <div class="heroBadge">Atelier catalogue</div>
-              <button id="digiy-help-btn" class="smallBtn" type="button">❓ Aide</button>
-              <button id="digiy-audio-btn" class="smallBtn" type="button">🔊 Écouter</button>
+              <button id="digiy-help-btn" class="smallBtn" type="button">Aide</button>
+              <button id="digiy-audio-btn" class="smallBtn" type="button">Écouter</button>
             </div>
 
             <h1 class="bigTitle"><span class="accent">Articles</span> prêts</h1>
@@ -813,7 +813,7 @@
           </div>
         </div>
 
-        <div id="digiy-help-panel" class="card" style="margin-bottom:14px">
+        <div id="digiy-help-panel" class="card" style="display:none;margin-bottom:14px">
           <h2 class="sideTitle" style="margin-bottom:12px">Comment faire</h2>
           <div class="helper" style="margin-top:0;color:var(--text)">
             <p style="margin:0 0 10px 0"><b>Ajouter</b> → nom, prix, quantité</p>
@@ -1620,16 +1620,20 @@
         const synth = window.speechSynthesis;
         let playing = false;
 
+        if(helpPanel){
+          helpPanel.style.display = "none";
+        }
+
         if(helpBtn && helpPanel){
           helpBtn.addEventListener("click", () => {
-            helpPanel.style.display =
-              helpPanel.style.display === "none" || !helpPanel.style.display ? "block" : "none";
+            const isOpen = helpPanel.style.display === "block";
+            helpPanel.style.display = isOpen ? "none" : "block";
           });
         }
 
         function updateAudioBtn(){
           if(!audioBtn) return;
-          audioBtn.textContent = playing ? "⏹️ Stop" : "🔊 Écouter";
+          audioBtn.textContent = playing ? "Stop" : "Écouter";
         }
 
         function getAudioText(){
