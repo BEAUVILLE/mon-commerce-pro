@@ -296,7 +296,11 @@
       <section id="liveShell">
         <div class="hero">
           <div class="card">
-            <div class="heroBadge">Caisse active</div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <div class="heroBadge">Caisse active</div>
+              <button id="digiy-audio-btn" class="smallBtn" type="button" aria-pressed="false">🔊 Écouter</button>
+            </div>
+
             <h1 class="bigTitle"><span class="accent">Encaisser</span> maintenant</h1>
             <div class="mainSub">
               Choisis tes articles, valide le ticket et garde une lecture claire du stock sans te battre avec l’outil.
@@ -463,6 +467,8 @@
         cart: [],
         saleBusy: false
       };
+
+      window.STATE = STATE;
 
       function reveal(){
         document.documentElement.classList.add("app-ready");
@@ -1340,6 +1346,88 @@
       }
 
       boot();
+    })();
+  </script>
+
+  <script>
+    (function(){
+      const btn = document.getElementById("digiy-audio-btn");
+      if(!btn) return;
+
+      const synth = window.speechSynthesis;
+      if(!synth || typeof window.SpeechSynthesisUtterance !== "function") return;
+
+      let playing = false;
+
+      function updateBtn(){
+        btn.setAttribute("aria-pressed", playing ? "true" : "false");
+        btn.textContent = playing ? "⏹️ Stop" : "🔊 Écouter";
+      }
+
+      function getAudioText(){
+        const state = window.STATE || {};
+        const products = Array.isArray(state.products) ? state.products : [];
+        const cart = Array.isArray(state.cart) ? state.cart : [];
+
+        const hasProducts = products.length > 0;
+        const cartCount = cart.reduce((sum, line) => sum + Number(line?.qty || 0), 0);
+        const lowStockCount = products.filter(p => Number(p?.stock_qty || 0) > 0 && Number(p?.stock_qty || 0) <= 5).length;
+
+        if(!hasProducts){
+          return "Ta caisse est ouverte. Commence par ajouter tes produits avec leur nom, leur prix et la quantité disponible.";
+        }
+
+        if(cartCount === 0){
+          if(lowStockCount > 0){
+            return "Tes produits sont prêts. Attention, tu as aussi du stock faible sur certains articles. Choisis un article pour commencer une vente.";
+          }
+          return "Tes produits sont prêts. Choisis un article pour commencer une vente.";
+        }
+
+        return "Ton ticket est en cours. Vérifie les quantités puis valide la vente.";
+      }
+
+      function speak(){
+        const text = getAudioText();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = "fr-FR";
+        u.rate = 1;
+        u.pitch = 1;
+
+        u.onstart = function(){
+          playing = true;
+          updateBtn();
+        };
+
+        u.onend = function(){
+          playing = false;
+          updateBtn();
+        };
+
+        u.onerror = function(){
+          playing = false;
+          updateBtn();
+        };
+
+        synth.cancel();
+        synth.speak(u);
+      }
+
+      btn.addEventListener("click", function(){
+        if(playing){
+          synth.cancel();
+          playing = false;
+          updateBtn();
+          return;
+        }
+        speak();
+      });
+
+      window.addEventListener("beforeunload", function(){
+        try{ synth.cancel(); }catch(_){}
+      });
+
+      updateBtn();
     })();
   </script>
 </body>
