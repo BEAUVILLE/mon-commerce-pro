@@ -57,7 +57,7 @@
       --green2:#16a34a;
       --red:#ef4444;
       --warn:#f59e0b;
-      --blue:#7c3aed;
+      --blue:#00a651;
       --shadow:0 22px 56px rgba(0,0,0,.28);
       --shadow-soft:0 14px 34px rgba(0,0,0,.22);
       --radius:26px;
@@ -74,7 +74,7 @@
       font-family:var(--fontA);
       background:
         radial-gradient(circle at top left, rgba(250,204,21,.11), transparent 28%),
-        radial-gradient(circle at top right, rgba(124,58,237,.08), transparent 22%),
+        radial-gradient(circle at top right, rgba(0,166,81,.08), transparent 22%),
         linear-gradient(180deg, #07140f 0%, #04110d 42%, #020906 100%);
     }
 
@@ -216,7 +216,7 @@
 
     .hero-side{
       padding:18px;display:flex;flex-direction:column;gap:14px;
-      background:radial-gradient(circle at top right, rgba(124,58,237,.08), transparent 28%),
+      background:radial-gradient(circle at top right, rgba(0,166,81,.08), transparent 28%),
         linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),var(--card2);
     }
 
@@ -264,8 +264,8 @@
     }
     .preview-badge{
       display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
-      background:rgba(124,58,237,.10);border:1px solid rgba(124,58,237,.22);
-      color:#d7ceff;font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;
+      background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);
+      color:var(--gold);font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;
     }
 
     .cockpit{
@@ -944,10 +944,10 @@
   }
 
   if(!hasAccess){
-    return "Ton commerce est reconnu, mais il faut d’abord ouvrir ton accès avant de préparer ta caisse.";
+    return "Ton commerce est reconnu, mais il faut d'abord ouvrir ton accès avant de préparer ta caisse.";
   }
 
-  return "Avant d’encaisser, ajoute d’abord tes produits un par un. Mets le nom du produit, son prix de vente, puis la quantité que tu as en stock.";
+  return "Avant d'encaisser, ajoute d'abord tes produits un par un. Mets le nom du produit, son prix de vente, puis la quantité que tu as en stock.";
 }
 
       function refreshPosAudioText(){
