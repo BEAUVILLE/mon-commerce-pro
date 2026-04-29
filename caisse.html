@@ -219,6 +219,186 @@
     .blockedText{color:var(--muted);font-size:14px;line-height:1.8;font-weight:700;}
     .footerNote{margin-top:12px;color:var(--muted);font-size:12px;font-weight:800;line-height:1.6;}
 
+
+    .quickCommerce{
+      border-color:rgba(250,204,21,.20);
+      background:
+        radial-gradient(circle at top right, rgba(250,204,21,.10), transparent 34%),
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02)),var(--card);
+    }
+
+    .quickGuide{
+      padding:13px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.12);
+      display:grid;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    .quickGuide strong{
+      color:var(--gold);
+      font-size:13px;
+      font-weight:1000;
+    }
+
+    .quickGuide p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:800;
+      line-height:1.55;
+    }
+
+    .quickExamples{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .quickExamples button{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      border-radius:999px;
+      padding:8px 11px;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .quickExamples button:hover{
+      border-color:rgba(250,204,21,.28);
+      color:var(--gold);
+    }
+
+    .quickDraft{
+      display:none;
+      margin-top:12px;
+      padding:13px;
+      border-radius:18px;
+      border:1px solid rgba(34,197,94,.28);
+      background:rgba(34,197,94,.08);
+      color:#d7ffe1;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.55;
+    }
+
+    .quickDraft strong{color:#fff}
+
+    .memoryBox{
+      margin-top:12px;
+      padding:13px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.12);
+      display:grid;
+      gap:10px;
+    }
+
+    .memoryHead{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+    }
+
+    .memoryTitle{
+      font-size:13px;
+      font-weight:1000;
+      color:var(--gold);
+      line-height:1.25;
+    }
+
+    .memoryHelp{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.45;
+    }
+
+    .memoryList{
+      display:grid;
+      gap:8px;
+    }
+
+    .memoryItem{
+      padding:11px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      display:grid;
+      gap:5px;
+    }
+
+    .memoryItemTop{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+    }
+
+    .memoryItemTitle{
+      font-size:13px;
+      font-weight:1000;
+      color:var(--text);
+      line-height:1.35;
+    }
+
+    .memoryItemAmount{
+      font-size:12px;
+      font-weight:1000;
+      color:#d7ffe1;
+      white-space:nowrap;
+    }
+
+    .memoryItemMeta{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.4;
+    }
+
+    .memoryEmpty{
+      padding:11px;
+      border-radius:16px;
+      border:1px dashed rgba(255,255,255,.16);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.45;
+    }
+
+    .memoryPayAction{
+      margin-top:6px;
+      display:inline-flex;
+      width:max-content;
+      max-width:100%;
+      min-height:36px;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      padding:8px 11px;
+      border-radius:999px;
+      border:1px solid rgba(250,204,21,.28);
+      background:rgba(250,204,21,.10);
+      color:var(--gold);
+      font-size:12px;
+      font-weight:1000;
+    }
+
+    .memoryPayHint{
+      color:rgba(191,211,200,.78);
+      font-size:11px;
+      font-weight:800;
+      line-height:1.35;
+    }
+
     @media(max-width:1100px){
       .hero{grid-template-columns:1fr}
       .sectionGrid{grid-template-columns:1fr}
@@ -361,6 +541,51 @@
             </div>
           </div>
         </div>
+
+
+        <section class="card quickCommerce" id="quickCommerceNote">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+            <div>
+              <h2 class="sideTitle" style="margin:0 0 6px 0;font-size:18px;font-weight:950;">Note rapide commerce</h2>
+              <div class="helper" style="margin-top:0">Écris court, DIGIY prépare. Tu confirmes avant toute suite.</div>
+            </div>
+          </div>
+
+          <div class="quickGuide">
+            <strong>Une phrase suffit.</strong>
+            <p>Exemples : vente, achat stock, client qui doit, livraison ou petite dépense boutique.</p>
+            <div class="quickExamples" id="quickCommerceExamples">
+              <button type="button">Vente riz 15000 cash</button>
+              <button type="button">Achat stock 40000 fournisseur</button>
+              <button type="button">Client Awa doit 5000</button>
+              <button type="button">Livraison 2000 cash</button>
+              <button type="button">Dépense sachets 3000 cash</button>
+            </div>
+          </div>
+
+          <textarea class="textarea" id="quickCommerceInput" placeholder="Ex : Vente riz 15000 cash"></textarea>
+
+          <div class="actionRow">
+            <button class="btn" id="btnQuickCommercePrepare" type="button">Préparer</button>
+            <button class="btn-outline" id="btnQuickCommerceConfirm" type="button" style="display:none">✅ Confirmer</button>
+            <button class="btn-ghost" id="btnQuickCommerceClear" type="button">Effacer</button>
+          </div>
+
+          <div class="quickDraft" id="quickCommerceDraft"></div>
+
+          <div class="memoryBox">
+            <div class="memoryHead">
+              <div>
+                <div class="memoryTitle">🧠 Aide-mémoire commerce</div>
+                <div class="memoryHelp">Dernières notes confirmées ici. Avec Mon argent, tu peux les transformer en entrées, dépenses ou suivi clair.</div>
+              </div>
+              <button class="btn-ghost" id="btnQuickCommerceMemoryClear" type="button">Vider</button>
+            </div>
+            <div class="memoryList" id="quickCommerceMemoryList">
+              <div class="memoryEmpty">Aucune note commerce confirmée pour le moment.</div>
+            </div>
+          </div>
+        </section>
 
         <div class="sectionGrid">
           <div class="card">
@@ -1259,6 +1484,342 @@
         qs("saleHelper").innerHTML = "Ticket vidé.";
       }
 
+
+      function quickCommerceAmount(text){
+        const m = String(text || "").replace(/\s+/g, " ").match(/(\d[\d\s.,]*)\s*(f|fcfa|xof)?/i);
+        if(!m) return 0;
+        const raw = String(m[1] || "").replace(/[^\d]/g, "");
+        const n = Number(raw);
+        return Number.isFinite(n) ? n : 0;
+      }
+
+      function quickCommerceChannel(text){
+        const t = String(text || "").toLowerCase();
+        if(/\bwave\b/.test(t)) return "wave";
+        if(/\b(cash|espèces|especes|liquide)\b/.test(t)) return "cash";
+        if(/\b(orange money|om)\b/.test(t)) return "orange_money";
+        if(/\b(banque|virement)\b/.test(t)) return "bank";
+        return "manual";
+      }
+
+      function quickCommerceComplement(text, type){
+        const s = String(text || "").trim();
+        const lower = s.toLowerCase();
+
+        if(/\b(riz|sucre|huile|lait|pain|eau|jus|sac|sacs|sachets|savon)\b/.test(lower)){
+          const found = lower.match(/\b(riz|sucre|huile|lait|pain|eau|jus|sac|sacs|sachets|savon)\b/);
+          return found ? found[1] : "";
+        }
+
+        if(/\b(stock|marchandise|fournisseur)\b/.test(lower)) return "stock";
+        if(/\b(livraison|transport)\b/.test(lower)) return "livraison";
+        if(/\b(client)\b/.test(lower) && /\b(doit|reste)\b/.test(lower)){
+          const words = s.replace(/[.,;:!?]/g, " ").split(/\s+/).filter(Boolean);
+          const banned = new Set(["client","doit","reste","payer","cash","wave","fcfa","xof","f"]);
+          const candidates = words.filter(w => {
+            const clean = w.toLowerCase().replace(/[^\p{L}\p{N}-]/gu, "");
+            if(!clean || /^\d+$/.test(clean)) return false;
+            return !banned.has(clean);
+          });
+          if(candidates.length){
+            const raw = candidates[candidates.length - 1].replace(/[^\p{L}\p{N}-]/gu, "");
+            return raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : "";
+          }
+        }
+
+        return "";
+      }
+
+      function quickCommerceDraftFromText(text){
+        const sentence = String(text || "").trim().replace(/\s+/g, " ");
+        const lower = sentence.toLowerCase();
+        const amount = quickCommerceAmount(sentence);
+        const channel = quickCommerceChannel(sentence);
+
+        let type = "note";
+        let title = "Note commerce";
+        let direction = "none";
+        let category = "commerce_note";
+        let kind = "other";
+        let impact = "à classer";
+
+        if(/\b(client)\b.*\b(doit|reste)\b|\b(doit|reste)\b/.test(lower)){
+          type = "client_debt";
+          title = "Client doit encore";
+          direction = "out";
+          category = "client_debt";
+          kind = "expense";
+          impact = "à suivre";
+        } else if(/\b(vente|vendu|encaissé|encaisse|recette|client payé|client paye)\b/.test(lower)){
+          type = "commerce_sale";
+          title = "Vente encaissée";
+          direction = "in";
+          category = "product_sale";
+          kind = "sale";
+          impact = "recette commerce";
+        } else if(/\b(achat|stock|marchandise|fournisseur)\b/.test(lower)){
+          type = "stock_purchase";
+          title = "Achat stock";
+          direction = "out";
+          category = "stock_purchase";
+          kind = "expense";
+          impact = "dépense stock";
+        } else if(/\b(livraison|transport)\b/.test(lower)){
+          type = "delivery_expense";
+          title = "Livraison payée";
+          direction = "out";
+          category = "delivery";
+          kind = "expense";
+          impact = "dépense commerce";
+        } else if(/\b(dépense|depense|payé|paye|sachets|sachet|sacs|sac)\b/.test(lower)){
+          type = "shop_expense";
+          title = "Dépense boutique";
+          direction = "out";
+          category = "shop_expense";
+          kind = "expense";
+          impact = "dépense commerce";
+        }
+
+        const complement = quickCommerceComplement(sentence, type);
+
+        return {
+          sentence,
+          type,
+          title,
+          amount_xof: amount,
+          channel,
+          direction,
+          category,
+          kind,
+          impact,
+          complement,
+          module: "COMMERCE",
+          status: "draft",
+          created_at: new Date().toISOString()
+        };
+      }
+
+      function quickCommerceMemoryKey(){
+        return STATE.slug ? `digiy_commerce_quick_memory:${STATE.slug}` : "digiy_commerce_quick_memory";
+      }
+
+      function quickCommerceDraftKey(){
+        return STATE.slug ? `digiy_commerce_quick_draft:${STATE.slug}` : "digiy_commerce_quick_draft";
+      }
+
+      function readQuickCommerceMemory(){
+        try{
+          const raw = localStorage.getItem(quickCommerceMemoryKey());
+          const arr = raw ? JSON.parse(raw) : [];
+          return Array.isArray(arr) ? arr : [];
+        }catch{
+          return [];
+        }
+      }
+
+      function writeQuickCommerceMemory(items){
+        try{
+          localStorage.setItem(quickCommerceMemoryKey(), JSON.stringify((items || []).slice(0, 10)));
+          return true;
+        }catch{
+          return false;
+        }
+      }
+
+      function saveQuickCommerceDraft(draft, confirmed = false){
+        try{
+          localStorage.setItem(quickCommerceDraftKey(), JSON.stringify({
+            ...draft,
+            status: confirmed ? "confirmed_local" : "draft",
+            confirmed_at: confirmed ? new Date().toISOString() : null
+          }));
+          return true;
+        }catch{
+          return false;
+        }
+      }
+
+      function addQuickCommerceMemory(draft){
+        const item = {
+          ...draft,
+          memory_id: "commerce_" + Date.now(),
+          confirmed_at: new Date().toISOString()
+        };
+        const list = readQuickCommerceMemory();
+        list.unshift(item);
+        writeQuickCommerceMemory(list);
+        renderQuickCommerceMemory();
+      }
+
+      function isQuickCommerceFinancial(item){
+        const type = String(item?.type || "").toLowerCase();
+        return ["commerce_sale","stock_purchase","delivery_expense","shop_expense","client_debt"].includes(type);
+      }
+
+      function paySlugFromCommercePhone(){
+        const p = normPhone(STATE.phone || getResolvedPhone());
+        return p ? "pay-" + p : "";
+      }
+
+      function payCommerceLabel(item){
+        const type = String(item?.type || "").toLowerCase();
+        const comp = String(item?.complement || "").trim();
+
+        if(type === "commerce_sale") return comp ? "Vente " + comp : "Vente commerce";
+        if(type === "stock_purchase") return "Achat stock";
+        if(type === "delivery_expense") return "Livraison";
+        if(type === "client_debt") return comp ? "Client doit " + comp : "Client doit encore";
+        if(type === "shop_expense") return comp ? comp.charAt(0).toUpperCase() + comp.slice(1) : "Dépense boutique";
+        return item?.title || "Note commerce";
+      }
+
+      function buildPayFromCommerceUrl(item){
+        const p = normPhone(STATE.phone || getResolvedPhone());
+        const paySlug = paySlugFromCommercePhone();
+        const qsPay = new URLSearchParams();
+
+        if(paySlug) qsPay.set("slug", paySlug);
+        if(p) qsPay.set("phone", p);
+
+        qsPay.set("fromDraft", "1");
+        qsPay.set("direction", item?.direction === "in" ? "in" : "out");
+        qsPay.set("scope", "pro");
+        qsPay.set("amount", String(Math.round(Number(item?.amount_xof || 0))));
+        qsPay.set("kind", item?.kind || (item?.direction === "in" ? "sale" : "expense"));
+        qsPay.set("channel", item?.channel && item.channel !== "manual" ? String(item.channel) : "manual");
+        qsPay.set("category", item?.category || "commerce_note");
+        qsPay.set("source_module", "COMMERCE");
+        qsPay.set("label", payCommerceLabel(item));
+        qsPay.set("note", String(item?.sentence || "").trim());
+        qsPay.set("complement", String(item?.complement || "").trim());
+        qsPay.set("intent", "commerce_quick_note");
+
+        return "https://pro-pay.digiylyfe.com/admin.html?" + qsPay.toString();
+      }
+
+      function renderQuickCommerceDraft(draft){
+        const box = qs("quickCommerceDraft");
+        const confirmBtn = qs("btnQuickCommerceConfirm");
+        if(!box) return;
+
+        if(!draft || !draft.sentence){
+          box.style.display = "none";
+          box.innerHTML = "";
+          if(confirmBtn) confirmBtn.style.display = "none";
+          return;
+        }
+
+        const amountText = draft.amount_xof ? money(draft.amount_xof) : "montant à préciser";
+        const channelText = draft.channel === "manual" ? "canal à préciser" : draft.channel;
+
+        box.style.display = "block";
+        if(confirmBtn) confirmBtn.style.display = "inline-flex";
+
+        box.innerHTML = `
+          <strong>Voilà ce que DIGIY COMMERCE a préparé :</strong><br>
+          Type : ${esc(draft.title)}<br>
+          Montant : ${esc(amountText)}<br>
+          Canal : ${esc(channelText)}<br>
+          Impact : ${esc(draft.impact)}<br>
+          ${draft.complement ? `Complément : ${esc(draft.complement)}<br>` : ``}
+          <br>
+          <span style="color:rgba(247,251,248,.72)">Brouillon seulement. Rien n’est envoyé en base automatiquement.</span>
+        `;
+      }
+
+      function renderQuickCommerceMemory(){
+        const box = qs("quickCommerceMemoryList");
+        if(!box) return;
+
+        const list = readQuickCommerceMemory();
+        if(!list.length){
+          box.innerHTML = `<div class="memoryEmpty">Aucune note commerce confirmée pour le moment.</div>`;
+          return;
+        }
+
+        box.innerHTML = list.slice(0, 10).map(item => {
+          const amount = item.amount_xof ? money(item.amount_xof) : "montant à préciser";
+          const channel = item.channel && item.channel !== "manual" ? item.channel : "canal à préciser";
+          const comp = item.complement ? " · " + item.complement : "";
+
+          return `
+            <div class="memoryItem">
+              <div class="memoryItemTop">
+                <div class="memoryItemTitle">✅ ${esc(item.title || "Note commerce")}</div>
+                <div class="memoryItemAmount">${esc(amount)}</div>
+              </div>
+              <div class="memoryItemMeta">${esc(channel)} · ${esc(item.impact || "à classer")}${esc(comp)}</div>
+              <div class="memoryItemMeta">${esc(item.sentence || "")}</div>
+              ${isQuickCommerceFinancial(item) ? `
+                <a class="memoryPayAction" href="${esc(buildPayFromCommerceUrl(item))}">
+                  💼 Envoyer vers Mon argent
+                </a>
+                <div class="memoryPayHint">Abonnement Mon argent requis pour enregistrer.</div>
+              ` : ``}
+            </div>
+          `;
+        }).join("");
+      }
+
+      function clearQuickCommerceMemory(){
+        const ok = window.confirm("Vider l’aide-mémoire commerce sur cet appareil ?");
+        if(!ok) return;
+        writeQuickCommerceMemory([]);
+        renderQuickCommerceMemory();
+        setNotice("info", "Aide-mémoire commerce vidé sur cet appareil.");
+      }
+
+      function bindQuickCommerceNote(){
+        const input = qs("quickCommerceInput");
+        const prepare = qs("btnQuickCommercePrepare");
+        const confirm = qs("btnQuickCommerceConfirm");
+        const clear = qs("btnQuickCommerceClear");
+
+        qs("quickCommerceExamples")?.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", () => {
+            if(!input) return;
+            input.value = btn.textContent.trim();
+            input.focus();
+          });
+        });
+
+        prepare?.addEventListener("click", () => {
+          const sentence = String(input?.value || "").trim();
+          if(!sentence){
+            setNotice("warn", "Écris une note commerce avant de préparer.");
+            return;
+          }
+
+          const draft = quickCommerceDraftFromText(sentence);
+          saveQuickCommerceDraft(draft, false);
+          renderQuickCommerceDraft(draft);
+          setNotice("info", "Brouillon commerce préparé. Vérifie puis confirme.");
+        });
+
+        confirm?.addEventListener("click", () => {
+          const draft = quickCommerceDraftFromText(String(input?.value || "").trim());
+          if(!draft.sentence){
+            setNotice("warn", "Prépare d’abord une note commerce.");
+            return;
+          }
+
+          saveQuickCommerceDraft(draft, true);
+          addQuickCommerceMemory(draft);
+          renderQuickCommerceDraft({...draft, status:"confirmed_local"});
+          if(confirm) confirm.style.display = "none";
+          setNotice("ok", "Note commerce confirmée dans l’aide-mémoire.");
+        });
+
+        clear?.addEventListener("click", () => {
+          if(input) input.value = "";
+          renderQuickCommerceDraft(null);
+          setNotice("info", "Note commerce effacée.");
+        });
+
+        qs("btnQuickCommerceMemoryClear")?.addEventListener("click", clearQuickCommerceMemory);
+        renderQuickCommerceMemory();
+      }
+
       async function hydrate(forceLive = false){
         let slug = getResolvedSlug();
         let phone = getResolvedPhone();
@@ -1325,6 +1886,7 @@
           qs("btnReloadTop").addEventListener("click", () => hydrate(true));
           qs("btnSaleReady").addEventListener("click", submitSale);
           qs("btnClearSale").addEventListener("click", clearSaleForm);
+          bindQuickCommerceNote();
 
           ["saleAmount", "saleLabel", "saleMethod"].forEach(id => {
             qs(id).addEventListener("input", () => { persistDraft(); renderSalePreview(); });
