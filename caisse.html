@@ -1686,7 +1686,7 @@
         qsPay.set("scope", "pro");
         qsPay.set("amount", String(Math.round(Number(item?.amount_xof || 0))));
         qsPay.set("kind", item?.kind || (item?.direction === "in" ? "sale" : "expense"));
-        qsPay.set("channel", item?.channel && item.channel !== "manual" ? String(item.channel) : "manual");
+        qsPay.set("channel", item?.channel && item.channel !== "manual" ? String(item.channel) : "other");
         qsPay.set("category", item?.category || "commerce_note");
         qsPay.set("source_module", "COMMERCE");
         qsPay.set("label", payCommerceLabel(item));
