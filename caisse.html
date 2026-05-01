@@ -4,8 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#07140f"/>
-  <title>Ma caisse · MON COMMERCE by DIGIY</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — ma caisse boutique, catalogue, stock et validation de vente."/>
+  <title>MON COMMERCE — Encaisser</title>
+  <meta name="description" content="MON COMMERCE by DIGIY — encaisser, gérer les articles, écrire une note rapide et garder la trace vers Mon argent."/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -67,7 +67,7 @@
     .app{display:none}
     html.app-ready .app{display:block}
 
-    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px 96px;}
+    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px calc(104px + env(safe-area-inset-bottom,0px));}
 
     .floating-site-btn{
       position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:90;
@@ -415,11 +415,67 @@
       .brandTitle{white-space:normal}
       .subInfo{grid-template-columns:1fr}
       .kpiGrid{grid-template-columns:1fr}
-      .floating-site-btn{
-        left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));
-        min-height:46px;padding:14px 14px;font-size:12px;
-      }
+      .floating-site-btn{display:none}
     }
+
+    #articles, #notes{scroll-margin-top:96px}
+
+    /* ━━━ MENU BAS MOBILE — doctrine DIGIY ━━━ */
+    .bottomNav{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:96;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+      background:rgba(4,17,13,.94);
+      border-top:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+    }
+    .bottomNavInner{
+      width:min(100%,760px);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:6px;
+    }
+    .bottomNav a{
+      min-height:58px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      align-content:center;
+      gap:3px;
+      color:rgba(247,251,248,.70);
+      font-size:11px;
+      font-weight:950;
+      text-align:center;
+      border:1px solid transparent;
+      text-decoration:none;
+    }
+    .bottomNav .ico{font-size:18px;line-height:1}
+    .bottomNav a.active{
+      color:#07110d;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      border-color:rgba(250,204,21,.28);
+      box-shadow:0 10px 24px rgba(250,204,21,.16);
+    }
+
+    .cashFastRow{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-top:14px;
+    }
+
+    @media(max-width:720px){
+      .navRow{display:none}
+      .cashFastRow{grid-template-columns:1fr 1fr}
+      .bigTitle{max-width:100%;font-size:clamp(34px,10vw,48px)}
+      .mainSub{font-size:15px}
+    }
+
   </style>
 </head>
 
@@ -435,7 +491,7 @@
             <div>
               <div class="brandKicker">DIGIYLYFE</div>
               <div class="brandTitle">MON COMMERCE</div>
-              <div class="brandSub">Ma caisse · mes articles · encaissement rapide</div>
+              <div class="brandSub">Encaisser · articles · notes · Mon argent</div>
             </div>
           </div>
 
@@ -454,10 +510,10 @@
 
       <div class="navRow">
         <a class="btn-ghost" href="./index.html" id="btnHall">🏠 Accueil</a>
-        <a class="btn-ghost" href="./dashboard-pro.html" id="btnDashboard">🧭 Mon espace de travail</a>
-        <a class="btn-ghost" href="./admin.html" id="btnAdmin">📦 Mes articles</a>
-        <a class="btn-ghost" href="./profile.html" id="btnProfile">🏪 Ma boutique</a>
-        <a class="btn-outline" href="./pin.html" id="btnPin">🔐 Mon code d'accès</a>
+        <a class="btn-ghost" href="./dashboard-pro.html" id="btnDashboard">🏠 Accueil</a>
+        <a class="btn-ghost" href="./admin.html" id="btnAdmin">⚙️ Plus</a>
+        <a class="btn-ghost" href="./profile.html" id="btnProfile">🏪 Boutique</a>
+        <a class="btn-outline" href="./pin.html" id="btnPin">🔐 Mon code</a>
       </div>
 
       <section id="blockedShell" class="blockedShell">
@@ -477,13 +533,13 @@
         <div class="hero">
           <div class="card">
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-              <div class="heroBadge">Caisse active</div>
+              <div class="heroBadge">Encaisser maintenant</div>
               <button id="digiy-audio-btn" class="smallBtn" type="button" aria-pressed="false">🔊 Écouter</button>
             </div>
 
             <h1 class="bigTitle"><span class="accent">Encaisser</span> maintenant</h1>
             <div class="mainSub">
-              Choisis tes articles, valide le ticket et garde une lecture claire du stock sans te battre avec l’outil.
+              Choisis tes articles, valide le ticket, ou écris vite une note pour Mon argent.
             </div>
 
             <div class="subInfo">
@@ -507,15 +563,22 @@
 
             <div class="notice info" id="noticeBox">Initialisation…</div>
 
+            <div class="cashFastRow">
+              <a class="btn" id="btnFastCash" href="#saleAmount">💰 Encaisser</a>
+              <a class="btn-outline" id="btnFastArticles" href="#articles">📦 Articles</a>
+              <a class="btn-outline" id="btnFastNotes" href="#notes">✍️ Notes</a>
+              <a class="btn-outline" id="btnFastMore" href="./admin.html">⚙️ Plus</a>
+            </div>
+
             <div class="actionRow">
-              <a class="btn-outline" id="btnGoDashboard" href="./dashboard-pro.html">🧭 Mon espace de travail</a>
-              <a class="btn-outline" id="btnGoAdmin" href="./admin.html">📦 Mes articles</a>
-              <a class="btn-outline" id="btnGoProfile" href="./profile.html">🏪 Ma boutique</a>
+              <a class="btn-outline" id="btnGoDashboard" href="./dashboard-pro.html">🏠 Accueil</a>
+              <a class="btn-outline" id="btnGoAdmin" href="./admin.html">⚙️ Plus</a>
+              <a class="btn-outline" id="btnGoProfile" href="./profile.html">🏪 Boutique</a>
             </div>
           </div>
 
           <div class="card">
-            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Lecture rapide</h2>
+            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Ce qui est prêt</h2>
 
             <div class="kpiGrid">
               <div class="kpi">
@@ -531,23 +594,23 @@
                 <div class="v" id="kpiValue">0 F</div>
               </div>
               <div class="kpi">
-                <div class="k">Ticket en cours</div>
+                <div class="k">Encaisser</div>
                 <div class="v" id="kpiCart">0 F</div>
               </div>
             </div>
 
             <div class="helper">
-              Ta caisse lit le catalogue réel `digiy_pos_products` et valide maintenant la vente sur le rail SQL posé.
+              Ta caisse lit les vrais articles, prépare le ticket et garde le chemin vers Mon argent.
             </div>
           </div>
         </div>
 
 
-        <section class="card quickCommerce" id="quickCommerceNote">
+        <section class="card quickCommerce" id="notes">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
             <div>
-              <h2 class="sideTitle" style="margin:0 0 6px 0;font-size:18px;font-weight:950;">Note rapide commerce</h2>
-              <div class="helper" style="margin-top:0">Écris court, DIGIY prépare. Tu confirmes avant toute suite.</div>
+              <h2 class="sideTitle" style="margin:0 0 6px 0;font-size:18px;font-weight:950;">Notes rapides</h2>
+              <div class="helper" style="margin-top:0">Écris comme tu parles. DIGIY prépare la trace vers Mon argent.</div>
             </div>
           </div>
 
@@ -576,8 +639,8 @@
           <div class="memoryBox">
             <div class="memoryHead">
               <div>
-                <div class="memoryTitle">🧠 Aide-mémoire commerce</div>
-                <div class="memoryHelp">Dernières notes confirmées ici. Avec Mon argent, tu peux les transformer en entrées, dépenses ou suivi clair.</div>
+                <div class="memoryTitle">🧠 Aide-mémoire caisse</div>
+                <div class="memoryHelp">Dernières notes confirmées ici. Elles restent locales, puis peuvent nourrir Mon argent.</div>
               </div>
               <button class="btn-ghost" id="btnQuickCommerceMemoryClear" type="button">Vider</button>
             </div>
@@ -588,8 +651,8 @@
         </section>
 
         <div class="sectionGrid">
-          <div class="card">
-            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Mes articles du jour</h2>
+          <div class="card" id="articles">
+            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Articles</h2>
 
             <div class="searchRow">
               <input class="input" id="searchText" placeholder="Chercher un article…"/>
@@ -615,7 +678,7 @@
           </div>
 
           <div class="card">
-            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Ticket en cours</h2>
+            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Encaisser</h2>
 
             <div id="cartList" class="cartList">
               <div class="empty">Aucun article dans le ticket.</div>
@@ -634,22 +697,23 @@
             </div>
 
             <div class="field">
-              <label for="saleMethod">Comment le client paie</label>
+              <label for="saleMethod">Paiement</label>
               <select class="select" id="saleMethod">
                 <option value="cash">Espèces</option>
                 <option value="wave">Wave</option>
                 <option value="orange_money">Orange Money</option>
                 <option value="card">Carte</option>
+                <option value="other">Autre</option>
               </select>
             </div>
 
             <div class="actionRow">
-              <button class="btn" type="button" id="btnSaleReady">✅ Valider la vente</button>
+              <button class="btn" type="button" id="btnSaleReady">✅ Encaisser</button>
               <button class="btn-ghost" type="button" id="btnClearSale">Effacer</button>
             </div>
 
             <div class="helper" id="saleHelper">
-              Choisis des articles ou remplis directement le ticket pour enregistrer une vraie vente.
+              Choisis des articles ou écris une vente simple pour encaisser maintenant.
             </div>
 
             <div class="notice info" id="salePreview" style="margin-top:12px">
@@ -660,6 +724,17 @@
       </section>
     </div>
   </div>
+
+
+  <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+    <div class="bottomNavInner">
+      <a id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
+      <a id="navArticles" href="#articles"><span class="ico">📦</span><span>Articles</span></a>
+      <a class="active" id="navCash" href="#saleAmount"><span class="ico">💰</span><span>Encaisser</span></a>
+      <a id="navNotes" href="#notes"><span class="ico">✍️</span><span>Notes</span></a>
+      <a id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Plus</span></a>
+    </div>
+  </nav>
 
   <script>
     (() => {
@@ -1088,6 +1163,27 @@
         qs("btnGoDashboard").href = buildUrl(DASHBOARD_URL, q);
         qs("btnGoAdmin").href = buildUrl(ADMIN_URL, q);
         qs("btnGoProfile").href = buildUrl(PROFILE_URL, q);
+        const extraLinks = {
+          btnFastMore: ADMIN_URL,
+          navHome: DASHBOARD_URL,
+          navMore: ADMIN_URL
+        };
+        Object.entries(extraLinks).forEach(([id, url]) => {
+          const el = qs(id);
+          if(el) el.href = buildUrl(url, q);
+        });
+        const navArticles = qs("navArticles");
+        const navCash = qs("navCash");
+        const navNotes = qs("navNotes");
+        const btnFastArticles = qs("btnFastArticles");
+        const btnFastCash = qs("btnFastCash");
+        const btnFastNotes = qs("btnFastNotes");
+        if(navArticles) navArticles.href = "#articles";
+        if(navCash) navCash.href = "#saleAmount";
+        if(navNotes) navNotes.href = "#notes";
+        if(btnFastArticles) btnFastArticles.href = "#articles";
+        if(btnFastCash) btnFastCash.href = "#saleAmount";
+        if(btnFastNotes) btnFastNotes.href = "#notes";
       }
 
       function filteredProducts(){
@@ -1225,7 +1321,7 @@
         STATE.saleBusy = !!isBusy;
         const btn = qs("btnSaleReady");
         btn.disabled = !!isBusy;
-        btn.textContent = isBusy ? "⏳ Enregistrement…" : "✅ Valider la vente";
+        btn.textContent = isBusy ? "⏳ Enregistrement…" : "✅ Encaisser";
       }
 
       function resetSaleInputs(){
@@ -1499,7 +1595,7 @@
         if(/\b(cash|espèces|especes|liquide)\b/.test(t)) return "cash";
         if(/\b(orange money|om)\b/.test(t)) return "orange_money";
         if(/\b(banque|virement)\b/.test(t)) return "bank";
-        return "manual";
+        return "other";
       }
 
       function quickCommerceComplement(text, type){
@@ -1686,7 +1782,7 @@
         qsPay.set("scope", "pro");
         qsPay.set("amount", String(Math.round(Number(item?.amount_xof || 0))));
         qsPay.set("kind", item?.kind || (item?.direction === "in" ? "sale" : "expense"));
-        qsPay.set("channel", item?.channel && item.channel !== "manual" ? String(item.channel) : "other");
+        qsPay.set("channel", item?.channel ? String(item.channel) : "other");
         qsPay.set("category", item?.category || "commerce_note");
         qsPay.set("source_module", "COMMERCE");
         qsPay.set("label", payCommerceLabel(item));
@@ -1710,7 +1806,7 @@
         }
 
         const amountText = draft.amount_xof ? money(draft.amount_xof) : "montant à préciser";
-        const channelText = draft.channel === "manual" ? "canal à préciser" : draft.channel;
+        const channelText = draft.channel || "other";
 
         box.style.display = "block";
         if(confirmBtn) confirmBtn.style.display = "inline-flex";
@@ -1739,7 +1835,7 @@
 
         box.innerHTML = list.slice(0, 10).map(item => {
           const amount = item.amount_xof ? money(item.amount_xof) : "montant à préciser";
-          const channel = item.channel && item.channel !== "manual" ? item.channel : "canal à préciser";
+          const channel = item.channel ? item.channel : "canal à préciser";
           const comp = item.complement ? " · " + item.complement : "";
 
           return `
@@ -1766,7 +1862,7 @@
         if(!ok) return;
         writeQuickCommerceMemory([]);
         renderQuickCommerceMemory();
-        setNotice("info", "Aide-mémoire commerce vidé sur cet appareil.");
+        setNotice("info", "Aide-mémoire caisse vidé sur cet appareil.");
       }
 
       function bindQuickCommerceNote(){
