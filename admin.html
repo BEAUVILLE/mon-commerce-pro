@@ -4,8 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#0f172a"/>
-  <title>Mes articles · MON COMMERCE by DIGIY</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — mes articles, mes prix, mon stock."/>
+  <title>MON COMMERCE — Plus</title>
+  <meta name="description" content="MON COMMERCE by DIGIY — Plus : articles, prix, stock, import, export et réglages utiles."/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -86,7 +86,7 @@
     .wrap{
       width:min(100%, var(--max));
       margin:0 auto;
-      padding:18px 16px 110px;
+      padding:18px 16px calc(112px + env(safe-area-inset-bottom,0px));
     }
 
     .floating-site-btn{
@@ -627,7 +627,7 @@
       .searchRow{grid-template-columns:1fr}
     }
     @media(max-width:700px){
-      .wrap{padding:12px 12px 96px}
+      .wrap{padding:12px 12px calc(112px + env(safe-area-inset-bottom,0px))}
       .topbar-inner{padding:14px}
       .brandTitle{white-space:normal;font-size:21px}
       .brandSub{font-size:13px}
@@ -639,14 +639,7 @@
       .field label{font-size:16px}
       .input,.select,.textarea{font-size:18px;padding:18px}
       .notice{font-size:15px}
-      .floating-site-btn{
-        left:12px;
-        right:12px;
-        bottom:calc(12px + env(safe-area-inset-bottom, 0px));
-        min-height:44px;
-        padding:12px 14px;
-        font-size:12px;
-      }
+      .floating-site-btn{display:none}
     }
 
     @media (prefers-reduced-motion: reduce){
@@ -656,6 +649,64 @@
         scroll-behavior:auto !important;
       }
     }
+
+    #articleForm, #articleList{scroll-margin-top:96px}
+
+    /* ━━━ MENU BAS MOBILE — doctrine DIGIY ━━━ */
+    .bottomNav{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:96;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+      background:rgba(15,23,42,.94);
+      border-top:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+    }
+    .bottomNavInner{
+      width:min(100%,760px);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:6px;
+    }
+    .bottomNav a{
+      min-height:58px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      align-content:center;
+      gap:3px;
+      color:rgba(248,250,252,.70);
+      font-size:11px;
+      font-weight:950;
+      text-align:center;
+      border:1px solid transparent;
+      text-decoration:none;
+    }
+    .bottomNav .ico{font-size:18px;line-height:1}
+    .bottomNav a.active{
+      color:#07110d;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      border-color:rgba(250,204,21,.28);
+      box-shadow:0 10px 24px rgba(250,204,21,.16);
+    }
+
+    .plusFastRow{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-top:14px;
+    }
+
+    @media(max-width:720px){
+      .navRow{display:none}
+      .plusFastRow{grid-template-columns:1fr 1fr}
+      .bigTitle{max-width:100%;font-size:clamp(34px,10vw,48px)}
+    }
+
   </style>
 </head>
 
@@ -670,8 +721,8 @@
             <div class="brandBadge">📦</div>
             <div>
               <div class="brandKicker">DIGIYLYFE</div>
-              <div class="brandTitle">MON COMMERCE — Mes articles</div>
-              <div class="brandSub">Mes produits · mes prix · mon stock</div>
+              <div class="brandTitle">MON COMMERCE — Plus</div>
+              <div class="brandSub">Articles · stock · réglages utiles</div>
             </div>
           </div>
 
@@ -690,10 +741,10 @@
 
       <div class="navRow">
         <a class="btn-ghost" href="./index.html" id="btnHall">🏠 Accueil</a>
-        <a class="btn-ghost" href="./dashboard-pro.html" id="btnDashboard">🧭 Mon espace de travail</a>
-        <a class="btn-ghost" href="./profile.html" id="btnProfile">🏪 Ma boutique</a>
-        <a class="btn-ghost" href="./caisse.html" id="btnCaisse">🧾 Ma caisse</a>
-        <a class="btn-outline" href="./pin.html" id="btnPin">🔐 Mon code d'accès</a>
+        <a class="btn-ghost" href="./dashboard-pro.html" id="btnDashboard">🏠 Accueil</a>
+        <a class="btn-ghost" href="./profile.html" id="btnProfile">🏪 Boutique</a>
+        <a class="btn-ghost" href="./caisse.html" id="btnCaisse">💰 Encaisser</a>
+        <a class="btn-outline" href="./pin.html" id="btnPin">🔐 Mon code</a>
       </div>
 
       <section id="blockedShell" class="blockedShell">
@@ -713,15 +764,15 @@
         <div class="hero">
           <div class="card">
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
-              <div class="heroBadge">Atelier catalogue</div>
+              <div class="heroBadge">Plus · articles · stock</div>
               <button id="digiy-help-btn" class="smallBtn" type="button">Aide</button>
               <button id="digiy-audio-btn" class="smallBtn" type="button">Écouter</button>
             </div>
 
-            <h1 class="bigTitle"><span class="accent">Articles</span> prêts</h1>
+            <h1 class="bigTitle"><span class="accent">Plus</span> utile</h1>
 
             <div class="mainSub">
-              Pose ce que tu vends, mets le bon prix et garde la main sur ton stock.
+              Garde tes articles propres, tes prix justes, et tes réglages utiles à portée de main.
             </div>
 
             <div class="subInfo">
@@ -737,8 +788,15 @@
 
             <div class="notice info" id="noticeBox">Chargement…</div>
 
+            <div class="plusFastRow">
+              <a class="btn" id="btnFastAdd" href="#articleForm">➕ Ajouter</a>
+              <a class="btn-outline" id="btnFastList" href="#articleList">📦 Articles</a>
+              <a class="btn-outline" id="btnFastCash" href="./caisse.html">💰 Encaisser</a>
+              <a class="btn-outline" id="btnFastProfile" href="./profile.html">🏪 Boutique</a>
+            </div>
+
             <div class="actionRow" style="margin-top:18px">
-              <button class="btn" type="button" id="btnNew">➕ Ajouter un article</button>
+              <button class="btn" type="button" id="btnNew">➕ Ajouter / modifier un article</button>
             </div>
 
             <div class="actionRow">
@@ -824,8 +882,8 @@
         </div>
 
         <div class="sectionGrid">
-          <div class="card">
-            <h2 class="sideTitle" id="formTitle">Ajouter un article</h2>
+          <div class="card" id="articleForm">
+            <h2 class="sideTitle" id="formTitle">Ajouter / modifier un article</h2>
 
             <div class="field">
               <label for="productName">Nom</label>
@@ -883,8 +941,8 @@
             <div class="notice" id="formNotice">Remplis les champs puis enregistre.</div>
           </div>
 
-          <div class="card">
-            <h2 class="sideTitle">Mes articles</h2>
+          <div class="card" id="articleList">
+            <h2 class="sideTitle">Liste des articles</h2>
 
             <div class="tableWrap">
               <table>
@@ -913,6 +971,17 @@
       </section>
     </div>
   </div>
+
+
+  <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+    <div class="bottomNavInner">
+      <a id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
+      <a id="navArticles" href="./caisse.html#articles"><span class="ico">📦</span><span>Articles</span></a>
+      <a id="navCash" href="./caisse.html"><span class="ico">💰</span><span>Encaisser</span></a>
+      <a id="navNotes" href="./caisse.html#notes"><span class="ico">✍️</span><span>Notes</span></a>
+      <a class="active" id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Plus</span></a>
+    </div>
+  </nav>
 
   <script>
     (() => {
@@ -1294,6 +1363,23 @@
         qs("btnPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
         qs("btnBlockedPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
         qs("btnBlockedAbos").href = buildUrl(ABOS_URL, { base_module: MODULE_CODE, module: MODULE_CODE, phone: STATE.phone, slug: STATE.slug });
+        const extraLinks = {
+          btnFastCash: CAISSE_URL,
+          btnFastProfile: PROFILE_URL,
+          navHome: DASHBOARD_URL,
+          navArticles: CAISSE_URL + "#articles",
+          navCash: CAISSE_URL,
+          navNotes: CAISSE_URL + "#notes",
+          navMore: digiyLocal("admin.html")
+        };
+        Object.entries(extraLinks).forEach(([id, url]) => {
+          const el = qs(id);
+          if(el) el.href = buildUrl(url, q);
+        });
+        const btnFastAdd = qs("btnFastAdd");
+        const btnFastList = qs("btnFastList");
+        if(btnFastAdd) btnFastAdd.href = "#articleForm";
+        if(btnFastList) btnFastList.href = "#articleList";
       }
 
       function renderBlocked(text){
@@ -1326,7 +1412,7 @@
       function clearForm(){
         STATE.editingId = null;
         window.STATE = STATE;
-        qs("formTitle").textContent = "Ajouter un article";
+        qs("formTitle").textContent = "Ajouter / modifier un article";
         qs("productName").value = "";
         qs("productCategory").value = "";
         qs("productSku").value = "";
