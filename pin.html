@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#08111f" />
-  <title>MON COMMERCE — Accès sécurisé</title>
+  <title>MON COMMERCE — Accès</title>
   <!-- ━━━ AVANT : "Accès sécurisé MON COMMERCE / DIGIY CAISSE PRO par téléphone + PIN" → banni ━━━ -->
-  <meta name="description" content="MON COMMERCE by DIGIY — accès sécurisé par téléphone et code." />
+  <meta name="description" content="MON COMMERCE by DIGIY — ouvrir l’accès et revenir vers Accueil, Articles, Encaisser, Notes ou Plus." />
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -37,7 +37,7 @@
       min-height:100dvh;color:var(--text);font-family:var(--fontA);
       background:radial-gradient(circle at top, rgba(250,204,21,.10), transparent 28%),
         linear-gradient(180deg,var(--bg),var(--bg2));
-      display:flex;align-items:center;justify-content:center;padding:20px;
+      display:flex;align-items:center;justify-content:center;padding:20px 20px calc(100px + env(safe-area-inset-bottom,0px));
     }
     .wrap{width:100%;max-width:var(--max)}
     .card{
@@ -81,6 +81,48 @@
     .hidden{display:none!important}
     .foot{padding:0 20px 20px;text-align:center;color:#94a3b8;font-size:.84rem}
     @media(max-width:560px){.grid{grid-template-columns:1fr}}
+
+    .bottomNav{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:80;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+      background:rgba(2,6,23,.94);
+      border-top:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+    }
+    .bottomNavInner{
+      width:min(100%,760px);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:6px;
+    }
+    .bottomNav a{
+      min-height:58px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      align-content:center;
+      gap:3px;
+      color:rgba(248,250,252,.70);
+      font-size:11px;
+      font-weight:950;
+      text-align:center;
+      border:1px solid transparent;
+      text-decoration:none;
+    }
+    .bottomNav .ico{font-size:18px;line-height:1}
+    .bottomNav a.active{
+      color:#111827;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      border-color:rgba(250,204,21,.28);
+      box-shadow:0 10px 24px rgba(250,204,21,.16);
+    }
+
   </style>
 </head>
 <body>
@@ -92,7 +134,7 @@
           <div>
             <h1>MON COMMERCE</h1>
             <!-- ━━━ AVANT : "DIGIY CAISSE PRO — Accès PIN" → banni ━━━ -->
-            <p class="sub">Accès sécurisé · MON COMMERCE by DIGIY</p>
+            <p class="sub">Une porte, puis tu circules librement</p>
           </div>
         </div>
       </div>
@@ -101,7 +143,7 @@
         <!-- ━━━ AVANT : "Entre avec ton slug ou ton téléphone" → "slug" banni ━━━ -->
         <p class="intro">
           Entre avec ton <strong>identifiant</strong> ou ton <strong>téléphone</strong>, puis ton <strong>code d'accès</strong>.
-          Une fois validé, ton espace s'ouvre directement.
+          Une fois validé, tu circules entre Accueil, Articles, Encaisser, Notes et Plus sans retaper ton code.
         </p>
 
         <!-- ━━━ AVANT : label "Slug" + placeholder "pos-221771342889" → jargon banni ━━━ -->
@@ -124,17 +166,17 @@
         </div>
 
         <div class="actions">
-          <button id="btnOpen" class="btn primary" type="button">🔓 Ouvrir mon espace</button>
-          <a id="btnReturn" class="btn secondary hidden" href="./dashboard-pro.html">↩️ Retour</a>
+          <button id="btnOpen" class="btn primary" type="button">🔓 Entrer dans MON COMMERCE</button>
+          <a id="btnReturn" class="btn secondary hidden" href="./dashboard-pro.html">↩️ Revenir dans MON COMMERCE</a>
           <a id="btnPay" class="btn ghost" href="https://commencer-a-payer.digiylyfe.com/" target="_blank" rel="noopener">💳 Mon abonnement</a>
         </div>
 
         <div class="grid">
           <!-- ━━━ AVANT : "🧭 Dashboard" → banni ━━━ -->
-          <a id="btnDashboard" class="btn secondary hidden" href="./dashboard-pro.html">🧭 Mon espace</a>
-          <a id="btnCaisse"    class="btn secondary hidden" href="./caisse.html">🧾 Ma caisse</a>
+          <a id="btnDashboard" class="btn secondary hidden" href="./dashboard-pro.html">🏠 Accueil</a>
+          <a id="btnCaisse"    class="btn secondary hidden" href="./caisse.html">💰 Encaisser</a>
           <!-- ━━━ AVANT : "🛠️ Admin" → banni ━━━ -->
-          <a id="btnAdmin"     class="btn secondary hidden" href="./dashboard-pro.html">⚙️ Mes réglages</a>
+          <a id="btnAdmin"     class="btn secondary hidden" href="./dashboard-pro.html">⚙️ Plus</a>
           <a id="btnSupport"   class="btn secondary"        href="https://wa.me/221771342889" target="_blank" rel="noopener">💬 Support</a>
         </div>
 
@@ -144,7 +186,7 @@
           <!-- ━━━ AVANT : "Module · POS" → jargon technique visible banni ━━━ -->
           <div class="row"><div class="k">Service</div><div class="v">MON COMMERCE</div></div>
           <!-- ━━━ AVANT : "Retour cible" → jargon banni ━━━ -->
-          <div class="row"><div class="k">Destination</div><div id="returnInfo" class="v">Mon espace de travail</div></div>
+          <div class="row"><div class="k">Destination</div><div id="returnInfo" class="v">Accueil</div></div>
           <div class="row"><div class="k">Accès en mémoire</div><div id="sessionInfo" class="v">Aucun</div></div>
         </div>
       </div>
@@ -153,6 +195,17 @@
       <div class="foot">DIGIYLYFE · MON COMMERCE · Accès sécurisé</div>
     </section>
   </div>
+
+
+  <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+    <div class="bottomNavInner">
+      <a id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
+      <a id="navArticles" href="./caisse.html#articles"><span class="ico">📦</span><span>Articles</span></a>
+      <a id="navCash" href="./caisse.html"><span class="ico">💰</span><span>Encaisser</span></a>
+      <a id="navNotes" href="./caisse.html#notes"><span class="ico">✍️</span><span>Notes</span></a>
+      <a class="active" id="navMore" href="./pin.html"><span class="ico">🔐</span><span>Accès</span></a>
+    </div>
+  </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -390,7 +443,7 @@
       }
 
       function isAllowedReturnPath(pathname) {
-        const allowed = ["/dashboard-pro.html","/dashboard.html","/caisse.html","/admin.html","/index.html","/"];
+        const allowed = ["/dashboard-pro.html","/dashboard.html","/caisse.html","/admin.html","/profile.html","/index.html","/"];
         return allowed.includes(pathname);
       }
 
@@ -412,7 +465,7 @@
         const target = (qs("target") || "").trim().toLowerCase();
         let next = CFG.DEFAULT_NEXT;
         if (target === "caisse")    next = "./caisse.html";
-        if (target === "admin")     next = "./dashboard-pro.html"; // admin = même espace
+        if (target === "admin")     next = "./admin.html";
         if (target === "dashboard") next = "./dashboard-pro.html";
 
         return buildSafeUrl(next, {
@@ -434,9 +487,25 @@
 
         el.btnDashboard.href = add("./dashboard-pro.html");
         el.btnCaisse.href    = add("./caisse.html");
-        el.btnAdmin.href     = add("./dashboard-pro.html"); // réglages = même espace
-        el.btnPay.href       = CFG.PAY_URL;
+        el.btnAdmin.href     = add("./admin.html");
+        el.btnPay.href       = buildSafeUrl(CFG.PAY_URL, {
+          module: CFG.MODULE,
+          ...(p ? { phone: p } : {}),
+          ...(s ? { slug: s } : {})
+        });
         el.btnSupport.href   = "https://wa.me/" + CFG.SUPPORT_WA;
+
+        const navMap = {
+          navHome: "./dashboard-pro.html",
+          navArticles: "./caisse.html#articles",
+          navCash: "./caisse.html",
+          navNotes: "./caisse.html#notes",
+          navMore: "./pin.html"
+        };
+        Object.entries(navMap).forEach(([id, base]) => {
+          const node = document.getElementById(id);
+          if(node) node.href = add(base);
+        });
 
         if (s) {
           el.btnDashboard.classList.remove("hidden");
@@ -452,10 +521,12 @@
            MAINTENANT : nom humain selon la destination ━━━ */
         const dest = new URL(el.btnReturn.href).pathname;
         const destLabel =
-          dest.includes("caisse")    ? "Ma caisse" :
-          dest.includes("dashboard") ? "Mon espace de travail" :
+          dest.includes("caisse")    ? "Encaisser" :
+          dest.includes("admin")     ? "Plus" :
+          dest.includes("profile")   ? "Boutique" :
+          dest.includes("dashboard") ? "Accueil" :
           dest.includes("index")     ? "Accueil" :
-          "Mon espace de travail";
+          "Accueil";
         el.returnInfo.textContent = destLabel;
       }
 
@@ -478,7 +549,7 @@
 
         if (saved?.verified_at || saved?.validated_at) {
           el.sessionInfo.textContent = "Active";
-          setStatus("Session déjà active. Tu peux reprendre directement.", "ok");
+          setStatus("Accès déjà ouvert. Tu peux reprendre directement.", "ok");
         }
       }
 
@@ -494,7 +565,7 @@
           }
 
           if (!pin) {
-            setStatus("Entre ton PIN.", "err");
+            setStatus("Entre ton code.", "err");
             return;
           }
 
@@ -534,7 +605,7 @@
           refreshLinks(session.slug, session.phone);
 
           /* ━━━ AVANT : "Ouverture de ton espace POS..." → "POS" banni ━━━ */
-          setStatus("PIN validé. Ouverture de ton espace…", "ok");
+          setStatus("Code validé. Ouverture de MON COMMERCE…", "ok");
 
           setTimeout(() => { window.location.href = buildReturnUrl(session); }, 220);
         } catch (err) {
