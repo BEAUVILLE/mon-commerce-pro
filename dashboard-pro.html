@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Mon espace de travail · MON COMMERCE by DIGIY</title>
+  <title>MON COMMERCE — Accueil</title>
   <meta name="theme-color" content="#07140f" />
-  <meta name="description" content="MON COMMERCE by DIGIY — mon espace de travail : abonnement, activité, boost et accès à ma caisse." />
+  <meta name="description" content="MON COMMERCE by DIGIY — Accueil mobile : ventes, argent, caisse, notes rapides et réglages." />
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -63,7 +63,7 @@
     a{text-decoration:none;color:inherit}
     button{font:inherit}
 
-    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px 92px}
+    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px calc(104px + env(safe-area-inset-bottom,0px))}
 
     /* ━━━ ANTI-ÉCRAN NOIR ━━━ */
     .app{display:none}
@@ -161,8 +161,63 @@
     @media(max-width:700px){
       .wrap{padding:12px 12px 92px}.topbar-inner{padding:12px}.brand-title{white-space:normal}
       .boostBox{flex-direction:column}
-      .floating-site-btn{left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom, 0px));min-height:46px;padding:14px;font-size:12px}
+      .floating-site-btn{display:none}
     }
+
+    /* ━━━ MENU BAS MOBILE — doctrine DIGIY ━━━ */
+    .bottomNav{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:95;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+      background:rgba(4,17,13,.94);
+      border-top:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+    }
+    .bottomNavInner{
+      width:min(100%,760px);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:6px;
+    }
+    .bottomNav a{
+      min-height:58px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      align-content:center;
+      gap:3px;
+      color:rgba(247,251,248,.70);
+      font-size:11px;
+      font-weight:950;
+      text-align:center;
+      border:1px solid transparent;
+    }
+    .bottomNav .ico{font-size:18px;line-height:1}
+    .bottomNav a.active{
+      color:#07110d;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      border-color:rgba(250,204,21,.28);
+      box-shadow:0 10px 24px rgba(250,204,21,.16);
+    }
+
+    .mobileHeroActions{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-top:14px;
+    }
+
+    @media(max-width:720px){
+      .right,.navRow{display:none}
+      .mobileHeroActions{grid-template-columns:1fr 1fr}
+      .bigMoney{font-size:32px}
+    }
+
   </style>
 </head>
 
@@ -178,15 +233,15 @@
           <div>
             <div class="brand-kicker">DIGIYLYFE</div>
             <!-- ━━━ AVANT : "MON COMMERCE — Dashboard Pro" → banni ━━━ -->
-            <div id="brandTitle" class="brand-title">MON COMMERCE — Mon espace de travail</div>
-            <div id="brandSub" class="brand-sub">Mon activité · boutique · abonnement</div>
+            <div id="brandTitle" class="brand-title">MON COMMERCE — Accueil</div>
+            <div id="brandSub" class="brand-sub">Ventes · caisse · notes · argent</div>
           </div>
         </div>
         <div class="right">
           <div class="pill" id="pillStatus">Statut : <b>…</b></div>
-          <a class="btn-outline" id="btnPinTop" href="./pin.html">🔐 Mon code d'accès</a>
+          <a class="btn-outline" id="btnPinTop" href="./pin.html">🔐 Mon code</a>
           <!-- ━━━ AVANT : "⚙️ Admin" → banni ━━━ -->
-          <a class="btn-outline" id="btnSettings" href="./dashboard-pro.html">⚙️ Mes réglages</a>
+          <a class="btn-outline" id="btnSettings" href="./dashboard-pro.html">⚙️ Plus</a>
         </div>
       </div>
     </div>
@@ -195,10 +250,10 @@
     <div class="navRow">
       <!-- ━━━ "Hall" × 2 → "Accueil" ━━━ -->
       <a class="btn-ghost"   id="btnHall"       href="./index.html">🏠 Accueil</a>
-      <a class="btn-ghost"   id="btnCaisse"     href="./caisse.html">🧾 Ma caisse</a>
+      <a class="btn-ghost"   id="btnCaisse"     href="./caisse.html">💰 Encaisser</a>
       <!-- ━━━ "Admin" × 2 → "Mes réglages" ━━━ -->
-      <a class="btn-ghost"   id="btnAdmin"      href="./dashboard-pro.html">⚙️ Mes réglages</a>
-      <a class="btn-outline" id="btnAbosTop"    href="https://commencer-a-payer.digiylyfe.com/">💳 Mon abonnement</a>
+      <a class="btn-ghost"   id="btnAdmin"      href="./dashboard-pro.html">⚙️ Plus</a>
+      <a class="btn-outline" id="btnAbosTop"    href="https://commencer-a-payer.digiylyfe.com/">💳 Mon accès</a>
       <a class="btn-outline" id="btnSupportTop" href="#" target="_blank" rel="noopener">💬 Support</a>
     </div>
 
@@ -210,7 +265,7 @@
         <div class="shellText" id="blockedText">Entre avec ton code d'accès ou rejoins DIGIY pour accéder à ton espace.</div>
         <div class="footer" style="justify-content:center;margin-top:18px">
           <a class="btn-outline" id="btnBlockedPin"  href="./pin.html">🔐 Entrer avec mon code</a>
-          <a class="btn"         id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon abonnement</a>
+          <a class="btn"         id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon accès</a>
         </div>
       </div>
     </div>
@@ -222,8 +277,8 @@
         <!-- CARTE STATUT -->
         <div class="card" id="cardStatus">
           <!-- ━━━ AVANT : "dashboard pro • abonnement • argent • boost" → banni ━━━ -->
-          <div class="heroBadge">Mon activité · abonnement · argent · boost</div>
-          <h3>Mon abonnement</h3>
+          <div class="heroBadge">Accueil · argent · caisse · boost</div>
+          <h3>Mon accès</h3>
 
           <div class="row">
             <div class="statusDot" id="dot"></div>
@@ -243,14 +298,21 @@
           <div class="hr"></div>
           <div class="mini" id="metaLine"><span>Abonnement : —</span><span>•</span><span>Paiement : —</span></div>
 
+          <div class="mobileHeroActions">
+            <a class="btn" id="btnHeroCash" href="./caisse.html">💰 Encaisser</a>
+            <a class="btn-outline" id="btnHeroArticles" href="./caisse.html#articles">📦 Articles</a>
+            <a class="btn-outline" id="btnHeroNotes" href="./caisse.html#notes">✍️ Notes</a>
+            <a class="btn-outline" id="btnHeroPlus" href="./admin.html">⚙️ Plus</a>
+          </div>
+
           <div class="footer">
-            <button class="btn-outline" id="btnManageSub" type="button">Gérer mon abonnement</button>
+            <button class="btn-outline" id="btnManageSub" type="button">Mon abonnement</button>
           </div>
         </div>
 
         <!-- CARTE ARGENT -->
         <div class="card" id="cardMoney">
-          <h3>Ce qui est rentré</h3>
+          <h3>Argent rentré</h3>
           <div class="bigMoney" id="moneyMonth">— FCFA</div>
           <div class="mini" id="moneyMeta">
             <span id="txCount">— transactions</span>
@@ -273,10 +335,27 @@
           </div>
         </div>
 
+        <!-- CARTE NOTES RAPIDES -->
+        <div class="card" id="cardNotes" style="grid-column:1/-1">
+          <div class="heroBadge">Notes rapides → Mon argent</div>
+          <h3>Écrire vite ce qui se passe</h3>
+          <div class="muted" style="font-weight:800;line-height:1.65">
+            Vente cash, achat stock, client qui doit, dépense sachets, remboursement fournisseur.
+            Une phrase suffit. DIGIY prépare la trace, puis Mon argent reçoit le brouillon.
+          </div>
+
+          <div class="mobileHeroActions">
+            <a class="btn" id="btnNoteFast" href="./caisse.html#notes">✍️ Écrire une note</a>
+            <a class="btn-outline" id="btnOpenPay" href="https://pro-pay.digiylyfe.com/admin.html">💰 Voir Mon argent</a>
+            <a class="btn-outline" id="btnOpenCaisse2" href="./caisse.html">💳 Encaisser</a>
+            <a class="btn-outline" id="btnOpenAdmin2" href="./admin.html">⚙️ Plus</a>
+          </div>
+        </div>
+
         <!-- CARTE ACTION -->
         <div class="card" id="cardAction" style="grid-column:1/-1">
-          <h3>Action principale</h3>
-          <div class="muted" style="font-weight:800;margin-bottom:10px" id="actionDesc">Une action. Simple. Efficace.</div>
+          <h3>Encaisser maintenant</h3>
+          <div class="muted" style="font-weight:800;margin-bottom:10px" id="actionDesc">Le geste maître de MON COMMERCE.</div>
 
           <div class="row" style="justify-content:space-between">
             <div class="muted" style="font-weight:900" id="actionHint">—</div>
@@ -299,14 +378,25 @@
 
   </div><!-- /.wrap.app -->
 
+
+  <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+    <div class="bottomNavInner">
+      <a class="active" id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
+      <a id="navArticles" href="./caisse.html#articles"><span class="ico">📦</span><span>Articles</span></a>
+      <a id="navCash" href="./caisse.html"><span class="ico">💰</span><span>Encaisser</span></a>
+      <a id="navNotes" href="./caisse.html#notes"><span class="ico">✍️</span><span>Notes</span></a>
+      <a id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Plus</span></a>
+    </div>
+  </nav>
+
 <script>
 (() => {
   "use strict";
 
   const MODULE_CODE          = "POS";
   const MODULE_LABEL         = "MON COMMERCE";
-  const PRIMARY_ACTION_LABEL = "Ouvrir ma caisse";
-  const PRIMARY_ACTION_HINT  = "Encaisse, gère tes produits et suis ton stock.";
+  const PRIMARY_ACTION_LABEL = "Encaisser maintenant";
+  const PRIMARY_ACTION_HINT  = "Ouvre la caisse, encaisse vite, puis garde une trace claire.";
   const SUPPORT_PHONE        = "221771342889";
 
   const SUPABASE_URL  = String(window.DIGIY_SUPABASE_URL  || "").trim();
@@ -566,6 +656,32 @@
       $("btnPublicFloating").href = buildUrl(PUBLIC_URL, { slug });
       $("btnBlockedPin").href    = buildUrl(PIN_URL, { slug, phone, module: MODULE_CODE, "return": DASHBOARD_URL });
       $("btnBlockedAbos").href   = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
+      const navParams = { slug, phone, module: MODULE_CODE };
+      const maybeLinks = {
+        btnHeroCash: CAISSE_URL,
+        btnHeroArticles: CAISSE_URL + "#articles",
+        btnHeroNotes: CAISSE_URL + "#notes",
+        btnHeroPlus: digiyLocal("admin.html"),
+        btnNoteFast: CAISSE_URL + "#notes",
+        btnOpenCaisse2: CAISSE_URL,
+        btnOpenAdmin2: digiyLocal("admin.html"),
+        navHome: DASHBOARD_URL,
+        navArticles: CAISSE_URL + "#articles",
+        navCash: CAISSE_URL,
+        navNotes: CAISSE_URL + "#notes",
+        navMore: digiyLocal("admin.html")
+      };
+      Object.entries(maybeLinks).forEach(([id, url]) => {
+        const el = $(id);
+        if (el) el.href = buildUrl(url, navParams);
+      });
+      const pay = $("btnOpenPay");
+      if (pay) pay.href = buildUrl("https://pro-pay.digiylyfe.com/admin.html", {
+        slug: phone ? "pay-" + phone : "",
+        phone,
+        from: "POS",
+        module: "PAY"
+      });
     } catch(e) {
       log("wireNav erreur silencieuse", { message: e.message || String(e) });
     }
@@ -592,10 +708,10 @@
 
     /* ━━━ Textes JS — doctrine façade ━━━ */
     $("brandTitle").textContent       = `${MODULE_LABEL} — Mon espace de travail`;
-    $("brandSub").textContent         = "Mon activité · boutique · abonnement";
+    $("brandSub").textContent         = "Ventes · caisse · notes · argent";
     $("btnPrimaryAction").textContent = PRIMARY_ACTION_LABEL;
     $("actionHint").textContent       = PRIMARY_ACTION_HINT;
-    $("actionDesc").textContent       = "Entre dans ta caisse, pilote tes produits et ton stock depuis un seul endroit.";
+    $("actionDesc").textContent       = "Le commerçant doit comprendre en deux secondes : encaisser, voir l’argent, noter une dépense.";
     $("pillStatus").innerHTML         = `Statut : <b>…</b>`;
 
     await awaitGuardReady();
