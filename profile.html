@@ -4,8 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#0f172a"/>
-  <title>Ma vitrine publique · MON COMMERCE by DIGIY</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — ma vitrine publique boutique." />
+  <title>MON COMMERCE — Boutique</title>
+  <meta name="description" content="MON COMMERCE by DIGIY — Boutique : vitrine publique, contact, identité et infos de facturation." />
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -52,7 +52,7 @@
         radial-gradient(circle at top, rgba(250,204,21,.16), transparent 56%),
         radial-gradient(circle at 18% 10%, rgba(34,197,94,.12), transparent 52%),
         linear-gradient(180deg, #1e293b 0%, #0f172a 52%, #0b1220 100%);
-      padding:16px;
+      padding:16px 16px calc(104px + env(safe-area-inset-bottom,0px));
     }
 
     #guard_status{
@@ -317,7 +317,7 @@
       }
 
       .wrap{
-        padding:8px 0 36px;
+        padding:8px 0 calc(104px + env(safe-area-inset-bottom,0px));
       }
 
       .card{
@@ -350,6 +350,66 @@
         padding:16px 14px;
       }
     }
+
+    #publicProfile, #shopInfo, #billingInfo{scroll-margin-top:96px}
+
+    .bottomNav{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:9998;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+      background:rgba(15,23,42,.94);
+      border-top:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+    }
+
+    .bottomNavInner{
+      width:min(100%,760px);
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:6px;
+    }
+
+    .bottomNav a{
+      min-height:58px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      align-content:center;
+      gap:3px;
+      color:rgba(248,250,252,.70);
+      font-size:11px;
+      font-weight:950;
+      text-align:center;
+      border:1px solid transparent;
+      text-decoration:none;
+    }
+
+    .bottomNav .ico{font-size:18px;line-height:1}
+
+    .bottomNav a.active{
+      color:#020617;
+      background:linear-gradient(135deg,var(--gold),var(--orange));
+      border-color:rgba(250,204,21,.28);
+      box-shadow:0 10px 24px rgba(250,204,21,.16);
+    }
+
+    .profileFastRow{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+      margin-top:16px;
+    }
+
+    @media(max-width:720px){
+      .profileFastRow{grid-template-columns:1fr 1fr}
+      #guard_status{display:none}
+    }
+
   </style>
 </head>
 
@@ -359,23 +419,29 @@
   <div class="app">
     <div class="wrap">
       <div class="card">
-        <h1>🏪 Ma vitrine publique</h1>
+        <h1>🏪 Ma boutique</h1>
         <p class="sub">
-          Ici tu règles ce que les clients voient.
-          La partie vitrine reste publique. La partie boutique / facturation reste séparée pour la gestion.
+          Ici tu règles ce que le client voit : nom, adresse, WhatsApp, photo, description. Les infos administratives restent séparées.
         </p>
 
         <div class="pillrow">
-          <span class="pill soft" id="scopePill">Façade client + gestion boutique</span>
+          <span class="pill soft" id="scopePill">Boutique visible + infos utiles</span>
           <span class="pill soft" id="dbPill">Connexion en cours…</span>
+        </div>
+
+        <div class="profileFastRow">
+          <a class="btn primary" id="btnFastPublic" href="#publicProfile">🏪 Visible</a>
+          <a class="btn" id="btnFastShop" href="#shopInfo">🧾 Interne</a>
+          <a class="btn" id="btnFastCash" href="./caisse.html">💰 Encaisser</a>
+          <a class="btn" id="btnFastMore" href="./admin.html">⚙️ Plus</a>
         </div>
 
         <div class="hr"></div>
 
-        <section class="section">
-          <h2>🏪 Vitrine publique</h2>
+        <section class="section" id="publicProfile">
+          <h2>🏪 Boutique visible</h2>
           <p class="desc">
-            Cette partie parle au client. Nom affiché, photo, adresse, WhatsApp, description, publication.
+            Cette partie parle au client : nom affiché, photo, adresse, WhatsApp, description et publication.
           </p>
 
           <div class="row">
@@ -464,10 +530,10 @@
           </div>
         </section>
 
-        <section class="section">
-          <h2>🏪 Infos boutique</h2>
+        <section class="section" id="shopInfo">
+          <h2>🏪 Infos internes</h2>
           <p class="desc">
-            Cette partie ne parle pas au client. Elle sert à ton identité boutique, ton suivi administratif et ta base de facturation.
+            Cette partie reste interne. Elle sert à ton identité boutique, ton suivi administratif et ta base de facturation.
           </p>
 
           <div class="row">
@@ -515,10 +581,10 @@
           </div>
         </section>
 
-        <section class="section">
+        <section class="section" id="billingInfo">
           <h2>🧾 Facturation</h2>
           <p class="desc">
-            Bloc propre pour la gestion fiscale et les futurs tickets / factures. Ici on ne mélange pas avec la façade client.
+            Bloc propre pour les futurs tickets et factures. On ne mélange pas ça avec ce que voit le client.
           </p>
 
           <div class="row">
@@ -557,11 +623,11 @@
         </section>
 
         <div class="actions">
-          <button class="btn primary" id="btnSave" type="button">💾 Enregistrer la page</button>
-          <button class="btn green" id="btnSaveAdmin" type="button">🧾 Garder mes infos boutique</button>
+          <button class="btn primary" id="btnSave" type="button">💾 Enregistrer la boutique</button>
+          <button class="btn green" id="btnSaveAdmin" type="button">🧾 Garder les infos internes</button>
           <button class="btn" id="btnReSlug" type="button">🔄 Régénérer l'identifiant</button>
-          <button class="btn" id="btnOpenListing" type="button">👁️ Voir ma vitrine</button>
-          <button class="btn" id="btnBack" type="button">↩️ Mon espace de travail</button>
+          <button class="btn" id="btnOpenListing" type="button">👁️ Voir côté client</button>
+          <button class="btn" id="btnBack" type="button">↩️ Accueil</button>
         </div>
 
         <div class="note" id="msg">Statut : —</div>
@@ -569,12 +635,25 @@
     </div>
   </div>
 
+
+  <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+    <div class="bottomNavInner">
+      <a id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
+      <a id="navArticles" href="./caisse.html#articles"><span class="ico">📦</span><span>Articles</span></a>
+      <a id="navCash" href="./caisse.html"><span class="ico">💰</span><span>Encaisser</span></a>
+      <a id="navNotes" href="./caisse.html#notes"><span class="ico">✍️</span><span>Notes</span></a>
+      <a class="active" id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Plus</span></a>
+    </div>
+  </nav>
+
 <script>
 (() => {
   "use strict";
 
   const DASHBOARD_URL = "./dashboard-pro.html";
   const PUBLIC_INDEX_URL = "./index.html";
+  const CAISSE_URL = "./caisse.html";
+  const ADMIN_URL = "./admin.html";
 
   const gs = document.getElementById("guard_status");
   const msg = document.getElementById("msg");
@@ -666,6 +745,32 @@
 
   function withSlug(url, slug){
     return buildSafeUrl(url, slug ? { slug } : {});
+  }
+
+  function wireMobileLinks(){
+    const slug = String($("slug")?.value || ACTIVE_SLUG || "").trim();
+    const phone = String(SESSION?.phone || "").replace(/[^\d]/g, "");
+    const params = { slug, phone, module: "POS" };
+
+    const map = {
+      btnFastCash: CAISSE_URL,
+      btnFastMore: ADMIN_URL,
+      navHome: DASHBOARD_URL,
+      navArticles: CAISSE_URL + "#articles",
+      navCash: CAISSE_URL,
+      navNotes: CAISSE_URL + "#notes",
+      navMore: ADMIN_URL
+    };
+
+    Object.entries(map).forEach(([id, base]) => {
+      const el = $(id);
+      if(el) el.href = buildSafeUrl(base, params);
+    });
+
+    const fastPublic = $("btnFastPublic");
+    const fastShop = $("btnFastShop");
+    if(fastPublic) fastPublic.href = "#publicProfile";
+    if(fastShop) fastShop.href = "#shopInfo";
   }
 
   function getSb(){
@@ -958,6 +1063,7 @@
       const nextUrl = new URL(location.href);
       if(ACTIVE_SLUG) nextUrl.searchParams.set("slug", ACTIVE_SLUG);
       history.replaceState({}, "", nextUrl.toString());
+      wireMobileLinks();
 
       saveAdminDraft(true);
       setDbPill("Base connectée", true);
@@ -1065,11 +1171,13 @@
     syncAdminFromPublic();
 
     if(ACTIVE_SLUG) $("slug").value = ACTIVE_SLUG;
+    wireMobileLinks();
 
     setDbPill("Connexion…", null);
     setMsg("Prêt ✅ chargement de ta page…", true);
 
     await loadExisting();
+    wireMobileLinks();
     loadAdminDraft();
     syncAdminFromPublic();
 
