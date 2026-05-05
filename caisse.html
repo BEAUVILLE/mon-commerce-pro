@@ -476,6 +476,16 @@
       .mainSub{font-size:15px}
     }
 
+    @media print{
+      body{background:#fff;color:#07140f;padding:0}
+      .topbar,.navRow,.bottomNav,.floating-site-btn,.quickCommerce,#articles,.blockedShell,.actionRow button.btn-ghost{display:none!important}
+      .wrap{padding:0;max-width:none}
+      .hero,.sectionGrid{display:block}
+      .card{box-shadow:none;border:none;border-radius:0;background:#fff;color:#07140f}
+      .mainSub,.helper,.tiny{color:#475569}
+      .notice{border:1px solid #e2e8f0;background:#fff;color:#07140f}
+    }
+
   </style>
 </head>
 
@@ -548,12 +558,12 @@
                 <div class="value" id="metaStoreName">—</div>
               </div>
               <div class="miniCard">
-                <div class="tiny">Téléphone</div>
-                <div class="value" id="metaPhone">—</div>
+                <div class="tiny">Compte</div>
+                <div class="value" id="metaPhone">Sécurisé</div>
               </div>
               <div class="miniCard">
-                <div class="tiny">Identifiant</div>
-                <div class="value" id="metaSlug">—</div>
+                <div class="tiny">Ticket</div>
+                <div class="value" id="metaSlug">Prêt</div>
               </div>
               <div class="miniCard">
                 <div class="tiny">Lecture</div>
@@ -709,6 +719,7 @@
 
             <div class="actionRow">
               <button class="btn" type="button" id="btnSaleReady">✅ Encaisser</button>
+              <button class="btn-outline" type="button" id="btnPrintReceipt">🧾 Imprimer reçu</button>
               <button class="btn-ghost" type="button" id="btnClearSale">Effacer</button>
             </div>
 
@@ -831,6 +842,26 @@
 
       function getParam(name){
         return new URL(location.href).searchParams.get(name) || "";
+      }
+
+      function cleanVisibleUrl(){
+        const params = new URLSearchParams(location.search);
+        const sensitive = [
+          "phone","tel","owner_phone","checkout_phone","subscription_phone",
+          "slug","pos_slug","subscription_slug","pro_slug","module","from"
+        ];
+        const dirty = sensitive.some((k) => params.has(k));
+        if(!dirty) return;
+
+        const keep = new URLSearchParams();
+        const clean = location.pathname + (keep.toString() ? "?" + keep.toString() : "") + location.hash;
+        try{ history.replaceState({}, document.title, clean); }catch(_){}
+      }
+
+      function cleanInternalUrl(path){
+        const u = new URL(path || "./caisse.html", location.href);
+        u.search = "";
+        return u.pathname + u.hash;
       }
 
       function getGuardState(){
@@ -1148,30 +1179,33 @@
         qs("dotAccess").classList.toggle("bad", !STATE.access);
         qs("pillStore").textContent = STATE.storeName || "Boutique";
         qs("metaStoreName").textContent = STATE.storeName || "—";
-        qs("metaPhone").textContent = STATE.phone ? `+${STATE.phone}` : "—";
-        qs("metaSlug").textContent = STATE.slug || "—";
+        qs("metaPhone").textContent = STATE.access ? "Compte ouvert" : "Compte protégé";
+        qs("metaSlug").textContent = "Reçu possible";
         qs("metaSource").textContent = STATE.source || "—";
 
-        const q = { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE };
-        qs("btnHall").href = buildUrl(HALL_URL, q);
-        qs("btnDashboard").href = buildUrl(DASHBOARD_URL, q);
-        qs("btnAdmin").href = buildUrl(ADMIN_URL, q);
-        qs("btnProfile").href = buildUrl(PROFILE_URL, q);
-        qs("btnPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
-        qs("btnBlockedPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
-        qs("btnBlockedAbos").href = buildUrl(ABOS_URL, { base_module: MODULE_CODE, module: MODULE_CODE, phone: STATE.phone, slug: STATE.slug });
-        qs("btnGoDashboard").href = buildUrl(DASHBOARD_URL, q);
-        qs("btnGoAdmin").href = buildUrl(ADMIN_URL, q);
-        qs("btnGoProfile").href = buildUrl(PROFILE_URL, q);
-        const extraLinks = {
+        const cleanLinks = {
+          btnHall: HALL_URL,
+          btnDashboard: DASHBOARD_URL,
+          btnAdmin: ADMIN_URL,
+          btnProfile: PROFILE_URL,
+          btnPin: PIN_URL,
+          btnBlockedPin: PIN_URL,
+          btnGoDashboard: DASHBOARD_URL,
+          btnGoAdmin: ADMIN_URL,
+          btnGoProfile: PROFILE_URL,
           btnFastMore: ADMIN_URL,
           navHome: DASHBOARD_URL,
           navMore: ADMIN_URL
         };
-        Object.entries(extraLinks).forEach(([id, url]) => {
+
+        Object.entries(cleanLinks).forEach(([id, url]) => {
           const el = qs(id);
-          if(el) el.href = buildUrl(url, q);
+          if(el) el.href = cleanInternalUrl(url);
         });
+
+        const abos = qs("btnBlockedAbos");
+        if(abos) abos.href = ABOS_URL;
+
         const navArticles = qs("navArticles");
         const navCash = qs("navCash");
         const navNotes = qs("navNotes");
@@ -1412,12 +1446,17 @@
           resetSaleInputs();
           await hydrate(true);
 
+          try{
+            localStorage.setItem("digiy_pos_last_sale_ref", saleRef);
+            localStorage.setItem("digiy_pos_last_sale_total", String(totalXof));
+          }catch(_){}
+
           qs("saleHelper").innerHTML = `Vente enregistrée ✅ Réf : <b>${esc(saleRef)}</b>`;
           setSalePreview(
             "ok",
-            `Vente enregistrée ✅<br><b>Réf</b> : ${esc(saleRef)}<br><b>Total</b> : ${esc(money(totalXof))}<br><b>Articles</b> : ${esc(String(itemsCount))}<br><b>Paiement</b> : ${esc(method)}`
+            `Vente enregistrée ✅<br><b>Réf</b> : ${esc(saleRef)}<br><b>Total</b> : ${esc(money(totalXof))}<br><b>Articles</b> : ${esc(String(itemsCount))}<br><b>Paiement</b> : ${esc(method)}<br><br><button class="smallBtn" type="button" onclick="window.print()">🧾 Imprimer le reçu</button>`
           );
-          setNotice("ok", `Dernière vente enregistrée : <b>${esc(saleRef)}</b>. Le stock a été relu en direct.`);
+          setNotice("ok", `Dernière vente enregistrée : <b>${esc(saleRef)}</b>. Le stock a été relu en direct. Tu peux imprimer un reçu.`);
         }catch(err){
           const msg = err?.message || String(err);
           log("submitSale KO", { message: msg });
@@ -1476,7 +1515,7 @@
 
               <div class="productActions">
                 <button class="smallBtn" data-add="${esc(item.id)}" ${stock <= 0 ? "disabled" : ""}>➕ Ajouter</button>
-                <a class="smallBtn" href="${buildUrl(ADMIN_URL, { slug: STATE.slug, phone: STATE.phone, edit: item.id })}">✏️ Modifier</a>
+                <a class="smallBtn" href="${buildUrl(ADMIN_URL, { edit: item.id })}">✏️ Modifier</a>
               </div>
             </article>
           `;
@@ -1974,6 +2013,7 @@
       async function boot(){
         reveal();
         try{
+          cleanVisibleUrl();
           log("Boot caisse POS", { href: location.href, module: MODULE_CODE });
           await awaitGuardReady();
           await bootGuard();
@@ -1981,6 +2021,7 @@
 
           qs("btnReloadTop").addEventListener("click", () => hydrate(true));
           qs("btnSaleReady").addEventListener("click", submitSale);
+          qs("btnPrintReceipt").addEventListener("click", () => window.print());
           qs("btnClearSale").addEventListener("click", clearSaleForm);
           bindQuickCommerceNote();
 
