@@ -337,6 +337,98 @@
       box-shadow:0 10px 20px rgba(250,204,21,.16);
     }
 
+
+
+    /* ── COMMERCES PUBLIÉS ── */
+    .commerce-gallery-shell{
+      padding:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:26px;
+      box-shadow:var(--shadow-soft);
+    }
+    .commerce-gallery-status{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:800;
+      line-height:1.7;
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+      margin-bottom:14px;
+    }
+    .commerce-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:14px;
+    }
+    .commerce-card{
+      overflow:hidden;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(255,255,255,.035);
+      box-shadow:0 14px 34px rgba(0,0,0,.18);
+      display:flex;
+      flex-direction:column;
+      min-height:100%;
+    }
+    .commerce-photo{
+      width:100%;
+      height:170px;
+      object-fit:cover;
+      display:block;
+      background:rgba(255,255,255,.05);
+    }
+    .commerce-body{
+      padding:15px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      flex:1;
+    }
+    .commerce-title{
+      font-size:18px;
+      line-height:1.15;
+      font-weight:950;
+      letter-spacing:-.02em;
+    }
+    .commerce-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:7px;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:900;
+    }
+    .commerce-chip{
+      padding:7px 9px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+    }
+    .commerce-bio{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.75;
+      font-weight:700;
+      flex:1;
+    }
+    .commerce-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:2px;
+    }
+    .commerce-actions .btn,
+    .commerce-actions .btn-outline{
+      flex:1;
+      min-width:130px;
+      min-height:42px;
+      padding:10px 12px;
+      font-size:12px;
+    }
+
     /* ── PRICING ── */
     .pricing{padding:30px 0 56px;}
     .price-wrap{max-width:780px;margin:0 auto;}
@@ -687,6 +779,24 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+
+
+    <section class="section" id="commerces-equipes">
+      <div class="section-head">
+        <div class="section-kicker">Commerces équipés</div>
+        <h2 class="section-title">Les boutiques qui gardent la main.</h2>
+        <p class="section-sub">
+          Ici apparaissent les commerces MON COMMERCE publiés : photo, ville, WhatsApp direct et présence claire.
+          Le client voit, contacte, puis paie le commerçant directement. DIGIY ne prend pas de commission.
+        </p>
+      </div>
+
+      <div class="commerce-gallery-shell">
+        <div class="commerce-gallery-status" id="commerceGalleryStatus">Chargement des commerces publiés…</div>
+        <div class="commerce-grid" id="commerceGallery" aria-live="polite"></div>
       </div>
     </section>
 
@@ -1140,6 +1250,102 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
         return null;
       }
 
+
+
+      function escapeHtml(value){
+        return String(value ?? "")
+          .replace(/&/g,"&amp;")
+          .replace(/</g,"&lt;")
+          .replace(/>/g,"&gt;")
+          .replace(/"/g,"&quot;")
+          .replace(/'/g,"&#039;");
+      }
+
+      function normalizeGalleryPayload(data){
+        if(Array.isArray(data)) return data;
+        if(Array.isArray(data?.items)) return data.items;
+        if(Array.isArray(data?.profiles)) return data.profiles;
+        if(Array.isArray(data?.data)) return data.data;
+        return [];
+      }
+
+      function publicWhatsappUrl(phone, name){
+        const digits = normPhone(phone || SUPPORT_PHONE);
+        const text = `Bonjour, je viens de voir ${name || "votre commerce"} sur MON COMMERCE by DIGIY.`;
+        return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
+      }
+
+      function publicProfileUrl(item){
+        const explicit = String(item?.profile_url || "").trim();
+        if(/^https?:\/\//i.test(explicit)) return explicit;
+        return `./?commerce=${encodeURIComponent(item?.slug || "")}`;
+      }
+
+      function renderCommerceGallery(items){
+        const box = $("commerceGallery");
+        const status = $("commerceGalleryStatus");
+        if(!box || !status) return;
+
+        box.innerHTML = "";
+
+        if(!items.length){
+          status.textContent = "Aucun commerce publié pour le moment. Les vitrines apparaîtront ici dès qu’elles seront validées.";
+          return;
+        }
+
+        status.textContent = `${items.length} commerce(s) publié(s) dans MON COMMERCE.`;
+
+        items.forEach((item) => {
+          const name = item.display_name || "Commerce DIGIY";
+          const photo = item.photo_url || "https://digiylyfe.net/wp-content/uploads/2026/03/digiylyfe_logo_qr.jpeg";
+          const city = item.city || "Ville non précisée";
+          const category = item.category || "Commerce";
+          const badge = item.badge || item.hub_badge || "💳 MON COMMERCE";
+          const bio = item.bio || "Commerce équipé avec MON COMMERCE by DIGIY.";
+          const wa = publicWhatsappUrl(item.whatsapp, name);
+          const profile = publicProfileUrl(item);
+
+          const card = document.createElement("article");
+          card.className = "commerce-card";
+          card.innerHTML = `
+            <img class="commerce-photo" src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.src='https://digiylyfe.net/wp-content/uploads/2026/03/digiylyfe_logo_qr.jpeg'" />
+            <div class="commerce-body">
+              <div class="commerce-title">${escapeHtml(name)}</div>
+              <div class="commerce-meta">
+                <span class="commerce-chip">${escapeHtml(category)}</span>
+                <span class="commerce-chip">📍 ${escapeHtml(city)}</span>
+                <span class="commerce-chip">${escapeHtml(badge)}</span>
+              </div>
+              <div class="commerce-bio">${escapeHtml(bio)}</div>
+              <div class="commerce-actions">
+                <a class="btn" href="${escapeHtml(wa)}" target="_blank" rel="noopener">💬 WhatsApp</a>
+                <a class="btn-outline" href="${escapeHtml(profile)}">👁️ Voir</a>
+              </div>
+            </div>
+          `;
+          box.appendChild(card);
+        });
+      }
+
+      async function loadPublicCommerceGallery(){
+        const status = $("commerceGalleryStatus");
+        if(!status) return;
+
+        if(!sb){
+          status.textContent = "Galerie indisponible pour le moment : connexion non prête.";
+          return;
+        }
+
+        try{
+          const { data, error } = await sb.rpc("digiy_pos_public_gallery");
+          if(error) throw error;
+          renderCommerceGallery(normalizeGalleryPayload(data));
+        }catch(err){
+          console.warn("[DIGIY POS INDEX] Galerie publique indisponible", err?.message || err);
+          status.textContent = "Impossible de charger les commerces publiés pour le moment.";
+        }
+      }
+
       async function hydrate(){
         state.loading = true;
         revealPage();
@@ -1276,6 +1482,7 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
         bind();
         await bootGuardSoft();
         await hydrate();
+        await loadPublicCommerceGallery();
       }
 
       init();
