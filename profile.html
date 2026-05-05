@@ -250,6 +250,32 @@
       line-height:1.6;
     }
 
+    .photoPreviewWrap{
+      margin-top:10px;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(2,6,23,.28);
+      display:none;
+    }
+
+    .photoPreviewWrap img{
+      display:block;
+      width:100%;
+      min-height:170px;
+      max-height:260px;
+      object-fit:cover;
+      background:rgba(255,255,255,.05);
+    }
+
+    .photoPreviewCaption{
+      padding:10px 12px;
+      color:rgba(214,224,234,.82);
+      font-size:12px;
+      font-weight:900;
+      line-height:1.45;
+    }
+
     .actions{
       display:flex;
       gap:10px;
@@ -474,6 +500,10 @@
             <div>
               <label>Photo vitrine (URL)</label>
               <input id="photo_url" placeholder="https://...jpg/png" />
+              <div class="photoPreviewWrap" id="photoPreviewWrap">
+                <img id="photoPreview" alt="Aperçu de la photo vitrine" />
+                <div class="photoPreviewCaption">Aperçu client — l’image doit venir d’un lien public https://</div>
+              </div>
             </div>
           </div>
 
@@ -602,8 +632,12 @@
 
           <div class="row3">
             <div>
-              <label>Devise</label>
-              <input id="currency" placeholder="Ex: XOF" />
+              <label>Devise de travail</label>
+              <select id="currency">
+                <option value="XOF">FCFA — Sénégal / Afrique</option>
+                <option value="EUR">€ — France / Europe</option>
+              </select>
+              <div class="hint">Une seule devise s’affiche dans Mon commerce. Pas de conversion, pas de double affichage.</div>
             </div>
             <div>
               <label>Taux TVA par défaut (%)</label>
@@ -711,6 +745,38 @@
       }catch(_){}
     }
     return s.split(",").map(x => x.trim()).filter(Boolean);
+  }
+
+  function normalizeCurrency(value){
+    const c = String(value || "XOF").trim().toUpperCase();
+    return c === "EUR" ? "EUR" : "XOF";
+  }
+
+  function isUuid(value){
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || "").trim());
+  }
+
+  function renderPhotoPreview(){
+    const wrap = $("photoPreviewWrap");
+    const img = $("photoPreview");
+    const url = String($("photo_url")?.value || "").trim();
+    if(!wrap || !img) return;
+
+    if(!url || !/^https:\/\//i.test(url)){
+      img.removeAttribute("src");
+      wrap.style.display = "none";
+      return;
+    }
+
+    img.onerror = () => {
+      wrap.style.display = "none";
+    };
+
+    img.onload = () => {
+      wrap.style.display = "block";
+    };
+
+    img.src = url;
   }
 
   function getUrlSlug(){
@@ -844,7 +910,7 @@
       country: $("country").value.trim(),
       company_register: $("company_register").value.trim(),
       vat_number: $("vat_number").value.trim(),
-      currency: $("currency").value.trim() || "XOF",
+      currency: normalizeCurrency($("currency").value),
       vat_rate: $("vat_rate").value.trim(),
       billing_code: $("billing_code").value.trim(),
       invoice_note: $("invoice_note").value.trim()
@@ -863,7 +929,7 @@
     $("country").value = d.country || "Sénégal";
     $("company_register").value = d.company_register || "";
     $("vat_number").value = d.vat_number || "";
-    $("currency").value = d.currency || "XOF";
+    $("currency").value = normalizeCurrency(d.currency || d.work_currency || "XOF");
     $("vat_rate").value = d.vat_rate || "";
     $("billing_code").value = d.billing_code || "";
     $("invoice_note").value = d.invoice_note || "";
@@ -924,6 +990,54 @@
     return payload;
   }
 
+  async function saveAdminInfo(quiet = false){
+    const payload = saveAdminDraft(true);
+    const sb = getSb();
+    const slug = normSlug(payload.slug || ACTIVE_SLUG || "");
+    const phone = String(payload.phone || SESSION?.phone || "").replace(/[^\d]/g, "");
+    const workCurrency = normalizeCurrency(payload.currency);
+
+    if(!sb){
+      if(!quiet) setMsg("Infos internes gardées sur cet appareil ✅", true);
+      return payload;
+    }
+
+    try{
+      const update = {
+        work_currency: workCurrency,
+        updated_at: new Date().toISOString()
+      };
+
+      if(payload.shop_commercial_name) update.name = payload.shop_commercial_name;
+      if(payload.country) update.country = payload.country;
+      if(payload.billing_city) update.city = payload.billing_city;
+      if(payload.billing_address) update.address = payload.billing_address;
+
+      if(slug){
+        await sb
+          .from("pos_stores")
+          .update(update)
+          .or(`store_id.eq.${slug},workspace_slug.eq.${slug}`);
+      }else if(phone){
+        await sb
+          .from("pos_stores")
+          .update(update)
+          .eq("owner_phone", phone);
+      }
+
+      if(!quiet){
+        setMsg(`Infos internes gardées ✅ • devise de travail : ${workCurrency === "EUR" ? "€" : "FCFA"}`, true);
+      }
+    }catch(e){
+      console.warn("[DIGIY POS] sauvegarde infos internes SQL KO", e?.message || e);
+      if(!quiet){
+        setMsg("Infos internes gardées sur cet appareil ✅ mais la devise n'a pas pu être envoyée en base.", false);
+      }
+    }
+
+    return payload;
+  }
+
   function buildPublicPayload(){
     const display_name = $("display_name").value.trim();
     const category = $("category").value.trim();
@@ -970,8 +1084,41 @@
       price_label: price_label || "0% commission • paiement direct"
     };
 
-    if(SESSION?.owner_id) payload.owner_id = SESSION.owner_id;
+    const ownerPhone = String(SESSION?.phone || "").replace(/[^\d]/g, "");
+    if(isUuid(SESSION?.owner_id)) payload.owner_id = SESSION.owner_id;
+    if(ownerPhone) payload.owner_phone = ownerPhone;
+    if(ACTIVE_SLUG) {
+      payload.workspace_slug = ACTIVE_SLUG;
+      payload.last_slug = ACTIVE_SLUG;
+    }
+    payload.module_code = "POS";
+    payload.module_label = "MON COMMERCE";
+
     return payload;
+  }
+
+  async function loadWorkCurrencyFromStore(){
+    const sb = getSb();
+    if(!sb || !ACTIVE_SLUG) return;
+
+    try{
+      const { data, error } = await sb
+        .from("pos_stores")
+        .select("work_currency,name,country,city,address")
+        .or(`store_id.eq.${ACTIVE_SLUG},workspace_slug.eq.${ACTIVE_SLUG}`)
+        .limit(1)
+        .maybeSingle();
+
+      if(error || !data) return;
+
+      $("currency").value = normalizeCurrency(data.work_currency || "XOF");
+      if(data.country && !$("country").value.trim()) $("country").value = data.country;
+      if(data.city && !$("billing_city").value.trim()) $("billing_city").value = data.city;
+      if(data.address && !$("billing_address").value.trim()) $("billing_address").value = data.address;
+      if(data.name && !$("shop_commercial_name").value.trim()) $("shop_commercial_name").value = data.name;
+    }catch(e){
+      console.warn("[DIGIY POS] lecture devise boutique KO", e?.message || e);
+    }
   }
 
   async function loadExisting(){
@@ -1031,6 +1178,7 @@
     $("address").value = data.address || "";
     $("whatsapp").value = data.whatsapp || "";
     $("photo_url").value = data.photo_url || "";
+    renderPhotoPreview();
     $("bio").value = data.bio || "";
     $("tags").value = Array.isArray(data.tags) ? data.tags.join(", ") : (data.tags || "");
     $("profile_url").value = data.profile_url || "";
@@ -1047,7 +1195,7 @@
   }
 
   async function saveAll(){
-    saveAdminDraft(true);
+    await saveAdminInfo(true);
 
     const sb = getSb();
     if(!sb){
@@ -1085,7 +1233,7 @@
       cleanVisibleUrl();
       wireMobileLinks();
 
-      saveAdminDraft(true);
+      await saveAdminInfo(true);
       setDbPill("Base connectée", true);
       setMsg(`Vitrine enregistrée en base ✅ • infos boutique gardées en local ✅ • publié=${payload.is_published ? "oui" : "non"}`, true);
     }catch(e){
@@ -1131,21 +1279,36 @@
       return;
     }
 
+    let readyResult = null;
     let guardState = window.DIGIY_GUARD.state || null;
     try{
       if(typeof window.DIGIY_GUARD.ready === "function"){
-        guardState = await window.DIGIY_GUARD.ready();
+        readyResult = await window.DIGIY_GUARD.ready();
+        guardState = readyResult || guardState;
       }
     }catch(err){
       console.warn("[DIGIY profil] guard ready KO", err?.message || err);
       guardState = window.DIGIY_GUARD.state || null;
     }
 
+    const guardSession = (typeof window.DIGIY_GUARD.getSession === "function")
+      ? (window.DIGIY_GUARD.getSession() || {})
+      : {};
+
     const st = window.DIGIY_GUARD.state || guardState || {};
-    const hasAccess = !!st.access_ok || !!st.access;
+    const readySession = readyResult?.session || null;
+    const hasAccess =
+      !!st.access_ok ||
+      !!st.access ||
+      readyResult?.ok === true ||
+      !!readySession ||
+      !!guardSession.phone ||
+      !!guardSession.slug;
 
     if(!hasAccess){
-      if(gs) gs.textContent = "🔐 Vérification…";
+      if(gs) gs.textContent = "🔐 Accès requis";
+      setDbPill("Accès requis", false);
+      setMsg("Entre avec ton code pour ouvrir ta boutique.", false);
       return;
     }
 
@@ -1163,17 +1326,19 @@
       localStorage.getItem("digiy_pos_phone") || ""
     ).replace(/[^\d]/g, "");
 
-    ACTIVE_SLUG = INITIAL_URL_SLUG || normSlug(st.slug || "") || lsSlug;
-    SESSION = window.DIGIY_GUARD.getSession?.() || st || {};
+    SESSION = Object.assign({}, st || {}, readySession || {}, guardSession || {});
 
     if(!SESSION.phone && lsPhone) SESSION.phone = lsPhone;
+    ACTIVE_SLUG = INITIAL_URL_SLUG || normSlug(SESSION.slug || st.slug || "") || lsSlug;
     if(!SESSION.slug && ACTIVE_SLUG) SESSION.slug = ACTIVE_SLUG;
-    if(!SESSION.owner_id && (SESSION.phone || lsPhone)){
-      SESSION.owner_id = SESSION.phone || lsPhone;
-    }
 
-    if(!ACTIVE_SLUG && SESSION?.phone){
-      ACTIVE_SLUG = `commerce-${String(SESSION.phone).replace(/[^\d]/g, "")}`;
+    const sessionPhone = String(SESSION.phone || lsPhone || "").replace(/[^\d]/g, "");
+    if(sessionPhone) SESSION.phone = sessionPhone;
+    if(sessionPhone) SESSION.owner_phone = sessionPhone;
+
+    if(!ACTIVE_SLUG && sessionPhone){
+      ACTIVE_SLUG = `pos-${sessionPhone}`;
+      SESSION.slug = ACTIVE_SLUG;
     }
 
     document.documentElement.classList.add("access-ok");
@@ -1190,15 +1355,18 @@
     syncAdminFromPublic();
 
     if(ACTIVE_SLUG) $("slug").value = ACTIVE_SLUG;
+    await loadWorkCurrencyFromStore();
     wireMobileLinks();
 
     setDbPill("Connexion…", null);
     setMsg("Prêt ✅ chargement de ta page…", true);
 
     await loadExisting();
+    await loadWorkCurrencyFromStore();
     wireMobileLinks();
     loadAdminDraft();
     syncAdminFromPublic();
+    renderPhotoPreview();
 
     $("display_name").addEventListener("input", () => {
       if(!EXISTING?.slug && !$("slug").value.trim()){
@@ -1227,8 +1395,11 @@
       }
     });
 
+    $("photo_url").addEventListener("input", renderPhotoPreview);
+    $("currency").addEventListener("change", () => saveAdminInfo(true));
+
     $("btnSave").addEventListener("click", saveAll);
-    $("btnSaveAdmin").addEventListener("click", () => saveAdminDraft(false));
+    $("btnSaveAdmin").addEventListener("click", () => saveAdminInfo(false));
     const btnReSlug = $("btnReSlug");
     if(btnReSlug) btnReSlug.addEventListener("click", reSlug);
     $("btnOpenListing").addEventListener("click", openPublic);
