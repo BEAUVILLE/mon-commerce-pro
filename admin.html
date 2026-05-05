@@ -711,7 +711,7 @@
 </head>
 
 <body>
-  <a class="floating-site-btn" href="./index.html" aria-label="Retour à la vitrine MON COMMERCE">⬅️ Retour à la vitrine</a>
+  <a class="floating-site-btn" href="https://mon-commerce.digiylyfe.com/" aria-label="Retour à la vitrine MON COMMERCE">⬅️ Retour à la vitrine</a>
 
   <div class="app" id="appRoot">
     <div class="wrap">
@@ -740,7 +740,7 @@
       </header>
 
       <div class="navRow">
-        <a class="btn-ghost" href="./index.html" id="btnHall">🏠 Accueil</a>
+        <a class="btn-ghost" href="https://mon-commerce.digiylyfe.com/" id="btnHall">🌍 Vitrine</a>
         <a class="btn-ghost" href="./dashboard-pro.html" id="btnDashboard">🏠 Accueil</a>
         <a class="btn-ghost" href="./profile.html" id="btnProfile">🏪 Boutique</a>
         <a class="btn-ghost" href="./caisse.html" id="btnCaisse">💰 Encaisser</a>
@@ -806,7 +806,7 @@
             </div>
 
             <div class="footerNote">
-              Si la table produits n’existe pas encore en base, l’atelier continue en local sur ce téléphone ou cet ordinateur.
+              Si la sauvegarde en ligne n’est pas disponible, l’atelier continue sur cet appareil pour ne pas bloquer ton travail.
             </div>
           </div>
 
@@ -994,6 +994,7 @@
       const PROFILE_URL = digiyLocal("profile.html");
       const CAISSE_URL = digiyLocal("caisse.html");
       const PIN_URL = digiyLocal("pin.html");
+      const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
       const CACHE_PREFIX = "digiy_pos_products_local:";
       const LOW_STOCK_LIMIT = 5;
 
@@ -1064,6 +1065,37 @@
 
       function getParam(name){
         return new URL(location.href).searchParams.get(name) || "";
+      }
+
+      function cleanVisibleUrl(){
+        const params = new URLSearchParams(location.search);
+        const sensitive = [
+          "slug",
+          "phone",
+          "tel",
+          "module",
+          "owner_phone",
+          "subscription_phone",
+          "checkout_phone",
+          "p_phone"
+        ];
+        if(!sensitive.some((key) => params.has(key))) return;
+        try{
+          history.replaceState({}, document.title, location.pathname + location.hash);
+        }catch(_){}
+      }
+
+      function cleanPath(path){
+        const u = new URL(path || "./admin.html", location.href);
+        u.search = "";
+        return u.pathname + u.hash;
+      }
+
+      function modeLabel(mode){
+        const raw = String(mode || "").toLowerCase();
+        if(raw === "supabase") return "En ligne";
+        if(raw === "local") return "Sur cet appareil";
+        return "—";
       }
 
       function getGuardState(){
@@ -1353,17 +1385,14 @@
         qs("dotAccess").classList.toggle("bad", !STATE.access);
         qs("pillStore").textContent = STATE.storeName || "Boutique";
         qs("metaStoreName").textContent = STATE.storeName || "—";
-        qs("metaMode").textContent = STATE.mode || "—";
+        qs("metaMode").textContent = modeLabel(STATE.mode);
 
-        const q = { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE };
-        qs("btnHall").href = buildUrl(HALL_URL, q);
-        qs("btnDashboard").href = buildUrl(DASHBOARD_URL, q);
-        qs("btnProfile").href = buildUrl(PROFILE_URL, q);
-        qs("btnCaisse").href = buildUrl(CAISSE_URL, q);
-        qs("btnPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
-        qs("btnBlockedPin").href = buildUrl(PIN_URL, { slug: STATE.slug, phone: STATE.phone, module: MODULE_CODE, return: location.pathname });
-        qs("btnBlockedAbos").href = buildUrl(ABOS_URL, { base_module: MODULE_CODE, module: MODULE_CODE, phone: STATE.phone, slug: STATE.slug });
-        const extraLinks = {
+        const cleanLinks = {
+          btnDashboard: DASHBOARD_URL,
+          btnProfile: PROFILE_URL,
+          btnCaisse: CAISSE_URL,
+          btnPin: PIN_URL,
+          btnBlockedPin: PIN_URL,
           btnFastCash: CAISSE_URL,
           btnFastProfile: PROFILE_URL,
           navHome: DASHBOARD_URL,
@@ -1372,10 +1401,20 @@
           navNotes: CAISSE_URL + "#notes",
           navMore: digiyLocal("admin.html")
         };
-        Object.entries(extraLinks).forEach(([id, url]) => {
+
+        Object.entries(cleanLinks).forEach(([id, url]) => {
           const el = qs(id);
-          if(el) el.href = buildUrl(url, q);
+          if(el) el.href = cleanPath(url);
         });
+
+        const hall = qs("btnHall");
+        if(hall) hall.href = PUBLIC_URL;
+
+        qs("btnBlockedAbos").href = buildUrl(ABOS_URL, {
+          base_module: MODULE_CODE,
+          module: MODULE_CODE
+        });
+
         const btnFastAdd = qs("btnFastAdd");
         const btnFastList = qs("btnFastList");
         if(btnFastAdd) btnFastAdd.href = "#articleForm";
@@ -1491,8 +1530,8 @@
         setNotice(
           low > 0 ? "warn" : "ok",
           low > 0
-            ? `Tu as <b>${low}</b> article(s) bientôt finis. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${STATE.mode}</b>.`
-            : `Catalogue prêt. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${STATE.mode}</b>.`
+            ? `Tu as <b>${low}</b> article(s) bientôt finis. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${modeLabel(STATE.mode)}</b>.`
+            : `Catalogue prêt. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${modeLabel(STATE.mode)}</b>.`
         );
       }
 
@@ -1558,6 +1597,7 @@
       }
 
       async function hydrate(){
+        cleanVisibleUrl();
         await awaitGuardReady();
         await bootGuard();
 
@@ -1566,7 +1606,7 @@
 
         if(!slug){
           reveal();
-          renderBlocked("Ta boutique n’a pas pu être identifiée. Passe par ton lien pro ou ton QR DIGIY.");
+          renderBlocked("Ton compte n’a pas pu être reconnu. Passe par ton accès ou ton QR DIGIY.");
           return;
         }
 
@@ -1649,17 +1689,31 @@
 
       function exportProducts(){
         const payload = {
-          slug: STATE.slug,
-          phone: STATE.phone,
           storeName: STATE.storeName,
           exported_at: new Date().toISOString(),
-          products: STATE.products
+          products: STATE.products.map((item) => ({
+            name: item.name,
+            category: item.category,
+            sku: item.sku,
+            price_xof: item.price_xof,
+            stock_qty: item.stock_qty,
+            note_text: item.note_text,
+            image_url: item.image_url,
+            is_published: item.is_published,
+            updated_at: item.updated_at
+          }))
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `digiy-pos-${STATE.slug || "catalogue"}.json`;
+        const safeName = String(STATE.storeName || "mon-commerce")
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "") || "mon-commerce";
+        a.download = `digiy-${safeName}-articles.json`;
         a.click();
         URL.revokeObjectURL(url);
       }
@@ -1789,6 +1843,7 @@
       }
 
       async function boot(){
+        cleanVisibleUrl();
         reveal();
 
         qs("btnReloadTop").addEventListener("click", () => hydrate());
