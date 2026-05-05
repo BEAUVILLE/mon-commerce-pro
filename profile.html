@@ -1205,37 +1205,50 @@
 
     try{
       const payload = buildPublicPayload();
+      const phone = String(SESSION?.phone || payload.owner_phone || "").replace(/[^\d]/g, "");
+
+      if(!phone){
+        setDbPill("Accès incomplet", false);
+        return setMsg("Téléphone de compte introuvable. Repasse par ton code d'accès puis réessaie.", false);
+      }
+
       setMsg("Enregistrement…", true);
 
-      let res = await sb
-        .from("digiy_pos_public_profiles")
-        .upsert(payload, { onConflict: "slug" })
-        .select("*")
-        .maybeSingle();
+      const { data, error } = await sb.rpc("digiy_pos_save_public_profile", {
+        p_phone: phone,
+        p_payload: payload
+      });
 
-      if(res?.error && SESSION?.owner_id){
-        res = await sb
-          .from("digiy_pos_public_profiles")
-          .upsert(payload, { onConflict: "owner_id" })
-          .select("*")
-          .maybeSingle();
-      }
-
-      if(res?.error){
-        console.error("[DIGIY POS] save KO", res.error);
+      if(error){
+        console.error("[DIGIY POS] save RPC KO", error);
         setDbPill("Erreur base", false);
-        return setMsg("Infos boutique gardées en local ✅ mais erreur base pour la vitrine : " + (res.error.message || res.error), false);
+        return setMsg("Infos boutique gardées en local ✅ mais erreur base pour la vitrine : " + (error.message || error), false);
       }
 
-      EXISTING = res.data || payload;
+      if(!data?.ok){
+        console.warn("[DIGIY POS] save RPC refus", data);
+        setDbPill("Erreur base", false);
+        return setMsg("Infos boutique gardées en local ✅ mais la vitrine n’a pas été enregistrée : " + (data?.message || "erreur inconnue"), false);
+      }
+
+      EXISTING = data.profile || payload;
       ACTIVE_SLUG = EXISTING.slug || ACTIVE_SLUG;
+
+      if(EXISTING.slug) $("slug").value = EXISTING.slug;
+      if(EXISTING.photo_url){
+        $("photo_url").value = EXISTING.photo_url;
+        renderPhotoPreview();
+      }
+      if(typeof EXISTING.is_published !== "undefined"){
+        $("is_published").value = String(!!EXISTING.is_published);
+      }
 
       cleanVisibleUrl();
       wireMobileLinks();
 
       await saveAdminInfo(true);
       setDbPill("Base connectée", true);
-      setMsg(`Vitrine enregistrée en base ✅ • infos boutique gardées en local ✅ • publié=${payload.is_published ? "oui" : "non"}`, true);
+      setMsg(`Vitrine enregistrée en base ✅ • infos boutique gardées en local ✅ • publié=${EXISTING.is_published ? "oui" : "non"}`, true);
     }catch(e){
       console.error("[DIGIY POS] saveAll fatal", e);
       setDbPill("Erreur base", false);
