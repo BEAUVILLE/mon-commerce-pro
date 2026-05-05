@@ -310,7 +310,7 @@
         <!-- CARTE ARGENT -->
         <div class="card" id="cardMoney">
           <h3>Argent rentré</h3>
-          <div class="bigMoney" id="moneyMonth">— FCFA</div>
+          <div class="bigMoney" id="moneyMonth">—</div>
           <div class="mini" id="moneyMeta">
             <span id="txCount">— transactions</span>
             <span>•</span>
@@ -322,7 +322,7 @@
           <div class="boostBox">
             <div>
               <b>🚀 BOOST visibilité</b>
-              <div class="muted" style="font-weight:800;font-size:13px" id="boostText">+50% d'apparition · 7 jours · 5 000 FCFA</div>
+              <div class="muted" style="font-weight:800;font-size:13px" id="boostText">+50% d'apparition · 7 jours · 5 000 FCFA · 9 €</div>
               <div class="muted" style="font-weight:800;font-size:12px;margin-top:6px" id="boostStatus">Statut boost : —</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;min-width:170px">
@@ -407,12 +407,12 @@
   const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
   const PUBLIC_URL    = "https://mon-commerce.digiylyfe.com/";
 
-  const BOOST = { module:"BOOST", plan:"boost_7d", price_xof:5000, label:"BOOST visibilité", duration_days:7 };
+  const BOOST = { module:"BOOST", plan:"boost_7d", price_xof:5000, price_eur:9, label:"BOOST visibilité", duration_days:7 };
 
   const $ = (id) => document.getElementById(id);
   const diagLines = [];
   let sb = null;
-  const state = { slug:"", phone:"", access:false, storeName:"", plan:"", statusPayload:null };
+  const state = { slug:"", phone:"", access:false, storeName:"", plan:"", statusPayload:null, workCurrency:"XOF" };
 
   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
      ANTI-ÉCRAN NOIR
@@ -440,6 +440,120 @@
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return "—";
     return d.toLocaleDateString("fr-FR", { year:"numeric", month:"long", day:"numeric" });
+  }
+
+function normalizeWorkCurrency(value) {
+    const c = String(value || "").trim().toUpperCase();
+
+    if (["EUR", "EURO", "EUROS", "€"].includes(c)) return "EUR";
+    if (["XOF", "FCFA", "CFA", "F CFA"].includes(c)) return "XOF";
+
+    return "XOF";
+  }
+
+  function currencySuffix(currency) {
+    return normalizeWorkCurrency(currency) === "EUR" ? "€" : "FCFA";
+  }
+
+  function formatCommerceMoney(amount, currency) {
+    const n = Number(amount || 0);
+    const safe = Number.isFinite(n) ? n : 0;
+
+    return `${safe.toLocaleString("fr-FR")} ${currencySuffix(currency)}`;
+  }
+
+  function pickMonthAmount(stats, currency) {
+    const c = normalizeWorkCurrency(currency);
+
+    if (c === "EUR") {
+      return stats?.month_eur
+        ?? stats?.month_amount_eur
+        ?? stats?.amount_eur
+        ?? stats?.month_amount
+        ?? stats?.month_xof
+        ?? null;
+    }
+
+    return stats?.month_xof
+      ?? stats?.month_amount_xof
+      ?? stats?.amount_xof
+      ?? stats?.month_amount
+      ?? null;
+  }
+
+  function extractWorkCurrency(payload) {
+    const candidates = [
+      payload?.work_currency,
+      payload?.currency,
+      payload?.currency_code,
+      payload?.store?.work_currency,
+      payload?.store?.currency,
+      payload?.store?.currency_code,
+      payload?.profile?.work_currency,
+      payload?.profile?.currency,
+      payload?.profile?.currency_code,
+      payload?.data?.work_currency,
+      payload?.data?.currency,
+      payload?.data?.currency_code
+    ];
+
+    for (const item of candidates) {
+      const c = normalizeWorkCurrency(item);
+      if (item && c) return c;
+    }
+
+    return "";
+  }
+
+  async function resolveWorkCurrency(phone, slug, storeCtx) {
+    const fromContext = extractWorkCurrency(storeCtx);
+    if (fromContext) return fromContext;
+
+    const client = await getSb();
+    if (!client) return "XOF";
+
+    const cleanPhone = cleanDigits(phone);
+    const cleanSlug = normSlug(slug);
+
+    const attempts = [];
+
+    if (cleanSlug) {
+      attempts.push({ column: "store_id", value: cleanSlug });
+      attempts.push({ column: "workspace_slug", value: cleanSlug });
+    }
+
+    for (const attempt of attempts) {
+      try {
+        const { data, error } = await client
+          .from("pos_stores")
+          .select("work_currency")
+          .eq(attempt.column, attempt.value)
+          .limit(1)
+          .maybeSingle();
+
+        if (!error && data?.work_currency) {
+          return normalizeWorkCurrency(data.work_currency);
+        }
+      } catch (_) {}
+    }
+
+    if (cleanPhone) {
+      try {
+        const { data, error } = await client
+          .from("pos_stores")
+          .select("work_currency,store_id,workspace_slug")
+          .eq("owner_phone", cleanPhone)
+          .ilike("store_id", "pos-%")
+          .limit(1)
+          .maybeSingle();
+
+        if (!error && data?.work_currency) {
+          return normalizeWorkCurrency(data.work_currency);
+        }
+      } catch (_) {}
+    }
+
+    return "XOF";
   }
 
   function cleanDigits(v)  { return String(v || "").replace(/[^\d]/g, ""); }
@@ -802,6 +916,7 @@
 
     const storeCtx = await getStoreContext(slug);
     state.storeName = String(storeCtx?.shop_name || storeCtx?.display_name || storeCtx?.store?.name || storeCtx?.profile?.display_name || MODULE_LABEL).trim();
+    state.workCurrency = await resolveWorkCurrency(state.phone, slug, storeCtx);
 
     const status = await digiyGetSubscriptionFull(state.phone, MODULE_CODE);
     state.statusPayload = status || null;
@@ -823,13 +938,17 @@
       : `<span>Abonnement actif</span><span>•</span><span>Paiement : ${pay}</span>`;
     /* ━━━ brandSub dynamique : nom boutique, pas jargon ━━━ */
     $("brandSub").textContent   = state.storeName ? `${state.storeName} · mon espace de travail` : "Mon espace de travail · boutique active";
+    $("boostText").textContent = `+50% d'apparition · 7 jours · ${Number(BOOST.price_xof).toLocaleString("fr-FR")} FCFA · ${BOOST.price_eur} €`;
 
     const stats = await digiyGetDashboardStats(state.phone, MODULE_CODE);
-    const month = stats?.month_xof ?? null;
-    const tx    = stats?.tx_count  ?? null;
+    const month = pickMonthAmount(stats, state.workCurrency);
+    const tx    = stats?.tx_count ?? null;
 
-    $("moneyMonth").textContent = month !== null ? `${Number(month).toLocaleString("fr-FR")} FCFA` : "— FCFA";
-    $("txCount").textContent    = tx    !== null ? `${tx} transactions` : "— transactions";
+    $("moneyMonth").textContent = month !== null
+      ? formatCommerceMoney(month, state.workCurrency)
+      : formatCommerceMoney(0, state.workCurrency);
+
+    $("txCount").textContent    = tx !== null ? `${tx} transactions` : "— transactions";
     $("todayHint").textContent  = stats?.today_hint || "Aujourd'hui";
 
     const notifs = [];
@@ -879,7 +998,7 @@
       }
     };
 
-    log("dashboard ready", { slug, phone: state.phone, access: state.access, plan: state.plan, store: state.storeName });
+    log("dashboard ready", { slug, phone: state.phone, access: state.access, plan: state.plan, store: state.storeName, work_currency: state.workCurrency });
   }
 
   init().catch((err) => {
