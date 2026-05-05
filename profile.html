@@ -516,16 +516,18 @@
             </div>
           </div>
 
+          <input id="slug" type="hidden" />
+
           <div class="row">
-            <div>
-              <label>Identifiant boutique</label>
-              <input id="slug" placeholder="auto"/>
-              <div class="hint">Ton identifiant unique. S'il existe déjà, il est conservé automatiquement.</div>
-            </div>
             <div>
               <label>Lien vitrine (optionnel)</label>
               <input id="profile_url" placeholder="Lien public direct si tu en as un" />
-              <div class="hint">Si vide, le bouton ouvrira ta vitrine publique.</div>
+              <div class="hint">Si vide, le bouton ouvrira la vitrine publique MON COMMERCE.</div>
+            </div>
+            <div>
+              <label>État de la fiche</label>
+              <input id="safe_profile_state" value="Compte reconnu — identifiant protégé" readonly />
+              <div class="hint">L’identifiant technique reste gardé en interne, sans être affiché.</div>
             </div>
           </div>
         </section>
@@ -617,15 +619,14 @@
           <textarea id="invoice_note" placeholder="Ex: Merci pour votre confiance • TVA incluse / non applicable selon votre régime…"></textarea>
 
           <div class="mini-note">
-            Dans cette version, ce bloc <b>n’est pas visible côté client</b> et il est gardé <b>à part</b> pour éviter de casser la table actuelle.
-            Il reste disponible sur cet appareil, en attendant la vraie couture SQL dédiée.
+            Ce bloc <b>n’est pas visible côté client</b>. Il reste séparé de ta vitrine pour protéger les informations administratives.
+            Si la sauvegarde en ligne n’est pas encore disponible, DIGIY garde ces infos sur cet appareil.
           </div>
         </section>
 
         <div class="actions">
           <button class="btn primary" id="btnSave" type="button">💾 Enregistrer la boutique</button>
           <button class="btn green" id="btnSaveAdmin" type="button">🧾 Garder les infos internes</button>
-          <button class="btn" id="btnReSlug" type="button">🔄 Régénérer l'identifiant</button>
           <button class="btn" id="btnOpenListing" type="button">👁️ Voir côté client</button>
           <button class="btn" id="btnBack" type="button">↩️ Accueil</button>
         </div>
@@ -664,6 +665,7 @@
   let EXISTING = null;
   let ACTIVE_SLUG = "";
   let SB_FALLBACK = null;
+  const INITIAL_URL_SLUG = getUrlSlug();
 
   function showPage() {
     document.documentElement.style.visibility = "";
@@ -715,6 +717,30 @@
     return String(new URLSearchParams(location.search).get("slug") || "").trim();
   }
 
+  function cleanVisibleUrl(){
+    const params = new URLSearchParams(location.search);
+    const sensitive = [
+      "slug",
+      "phone",
+      "tel",
+      "module",
+      "owner_phone",
+      "subscription_phone",
+      "checkout_phone",
+      "p_phone"
+    ];
+    if(!sensitive.some((key) => params.has(key))) return;
+    try{
+      history.replaceState({}, document.title, location.pathname + location.hash);
+    }catch(_){}
+  }
+
+  function cleanPath(path){
+    const u = new URL(path || "./profile.html", location.href);
+    u.search = "";
+    return u.pathname + u.hash;
+  }
+
   function buildSafeUrl(base, params){
     const baseStr = (base == null ? "" : String(base)).trim();
     if(!baseStr) return location.href;
@@ -744,14 +770,10 @@
   }
 
   function withSlug(url, slug){
-    return buildSafeUrl(url, slug ? { slug } : {});
+    return url;
   }
 
   function wireMobileLinks(){
-    const slug = String($("slug")?.value || ACTIVE_SLUG || "").trim();
-    const phone = String(SESSION?.phone || "").replace(/[^\d]/g, "");
-    const params = { slug, phone, module: "POS" };
-
     const map = {
       btnFastCash: CAISSE_URL,
       btnFastMore: ADMIN_URL,
@@ -764,7 +786,7 @@
 
     Object.entries(map).forEach(([id, base]) => {
       const el = $(id);
-      if(el) el.href = buildSafeUrl(base, params);
+      if(el) el.href = cleanPath(base);
     });
 
     const fastPublic = $("btnFastPublic");
@@ -1060,9 +1082,7 @@
       EXISTING = res.data || payload;
       ACTIVE_SLUG = EXISTING.slug || ACTIVE_SLUG;
 
-      const nextUrl = new URL(location.href);
-      if(ACTIVE_SLUG) nextUrl.searchParams.set("slug", ACTIVE_SLUG);
-      history.replaceState({}, "", nextUrl.toString());
+      cleanVisibleUrl();
       wireMobileLinks();
 
       saveAdminDraft(true);
@@ -1079,7 +1099,7 @@
     if(EXISTING?.slug){
       $("slug").value = EXISTING.slug;
       ACTIVE_SLUG = EXISTING.slug;
-      setMsg("Identifiant existant conservé ✅", true);
+      setMsg("Référence interne conservée ✅", true);
       return;
     }
 
@@ -1088,22 +1108,21 @@
     $("slug").value = newSlug;
     ACTIVE_SLUG = newSlug;
     saveAdminDraft(true);
-    setMsg("Identifiant régénéré ✅ — pense à enregistrer", true);
+    setMsg("Référence interne préparée ✅ — pense à enregistrer", true);
   }
 
   function openPublic(){
-    const slug = String($("slug").value || ACTIVE_SLUG || "").trim();
     const explicit = $("profile_url").value.trim();
-    window.location.href = explicit || withSlug(PUBLIC_INDEX_URL, slug);
+    window.location.href = explicit || "https://mon-commerce.digiylyfe.com/";
   }
 
   function goBack(){
-    const slug = String($("slug").value || ACTIVE_SLUG || "").trim();
-    window.location.href = withSlug(DASHBOARD_URL, slug);
+    window.location.href = cleanPath(DASHBOARD_URL);
   }
 
   async function init(){
     showPage();
+    cleanVisibleUrl();
 
     if(!window.DIGIY_GUARD){
       if(gs) gs.textContent = "⚠️ Chargement…";
@@ -1144,7 +1163,7 @@
       localStorage.getItem("digiy_pos_phone") || ""
     ).replace(/[^\d]/g, "");
 
-    ACTIVE_SLUG = getUrlSlug() || normSlug(st.slug || "") || lsSlug;
+    ACTIVE_SLUG = INITIAL_URL_SLUG || normSlug(st.slug || "") || lsSlug;
     SESSION = window.DIGIY_GUARD.getSession?.() || st || {};
 
     if(!SESSION.phone && lsPhone) SESSION.phone = lsPhone;
@@ -1210,7 +1229,8 @@
 
     $("btnSave").addEventListener("click", saveAll);
     $("btnSaveAdmin").addEventListener("click", () => saveAdminDraft(false));
-    $("btnReSlug").addEventListener("click", reSlug);
+    const btnReSlug = $("btnReSlug");
+    if(btnReSlug) btnReSlug.addEventListener("click", reSlug);
     $("btnOpenListing").addEventListener("click", openPublic);
     $("btnBack").addEventListener("click", goBack);
   }
