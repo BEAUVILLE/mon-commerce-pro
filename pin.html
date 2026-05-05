@@ -142,19 +142,23 @@
       <div class="body">
         <!-- ━━━ AVANT : "Entre avec ton slug ou ton téléphone" → "slug" banni ━━━ -->
         <p class="intro">
-          Entre avec ton <strong>identifiant</strong> ou ton <strong>téléphone</strong>, puis ton <strong>code d'accès</strong>.
-          Une fois validé, tu circules entre Accueil, Articles, Encaisser, Notes et Plus sans retaper ton code.
+          Si ton compte est déjà reconnu par cet appareil, entre seulement ton <strong>code d'accès</strong>.
+          Sinon, renseigne ton identifiant ou ton téléphone une première fois. Ensuite, tu circules entre Accueil, Articles, Encaisser, Notes et Plus sans retaper ton code.
         </p>
 
         <!-- ━━━ AVANT : label "Slug" + placeholder "pos-221771342889" → jargon banni ━━━ -->
-        <div class="field">
+        <div class="field" id="identitySlugField">
           <label for="slug">Identifiant boutique</label>
           <input id="slug" type="text" placeholder="Ton identifiant boutique" autocomplete="off" />
         </div>
 
-        <div class="field">
+        <div class="field" id="identityPhoneField">
           <label for="phone">Téléphone</label>
           <input id="phone" type="tel" inputmode="numeric" placeholder="221771342889" autocomplete="tel" />
+        </div>
+
+        <div class="status ok hidden" id="knownBox">
+          Compte reconnu. Les identifiants restent cachés. Entre seulement ton code.
         </div>
 
         <div class="field">
@@ -176,7 +180,7 @@
           <a id="btnDashboard" class="btn secondary hidden" href="./dashboard-pro.html">🏠 Accueil</a>
           <a id="btnCaisse"    class="btn secondary hidden" href="./caisse.html">💰 Encaisser</a>
           <!-- ━━━ AVANT : "🛠️ Admin" → banni ━━━ -->
-          <a id="btnAdmin"     class="btn secondary hidden" href="./dashboard-pro.html">⚙️ Plus</a>
+          <a id="btnAdmin"     class="btn secondary hidden" href="./admin.html">⚙️ Plus</a>
           <a id="btnSupport"   class="btn secondary"        href="https://wa.me/221771342889" target="_blank" rel="noopener">💬 Support</a>
         </div>
 
@@ -187,7 +191,7 @@
           <div class="row"><div class="k">Service</div><div class="v">MON COMMERCE</div></div>
           <!-- ━━━ AVANT : "Retour cible" → jargon banni ━━━ -->
           <div class="row"><div class="k">Destination</div><div id="returnInfo" class="v">Accueil</div></div>
-          <div class="row"><div class="k">Accès en mémoire</div><div id="sessionInfo" class="v">Aucun</div></div>
+          <div class="row"><div class="k">Compte reconnu</div><div id="sessionInfo" class="v">Aucun</div></div>
         </div>
       </div>
 
@@ -220,7 +224,7 @@
         LOGIN_URL: "./pin.html",
         PAY_URL: window.DIGIY_PAY_URL || "https://commencer-a-payer.digiylyfe.com/",
         SUPPORT_WA: "221771342889",
-        KEEP_PHONE_IN_URL: true,
+        KEEP_PHONE_IN_URL: false,
         SESSION_MAX_AGE_MS: 8 * 60 * 60 * 1000,
         STORAGE_KEYS: [
           "DIGIY_POS_PIN_SESSION","DIGIY_POS_SESSION","DIGIY_PIN_SESSION",
@@ -251,11 +255,37 @@
         btnSupport:  document.getElementById("btnSupport"),
         status:      document.getElementById("status"),
         returnInfo:  document.getElementById("returnInfo"),
-        sessionInfo: document.getElementById("sessionInfo")
+        sessionInfo: document.getElementById("sessionInfo"),
+        identitySlugField: document.getElementById("identitySlugField"),
+        identityPhoneField: document.getElementById("identityPhoneField"),
+        knownBox: document.getElementById("knownBox")
       };
 
       function qs(name) {
         return new URLSearchParams(window.location.search).get(name);
+      }
+
+      function cleanVisibleUrl() {
+        const params = new URLSearchParams(location.search);
+        const sensitive = ["slug", "phone", "tel", "module", "owner_phone", "subscription_phone", "checkout_phone", "p_phone"];
+        if (!sensitive.some((key) => params.has(key))) return;
+        try {
+          history.replaceState({}, document.title, location.pathname + location.hash);
+        } catch (_) {}
+      }
+
+      function cleanPath(path) {
+        const u = new URL(path || CFG.DEFAULT_NEXT, location.href);
+        u.search = "";
+        return u.pathname + u.hash;
+      }
+
+      function paintIdentityMode(hasIdentity) {
+        const known = !!hasIdentity;
+        if (el.identitySlugField) el.identitySlugField.classList.toggle("hidden", known);
+        if (el.identityPhoneField) el.identityPhoneField.classList.toggle("hidden", known);
+        if (el.knownBox) el.knownBox.classList.toggle("hidden", !known);
+        el.sessionInfo.textContent = known ? "Oui" : "Aucun";
       }
 
       function normSlug(value) {
@@ -453,11 +483,7 @@
           try {
             const u = new URL(ret, location.href);
             if (u.origin === location.origin && isAllowedReturnPath(u.pathname)) {
-              u.searchParams.set("slug", session.slug);
-              if (CFG.KEEP_PHONE_IN_URL && session.phone) u.searchParams.set("phone", session.phone);
-              u.searchParams.set("module", CFG.MODULE);
-              u.searchParams.set("from", "pin");
-              return u.toString();
+              return cleanPath(u.pathname + u.hash);
             }
           } catch (_) {}
         }
@@ -467,33 +493,22 @@
         if (target === "caisse")    next = "./caisse.html";
         if (target === "admin")     next = "./admin.html";
         if (target === "dashboard") next = "./dashboard-pro.html";
+        if (target === "profile")   next = "./profile.html";
 
-        return buildSafeUrl(next, {
-          slug: session.slug,
-          ...(CFG.KEEP_PHONE_IN_URL && session.phone ? { phone: session.phone } : {}),
-          module: CFG.MODULE,
-          from: "pin"
-        });
+        return cleanPath(next);
       }
 
       function refreshLinks(slug, phone) {
         const s = normSlug(slug);
         const p = normPhone(phone);
 
-        const add = (base) => buildSafeUrl(base, {
-          ...(s ? { slug: s } : {}),
-          ...(CFG.KEEP_PHONE_IN_URL && p ? { phone: p } : {})
-        });
+        const clean = (base) => cleanPath(base);
 
-        el.btnDashboard.href = add("./dashboard-pro.html");
-        el.btnCaisse.href    = add("./caisse.html");
-        el.btnAdmin.href     = add("./admin.html");
-        el.btnPay.href       = buildSafeUrl(CFG.PAY_URL, {
-          module: CFG.MODULE,
-          ...(p ? { phone: p } : {}),
-          ...(s ? { slug: s } : {})
-        });
-        el.btnSupport.href   = "https://wa.me/" + CFG.SUPPORT_WA;
+        el.btnDashboard.href = clean("./dashboard-pro.html");
+        el.btnCaisse.href    = clean("./caisse.html");
+        el.btnAdmin.href     = clean("./admin.html");
+        el.btnPay.href       = buildSafeUrl(CFG.PAY_URL, { module: CFG.MODULE, base_module: CFG.MODULE });
+        el.btnSupport.href   = "https://wa.me/" + CFG.SUPPORT_WA + "?text=" + encodeURIComponent("Bonjour JB, j'ai besoin d'aide pour MON COMMERCE by DIGIY.");
 
         const navMap = {
           navHome: "./dashboard-pro.html",
@@ -504,10 +519,10 @@
         };
         Object.entries(navMap).forEach(([id, base]) => {
           const node = document.getElementById(id);
-          if(node) node.href = add(base);
+          if(node) node.href = clean(base);
         });
 
-        if (s) {
+        if (s || p) {
           el.btnDashboard.classList.remove("hidden");
           el.btnCaisse.classList.remove("hidden");
           el.btnAdmin.classList.remove("hidden");
@@ -517,9 +532,7 @@
         el.btnReturn.href = buildReturnUrl(dummy);
         el.btnReturn.classList.remove("hidden");
 
-        /* ━━━ AVANT : affichait le nom de fichier technique ━━━
-           MAINTENANT : nom humain selon la destination ━━━ */
-        const dest = new URL(el.btnReturn.href).pathname;
+        const dest = new URL(el.btnReturn.href, location.href).pathname;
         const destLabel =
           dest.includes("caisse")    ? "Encaisser" :
           dest.includes("admin")     ? "Plus" :
@@ -533,6 +546,8 @@
       function hydrate() {
         const qSlug  = normSlug(qs("slug"));
         const qPhone = normPhone(qs("phone"));
+        cleanVisibleUrl();
+
         const saved  = readSession();
 
         el.slug.value = qSlug || saved?.slug ||
@@ -541,14 +556,18 @@
         el.phone.value = qPhone || saved?.phone ||
           normPhone(sessionStorage.getItem(CFG.PHONE_KEY) || localStorage.getItem(CFG.PHONE_KEY) || "");
 
+        const hasIdentity = !!(saved?.slug || saved?.phone || el.slug.value || el.phone.value);
+        paintIdentityMode(hasIdentity);
+
         if (saved?.slug || saved?.phone) {
           refreshLinks(saved.slug || el.slug.value, saved.phone || el.phone.value);
         } else if (el.slug.value || el.phone.value) {
           refreshLinks(el.slug.value, el.phone.value);
+        } else {
+          refreshLinks("", "");
         }
 
         if (saved?.verified_at || saved?.validated_at) {
-          el.sessionInfo.textContent = "Active";
           setStatus("Accès déjà ouvert. Tu peux reprendre directement.", "ok");
         }
       }
@@ -601,7 +620,7 @@
           }
 
           const session = saveSession({ slug, phone: auth.phone || phone, owner_id: auth.owner_id || null });
-          el.sessionInfo.textContent = "Active";
+          paintIdentityMode(true);
           refreshLinks(session.slug, session.phone);
 
           /* ━━━ AVANT : "Ouverture de ton espace POS..." → "POS" banni ━━━ */
