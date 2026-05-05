@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>MON COMMERCE — Accueil</title>
+  <title>MON COMMERCE — Mon espace de travail</title>
   <meta name="theme-color" content="#07140f" />
   <meta name="description" content="MON COMMERCE by DIGIY — Accueil mobile : ventes, argent, caisse, notes rapides et réglages." />
 
@@ -248,10 +248,8 @@
 
     <!-- ━━━ NAV — doctrine façade ━━━ -->
     <div class="navRow">
-      <!-- ━━━ "Hall" × 2 → "Accueil" ━━━ -->
-      <a class="btn-ghost"   id="btnHall"       href="./index.html">🏠 Accueil</a>
+      <a class="btn-ghost"   id="btnHall"       href="https://mon-commerce.digiylyfe.com/">🌍 Vitrine</a>
       <a class="btn-ghost"   id="btnCaisse"     href="./caisse.html">💰 Encaisser</a>
-      <!-- ━━━ "Admin" × 2 → "Mes réglages" ━━━ -->
       <a class="btn-ghost"   id="btnAdmin"      href="./dashboard-pro.html">⚙️ Plus</a>
       <a class="btn-outline" id="btnAbosTop"    href="https://commencer-a-payer.digiylyfe.com/">💳 Mon accès</a>
       <a class="btn-outline" id="btnSupportTop" href="#" target="_blank" rel="noopener">💬 Support</a>
@@ -289,9 +287,8 @@
           </div>
 
           <div class="subPills">
-            <!-- ━━━ AVANT : "Slug :" → jargon technique, remplacé par "Identifiant :" ━━━ -->
-            <div class="subPill">Identifiant : <b id="slugBox">—</b></div>
-            <div class="subPill">Téléphone : <b id="phoneBox">—</b></div>
+            <div class="subPill">Compte : <b id="accountBox">Compte sécurisé</b></div>
+            <div class="subPill">Accès : <b id="accessBox">En vérification</b></div>
             <div class="subPill">Service : <b>MON COMMERCE</b></div>
           </div>
 
@@ -405,7 +402,7 @@
   const ABOS_URL      = "https://commencer-a-payer.digiylyfe.com/";
   const CAISSE_URL    = digiyLocal("caisse.html");
   const HALL_URL      = digiyLocal("index.html");
-  const ADMIN_URL     = digiyLocal("dashboard-pro.html"); // réglages = même espace
+  const ADMIN_URL     = digiyLocal("admin.html");
   const PIN_URL       = digiyLocal("pin.html");
   const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
   const PUBLIC_URL    = "https://mon-commerce.digiylyfe.com/";
@@ -477,16 +474,17 @@
     return u.toString();
   }
 
-  function buildSupportUrl(phone, slug) {
-    const text = ["Bonjour JB,", "j'ai besoin d'aide pour MON COMMERCE by DIGIY.",
-      slug  ? `Slug : ${slug}`        : "",
-      phone ? `Téléphone : +${phone}` : ""
-    ].filter(Boolean).join(" ");
+  function buildSupportUrl() {
+    const text = [
+      "Bonjour JB,",
+      "j'ai besoin d'aide pour MON COMMERCE by DIGIY.",
+      "Mon compte est reconnu dans mon espace."
+    ].join(" ");
     return `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(text)}`;
   }
 
-  function buildAbosParams(phone, slug, moduleCode = MODULE_CODE) {
-    return { base_module: MODULE_CODE, module: moduleCode, phone, slug };
+  function buildAbosParams(moduleCode = MODULE_CODE) {
+    return { base_module: MODULE_CODE, module: moduleCode };
   }
 
   function saveLocalAccess(slug, phone) {
@@ -498,6 +496,30 @@
   }
 
   function getParam(name) { return new URL(location.href).searchParams.get(name) || ""; }
+
+  function cleanVisibleUrl() {
+    const params = new URLSearchParams(location.search);
+    const sensitive = [
+      "slug",
+      "phone",
+      "tel",
+      "module",
+      "owner_phone",
+      "subscription_phone",
+      "checkout_phone",
+      "p_phone"
+    ];
+    if (!sensitive.some((key) => params.has(key))) return;
+    try {
+      history.replaceState({}, document.title, location.pathname + location.hash);
+    } catch (_) {}
+  }
+
+  function cleanPath(path) {
+    const u = new URL(path || "./dashboard-pro.html", location.href);
+    u.search = "";
+    return u.pathname + u.hash;
+  }
 
   function getGuardSession() {
     if (typeof window.DIGIY_GUARD?.getSession === "function") {
@@ -640,48 +662,46 @@
     }
   }
 
-  /* ━━━ wireNav : try/catch pour ne jamais faire tomber init() ━━━ */
+  /* ━━━ wireNav : liens propres, coffre gardé en mémoire locale ━━━ */
   function wireNav(phone, slug) {
     try {
-      const q = { slug, phone, module: MODULE_CODE };
-      $("btnHall").href          = buildUrl(HALL_URL,  q);
-      $("btnCaisse").href        = buildUrl(CAISSE_URL, q);
-      $("btnAdmin").href         = buildUrl(ADMIN_URL,  q);
-      $("btnSettings").href      = buildUrl(ADMIN_URL,  q);
-      $("btnAbosTop").href       = buildUrl(ABOS_URL,   buildAbosParams(phone, slug));
-      $("btnSupportTop").href    = buildSupportUrl(phone, slug);
-      $("linkSupport").href      = buildSupportUrl(phone, slug);
-      $("linkPayments").href     = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
-      $("btnPinTop").href        = buildUrl(PIN_URL, { slug, phone, module: MODULE_CODE, "return": DASHBOARD_URL });
-      $("btnPublicFloating").href = buildUrl(PUBLIC_URL, { slug });
-      $("btnBlockedPin").href    = buildUrl(PIN_URL, { slug, phone, module: MODULE_CODE, "return": DASHBOARD_URL });
-      $("btnBlockedAbos").href   = buildUrl(ABOS_URL, buildAbosParams(phone, slug));
-      const navParams = { slug, phone, module: MODULE_CODE };
-      const maybeLinks = {
+      const safeLinks = {
+        btnHall: PUBLIC_URL,
+        btnCaisse: CAISSE_URL,
+        btnAdmin: ADMIN_URL,
+        btnSettings: ADMIN_URL,
+        btnPinTop: PIN_URL,
+        btnBlockedPin: PIN_URL,
         btnHeroCash: CAISSE_URL,
         btnHeroArticles: CAISSE_URL + "#articles",
         btnHeroNotes: CAISSE_URL + "#notes",
-        btnHeroPlus: digiyLocal("admin.html"),
+        btnHeroPlus: ADMIN_URL,
         btnNoteFast: CAISSE_URL + "#notes",
         btnOpenCaisse2: CAISSE_URL,
-        btnOpenAdmin2: digiyLocal("admin.html"),
+        btnOpenAdmin2: ADMIN_URL,
         navHome: DASHBOARD_URL,
         navArticles: CAISSE_URL + "#articles",
         navCash: CAISSE_URL,
         navNotes: CAISSE_URL + "#notes",
-        navMore: digiyLocal("admin.html")
+        navMore: ADMIN_URL
       };
-      Object.entries(maybeLinks).forEach(([id, url]) => {
+
+      Object.entries(safeLinks).forEach(([id, url]) => {
         const el = $(id);
-        if (el) el.href = buildUrl(url, navParams);
+        if (el) el.href = /^https?:\/\//i.test(url) ? url : cleanPath(url);
       });
+
+      $("btnAbosTop").href = buildUrl(ABOS_URL, buildAbosParams());
+      $("btnBlockedAbos").href = buildUrl(ABOS_URL, buildAbosParams());
+      $("linkPayments").href = buildUrl(ABOS_URL, buildAbosParams());
+
+      $("btnSupportTop").href = buildSupportUrl();
+      $("linkSupport").href = buildSupportUrl();
+
+      $("btnPublicFloating").href = PUBLIC_URL;
+
       const pay = $("btnOpenPay");
-      if (pay) pay.href = buildUrl("https://pro-pay.digiylyfe.com/admin.html", {
-        slug: phone ? "pay-" + phone : "",
-        phone,
-        from: "POS",
-        module: "PAY"
-      });
+      if (pay) pay.href = "https://pro-pay.digiylyfe.com/admin.html";
     } catch(e) {
       log("wireNav erreur silencieuse", { message: e.message || String(e) });
     }
@@ -705,6 +725,7 @@
 
   async function init() {
     reveal(); // filet 1 : on révèle dès le départ
+    cleanVisibleUrl();
 
     /* ━━━ Textes JS — doctrine façade ━━━ */
     $("brandTitle").textContent       = `${MODULE_LABEL} — Mon espace de travail`;
@@ -723,8 +744,10 @@
     state.slug  = slug;
     state.phone = phone;
 
-    $("slugBox").textContent  = slug  || "—";
-    $("phoneBox").textContent = phone ? `+${phone}` : "—";
+    const accountBox = $("accountBox");
+    const accessBox = $("accessBox");
+    if (accountBox) accountBox.textContent = slug || phone ? "Compte reconnu" : "À ouvrir";
+    if (accessBox) accessBox.textContent = "Vérification";
     wireNav(phone, slug);
 
     if (!slug) {
@@ -746,8 +769,8 @@
     state.phone = phone || "";
     saveLocalAccess(slug, state.phone);
 
-    $("slugBox").textContent  = slug  || "—";
-    $("phoneBox").textContent = state.phone ? `+${state.phone}` : "—";
+    if (accountBox) accountBox.textContent = "Compte reconnu";
+    if (accessBox) accessBox.textContent = "Vérification";
     wireNav(state.phone, slug);
 
     let access = false;
@@ -790,6 +813,8 @@
 
     $("dot").classList.remove("bad");
     $("dot").classList.add("ok");
+    if (accountBox) accountBox.textContent = "Compte reconnu";
+    if (accessBox) accessBox.textContent = "Accès actif";
     $("statusLine").textContent = "Abonnement actif";
     $("expiryLine").textContent = expiresAt ? `Expire le ${fmtDateFR(expiresAt)}` : "Expiration : —";
     $("pillStatus").innerHTML   = `Statut : <b>Actif</b>`;
@@ -834,8 +859,8 @@
 
     setNotifs(notifs);
 
-    $("btnManageSub").onclick     = () => { location.href = buildUrl(ABOS_URL, buildAbosParams(state.phone, slug)); };
-    $("btnPrimaryAction").onclick = () => { location.href = buildUrl(CAISSE_URL, { slug, phone: state.phone, module: MODULE_CODE }); };
+    $("btnManageSub").onclick     = () => { location.href = buildUrl(ABOS_URL, buildAbosParams()); };
+    $("btnPrimaryAction").onclick = () => { location.href = cleanPath(CAISSE_URL); };
     $("btnBoostInfo").onclick     = () => { alert("BOOST : +50% d'apparition pendant 7 jours. Paiement direct. Aucun spam."); };
 
     $("btnBoost").onclick = async () => {
