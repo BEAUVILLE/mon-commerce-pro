@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MON COMMERCE — Ma caisse by DIGIY</title>
+  <title>MON COMMERCE — Ma caisse</title>
   <meta name="theme-color" content="#07140f" />
   <meta
     name="description"
@@ -546,19 +546,19 @@
               <div>
                 <div class="status-title" id="statusTitle">Vérification en cours…</div>
                 <div class="status-sub" id="statusSub">
-                  Lecture de ton identifiant et de ton accès boutique.
+                  Lecture de ton compte et de ton accès boutique.
                 </div>
               </div>
             </div>
 
             <div class="status-meta">
               <div class="mini">
-                <div class="mini-label">Identifiant</div>
-                <div class="mini-value" id="metaSlug">—</div>
+                <div class="mini-label">Compte</div>
+                <div class="mini-value" id="metaAccount">Aperçu libre</div>
               </div>
               <div class="mini">
-                <div class="mini-label">Téléphone</div>
-                <div class="mini-value" id="metaPhone">—</div>
+                <div class="mini-label">Accès</div>
+                <div class="mini-value" id="metaAccess">En vérification</div>
               </div>
               <div class="mini">
                 <div class="mini-label">Boutique</div>
@@ -571,7 +571,7 @@
             </div>
 
             <div class="helper" id="statusHelper">
-              Passe par ton lien pro pour que ta boutique soit reconnue automatiquement.
+              Passe par ton accès sécurisé pour que ta boutique soit reconnue automatiquement.
             </div>
           </div>
         </aside>
@@ -854,6 +854,31 @@
       }
 
       function getParam(name){ return new URL(location.href).searchParams.get(name) || ""; }
+
+      function cleanVisibleUrl(){
+        const params = new URLSearchParams(location.search);
+        const sensitive = [
+          "slug",
+          "phone",
+          "tel",
+          "module",
+          "owner_phone",
+          "subscription_phone",
+          "checkout_phone",
+          "p_phone"
+        ];
+        if (!sensitive.some((key) => params.has(key))) return;
+        try {
+          history.replaceState({}, document.title, location.pathname + location.hash);
+        } catch (_) {}
+      }
+
+      function cleanPath(path){
+        const u = new URL(path || "./index.html", location.href);
+        u.search = "";
+        return u.pathname + u.hash;
+      }
+
       function normPhone(v){ return String(v || "").replace(/[^\d]/g, ""); }
       function normSlug(v){ return String(v || "").trim().toLowerCase(); }
       function getGuardState(){ return window.DIGIY_GUARD?.state || {}; }
@@ -903,14 +928,22 @@
         return u.toString();
       }
 
-      function buildPublicUrl(){ return buildUrl(PUBLIC_URL, { slug: state.slug || "" }); }
-      function buildAbosUrl(){ return buildUrl(ABOS_URL, { module: MODULE, base_module: MODULE, phone: state.phone || "", slug: state.slug || "" }); }
-      function buildDashboardUrl(){ return buildUrl(DASHBOARD_URL, { slug: state.slug || "", phone: state.phone || "", module: MODULE }); }
-      function buildCaisseUrl(){ return buildUrl(CAISSE_URL, { slug: state.slug || "", phone: state.phone || "", module: MODULE }); }
-      function buildPinUrl(extra = {}){ return buildUrl(PIN_URL, { slug: state.slug || "", phone: state.phone || "", module: MODULE, ...extra }); }
+      function buildPublicUrl(){ return PUBLIC_URL; }
+      function buildAbosUrl(){ return buildUrl(ABOS_URL, { module: MODULE, base_module: MODULE }); }
+      function buildDashboardUrl(){ return cleanPath(DASHBOARD_URL); }
+      function buildCaisseUrl(){ return cleanPath(CAISSE_URL); }
+      function buildPinUrl(extra = {}){
+        const safe = {};
+        if (extra && extra.target) safe.target = extra.target;
+        return buildUrl(PIN_URL, safe);
+      }
 
       function buildSupportUrl(){
-        const text = ["Bonjour JB,", "j'ai besoin d'aide pour MON COMMERCE by DIGIY.", state.slug ? `Slug : ${state.slug}` : "", state.phone ? `Téléphone : +${state.phone}` : ""].filter(Boolean).join(" ");
+        const text = [
+          "Bonjour JB,",
+          "j'ai besoin d'aide pour MON COMMERCE by DIGIY.",
+          "Mon compte est reconnu dans mon espace."
+        ].join(" ");
         return `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(text)}`;
       }
 
@@ -929,8 +962,10 @@
       }
 
       function paintMeta(){
-        $("metaSlug").textContent = state.slug || "—";
-        $("metaPhone").textContent = state.phone || "—";
+        const account = $("metaAccount");
+        const access = $("metaAccess");
+        if (account) account.textContent = state.slug || state.phone ? "Compte reconnu" : "Aperçu libre";
+        if (access) access.textContent = state.access ? "Accès ouvert" : (state.slug || state.phone ? "À ouvrir" : "Libre");
         $("metaStore").textContent = state.storeName || "Aperçu libre";
         $("metaPlan").textContent = state.plan || "—";
       }
@@ -983,7 +1018,7 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
           const abos = buildAbosUrl();
           const dashboard = buildDashboardUrl();
           const caisse = buildCaisseUrl();
-          const pinDefault = buildPinUrl({ "return": DASHBOARD_URL });
+          const pinDefault = buildPinUrl();
           const pinForCaisse = buildPinUrl({ target: "caisse" });
           const publicUrl = buildPublicUrl();
 
@@ -1108,6 +1143,7 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
       async function hydrate(){
         state.loading = true;
         revealPage();
+        cleanVisibleUrl();
 
         try{
           let slug = getStoredSlug();
@@ -1189,7 +1225,7 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
             setStatus(
               "warn", "APERÇU + CONTRÔLE", "Boutique repérée, accès fermé",
               "La page a reconnu ton identifiant, mais l'accès reste fermé tant que tu n'es pas abonné actif.",
-              `Identifiant reconnu : <b>${state.slug}</b>${state.phone ? `<br>Téléphone : <b>+${state.phone}</b>` : ""}<br>Tu peux rejoindre DIGIY ou entrer avec ton code pour vérifier ton accès.`
+              `Compte reconnu.<br>Tu peux rejoindre DIGIY ou entrer avec ton code pour vérifier ton accès.`
             );
           }
         }catch(err){
@@ -1236,6 +1272,7 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
 
       async function init(){
         revealPage();
+        cleanVisibleUrl();
         bind();
         await bootGuardSoft();
         await hydrate();
