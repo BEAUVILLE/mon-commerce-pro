@@ -297,7 +297,7 @@
 
     .quickGrid{
       display:grid;
-      grid-template-columns:repeat(4,1fr);
+      grid-template-columns:repeat(5,1fr);
       gap:9px;
       margin-top:14px;
     }
@@ -313,6 +313,7 @@
       align-content:center;
       gap:4px;
       text-align:center;
+      color:var(--text);
       font-weight:1000;
     }
 
@@ -712,6 +713,7 @@
             <div class="quickGrid">
               <a class="quickBtn primary" id="btnFastAdd" href="#articleForm"><span>➕</span>Ajouter<small>nom · prix · quantité</small></a>
               <a class="quickBtn" id="btnFastList" href="#articleList"><span>📦</span>Articles<small>voir · modifier</small></a>
+              <button class="quickBtn" id="btnInitCaisse" type="button"><span>🚀</span>Initialiser<small>préparer la caisse</small></button>
               <a class="quickBtn" id="btnFastCash" href="./caisse.html"><span>💰</span>Encaisser<small>retour caisse</small></a>
               <a class="quickBtn" id="btnFastProfile" href="./profile.html"><span>🏪</span>Boutique<small>fiche publique</small></a>
             </div>
@@ -747,7 +749,8 @@
                 <b>Ajouter</b> : nom, prix, quantité.<br>
                 <b>Vendre</b> : article visible dans la caisse.<br>
                 <b>Cacher</b> : article gardé, mais pas affiché.<br>
-                <b>Corriger</b> : clique sur modifier, puis enregistre.
+                <b>Corriger</b> : clique sur modifier, puis enregistre.<br>
+                <b>Initialiser la caisse</b> : envoie les articles visibles vers la caisse verte du téléphone.
               </div>
             </div>
           </div>
@@ -911,6 +914,9 @@
       const ADMIN_URL = digiyLocal("admin.html");
       const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
       const CACHE_PREFIX = "digiy_pos_products_local:";
+      const CAISSE_STORAGE_PRODUCTS = "caisse_prods";
+      const CAISSE_STORAGE_SHOP = "caisse_shop";
+      const CAISSE_STORAGE_META = "caisse_meta";
       const LOW_STOCK_LIMIT = 5;
 
       const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
@@ -1224,6 +1230,69 @@
         try{
           localStorage.setItem(cacheKey(slug),JSON.stringify(Array.isArray(items) ? items : []));
         }catch(_){}
+      }
+
+      function categoryEmoji(category,name){
+        const txt = (String(category || "") + " " + String(name || "")).toLowerCase();
+
+        if(/riz|huile|sucre|lait|pain|oeuf|aliment|food|épicer|epicer/.test(txt)) return "🛒";
+        if(/boisson|eau|jus|coca|bissap|café|cafe/.test(txt)) return "🥤";
+        if(/beaut|hygien|hygiène|savon|dentifrice|parfum|deodor/.test(txt)) return "🧴";
+        if(/mode|robe|habit|vêtement|vetement|chauss|sac/.test(txt)) return "👗";
+        if(/maison|bougie|lessive|ménage|menage/.test(txt)) return "🏠";
+
+        return "📦";
+      }
+
+      function productToCaisseItem(item,index){
+        const p = normalizeProduct(item);
+
+        return {
+          id:index + 1,
+          source_id:p.id,
+          name:p.name || "Article",
+          cat:p.category || "Autres",
+          emoji:categoryEmoji(p.category,p.name),
+          price:Number(p.price_xof || 0) || 0,
+          stock:Math.max(0,Number(p.stock_qty || 0) || 0),
+          published:!!p.is_published,
+          updated_at:p.updated_at || new Date().toISOString()
+        };
+      }
+
+      function syncCaisseFromProducts(options = {}){
+        const silent = !!options.silent;
+
+        const visibles = (STATE.products || [])
+          .map(normalizeProduct)
+          .filter(item => item.is_published && item.name && Number(item.price_xof || 0) > 0)
+          .map(productToCaisseItem);
+
+        try{
+          localStorage.setItem(CAISSE_STORAGE_PRODUCTS,JSON.stringify(visibles));
+          localStorage.setItem(CAISSE_STORAGE_SHOP,STATE.storeName || "Ma Boutique");
+          localStorage.setItem(CAISSE_STORAGE_META,JSON.stringify({
+            source:"admin",
+            module:MODULE_CODE,
+            slug:STATE.slug || "",
+            synced_at:new Date().toISOString(),
+            count:visibles.length
+          }));
+        }catch(_){
+          if(!silent) setFormNotice("Impossible d’initialiser la caisse sur cet appareil.",false);
+          return false;
+        }
+
+        if(!silent){
+          const msg = visibles.length
+            ? `Caisse initialisée ✅ — ${visibles.length} article(s) envoyé(s).`
+            : "Caisse initialisée, mais aucun article visible à vendre.";
+
+          setFormNotice(msg,visibles.length > 0);
+          setNotice(visibles.length > 0 ? "ok" : "warn",msg + " Ouvre ensuite <b>Encaisser</b>.");
+        }
+
+        return true;
       }
 
       function normalizeProduct(row){
@@ -1673,7 +1742,8 @@
         clearForm();
         renderList();
         updateHeader();
-        setFormNotice("Article enregistré ✅ — sauvegarde " + modeLabel(STATE.mode) + ".", true);
+        syncCaisseFromProducts({ silent:true });
+        setFormNotice("Article enregistré ✅ — sauvegarde " + modeLabel(STATE.mode) + ". Caisse mise à jour.", true);
       }
 
       async function deleteCurrentProduct(){
@@ -1692,7 +1762,8 @@
         clearForm();
         renderList();
         updateHeader();
-        setFormNotice("Article supprimé ✅", true);
+        syncCaisseFromProducts({ silent:true });
+        setFormNotice("Article supprimé ✅ — caisse mise à jour.", true);
       }
 
       function exportProducts(){
@@ -1760,7 +1831,8 @@
           window.STATE = STATE;
           renderList();
           updateHeader();
-          setFormNotice("Fichier ajouté ✅ — " + normalized.length + " article(s).", true);
+          syncCaisseFromProducts({ silent:true });
+          setFormNotice("Fichier ajouté ✅ — " + normalized.length + " article(s). Caisse mise à jour.", true);
         }catch(_){
           setFormNotice("Ajout impossible : fichier invalide.", false);
         }finally{
@@ -1871,6 +1943,7 @@
         qs("btnDeleteProduct")?.addEventListener("click",deleteCurrentProduct);
         qs("btnExport")?.addEventListener("click",exportProducts);
         qs("btnImport")?.addEventListener("click",() => qs("fileImport").click());
+        qs("btnInitCaisse")?.addEventListener("click",() => syncCaisseFromProducts({ silent:false }));
         qs("fileImport")?.addEventListener("change",(e) => importProducts(e.target.files?.[0] || null));
 
         ["searchText","filterStatus","sortBy"].forEach(id => {
