@@ -596,14 +596,15 @@
           <div class="topActions">
             <div class="pill"><span class="dot" id="dotAccess"></span><span id="pillStatus">Accès…</span></div>
             <a class="btnOutline" id="btnPinTop" href="./pin.html">🔐 Mon code</a>
-            <a class="btnOutline" id="btnPublicTop" href="https://mon-commerce.digiylyfe.com/">🌍 Fiche publique</a>
+            <a class="btnOutline" id="btnPublicTop" href="https://mon-commerce.digiylyfe.com/">🌍 Voir côté client</a>
             <a class="btnOutline" id="btnSettings" href="./admin.html">⚙️ Plus</a>
           </div>
         </div>
       </header>
 
       <div class="navRow">
-        <a class="btnGhost" id="btnHall" href="https://mon-commerce.digiylyfe.com/">🌍 Fiche publique</a>
+        <a class="btnGhost" id="btnHall" href="./profile.html">🏪 Ma fiche commerce</a>
+        <a class="btnGhost" id="btnClientView" href="https://mon-commerce.digiylyfe.com/">🌍 Voir côté client</a>
         <a class="btnGhost" id="btnCaisse" href="./caisse.html">💰 Encaisser</a>
         <a class="btnGhost" id="btnArticles" href="./admin.html#articleList">📦 Articles</a>
         <a class="btnGhost" id="btnNotes" href="./caisse.html#notes">✍️ Notes</a>
@@ -637,8 +638,11 @@
               <a class="heroAction" id="btnHeroArticles" href="./admin.html#articleList">
                 <span>📦</span>Articles<small>ajouter · modifier</small>
               </a>
-              <a class="heroAction" id="btnHeroPublic" href="https://mon-commerce.digiylyfe.com/">
-                <span>🌍</span>Fiche publique<small>voir côté client</small>
+              <a class="heroAction" id="btnHeroProfile" href="./profile.html">
+                <span>🏪</span>Ma fiche commerce<small>modifier la fiche</small>
+              </a>
+              <a class="heroAction" id="btnHeroClient" href="https://mon-commerce.digiylyfe.com/">
+                <span>🌍</span>Voir côté client<small>vitrine publique</small>
               </a>
               <a class="heroAction" id="btnHeroNotes" href="./caisse.html#notes">
                 <span>✍️</span>Notes<small>dépense · client doit</small>
@@ -747,6 +751,7 @@
       const SUPABASE_ANON = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
 
       const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
+      const PROFILE_URL = digiyLocal("profile.html");
       const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
       const PAY_URL = "https://pro-pay.digiylyfe.com/admin.html";
 
@@ -1182,9 +1187,11 @@
 
       function wireNav(){
         const links = {
-          btnHall:PUBLIC_URL,
+          btnHall:PROFILE_URL,
+          btnClientView:PUBLIC_URL,
           btnPublicTop:PUBLIC_URL,
-          btnHeroPublic:PUBLIC_URL,
+          btnHeroProfile:PROFILE_URL,
+          btnHeroClient:PUBLIC_URL,
           btnCaisse:CAISSE_URL,
           btnArticles:ADMIN_URL + "#articleList",
           btnNotes:CAISSE_URL + "#notes",
