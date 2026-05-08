@@ -161,6 +161,8 @@
           Compte reconnu. Les identifiants restent cachés. Entre seulement ton code.
         </div>
 
+        <button id="btnRepairAccess" class="btn secondary hidden" type="button" style="width:100%;margin:10px 0 12px;">♻️ Changer / reconstruire mon accès</button>
+
         <div class="field">
           <label for="pin">Code d'accès</label>
           <div class="pin-row">
@@ -259,7 +261,8 @@
         sessionInfo: document.getElementById("sessionInfo"),
         identitySlugField: document.getElementById("identitySlugField"),
         identityPhoneField: document.getElementById("identityPhoneField"),
-        knownBox: document.getElementById("knownBox")
+        knownBox: document.getElementById("knownBox"),
+        btnRepairAccess: document.getElementById("btnRepairAccess")
       };
 
       function qs(name) {
@@ -286,7 +289,27 @@
         if (el.identitySlugField) el.identitySlugField.classList.toggle("hidden", known);
         if (el.identityPhoneField) el.identityPhoneField.classList.toggle("hidden", known);
         if (el.knownBox) el.knownBox.classList.toggle("hidden", !known);
+        if (el.btnRepairAccess) el.btnRepairAccess.classList.toggle("hidden", !known);
         el.sessionInfo.textContent = known ? "Oui" : "Aucun";
+      }
+
+      function showIdentityFields(message = "Entre ton téléphone ou ton identifiant boutique, puis ton code.") {
+        if (el.identitySlugField) el.identitySlugField.classList.remove("hidden");
+        if (el.identityPhoneField) el.identityPhoneField.classList.remove("hidden");
+        if (el.knownBox) el.knownBox.classList.add("hidden");
+        if (el.btnRepairAccess) el.btnRepairAccess.classList.add("hidden");
+        el.sessionInfo.textContent = "À refaire";
+        setStatus(message, "err");
+      }
+
+      function repairCommerceAccess() {
+        clearWrongCommerceIdentity();
+        el.slug.value = "";
+        el.phone.value = "";
+        el.pin.value = "";
+        showIdentityFields("Ancien accès effacé. Entre ton téléphone ou ton identifiant MON COMMERCE, puis ton code.");
+        refreshLinks("", "");
+        setTimeout(() => { try { el.phone.focus(); } catch (_) {} }, 80);
       }
 
       function normSlug(value) {
@@ -696,7 +719,10 @@
           if (slug) {
             const sub = await resolveSubBySlug(slug);
             if (!sub) {
-              setStatus("Cet identifiant n’ouvre pas MON COMMERCE. Utilise ton téléphone ou contacte le support.", "err");
+              clearWrongCommerceIdentity();
+              slug = "";
+              el.slug.value = "";
+              showIdentityFields("Cet identifiant n’ouvre pas MON COMMERCE. Entre ton téléphone, puis ton code, pour reconstruire l’accès.");
               return;
             }
             slug = sub.slug;
@@ -710,7 +736,7 @@
           }
 
           if (!slug || !isPosSlug(slug)) {
-            setStatus("MON COMMERCE n’est pas trouvé pour ce compte. Vérifie l’abonnement ou contacte le support.", "err");
+            showIdentityFields("MON COMMERCE n’est pas trouvé pour ce téléphone. Vérifie que l’abonnement POS existe, ou contacte le support.");
             return;
           }
 
@@ -745,6 +771,8 @@
         el.pin.type = visible ? "password" : "text";
         el.togglePin.textContent = visible ? "👁️" : "🙈";
       });
+
+      if (el.btnRepairAccess) el.btnRepairAccess.addEventListener("click", repairCommerceAccess);
 
       el.btnOpen.addEventListener("click", login);
 
