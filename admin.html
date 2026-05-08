@@ -297,7 +297,7 @@
 
     .quickGrid{
       display:grid;
-      grid-template-columns:repeat(5,1fr);
+      grid-template-columns:repeat(6,1fr);
       gap:9px;
       margin-top:14px;
     }
@@ -714,6 +714,7 @@
               <a class="quickBtn primary" id="btnFastAdd" href="#articleForm"><span>➕</span>Ajouter<small>nom · prix · quantité</small></a>
               <a class="quickBtn" id="btnFastList" href="#articleList"><span>📦</span>Articles<small>voir · modifier</small></a>
               <button class="quickBtn" id="btnInitCaisse" type="button"><span>🚀</span>Initialiser<small>préparer la caisse</small></button>
+              <button class="quickBtn" id="btnLoadStarter" type="button"><span>🌾</span>Départ<small>charger les exemples</small></button>
               <a class="quickBtn" id="btnFastCash" href="./caisse.html"><span>💰</span>Encaisser<small>retour caisse</small></a>
               <a class="quickBtn" id="btnFastProfile" href="./profile.html"><span>🏪</span>Boutique<small>fiche publique</small></a>
             </div>
@@ -750,7 +751,8 @@
                 <b>Vendre</b> : article visible dans la caisse.<br>
                 <b>Cacher</b> : article gardé, mais pas affiché.<br>
                 <b>Corriger</b> : clique sur modifier, puis enregistre.<br>
-                <b>Initialiser la caisse</b> : envoie les articles visibles vers la caisse verte du téléphone.
+                <b>Initialiser la caisse</b> : envoie les articles visibles vers la caisse verte du téléphone.<br>
+                <b>Départ</b> : recharge les articles exemples si la boutique n’a qu’un ou deux articles de test.
               </div>
             </div>
           </div>
@@ -1363,6 +1365,44 @@
 
         return true;
       }
+      async function reloadStarterProducts(){
+        if(!confirm("Charger les articles de départ dans Mes articles ? Les articles déjà présents seront gardés.")) return;
+
+        const existingNames = new Set(
+          (STATE.products || [])
+            .map(normalizeProduct)
+            .map(item => String(item.name || "").trim().toLowerCase())
+            .filter(Boolean)
+        );
+
+        const starters = starterProducts().filter(item => {
+          const name = String(item.name || "").trim().toLowerCase();
+          return name && !existingNames.has(name);
+        });
+
+        if(!starters.length){
+          syncCaisseFromProducts({ silent:false });
+          openPanel("articleList");
+          setFormNotice("Les articles de départ sont déjà présents ✅ — caisse initialisée.", true);
+          return;
+        }
+
+        for(const item of starters){
+          const saved = await saveProduct(item);
+          const savedNorm = normalizeProduct(saved);
+          STATE.products = STATE.products.filter(x => x.id !== savedNorm.id);
+          STATE.products.unshift(savedNorm);
+        }
+
+        window.STATE = STATE;
+        renderList();
+        updateHeader();
+        syncCaisseFromProducts({ silent:true });
+        openPanel("articleList");
+        setFormNotice("Articles de départ chargés ✅ — " + starters.length + " article(s) ajouté(s). Caisse mise à jour.", true);
+        setNotice("ok","Articles de départ chargés dans <b>Mes articles</b> et envoyés vers la caisse. Ouvre <b>Encaisser</b>.");
+      }
+
 
       function normalizeProduct(row){
         const r = row || {};
@@ -2041,6 +2081,7 @@
         qs("btnExport")?.addEventListener("click",exportProducts);
         qs("btnImport")?.addEventListener("click",() => qs("fileImport").click());
         qs("btnInitCaisse")?.addEventListener("click",() => syncCaisseFromProducts({ silent:false }));
+        qs("btnLoadStarter")?.addEventListener("click",reloadStarterProducts);
         qs("fileImport")?.addEventListener("change",(e) => importProducts(e.target.files?.[0] || null));
 
         ["searchText","filterStatus","sortBy"].forEach(id => {
@@ -2072,6 +2113,27 @@
         clearForm();
 
         await hydrate();
+
+        const hash = String(location.hash || "").replace("#","");
+        if(hash === "articleList") openPanel("articleList");
+        else openPanel("articleForm");
+      }
+
+      boot().catch((err) => {
+        console.error(err);
+        reveal();
+        try{
+          renderBlocked("Problème technique. Entre avec ton code ou recharge la page.");
+        }catch(_){
+          document.documentElement.style.visibility = "";
+          document.body.innerHTML = '<div style="min-height:100vh;background:#04110d;color:#fff;font-family:system-ui;padding:24px"><h1>MON COMMERCE — Plus</h1><p>Chargement bloqué. Recharge la page ou repasse par le code.</p><p><a style="color:#facc15" href="./pin.html">Entrer avec mon code</a></p></div>';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
 
         const hash = String(location.hash || "").replace("#","");
         if(hash === "articleList") openPanel("articleList");
