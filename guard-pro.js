@@ -1,8 +1,7 @@
-// guard.js — DIGIY POS PRO
-// Doctrine : PIN une seule fois -> session locale fraîche -> navigation interne directe
-// POS / Mon commerce = coffre sécurisé
-// Public = vitrine propre
-// RPC = pont contrôlé
+// guard.js — DIGIY POS PRO / MON COMMERCE
+// Version blindée : POS strict, anti LOC / EXPLORE, session 8h, PIN une seule fois.
+// Ne touche PAS aux articles, ventes, notes, marchandises.
+
 (() => {
   "use strict";
 
@@ -19,7 +18,33 @@
     MODULE_CODE: "POS",
     MODULE_CODE_LOWER: "pos",
 
-    SESSION_MAX_AGE_MS: 8 * 60 * 60 * 1000, // 8h
+    ALLOWED_MODULES: [
+      "POS",
+      "pos",
+      "POS_PRO",
+      "COMMERCE",
+      "CAISSE",
+      "MON_COMMERCE"
+    ],
+
+    ALLOWED_SLUG_PREFIXES: [
+      "pos-",
+      "commerce-",
+      "caisse-"
+    ],
+
+    FORBIDDEN_SLUG_PREFIXES: [
+      "loc-",
+      "explore-",
+      "driver-",
+      "market-",
+      "build-",
+      "jobs-",
+      "resa-",
+      "pay-"
+    ],
+
+    SESSION_MAX_AGE_MS: 8 * 60 * 60 * 1000,
 
     PIN_PATH: window.DIGIY_LOGIN_URL || "./pin.html",
     PAY_URL: window.DIGIY_PAY_URL || "https://commencer-a-payer.digiylyfe.com/",
@@ -55,7 +80,6 @@
   };
 
   const MODULE = CFG.MODULE_CODE;
-  const MODULE_LOWER = CFG.MODULE_CODE_LOWER;
 
   const initialQs = new URLSearchParams(location.search);
   const slugQ = initialQs.get("slug") || "";
@@ -111,6 +135,28 @@
     const n = Number(ts || 0);
     if (!n) return false;
     return nowMs() - n <= CFG.SESSION_MAX_AGE_MS;
+  }
+
+  function isAllowedModule(moduleName) {
+    const raw = String(moduleName || "").trim();
+    if (!raw) return false;
+
+    return CFG.ALLOWED_MODULES.some((m) => {
+      return String(m).trim().toUpperCase() === raw.toUpperCase();
+    });
+  }
+
+  function isForbiddenSlug(slug) {
+    const s = normSlug(slug);
+    if (!s) return false;
+    return CFG.FORBIDDEN_SLUG_PREFIXES.some((p) => s.startsWith(p));
+  }
+
+  function isAllowedSlug(slug) {
+    const s = normSlug(slug);
+    if (!s) return false;
+    if (isForbiddenSlug(s)) return false;
+    return CFG.ALLOWED_SLUG_PREFIXES.some((p) => s.startsWith(p));
   }
 
   function hidePage() {
@@ -196,7 +242,7 @@
         u = new URL(full);
       }
     } catch (e) {
-      console.warn("[DIGIY GUARD] buildSafeUrl KO:", baseStr, e.message);
+      console.warn("[DIGIY GUARD POS] buildSafeUrl KO:", baseStr, e.message);
       return baseStr;
     }
 
@@ -252,9 +298,102 @@
     } catch (_) {}
   }
 
+  function clearSessionsOnly() {
+    for (const key of CFG.STORAGE.SESSION_KEYS) {
+      try {
+        localStorage.removeItem(key);
+      } catch (_) {}
+
+      try {
+        sessionStorage.removeItem(key);
+      } catch (_) {}
+    }
+  }
+
+  function clearIdentityOnly() {
+    try {
+      localStorage.removeItem(CFG.STORAGE.SLUG_KEY);
+      localStorage.removeItem(CFG.STORAGE.PHONE_KEY);
+      localStorage.removeItem(CFG.STORAGE.LAST_SLUG_KEY);
+      localStorage.removeItem(CFG.STORAGE.LAST_PHONE_KEY);
+      sessionStorage.removeItem(CFG.STORAGE.SLUG_KEY);
+      sessionStorage.removeItem(CFG.STORAGE.PHONE_KEY);
+      sessionStorage.removeItem(CFG.STORAGE.LAST_SLUG_KEY);
+      sessionStorage.removeItem(CFG.STORAGE.LAST_PHONE_KEY);
+    } catch (_) {}
+  }
+
+  function clearAllAccessState() {
+    clearSessionsOnly();
+    clearIdentityOnly();
+  }
+
+  function purgeBadPosIdentity() {
+    let dirty = false;
+
+    try {
+      const keys = [
+        CFG.STORAGE.SLUG_KEY,
+        CFG.STORAGE.LAST_SLUG_KEY
+      ];
+
+      for (const key of keys) {
+        const local = normSlug(localStorage.getItem(key) || "");
+        const sess = normSlug(sessionStorage.getItem(key) || "");
+
+        if (local && !isAllowedSlug(local)) {
+          localStorage.removeItem(key);
+          dirty = true;
+        }
+
+        if (sess && !isAllowedSlug(sess)) {
+          sessionStorage.removeItem(key);
+          dirty = true;
+        }
+      }
+    } catch (_) {}
+
+    for (const key of CFG.STORAGE.SESSION_KEYS) {
+      try {
+        const local = safeJsonParse(localStorage.getItem(key));
+        if (local && typeof local === "object") {
+          const moduleName = local.module || local.module_code || "";
+          const slug = normSlug(local.slug || "");
+
+          if (
+            (moduleName && !isAllowedModule(moduleName)) ||
+            (slug && !isAllowedSlug(slug))
+          ) {
+            localStorage.removeItem(key);
+            dirty = true;
+          }
+        }
+      } catch (_) {}
+
+      try {
+        const sess = safeJsonParse(sessionStorage.getItem(key));
+        if (sess && typeof sess === "object") {
+          const moduleName = sess.module || sess.module_code || "";
+          const slug = normSlug(sess.slug || "");
+
+          if (
+            (moduleName && !isAllowedModule(moduleName)) ||
+            (slug && !isAllowedSlug(slug))
+          ) {
+            sessionStorage.removeItem(key);
+            dirty = true;
+          }
+        }
+      } catch (_) {}
+    }
+
+    return dirty;
+  }
+
   function saveSlugOnly(slug) {
     const clean = normSlug(slug);
     if (!clean) return;
+    if (!isAllowedSlug(clean)) return;
 
     try {
       localStorage.setItem(CFG.STORAGE.SLUG_KEY, clean);
@@ -277,18 +416,30 @@
   }
 
   function readSavedSlug() {
+    let raw = "";
+
     try {
-      return normSlug(
+      raw =
         initialQs.get("slug") ||
-          sessionStorage.getItem(CFG.STORAGE.SLUG_KEY) ||
-          sessionStorage.getItem(CFG.STORAGE.LAST_SLUG_KEY) ||
-          localStorage.getItem(CFG.STORAGE.SLUG_KEY) ||
-          localStorage.getItem(CFG.STORAGE.LAST_SLUG_KEY) ||
-          ""
-      );
+        sessionStorage.getItem(CFG.STORAGE.SLUG_KEY) ||
+        sessionStorage.getItem(CFG.STORAGE.LAST_SLUG_KEY) ||
+        localStorage.getItem(CFG.STORAGE.SLUG_KEY) ||
+        localStorage.getItem(CFG.STORAGE.LAST_SLUG_KEY) ||
+        "";
     } catch (_) {
-      return normSlug(initialQs.get("slug") || "");
+      raw = initialQs.get("slug") || "";
     }
+
+    const slug = normSlug(raw);
+
+    if (!slug) return "";
+
+    if (!isAllowedSlug(slug)) {
+      purgeBadPosIdentity();
+      return "";
+    }
+
+    return slug;
   }
 
   function readSavedPhone() {
@@ -313,34 +464,9 @@
     }
   }
 
-  function clearSessionsOnly() {
-    for (const key of CFG.STORAGE.SESSION_KEYS) {
-      try {
-        localStorage.removeItem(key);
-      } catch (_) {}
-
-      try {
-        sessionStorage.removeItem(key);
-      } catch (_) {}
-    }
-  }
-
-  function clearAllLocalState() {
-    clearSessionsOnly();
-
-    try {
-      localStorage.removeItem(CFG.STORAGE.SLUG_KEY);
-      localStorage.removeItem(CFG.STORAGE.PHONE_KEY);
-      localStorage.removeItem(CFG.STORAGE.LAST_SLUG_KEY);
-      localStorage.removeItem(CFG.STORAGE.LAST_PHONE_KEY);
-      sessionStorage.removeItem(CFG.STORAGE.SLUG_KEY);
-      sessionStorage.removeItem(CFG.STORAGE.PHONE_KEY);
-      sessionStorage.removeItem(CFG.STORAGE.LAST_SLUG_KEY);
-      sessionStorage.removeItem(CFG.STORAGE.LAST_PHONE_KEY);
-    } catch (_) {}
-  }
-
   function readStoredSession() {
+    purgeBadPosIdentity();
+
     for (const key of CFG.STORAGE.SESSION_KEYS) {
       let parsed = null;
 
@@ -351,10 +477,14 @@
 
       if (!parsed || typeof parsed !== "object") continue;
 
-      const moduleName = upper(parsed.module || parsed.module_code || "");
+      const moduleName = parsed.module || parsed.module_code || "";
       const slug = normSlug(parsed.slug || "");
       const phone = normPhone(parsed.phone || "");
       const owner_id = parsed.owner_id || null;
+
+      if (moduleName && !isAllowedModule(moduleName)) continue;
+      if (slug && !isAllowedSlug(slug)) continue;
+      if (!slug && !phone) continue;
 
       const access =
         !!parsed.access ||
@@ -379,8 +509,6 @@
         if (dt && isRecent(dt)) ageOk = true;
       }
 
-      if (!slug && !phone) continue;
-      if (moduleName && moduleName !== MODULE) continue;
       if (!ageOk) continue;
       if (!access) continue;
 
@@ -410,9 +538,17 @@
       payload.validated_at ||
       (verifiedAtMs ? new Date(verifiedAtMs).toISOString() : nowIso());
 
+    const slug = normSlug(payload.slug || state.slug || "");
+    const phone = normPhone(payload.phone || state.phone || "");
+
+    if (slug && !isAllowedSlug(slug)) {
+      clearSessionsOnly();
+      return null;
+    }
+
     const session = {
-      slug: normSlug(payload.slug || state.slug || ""),
-      phone: normPhone(payload.phone || state.phone || ""),
+      slug,
+      phone,
       owner_id: payload.owner_id || state.owner_id || null,
       module: MODULE,
       access: !!payload.access,
@@ -446,7 +582,7 @@
     const slug = normSlug(input.slug || state.slug || "");
 
     return buildSafeUrl(CFG.PIN_PATH, {
-      ...(slug ? { slug } : {}),
+      ...(isAllowedSlug(slug) ? { slug } : {}),
       return: location.href
     });
   }
@@ -460,7 +596,7 @@
 
     return buildSafeUrl(CFG.PAY_URL, {
       module: MODULE,
-      ...(slug ? { slug } : {}),
+      ...(isAllowedSlug(slug) ? { slug } : {}),
       return: location.href
     });
   }
@@ -487,7 +623,7 @@
 
       let changed = false;
 
-      if (!removeSensitive && s && currentSlug !== s) {
+      if (!removeSensitive && s && isAllowedSlug(s) && currentSlug !== s) {
         url.searchParams.set("slug", s);
         changed = true;
       }
@@ -538,54 +674,35 @@
   async function resolveSubBySlug(slug) {
     const s = normSlug(slug);
     if (!s) return null;
+    if (!isAllowedSlug(s)) return null;
 
-    const tries = [
-      {
+    const tries = [];
+
+    CFG.ALLOWED_MODULES.forEach((moduleName) => {
+      tries.push({
         select: "phone,slug,module",
         slug: `eq.${s}`,
-        module: `eq.${MODULE}`,
+        module: `eq.${moduleName}`,
         limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        slug: `eq.${s}`,
-        module: `eq.${MODULE_LOWER}`,
-        limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        slug: `eq.${s}`,
-        module: "eq.POS_PRO",
-        limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        slug: `eq.${s}`,
-        module: "eq.COMMERCE",
-        limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        slug: `eq.${s}`,
-        module: "eq.CAISSE",
-        limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        slug: `eq.${s}`,
-        limit: "1"
-      }
-    ];
+      });
+    });
 
     for (const params of tries) {
       const res = await tableGet(CFG.TABLES.SUBSCRIPTIONS_PUBLIC, params);
 
       if (!res.ok || !Array.isArray(res.data) || !res.data[0]) continue;
 
+      const row = res.data[0];
+      const rowSlug = normSlug(row.slug);
+      const rowModule = row.module || MODULE;
+
+      if (!isAllowedModule(rowModule)) continue;
+      if (rowSlug && !isAllowedSlug(rowSlug)) continue;
+
       return {
-        slug: normSlug(res.data[0].slug),
-        phone: normPhone(res.data[0].phone),
-        module: upper(res.data[0].module || MODULE)
+        slug: rowSlug || s,
+        phone: normPhone(row.phone),
+        module: upper(rowModule)
       };
     }
 
@@ -596,53 +713,33 @@
     const p = normPhone(phone);
     if (!p) return null;
 
-    const tries = [
-      {
+    const tries = [];
+
+    CFG.ALLOWED_MODULES.forEach((moduleName) => {
+      tries.push({
         select: "phone,slug,module",
         phone: `eq.${p}`,
-        module: `eq.${MODULE}`,
+        module: `eq.${moduleName}`,
         limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        phone: `eq.${p}`,
-        module: `eq.${MODULE_LOWER}`,
-        limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        phone: `eq.${p}`,
-        module: "eq.POS_PRO",
-        limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        phone: `eq.${p}`,
-        module: "eq.COMMERCE",
-        limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        phone: `eq.${p}`,
-        module: "eq.CAISSE",
-        limit: "1"
-      },
-      {
-        select: "phone,slug,module",
-        phone: `eq.${p}`,
-        limit: "1"
-      }
-    ];
+      });
+    });
 
     for (const params of tries) {
       const res = await tableGet(CFG.TABLES.SUBSCRIPTIONS_PUBLIC, params);
 
       if (!res.ok || !Array.isArray(res.data) || !res.data[0]) continue;
 
+      const row = res.data[0];
+      const rowSlug = normSlug(row.slug);
+      const rowModule = row.module || MODULE;
+
+      if (!isAllowedModule(rowModule)) continue;
+      if (!rowSlug || !isAllowedSlug(rowSlug)) continue;
+
       return {
-        slug: normSlug(res.data[0].slug),
-        phone: normPhone(res.data[0].phone),
-        module: upper(res.data[0].module || MODULE)
+        slug: rowSlug,
+        phone: normPhone(row.phone),
+        module: upper(rowModule)
       };
     }
 
@@ -653,21 +750,12 @@
     const p = normPhone(phone);
     if (!p) return false;
 
-    const tries = [
-      { p_phone: p, p_module: MODULE },
-      { p_phone: p, p_module: MODULE_LOWER },
-      { p_phone: p, p_module: "POS_PRO" },
-      { p_phone: p, p_module: "COMMERCE" },
-      { p_phone: p, p_module: "CAISSE" },
-      { p_phone: p, p_module: "MON_COMMERCE" },
+    const tries = [];
 
-      { phone: p, module: MODULE },
-      { phone: p, module: MODULE_LOWER },
-      { phone: p, module: "POS_PRO" },
-      { phone: p, module: "COMMERCE" },
-      { phone: p, module: "CAISSE" },
-      { phone: p, module: "MON_COMMERCE" }
-    ];
+    CFG.ALLOWED_MODULES.forEach((moduleName) => {
+      tries.push({ p_phone: p, p_module: moduleName });
+      tries.push({ phone: p, module: moduleName });
+    });
 
     for (const body of tries) {
       const res = await rpc(CFG.RPC.HAS_ACCESS, body);
@@ -696,11 +784,17 @@
         raw.allowed === true ||
         raw.access === true
       ) {
+        const moduleName = upper(raw.module || raw.p_module || MODULE);
+        const slug = normSlug(raw.slug || raw.pos_slug || fallbackSlug || "");
+
+        if (moduleName && !isAllowedModule(moduleName)) return null;
+        if (slug && !isAllowedSlug(slug)) return null;
+
         return {
           ok: true,
-          module: upper(raw.module || raw.p_module || MODULE),
+          module: moduleName || MODULE,
           phone: normPhone(raw.phone || raw.p_phone || fallbackPhone || ""),
-          slug: normSlug(raw.slug || raw.pos_slug || fallbackSlug || ""),
+          slug,
           owner_id: raw.owner_id || null
         };
       }
@@ -715,11 +809,17 @@
           vals[0] === 1;
 
         if (okLike) {
+          const moduleName = upper(vals[1] || MODULE);
+          const slug = normSlug(vals[3] || fallbackSlug || "");
+
+          if (moduleName && !isAllowedModule(moduleName)) return null;
+          if (slug && !isAllowedSlug(slug)) return null;
+
           return {
             ok: true,
-            module: upper(vals[1] || MODULE),
+            module: moduleName || MODULE,
             phone: normPhone(vals[2] || fallbackPhone || ""),
-            slug: normSlug(vals[3] || fallbackSlug || ""),
+            slug,
             owner_id: vals[4] || null
           };
         }
@@ -748,12 +848,18 @@
           const okLike =
             okToken === "t" || okToken === "true" || okToken === "1";
 
+          const moduleName = upper(modToken || MODULE);
+          const slug = normSlug(fallbackSlug || "");
+
           if (okLike) {
+            if (moduleName && !isAllowedModule(moduleName)) return null;
+            if (slug && !isAllowedSlug(slug)) return null;
+
             return {
               ok: true,
-              module: upper(modToken || MODULE),
+              module: moduleName || MODULE,
               phone: normPhone(phoneToken || fallbackPhone || ""),
-              slug: normSlug(fallbackSlug || ""),
+              slug,
               owner_id: null
             };
           }
@@ -770,6 +876,7 @@
     const ph = normPhone(phone);
 
     if (!s || !p || !ph) return null;
+    if (!isAllowedSlug(s)) return null;
 
     const tries = [
       { p_phone: ph, p_pin: p },
@@ -797,14 +904,19 @@
     return null;
   }
 
+  purgeBadPosIdentity();
+
   const stored = readStoredSession();
   const savedSlug = readSavedSlug();
   const savedPhone = readSavedPhone();
 
+  const initialSlug = normSlug(slugQ || stored?.slug || savedSlug || "");
+  const initialPhone = normPhone(phoneQ || stored?.phone || savedPhone || "");
+
   const state = {
     module: MODULE,
-    slug: normSlug(slugQ || stored?.slug || savedSlug || ""),
-    phone: normPhone(phoneQ || stored?.phone || savedPhone || ""),
+    slug: isAllowedSlug(initialSlug) ? initialSlug : "",
+    phone: initialPhone,
     owner_id: stored?.owner_id || null,
     access: false,
     access_ok: false,
@@ -834,6 +946,15 @@
       return {
         ok: false,
         error: "Identifiant manquant."
+      };
+    }
+
+    if (!isAllowedSlug(s)) {
+      purgeBadPosIdentity();
+
+      return {
+        ok: false,
+        error: "Cet identifiant n’ouvre pas MON COMMERCE. Utilise ton téléphone ou contacte le support."
       };
     }
 
@@ -867,6 +988,17 @@
       };
     }
 
+    const finalSlug = normSlug(auth.slug || s);
+
+    if (!isAllowedSlug(finalSlug)) {
+      purgeBadPosIdentity();
+
+      return {
+        ok: false,
+        error: "Mauvaise porte détectée. Reviens par MON COMMERCE."
+      };
+    }
+
     const finalPhone = normPhone(auth.phone || phone);
     const finalOwnerId = auth.owner_id || null;
 
@@ -880,13 +1012,20 @@
     }
 
     const saved = saveSession({
-      slug: s,
+      slug: finalSlug,
       phone: finalPhone,
       owner_id: finalOwnerId,
       access: true,
       verified_at: nowMs(),
       validated_at: nowIso()
     });
+
+    if (!saved) {
+      return {
+        ok: false,
+        error: "Session non enregistrée. Identifiant invalide."
+      };
+    }
 
     state.slug = saved.slug;
     state.phone = saved.phone;
@@ -913,7 +1052,7 @@
   }
 
   function logout() {
-    clearAllLocalState();
+    clearAllAccessState();
 
     state.slug = "";
     state.phone = "";
@@ -931,16 +1070,25 @@
   }
 
   async function check() {
+    purgeBadPosIdentity();
+
     const storedSession = readStoredSession();
     const persistedSlug = readSavedSlug();
     const persistedPhone = readSavedPhone();
 
     let slug = normSlug(
-      slugQ || storedSession?.slug || state.slug || persistedSlug || ""
+      storedSession?.slug ||
+      state.slug ||
+      persistedSlug ||
+      ""
     );
 
     let phone = normPhone(
-      phoneQ || storedSession?.phone || state.phone || persistedPhone || ""
+      phoneQ ||
+      storedSession?.phone ||
+      state.phone ||
+      persistedPhone ||
+      ""
     );
 
     let owner_id = storedSession?.owner_id || state.owner_id || null;
@@ -949,6 +1097,12 @@
       Number(storedSession?.verified_at || state.verified_at || 0) || 0;
 
     let validatedAt = storedSession?.validated_at || state.validated_at || null;
+
+    if (slug && !isAllowedSlug(slug)) {
+      slug = "";
+      clearSessionsOnly();
+      purgeBadPosIdentity();
+    }
 
     state.slug = slug;
     state.phone = phone;
@@ -977,7 +1131,7 @@
     if (phone && !slug) {
       const sub = await resolveSubByPhone(phone);
 
-      if (sub?.slug) {
+      if (sub?.slug && isAllowedSlug(sub.slug)) {
         slug = normSlug(sub.slug);
         state.slug = slug;
         saveSlugOnly(slug);
@@ -1008,7 +1162,7 @@
       state.error = "Accès non identifié.";
 
       showPage();
-      goPin({ slug, phone });
+      goPin({});
 
       return { ...state };
     }
@@ -1023,7 +1177,24 @@
       state.error = "Identifiant absent.";
 
       showPage();
-      goPin({ slug, phone });
+      goPin({ phone });
+
+      return { ...state };
+    }
+
+    if (!isAllowedSlug(slug)) {
+      clearSessionsOnly();
+      purgeBadPosIdentity();
+
+      state.slug = "";
+      state.access = false;
+      state.access_ok = false;
+      state.preview = true;
+      state.ready_flag = true;
+      state.error = "Mauvais rail détecté.";
+
+      showPage();
+      goPin({ phone });
 
       return { ...state };
     }
@@ -1062,6 +1233,21 @@
       verified_at: verifiedAt || nowMs(),
       validated_at: validatedAt || nowIso()
     });
+
+    if (!saved) {
+      clearSessionsOnly();
+
+      state.access = false;
+      state.access_ok = false;
+      state.preview = true;
+      state.ready_flag = true;
+      state.error = "Session invalide.";
+
+      showPage();
+      goPin({ phone });
+
+      return { ...state };
+    }
 
     state.slug = saved.slug;
     state.phone = saved.phone;
@@ -1129,8 +1315,17 @@
       return !!state.access_ok;
     },
 
+    isAllowedSlug(slug) {
+      return isAllowedSlug(slug);
+    },
+
     saveSession(payload = {}) {
       const saved = saveSession(payload);
+
+      if (!saved) {
+        clearSessionsOnly();
+        return null;
+      }
 
       state.slug = saved.slug;
       state.phone = saved.phone;
@@ -1161,7 +1356,7 @@
     },
 
     clearAll() {
-      clearAllLocalState();
+      clearAllAccessState();
 
       state.access = false;
       state.access_ok = false;
@@ -1173,6 +1368,28 @@
       state.owner_id = null;
       state.verified_at = null;
       state.validated_at = null;
+    },
+
+    repairAccess() {
+      clearAllAccessState();
+
+      state.access = false;
+      state.access_ok = false;
+      state.preview = true;
+      state.ready_flag = false;
+      state.error = null;
+      state.slug = "";
+      state.phone = "";
+      state.owner_id = null;
+      state.verified_at = null;
+      state.validated_at = null;
+
+      showPage();
+
+      return {
+        ok: true,
+        message: "Accès MON COMMERCE réinitialisé."
+      };
     },
 
     loginWithPin,
