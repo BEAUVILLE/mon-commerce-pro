@@ -1,1323 +1,443 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MON COMMERCE — Ma caisse</title>
-  <meta name="theme-color" content="#07140f" />
-  <meta
-    name="description"
-    content="MON COMMERCE by DIGIY — ta caisse élégante pour boutiques, commerce local et activité terrain. Accès sécurisé, 0% commission."
-  />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CAISSE PRO — Boutique</title>
+<style>
+  :root {
+    --bg:#0d0d0d;--surface:#161616;--card:#1e1e1e;--border:#2a2a2a;
+    --accent:#f5a623;--green:#27c97b;--red:#e05454;--blue:#4a9eff;
+    --text:#f0f0f0;--muted:#888;--radius:12px;
+    --font:'Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@400;600;700;800;900&display=swap"
-    rel="stylesheet"
-  >
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:100;}
+  .logo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#000;}
+  .shop-name{font-size:16px;font-weight:700;}
+  .shop-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+  .header-left{display:flex;align-items:center;gap:12px;}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .time-badge{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums;}
+  .btn-icon{width:36px;height:36px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:border-color .2s;}
+  .btn-icon:hover{border-color:var(--accent);}
 
-  <script>
-    window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
-    window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
-    window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
-    window.DIGIY_MODULE = "POS";
-    window.DIGIY_LOGIN_URL = "./pin.html";
-    document.documentElement.style.visibility = "hidden";
+  main{display:flex;flex:1;height:calc(100vh - 62px);overflow:hidden;}
+  .left-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border);}
+  .search-bar{padding:14px 16px 0;}
+  .search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px 10px 38px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23888' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.44 1.406a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center;}
+  .search-input:focus{border-color:var(--accent);}
+  .search-input::placeholder{color:var(--muted);}
 
-    function digiyBasePath() {
-      const parts = location.pathname.split("/").filter(Boolean);
-      const isGh = /\.github\.io$/i.test(location.hostname);
-      if (isGh && parts.length > 0) return "/" + parts[0] + "/";
-      return "/";
-    }
+  .cats{display:flex;gap:8px;padding:12px 16px;overflow-x:auto;scrollbar-width:none;}
+  .cats::-webkit-scrollbar{display:none;}
+  .cat-btn{flex-shrink:0;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;}
+  .cat-btn.active,.cat-btn:hover{background:var(--accent);border-color:var(--accent);color:#000;}
 
-    function digiyLocal(path) {
-      path = String(path || "").replace(/^\/+/, "");
-      return digiyBasePath() + path;
-    }
-  </script>
+  .products-grid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;padding:4px 16px 16px;align-content:start;}
+  .products-grid::-webkit-scrollbar{width:4px;}
+  .products-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+  .product-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 12px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:6px;user-select:none;position:relative;overflow:hidden;}
+  .product-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,166,35,.12);}
+  .product-card:active{transform:scale(.97);}
+  .product-card.oos{opacity:.4;pointer-events:none;}
+  .p-emoji{font-size:28px;line-height:1;}
+  .p-name{font-size:12px;font-weight:600;line-height:1.3;}
+  .p-cat{font-size:10px;color:var(--muted);}
+  .p-price{font-size:13px;font-weight:700;color:var(--accent);margin-top:2px;}
+  .p-stock{position:absolute;top:8px;right:8px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(39,201,123,.15);color:var(--green);}
+  .p-stock.low{background:rgba(224,84,84,.15);color:var(--red);}
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./guard.js"></script>
+  .right-panel{width:340px;min-width:300px;display:flex;flex-direction:column;background:var(--surface);}
+  .panier-header{padding:16px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .panier-title{font-size:14px;font-weight:700;}
+  .panier-count{background:var(--accent);color:#000;font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;}
+  .btn-clear{border:none;background:rgba(224,84,84,.15);color:var(--red);font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;cursor:pointer;}
+  .btn-clear:hover{background:rgba(224,84,84,.3);}
+  .client-row{padding:10px 16px;border-bottom:1px solid var(--border);}
+  .client-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none;}
+  .client-input:focus{border-color:var(--accent);}
+  .client-input::placeholder{color:var(--muted);}
 
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --bg:#04110d;
-      --bg2:#071a14;
-      --card:rgba(8,24,18,.76);
-      --card2:rgba(9,26,20,.92);
-      --line:rgba(255,255,255,.09);
-      --line2:rgba(255,255,255,.14);
-      --text:#f7fbf8;
-      --muted:#bfd3c8;
-      --gold:#facc15;
-      --gold2:#f59e0b;
-      --green:#22c55e;
-      --red:#ef4444;
-      --warn:#f59e0b;
-      --shadow:0 22px 56px rgba(0,0,0,.28);
-      --shadow-soft:0 14px 34px rgba(0,0,0,.22);
-      --max:1180px;
-      --fontA:"Outfit", system-ui, sans-serif;
-      --fontB:"Cormorant Garamond", Georgia, serif;
-    }
+  .cart-items{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+  .cart-items::-webkit-scrollbar{width:3px;}
+  .cart-items::-webkit-scrollbar-thumb{background:var(--border);}
+  .cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:13px;padding:40px 0;}
+  .cart-empty .ei{font-size:48px;opacity:.3;}
+  .cart-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+  .ci-emoji{font-size:20px;flex-shrink:0;}
+  .ci-info{flex:1;min-width:0;}
+  .ci-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ci-unit{font-size:11px;color:var(--muted);}
+  .ci-qty{display:flex;align-items:center;gap:6px;}
+  .qty-btn{width:24px;height:24px;border:1px solid var(--border);background:var(--surface);color:var(--text);border-radius:6px;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+  .qty-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .qty-btn.minus:hover{border-color:var(--red);color:var(--red);}
+  .qty-num{font-size:13px;font-weight:700;min-width:20px;text-align:center;}
+  .ci-total{font-size:13px;font-weight:700;color:var(--accent);flex-shrink:0;}
 
-    html{scroll-behavior:smooth}
-    body{
-      min-height:100vh;
-      color:var(--text);
-      font-family:var(--fontA);
-      background:
-        radial-gradient(circle at top left, rgba(250,204,21,.11), transparent 28%),
-        radial-gradient(circle at top right, rgba(0,166,81,.08), transparent 22%),
-        linear-gradient(180deg, #07140f 0%, #04110d 42%, #020906 100%);
-    }
+  .totaux{border-top:1px solid var(--border);padding:14px 16px;display:flex;flex-direction:column;gap:6px;}
+  .total-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);}
+  .total-row.big{font-size:18px;font-weight:800;color:var(--text);margin-top:4px;padding-top:8px;border-top:1px solid var(--border);}
+  .total-row.big span:last-child{color:var(--accent);}
+  .remise-row{display:flex;gap:6px;margin-top:4px;}
+  .remise-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:12px;outline:none;}
+  .remise-input:focus{border-color:var(--blue);}
+  .remise-input::placeholder{color:var(--muted);}
+  .remise-type{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 8px;color:var(--text);font-size:12px;outline:none;cursor:pointer;}
 
-    a{text-decoration:none;color:inherit}
-    button{font:inherit}
-    .wrap{width:min(100%,var(--max));margin:0 auto;padding:0 16px}
+  .payment-section{padding:12px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px;}
+  .payment-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  .pay-btn{background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s;}
+  .pay-btn:hover{border-color:var(--accent);}
+  .pay-btn.active{border-color:var(--accent);background:rgba(245,166,35,.1);}
+  .pay-icon{font-size:20px;}
+  .pay-label{font-size:10px;font-weight:700;color:var(--muted);}
+  .pay-btn.active .pay-label{color:var(--accent);}
+  .encaisser-btn{background:var(--green);color:#000;border:none;border-radius:var(--radius);padding:14px;font-size:15px;font-weight:800;cursor:pointer;width:100%;transition:all .2s;}
+  .encaisser-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+  .encaisser-btn:active{transform:scale(.98);}
+  .encaisser-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;transform:none;}
 
-    /* ━━━ Sécurité visuelle : aucune grosse bande ne doit apparaître ━━━ */
-    .topbar,
-    .routeNav,
-    .floating-site-btn{
-      display:none!important;
-    }
+  /* ── MODAL RECU ── */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .3s;}
+  .modal-overlay.open{opacity:1;pointer-events:all;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:380px;padding:24px;transform:scale(.95);transition:transform .3s;}
+  .modal-overlay.open .modal{transform:scale(1);}
+  .recu-header{text-align:center;padding-bottom:16px;border-bottom:1px dashed var(--border);margin-bottom:16px;}
+  .recu-logo{font-size:32px;margin-bottom:6px;}
+  .recu-shop{font-size:16px;font-weight:800;}
+  .recu-date{font-size:11px;color:var(--muted);margin-top:4px;}
+  .recu-items{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .recu-item{display:flex;justify-content:space-between;font-size:13px;}
+  .recu-item span:last-child{font-weight:600;}
+  .recu-total{border-top:1px dashed var(--border);padding-top:12px;display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--accent);}
+  .recu-payment{text-align:center;font-size:12px;color:var(--muted);margin-top:10px;}
+  .recu-thanks{text-align:center;font-size:13px;font-weight:700;color:var(--green);margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);}
+  .recu-actions{display:flex;gap:10px;margin-top:20px;}
+  .btn-secondary{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;transition:border-color .2s;}
+  .btn-secondary:hover{border-color:var(--accent);}
+  .btn-primary{flex:1;background:var(--accent);border:none;color:#000;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;transition:filter .2s;}
+  .btn-primary:hover{filter:brightness(1.1);}
 
-    /* ━━━ Camembert discret ━━━ */
-    .digiy-camembert{
-      position:fixed;
-      top:12px;
-      right:12px;
-      z-index:99999;
-    }
+  /* ── TOAST ── */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;font-weight:700;font-size:13px;padding:10px 20px;border-radius:30px;z-index:300;transition:transform .3s;white-space:nowrap;pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
 
-    .digiy-camembert-btn{
-      width:44px;
-      height:44px;
-      border-radius:999px;
-      border:1px solid rgba(250,204,21,.28);
-      background:rgba(4,17,13,.90);
-      color:#fff7c2;
-      display:grid;
-      place-items:center;
-      font-size:21px;
-      font-weight:1000;
-      box-shadow:0 12px 30px rgba(0,0,0,.30);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      cursor:pointer;
-    }
+  /* ── PRINT ── */
+  @media print{
+    body>*:not(.modal-overlay){display:none!important;}
+    .modal-overlay{position:static!important;background:white!important;display:flex!important;opacity:1!important;}
+    .modal{box-shadow:none!important;border:none!important;background:white!important;}
+    .recu-actions{display:none!important;}
+    *{color:#000!important;}
+  }
 
-    .digiy-camembert-panel{
-      position:absolute;
-      top:52px;
-      right:0;
-      width:min(292px,calc(100vw - 24px));
-      display:none;
-      padding:10px;
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(4,17,13,.96);
-      box-shadow:0 20px 50px rgba(0,0,0,.45);
-      backdrop-filter:blur(18px);
-      -webkit-backdrop-filter:blur(18px);
-    }
-
-    .digiy-camembert.open .digiy-camembert-panel{
-      display:grid;
-      gap:7px;
-    }
-
-    .digiy-camembert-title{
-      padding:8px 10px 2px;
-      color:#facc15;
-      font-size:11px;
-      font-weight:1000;
-      letter-spacing:.13em;
-      text-transform:uppercase;
-    }
-
-    .digiy-camembert-sub{
-      padding:0 10px 8px;
-      color:rgba(247,251,248,.72);
-      font-size:12px;
-      font-weight:800;
-      line-height:1.35;
-    }
-
-    .digiy-camembert-status{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border-radius:999px;
-      background:rgba(250,204,21,.10);
-      border:1px solid rgba(250,204,21,.18);
-      color:#fde68a;
-      font-size:12px;
-      font-weight:950;
-    }
-
-    .digiy-camembert-panel a,
-    .digiy-camembert-panel button{
-      width:100%;
-      min-height:42px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.045);
-      color:#f7fbf8;
-      text-decoration:none;
-      display:flex;
-      align-items:center;
-      justify-content:flex-start;
-      gap:9px;
-      font-size:13px;
-      font-weight:950;
-      cursor:pointer;
-      font-family:inherit;
-    }
-
-    .digiy-camembert-panel a:hover,
-    .digiy-camembert-panel button:hover{
-      border-color:rgba(250,204,21,.35);
-      background:rgba(250,204,21,.08);
-    }
-
-    .digiy-camembert-panel .quiet{color:rgba(247,251,248,.72)}
-
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;
-      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.11);
-      color:var(--muted);font-size:12px;font-weight:900;backdrop-filter:blur(10px);
-    }
-
-    .dot{
-      width:9px;height:9px;border-radius:999px;background:var(--warn);
-      flex:0 0 auto;box-shadow:0 0 0 4px rgba(255,255,255,.04);
-    }
-    .dot.ok{background:var(--green)}
-    .dot.bad{background:var(--red)}
-
-    .btn,.btn-outline,.btn-ghost{
-      appearance:none;border:none;cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;gap:10px;
-      min-height:46px;padding:12px 16px;border-radius:999px;
-      font-weight:900;font-size:13px;letter-spacing:.02em;font-family:var(--fontA);
-      transition:transform .14s ease,opacity .14s ease,border-color .14s ease,background .14s ease;
-      white-space:nowrap;
-    }
-    .btn:hover,.btn-outline:hover,.btn-ghost:hover{transform:translateY(-1px)}
-    .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled{opacity:.55;cursor:not-allowed;transform:none}
-    .btn{color:#07110d;background:linear-gradient(135deg,var(--gold),var(--gold2));box-shadow:0 14px 30px rgba(250,204,21,.18)}
-    .btn-outline{color:var(--text);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12)}
-    .btn-ghost{color:var(--muted);background:transparent;border:1px solid rgba(255,255,255,.12)}
-
-    .hero{padding:34px 0 20px}
-    .hero-grid{
-      display:grid;grid-template-columns:minmax(0,1.18fr) minmax(330px,.82fr);
-      gap:18px;align-items:stretch;
-    }
-
-    .panel{
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);
-      border:1px solid rgba(255,255,255,.08);border-radius:30px;
-      box-shadow:var(--shadow);overflow:hidden;
-    }
-
-    .hero-main{padding:28px 24px 24px;position:relative}
-    .hero-main::after{
-      content:"";position:absolute;right:-80px;bottom:-90px;
-      width:240px;height:240px;border-radius:999px;
-      background:radial-gradient(circle, rgba(34,197,94,.14), transparent 70%);
-      pointer-events:none;
-    }
-
-    .hero-badge{
-      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
-      background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);
-      color:var(--gold);font-size:12px;font-weight:900;letter-spacing:.08em;
-      text-transform:uppercase;margin-bottom:16px;
-    }
-
-    .hero-title{
-      font-family:var(--fontB);
-      font-size:clamp(42px, 6vw, 78px);line-height:.94;
-      letter-spacing:-.03em;font-weight:700;margin-bottom:14px;max-width:10.6ch;
-    }
-    .hero-title em{color:var(--gold);font-style:italic}
-
-    .hero-sub{color:var(--muted);font-size:17px;line-height:1.75;max-width:64ch;font-weight:600}
-    .hero-points{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
-    .hero-point{
-      padding:10px 13px;border-radius:999px;font-size:13px;font-weight:900;
-      color:var(--muted);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);
-    }
-    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
-    .helper{margin-top:14px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:800}
-
-    .hero-mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
-    .mini-box{padding:14px 12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
-    .mini-label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em}
-    .mini-value{margin-top:6px;font-size:19px;font-weight:950;letter-spacing:-.02em;word-break:break-word}
-
-    .hero-side{
-      padding:18px;display:flex;flex-direction:column;gap:14px;
-      background:radial-gradient(circle at top right, rgba(0,166,81,.08), transparent 28%),
-        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),var(--card2);
-    }
-
-    .status-box{padding:16px;border-radius:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
-    .status-top{display:flex;align-items:flex-start;gap:10px}
-    .status-title{font-size:20px;font-weight:950;line-height:1.15}
-    .status-sub{margin-top:5px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:700}
-    .status-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-    .mini{padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);min-width:0}
-    .mini .mini-label{font-size:10px}
-    .mini .mini-value{font-size:14px;margin-top:5px}
-
-    .section{padding:24px 0}
-    .section-head{text-align:center;margin-bottom:18px}
-    .section-kicker{color:var(--gold);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;margin-bottom:8px}
-    .section-title{font-family:var(--fontB);font-size:clamp(30px,4vw,48px);line-height:1;margin-bottom:8px}
-    .section-sub{color:var(--muted);font-size:14px;line-height:1.8;max-width:760px;margin:0 auto;font-weight:600}
-
-    .preview-shell,.section-card,.price-card{
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);
-      border:1px solid rgba(255,255,255,.08);border-radius:26px;box-shadow:var(--shadow-soft);
-    }
-
-    .preview-shell{padding:18px;overflow:hidden}
-    .preview-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-    .preview-badge{
-      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
-      background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);
-      color:var(--gold);font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;
-    }
-
-    .cockpit{background:var(--card2);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px}
-    .cockpit-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-    .cockpit-title{font-size:20px;font-weight:950;line-height:1.15;font-family:var(--fontA)}
-    .cockpit-sub{margin-top:4px;color:var(--muted);font-size:12px;font-weight:700}
-    .cockpit-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:14px}
-    .pane{border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.03);padding:14px}
-    .pane-title{font-size:13px;font-weight:950;margin-bottom:10px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
-    .demo-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-    .demo-stat{padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
-    .demo-stat small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.10em;font-weight:900}
-    .demo-stat strong{display:block;margin-top:6px;font-size:22px;font-weight:950;letter-spacing:-.02em}
-    .sale-form{display:grid;grid-template-columns:1.1fr .6fr .7fr;gap:10px;margin-top:10px}
-    .mock-field{min-height:48px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#c4d3ca;font-size:12px;display:flex;align-items:center;font-weight:700}
-    .mock-list{display:grid;gap:8px}
-    .mock-item{padding:11px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .mock-item strong{font-size:14px;line-height:1.4}
-    .mock-item small{display:block;color:var(--muted);font-size:11px;margin-top:4px;line-height:1.55;font-weight:700}
-    .mock-tag{padding:6px 9px;border-radius:999px;border:1px solid rgba(250,204,21,.20);background:rgba(250,204,21,.08);color:var(--gold);font-size:10px;font-weight:950;white-space:nowrap}
-    .lock-strip{margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:#ffc9c9;font-size:12px;font-weight:800;line-height:1.7}
-
-    .features,.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
-    .section-card{padding:20px;transition:transform .16s ease, border-color .16s ease}
-    .section-card:hover{transform:translateY(-2px);border-color:rgba(250,204,21,.20)}
-    .feat-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:24px;margin-bottom:12px;background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.16)}
-    .feat-title{font-family:var(--fontB);font-size:24px;color:var(--gold);margin-bottom:7px;line-height:1}
-    .feat-text{font-size:13px;line-height:1.9;color:var(--muted);font-weight:700}
-    .step-num{width:34px;height:34px;border-radius:999px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07110d;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:13px;margin-bottom:12px;box-shadow:0 10px 20px rgba(250,204,21,.16)}
-
-    .commerce-gallery-shell{padding:18px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);border:1px solid rgba(255,255,255,.08);border-radius:26px;box-shadow:var(--shadow-soft)}
-    .commerce-gallery-status{color:var(--muted);font-size:13px;font-weight:800;line-height:1.7;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);margin-bottom:14px}
-    .commerce-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-    .commerce-card{overflow:hidden;border-radius:22px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.035);box-shadow:0 14px 34px rgba(0,0,0,.18);display:flex;flex-direction:column;min-height:100%}
-    .commerce-photo{width:100%;height:170px;object-fit:cover;display:block;background:rgba(255,255,255,.05)}
-    .commerce-body{padding:15px;display:flex;flex-direction:column;gap:10px;flex:1}
-    .commerce-title{font-size:18px;line-height:1.15;font-weight:950;letter-spacing:-.02em}
-    .commerce-meta{display:flex;flex-wrap:wrap;gap:7px;color:var(--muted);font-size:11px;font-weight:900}
-    .commerce-chip{padding:7px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04)}
-    .commerce-bio{color:var(--muted);font-size:13px;line-height:1.75;font-weight:700;flex:1}
-    .commerce-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
-    .commerce-actions .btn,.commerce-actions .btn-outline{flex:1;min-width:130px;min-height:42px;padding:10px 12px;font-size:12px}
-
-    .pricing{padding:30px 0 56px}
-    .price-wrap{max-width:780px;margin:0 auto}
-    .price-card{padding:30px 24px;border:2px solid rgba(250,204,21,.22);text-align:center;position:relative;overflow:hidden}
-    .price-card::before{content:"";position:absolute;inset:-120px auto auto -120px;width:260px;height:260px;border-radius:999px;background:radial-gradient(circle, rgba(250,204,21,.10), transparent 70%);pointer-events:none}
-    .price-badge{display:inline-flex;padding:8px 12px;border-radius:999px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07110d;font-weight:950;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
-    .price-name{font-family:var(--fontB);font-size:34px;line-height:1;margin-bottom:8px}
-    .price-amount{font-family:var(--fontB);font-size:64px;font-weight:700;color:var(--gold);line-height:1;letter-spacing:-.02em}
-    .price-period{margin-top:8px;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:900}
-    .price-list{list-style:none;max-width:460px;margin:22px auto 0;text-align:left;display:grid;gap:8px}
-    .price-list li{padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);font-size:13px;color:#d8e2db;line-height:1.65;font-weight:700}
-    .cta-box{margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-    .footer{border-top:1px solid rgba(255,255,255,.07);padding:20px 0 40px;color:var(--muted);font-size:12px}
-    .footer-inner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;line-height:1.7;font-weight:800}
-
-    #digiy-audio-btn{position:fixed;display:inline-flex;align-items:center;gap:12px;padding:16px 26px;border:none;border-radius:999px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:900;font-size:17px;line-height:1;-webkit-tap-highlight-color:transparent;user-select:none;transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;z-index:99998}
-    #digiy-audio-btn:hover{transform:translateY(-2px)}
-    #digiy-audio-btn:active{transform:scale(.97)}
-    #digiy-audio-btn:disabled{opacity:.65;cursor:not-allowed}
-    #digiy-audio-btn .digiy-audio-ico{font-size:18px;line-height:1}
-    #digiy-audio-progress-wrap{position:fixed;left:0;right:0;bottom:0;height:3px;opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:99997}
-    #digiy-audio-progress{width:0%;height:100%;transition:width .18s linear}
-
-    @media(max-width:980px){.hero-grid{grid-template-columns:1fr}.hero-title{max-width:none}.cockpit-grid{grid-template-columns:1fr}}
-    @media(max-width:760px){.hero-mini-grid,.status-meta,.demo-stats,.sale-form{grid-template-columns:1fr}}
-    @media(max-width:700px){
-      .wrap{padding:0 12px}
-      .hero-main{padding:22px 18px 20px}
-      .hero-side{padding:14px}
-      .preview-shell,.section-card,.price-card{border-radius:22px}
-      .digiy-camembert{top:10px;right:10px}
-      .digiy-camembert-btn{width:42px;height:42px;font-size:20px}
-    }
-    @media(max-width:600px){
-      #digiy-audio-btn{left:12px!important;right:12px!important;bottom:12px!important;justify-content:center;font-size:16px;padding:15px 18px;gap:11px}
-      #digiy-audio-btn .digiy-audio-ico{font-size:17px}
-    }
-  </style>
+  /* ── RESPONSIVE ── */
+  @media(max-width:700px){
+    main{flex-direction:column;height:auto;overflow:visible;}
+    .left-panel{height:60vh;border-right:none;border-bottom:1px solid var(--border);}
+    .right-panel{width:100%;min-width:unset;}
+    .products-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));}
+  }
+</style>
 </head>
 <body>
 
-  <div class="digiy-camembert" id="digiyCamembert">
-    <button class="digiy-camembert-btn" id="digiyCamembertBtn" type="button" aria-label="Menu DIGIY">☰</button>
-
-    <div class="digiy-camembert-panel" id="digiyCamembertPanel">
-      <div class="digiy-camembert-title">MON COMMERCE</div>
-      <div class="digiy-camembert-sub">Ma caisse · accès sécurisé</div>
-
-      <div class="digiy-camembert-status">
-        <span id="statusDot" class="dot"></span>
-        <span id="statusPillText">Chargement…</span>
-      </div>
-
-      <a class="btn-ghost" id="btnPinTop" href="./pin.html">🔐 Mon code d'accès</a>
-      <button class="btn-outline" id="btnCheck" type="button">🔄 Vérifier mon accès</button>
-      <a class="btn" id="btnTopAction" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence</a>
-
-      <a class="quiet" id="btnBackPublic" href="https://mon-commerce.digiylyfe.com/">⬅️ Vitrine</a>
-      <a class="quiet" href="https://digiylyfe.com/" rel="noopener noreferrer">🌍 Site</a>
-      <a class="quiet" href="https://digiy-hub.digiylyfe.com/" rel="noopener noreferrer">🧭 HUB</a>
-      <a class="quiet" href="https://tarifs.digiylyfe.com/" target="_blank" rel="noopener noreferrer">📦 Tarifs</a>
-      <a class="quiet" href="https://pro-espace.digiylyfe.com/" rel="noopener noreferrer">🏢 Espace pro</a>
+<header>
+  <div class="header-left">
+    <div class="logo">🛒</div>
+    <div>
+      <div class="shop-name" id="shopNameDisplay">Ma Boutique</div>
+      <div class="shop-sub">Caisse Pro</div>
     </div>
   </div>
-
-  <main class="wrap">
-    <section class="hero">
-      <div class="hero-grid">
-        <div class="panel hero-main">
-          <div class="hero-badge">0% commission · accès libre · usage sécurisé</div>
-
-          <h1 class="hero-title">
-            La caisse qui élève
-            <em>ta boutique.</em>
-          </h1>
-
-          <p class="hero-sub">
-            MON COMMERCE te donne une caisse propre pour encaisser, suivre ton stock et lire ton activité
-            sans te battre avec l'outil. Tu entres avec ton accès, tu travailles — c'est tout.
-          </p>
-
-          <div class="hero-points">
-            <div class="hero-point">🛒 Caisse rapide</div>
-            <div class="hero-point">📦 Stock lisible</div>
-            <div class="hero-point">📊 Activité claire</div>
-            <div class="hero-point">🔐 Accès sécurisé</div>
-          </div>
-
-          <div class="hero-actions">
-            <a class="btn" id="btnHeroPrimary" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence</a>
-            <a class="btn-ghost" id="btnOpenPin" href="./pin.html">🔐 Entrer avec mon code</a>
-          </div>
-
-          <div class="helper">
-            Tu vois d'abord. Tu entres ensuite par ton accès sécurisé — proprement, sans détour.
-          </div>
-
-          <div class="hero-mini-grid">
-            <div class="mini-box">
-              <div class="mini-label">Positionnement</div>
-              <div class="mini-value">Boutique sérieuse</div>
-            </div>
-            <div class="mini-box">
-              <div class="mini-label">Commission</div>
-              <div class="mini-value">0 F</div>
-            </div>
-            <div class="mini-box">
-              <div class="mini-label">Compatible</div>
-              <div class="mini-value">Mobile + bureau</div>
-            </div>
-          </div>
-        </div>
-
-        <aside class="panel hero-side">
-          <div class="status-box">
-            <div class="status-top">
-              <span id="statusDotSide" class="dot"></span>
-              <div>
-                <div class="status-title" id="statusTitle">Vérification en cours…</div>
-                <div class="status-sub" id="statusSub">
-                  Lecture de ton compte et de ton accès boutique.
-                </div>
-              </div>
-            </div>
-
-            <div class="status-meta">
-              <div class="mini">
-                <div class="mini-label">Compte</div>
-                <div class="mini-value" id="metaAccount">Aperçu libre</div>
-              </div>
-              <div class="mini">
-                <div class="mini-label">Accès</div>
-                <div class="mini-value" id="metaAccess">En vérification</div>
-              </div>
-              <div class="mini">
-                <div class="mini-label">Boutique</div>
-                <div class="mini-value" id="metaStore">Aperçu libre</div>
-              </div>
-              <div class="mini">
-                <div class="mini-label">Abonnement</div>
-                <div class="mini-value" id="metaPlan">—</div>
-              </div>
-            </div>
-
-            <div class="helper" id="statusHelper">
-              Passe par ton accès sécurisé pour que ta boutique soit reconnue automatiquement.
-            </div>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <section class="section" id="apercu-cockpit">
-      <div class="section-head">
-        <div class="section-kicker">Aperçu de ta caisse</div>
-        <h2 class="section-title">On montre la valeur, pas toute la mécanique.</h2>
-        <p class="section-sub">
-          Tu vois comment ça fonctionne. La vraie exploitation reste sécurisée pour les abonnés actifs.
-        </p>
-      </div>
-
-      <div class="preview-shell">
-        <div class="preview-top">
-          <div class="preview-badge">Exemple visuel</div>
-          <div class="helper" style="margin-top:0">
-            Les vraies actions s'ouvrent seulement avec ton accès actif.
-          </div>
-        </div>
-
-        <div class="cockpit">
-          <div class="cockpit-head">
-            <div>
-              <div class="cockpit-title">Ma caisse — exemple boutique</div>
-              <div class="cockpit-sub">Aperçu visuel pour montrer comment tu travailles</div>
-            </div>
-            <div class="pill"><span class="dot ok"></span><span>Exemple</span></div>
-          </div>
-
-          <div class="cockpit-grid">
-            <div class="pane">
-              <div class="pane-title">Aujourd'hui</div>
-
-              <div class="demo-stats">
-                <div class="demo-stat"><small>Ventes du jour</small><strong>87 500 F</strong></div>
-                <div class="demo-stat"><small>Transactions</small><strong>18</strong></div>
-                <div class="demo-stat"><small>Panier moyen</small><strong>4 860 F</strong></div>
-              </div>
-
-              <div class="pane-title">Nouvelle vente</div>
-              <div class="sale-form">
-                <div class="mock-field">Produit / service</div>
-                <div class="mock-field">Qté</div>
-                <div class="mock-field">Prix</div>
-              </div>
-              <div class="sale-form">
-                <div class="mock-field">Paiement</div>
-                <div class="mock-field">Référence</div>
-                <div class="mock-field">Client</div>
-              </div>
-
-              <div class="lock-strip">
-                Tu vois la logique de travail. L'enregistrement réel des ventes, du stock et des mouvements reste réservé aux abonnés actifs.
-              </div>
-            </div>
-
-            <div class="pane">
-              <div class="pane-title">Dernières ventes</div>
-              <div class="mock-list">
-                <div class="mock-item"><div><strong>Riz parfumé 5kg</strong><small>Qté 1 · Wave · 10:42</small></div><div class="mock-tag">12 500 F</div></div>
-                <div class="mock-item"><div><strong>Pack boissons</strong><small>Qté 3 · Espèces · 10:26</small></div><div class="mock-tag">6 000 F</div></div>
-                <div class="mock-item"><div><strong>Recharge divers</strong><small>Qté 2 · Orange Money · 09:58</small></div><div class="mock-tag">3 500 F</div></div>
-              </div>
-
-              <div class="pane-title" style="margin-top:14px">Mon stock</div>
-              <div class="mock-list">
-                <div class="mock-item"><div><strong>Sucre</strong><small>18 unités</small></div><div class="mock-tag">OK</div></div>
-                <div class="mock-item"><div><strong>Huile 1L</strong><small>6 unités</small></div><div class="mock-tag">Bas</div></div>
-                <div class="mock-item"><div><strong>Eau 1.5L</strong><small>42 unités</small></div><div class="mock-tag">OK</div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="commerces-equipes">
-      <div class="section-head">
-        <div class="section-kicker">Commerces équipés</div>
-        <h2 class="section-title">Les boutiques qui gardent la main.</h2>
-        <p class="section-sub">
-          Ici apparaissent les commerces MON COMMERCE publiés : photo, ville, WhatsApp direct et présence claire.
-          Le client voit, contacte, puis paie le commerçant directement. DIGIY ne prend pas de commission.
-        </p>
-      </div>
-
-      <div class="commerce-gallery-shell">
-        <div class="commerce-gallery-status" id="commerceGalleryStatus">Chargement des commerces publiés…</div>
-        <div class="commerce-grid" id="commerceGallery" aria-live="polite"></div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div class="section-kicker">Ce que tu gagnes</div>
-        <h2 class="section-title">Une caisse pensée pour le terrain, pas pour les ingénieurs.</h2>
-        <p class="section-sub">
-          Structure nette, boutique réelle, travail fluide. La technologie sert ta tenue — elle ne t'alourdit pas.
-        </p>
-      </div>
-
-      <div class="features">
-        <article class="section-card">
-          <div class="feat-icon">🛒</div>
-          <div class="feat-title">Caisse rapide</div>
-          <div class="feat-text">Produits, panier, vente et encaissement sans détour. Sur téléphone, tablette ou ordinateur.</div>
-        </article>
-        <article class="section-card">
-          <div class="feat-icon">📦</div>
-          <div class="feat-title">Stock simple</div>
-          <div class="feat-text">Ruptures visibles, quantités claires, catalogue vivant. Pas besoin d'un système complexe pour vendre au quartier.</div>
-        </article>
-        <article class="section-card">
-          <div class="feat-icon">💰</div>
-          <div class="feat-title">Argent direct</div>
-          <div class="feat-text">DIGIY ne garde pas l’argent. Le client paie le professionnel directement. 0% commission.</div>
-        </article>
-        <article class="section-card">
-          <div class="feat-icon">📊</div>
-          <div class="feat-title">Lecture claire</div>
-          <div class="feat-text">Recettes, rythme, historique — lisibles d'un coup d'œil, sans te noyer sous les menus.</div>
-        </article>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div class="section-kicker">Comment ça marche</div>
-        <h2 class="section-title">Tu vois. Tu entres. Tu travailles.</h2>
-        <p class="section-sub">La ligne DIGIY reste claire : regarder librement, puis entrer par l'accès sécurisé.</p>
-      </div>
-
-      <div class="how-grid">
-        <article class="section-card">
-          <div class="step-num">1</div>
-          <div class="feat-title">Tu regardes</div>
-          <div class="feat-text">Cette page te montre la valeur, le ton, la structure et un aperçu de ta future caisse.</div>
-        </article>
-        <article class="section-card">
-          <div class="step-num">2</div>
-          <div class="feat-title">Tu entres</div>
-          <div class="feat-text">Ton code d'accès t'ouvre directement ton espace de travail, sans détour inutile.</div>
-        </article>
-        <article class="section-card">
-          <div class="step-num">3</div>
-          <div class="feat-title">Tu travailles</div>
-          <div class="feat-text">Une fois dedans, ton espace de travail devient la porte centrale — et ta caisse, ton outil métier quotidien.</div>
-        </article>
-      </div>
-    </section>
-
-    <section class="pricing">
-      <div class="price-wrap">
-        <div class="price-card">
-          <div class="price-badge">Abonnement direct</div>
-          <div class="price-name">Mon commerce</div>
-          <div class="price-amount">19 900 F</div>
-          <div class="price-period">CFA / mois · 0% commission</div>
-
-          <ul class="price-list">
-            <li>✓ Accès à mon espace de travail</li>
-            <li>✓ Ma caisse, prête à encaisser</li>
-            <li>✓ Catalogue et suivi du stock</li>
-            <li>✓ Lecture de mon activité boutique</li>
-            <li>✓ Porte propre vers l'écosystème DIGIY</li>
-          </ul>
-
-          <div class="cta-box">
-            <a class="btn" id="btnPriceAction" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence maintenant</a>
-            <a class="btn-outline" href="https://wa.me/221771342889?text=Bonjour%20JB%2C%20je%20veux%20ouvrir%20MON%20COMMERCE%20by%20DIGIY" target="_blank" rel="noopener">💬 WhatsApp</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        <div>MON COMMERCE by DIGIY · ancré terrain, branché futur.</div>
-        <div>Support : +221 77 134 28 89</div>
-      </div>
-    </footer>
-  </main>
-
-  <script>
-    (() => {
-      "use strict";
-
-      const MODULE = "POS";
-      const CAISSE_URL = digiyLocal("caisse.html");
-      const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
-      const PIN_URL = digiyLocal("pin.html");
-      const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
-      const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
-      const SUPPORT_PHONE = "221771342889";
-
-      const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
-      const SUPABASE_ANON_KEY = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
-
-      const canUseSupabase = !!window.supabase && typeof window.supabase.createClient === "function" && !!SUPABASE_URL && !!SUPABASE_ANON_KEY;
-      const sb = canUseSupabase
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } })
-        : null;
-
-      const state = { slug: "", phone: "", access: false, storeName: "", plan: "", loading: false };
-      const $ = (id) => document.getElementById(id);
-      const diagLines = [];
-
-      function revealPage(){ document.documentElement.style.visibility = ""; }
-      function safeStringify(v){ try { return JSON.stringify(v, null, 2); } catch(_) { return String(v); } }
-      function log(msg, data){
-        const line = `[${new Date().toLocaleTimeString("fr-FR")}] ${msg}`;
-        diagLines.push(data === undefined ? line : `${line}\n${safeStringify(data)}`);
-        if($("diagBox")) $("diagBox").textContent = diagLines.join("\n\n");
-        console.log("[DIGIY POS INDEX]", msg, data ?? "");
-      }
-
-      function getParam(name){ return new URL(location.href).searchParams.get(name) || ""; }
-      function cleanVisibleUrl(){
-        const params = new URLSearchParams(location.search);
-        const sensitive = ["slug","phone","tel","module","owner_phone","subscription_phone","checkout_phone","p_phone"];
-        if(!sensitive.some((key) => params.has(key))) return;
-        try{ history.replaceState({}, document.title, location.pathname + location.hash); }catch(_){}
-      }
-
-      function cleanPath(path){
-        const u = new URL(path || "./index.html", location.href);
-        u.search = "";
-        return u.pathname + u.hash;
-      }
-
-      function normPhone(v){ return String(v || "").replace(/[^\d]/g, ""); }
-      function normSlug(v){ return String(v || "").trim().toLowerCase(); }
-      function getGuardState(){ return window.DIGIY_GUARD?.state || {}; }
-
-      function getStoredSlug(){
-        const gs = getGuardState();
-        return normSlug(getParam("slug") || gs.slug || localStorage.getItem("digiy_pos_last_slug") || sessionStorage.getItem("digiy_pos_last_slug") || "");
-      }
-
-      function getStoredPhone(){
-        const gs = getGuardState();
-        return normPhone(getParam("phone") || getParam("tel") || gs.phone || localStorage.getItem("digiy_pos_last_phone") || sessionStorage.getItem("digiy_pos_last_phone") || "");
-      }
-
-      function remember(slug, phone){
-        try{
-          if(slug){ localStorage.setItem("digiy_pos_last_slug", slug); sessionStorage.setItem("digiy_pos_last_slug", slug); }
-          if(phone){ localStorage.setItem("digiy_pos_last_phone", phone); sessionStorage.setItem("digiy_pos_last_phone", phone); }
-        }catch(_){}
-      }
-
-      function buildUrl(base, params){
-        const baseStr = String(base || "").trim();
-        if(!baseStr) return location.href;
-        let u;
-        try{
-          if(/^https?:\/\//i.test(baseStr)) u = new URL(baseStr);
-          else u = new URL(baseStr, location.href);
-          Object.entries(params || {}).forEach(([k,v]) => {
-            if(v !== undefined && v !== null && String(v) !== "") u.searchParams.set(k, String(v));
-          });
-          return u.toString();
-        }catch(e){
-          log("buildUrl KO: " + baseStr + " — " + e.message);
-          return baseStr;
-        }
-      }
-
-      function buildPublicUrl(){ return PUBLIC_URL; }
-      function buildAbosUrl(){ return buildUrl(ABOS_URL, { module: MODULE, base_module: MODULE }); }
-      function buildDashboardUrl(){ return cleanPath(DASHBOARD_URL); }
-      function buildCaisseUrl(){ return cleanPath(CAISSE_URL); }
-      function buildPinUrl(extra = {}){
-        const safe = {};
-        if(extra && extra.target) safe.target = extra.target;
-        return buildUrl(PIN_URL, safe);
-      }
-
-      function buildSupportUrl(){
-        const text = "Bonjour JB, j'ai besoin d'aide pour MON COMMERCE by DIGIY.";
-        return `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(text)}`;
-      }
-
-      function setDots(kind){
-        const map = { ok:"dot ok", bad:"dot bad", warn:"dot" };
-        if($("statusDot")) $("statusDot").className = map[kind] || "dot";
-        if($("statusDotSide")) $("statusDotSide").className = map[kind] || "dot";
-      }
-
-      function setStatus(kind, pillText, title, sub, helperHtml){
-        setDots(kind);
-        if($("statusPillText")) $("statusPillText").textContent = pillText;
-        if($("statusTitle")) $("statusTitle").textContent = title;
-        if($("statusSub")) $("statusSub").textContent = sub;
-        if($("statusHelper")) $("statusHelper").innerHTML = helperHtml;
-      }
-
-      function paintMeta(){
-        if($("metaAccount")) $("metaAccount").textContent = state.slug || state.phone ? "Compte reconnu" : "Aperçu libre";
-        if($("metaAccess")) $("metaAccess").textContent = state.access ? "Accès ouvert" : (state.slug || state.phone ? "À ouvrir" : "Libre");
-        if($("metaStore")) $("metaStore").textContent = state.storeName || "Aperçu libre";
-        if($("metaPlan")) $("metaPlan").textContent = state.plan || "—";
-      }
-
-      function digiyPosAudio(){
-        const hasSlug = !!state.slug;
-        const hasAccess = !!state.access;
-        if(!hasSlug) return "Entre dans ton commerce avec ton identifiant pour commencer.";
-        if(!hasAccess) return "Ton commerce est reconnu, mais il faut d'abord ouvrir ton accès avant de préparer ta caisse.";
-        return "Avant d'encaisser, ajoute d'abord tes produits un par un. Mets le nom du produit, son prix de vente, puis la quantité que tu as en stock.";
-      }
-
-      function refreshPosAudioText(){
-        const nextText = digiyPosAudio();
-        window.DIGIY_POS_AUDIO_TEXT = nextText;
-        if(!window.DIGIY_AUDIO_CONFIG) window.DIGIY_AUDIO_CONFIG = {};
-        window.DIGIY_AUDIO_CONFIG.text = nextText;
-        console.log("[DIGIY POS AUDIO TEXT]", nextText);
-      }
-
-      window.DIGIY_GET_AUDIO_TEXT = function(){ return digiyPosAudio(); };
-
-      function wireButtons(){
-        try{
-          const abos = buildAbosUrl();
-          const dashboard = buildDashboardUrl();
-          const caisse = buildCaisseUrl();
-          const pinDefault = buildPinUrl();
-          const publicUrl = buildPublicUrl();
-
-          const btnBackPublic = $("btnBackPublic");
-          const btnPriceAction = $("btnPriceAction");
-          const btnPinTop = $("btnPinTop");
-          const btnOpenPin = $("btnOpenPin");
-          const btnTopAction = $("btnTopAction");
-          const btnHeroPrimary = $("btnHeroPrimary");
-
-          if(btnBackPublic) btnBackPublic.href = publicUrl;
-          if(btnPriceAction) btnPriceAction.href = abos;
-          if(btnPinTop) btnPinTop.href = pinDefault;
-          if(btnOpenPin) btnOpenPin.href = pinDefault;
-
-          if(state.access){
-            if(btnTopAction){ btnTopAction.href = dashboard; btnTopAction.textContent = "🧭 Mon espace de travail"; }
-            if(btnHeroPrimary){ btnHeroPrimary.href = caisse; btnHeroPrimary.textContent = "💰 Ouvrir ma caisse"; }
-          }else{
-            if(btnTopAction){ btnTopAction.href = abos; btnTopAction.textContent = "💳 Je commence"; }
-            if(btnHeroPrimary){ btnHeroPrimary.href = abos; btnHeroPrimary.textContent = "💳 Je commence maintenant"; }
-          }
-
-          const btnCheck = $("btnCheck");
-          if(btnCheck) btnCheck.setAttribute("data-support", buildSupportUrl());
-        }catch(e){
-          log("wireButtons: erreur silencieuse", { message:e.message || String(e) });
-        }
-      }
-
-      async function resolvePhoneFromSlug(slug){
-        if(!sb || !slug) return "";
-        const { data, error } = await sb
-          .from("digiy_subscriptions_public")
-          .select("phone,module,slug")
-          .eq("slug", slug)
-          .limit(1)
-          .maybeSingle();
-        if(error) throw error;
-        return normPhone(data?.phone || "");
-      }
-
-      async function rpcFirstSuccess(name, payloads){
-        if(!sb) throw new Error("supabase_not_ready");
-        let lastError = null;
-        for(const payload of payloads){
-          try{
-            const { data, error } = await sb.rpc(name, payload);
-            if(error){ lastError = error; continue; }
-            return data;
-          }catch(err){ lastError = err; }
-        }
-        throw lastError || new Error(`RPC ${name} échouée`);
-      }
-
-      async function getAccess(phone){
-        if(!phone || !sb) return false;
-        const res = await rpcFirstSuccess("digiy_has_access", [{ p_phone:phone, p_module:MODULE }, { phone, module:MODULE }]);
-        if(typeof res === "boolean") return res;
-        if(res && typeof res.ok === "boolean") return res.ok;
-        if(res && typeof res.has_access === "boolean") return res.has_access;
-        if(res && typeof res.allowed === "boolean") return res.allowed;
-        if(res && typeof res.access === "boolean") return res.access;
-        return !!res;
-      }
-
-      async function getSubscription(phone){
-        if(!phone || !sb) return null;
-        try{
-          return await rpcFirstSuccess("digiy_get_subscription_status", [{ p_phone:phone, p_module:MODULE }, { phone, module:MODULE }]);
-        }catch(err){
-          log("digiy_get_subscription_status indisponible", { message:err?.message || String(err) });
-          return null;
-        }
-      }
-
-      async function getStoreContext(slug){
-        if(!slug || !sb) return null;
-        const attempts = [
-          ["pos_get_store_context_by_slug", [{ p_slug:slug }, { slug }]],
-          ["digiy_pos_get_store_context_by_slug", [{ p_slug:slug }, { slug }]]
-        ];
-        for(const [name, payloads] of attempts){
-          try{
-            const data = await rpcFirstSuccess(name, payloads);
-            if(data) return data;
-          }catch(err){
-            log(`${name} indisponible`, { message:err?.message || String(err) });
-          }
-        }
-        return null;
-      }
-
-      function escapeHtml(value){
-        return String(value ?? "")
-          .replace(/&/g,"&amp;")
-          .replace(/</g,"&lt;")
-          .replace(/>/g,"&gt;")
-          .replace(/"/g,"&quot;")
-          .replace(/'/g,"&#039;");
-      }
-
-      function normalizeGalleryPayload(data){
-        if(Array.isArray(data)) return data;
-        if(Array.isArray(data?.items)) return data.items;
-        if(Array.isArray(data?.profiles)) return data.profiles;
-        if(Array.isArray(data?.data)) return data.data;
-        return [];
-      }
-
-      function publicWhatsappUrl(phone, name){
-        const digits = normPhone(phone || SUPPORT_PHONE);
-        const text = `Bonjour, je viens de voir ${name || "votre commerce"} sur MON COMMERCE by DIGIY.`;
-        return `https://wa.me/${digits}?text=${encodeURIComponent(text)}`;
-      }
-
-      function publicProfileUrl(item){
-        const explicit = String(item?.profile_url || "").trim();
-        if(/^https?:\/\//i.test(explicit)) return explicit;
-        return `./?commerce=${encodeURIComponent(item?.slug || "")}`;
-      }
-
-      function renderCommerceGallery(items){
-        const box = $("commerceGallery");
-        const status = $("commerceGalleryStatus");
-        if(!box || !status) return;
-        box.innerHTML = "";
-
-        if(!items.length){
-          status.textContent = "Aucun commerce publié pour le moment. Les vitrines apparaîtront ici dès qu’elles seront validées.";
-          return;
-        }
-
-        status.textContent = `${items.length} commerce(s) publié(s) dans MON COMMERCE.`;
-
-        items.forEach((item) => {
-          const name = item.display_name || item.shop_name || item.name || "Commerce DIGIY";
-          const photo = item.photo_url || item.image_url || "https://digiylyfe.net/wp-content/uploads/2026/03/digiylyfe_logo_qr.jpeg";
-          const city = item.city || item.ville || "Ville non précisée";
-          const category = item.category || "Commerce";
-          const badge = item.badge || item.hub_badge || "💳 MON COMMERCE";
-          const bio = item.bio || "Commerce équipé avec MON COMMERCE by DIGIY.";
-          const wa = publicWhatsappUrl(item.whatsapp || item.whatsapp_phone || item.phone, name);
-          const profile = publicProfileUrl(item);
-
-          const card = document.createElement("article");
-          card.className = "commerce-card";
-          card.innerHTML = `
-            <img class="commerce-photo" src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.src='https://digiylyfe.net/wp-content/uploads/2026/03/digiylyfe_logo_qr.jpeg'" />
-            <div class="commerce-body">
-              <div class="commerce-title">${escapeHtml(name)}</div>
-              <div class="commerce-meta">
-                <span class="commerce-chip">${escapeHtml(category)}</span>
-                <span class="commerce-chip">📍 ${escapeHtml(city)}</span>
-                <span class="commerce-chip">${escapeHtml(badge)}</span>
-              </div>
-              <div class="commerce-bio">${escapeHtml(bio)}</div>
-              <div class="commerce-actions">
-                <a class="btn" href="${escapeHtml(wa)}" target="_blank" rel="noopener">💬 WhatsApp</a>
-                <a class="btn-outline" href="${escapeHtml(profile)}">👁️ Voir</a>
-              </div>
-            </div>
-          `;
-          box.appendChild(card);
-        });
-      }
-
-      async function loadPublicCommerceGallery(){
-        const status = $("commerceGalleryStatus");
-        if(!status) return;
-        if(!sb){
-          status.textContent = "Galerie indisponible pour le moment : connexion non prête.";
-          return;
-        }
-
-        try{
-          const { data, error } = await sb.rpc("digiy_pos_public_gallery");
-          if(error) throw error;
-          renderCommerceGallery(normalizeGalleryPayload(data));
-        }catch(err){
-          console.warn("[DIGIY POS INDEX] Galerie publique indisponible", err?.message || err);
-          status.textContent = "Impossible de charger les commerces publiés pour le moment.";
-        }
-      }
-
-      async function hydrate(){
-        state.loading = true;
-        revealPage();
-        cleanVisibleUrl();
-
-        try{
-          let slug = getStoredSlug();
-          let phone = getStoredPhone();
-          state.slug = slug;
-          state.phone = phone;
-          paintMeta();
-          wireButtons();
-          log("Hydratation démarrée", { slug, phone });
-
-          if(!slug){
-            setStatus(
-              "warn", "APERÇU LIBRE", "Ta caisse t'attend",
-              "La page montre la valeur. Le vrai travail s'ouvre avec ton identifiant et ton accès actif.",
-              "Passe par ton lien d'accès ou rejoins DIGIY pour commencer. L'entrée normale se fait par <b>QR → code d'accès → espace de travail</b>."
-            );
-            state.storeName = "Aperçu libre";
-            state.plan = "—";
-            paintMeta();
-            wireButtons();
-            return;
-          }
-
-          if(!phone){
-            try{
-              phone = await resolvePhoneFromSlug(slug);
-              log("Téléphone résolu depuis slug", { slug, phone });
-            }catch(err){
-              log("resolvePhoneFromSlug KO", { message:err?.message || String(err) });
-            }
-          }
-
-          state.slug = slug;
-          state.phone = phone || "";
-          remember(state.slug, state.phone);
-
-          let storeCtx = null;
-          try{ storeCtx = await getStoreContext(slug); }catch(err){ log("getStoreContext KO", { message:err?.message || String(err) }); }
-
-          if(storeCtx){
-            state.storeName = String(
-              storeCtx?.shop_name ||
-              storeCtx?.display_name ||
-              storeCtx?.store?.name ||
-              storeCtx?.profile?.display_name ||
-              "Boutique active"
-            ).trim();
-          }else{
-            state.storeName = "Boutique détectée";
-          }
-
-          let sub = null;
-          if(phone){
-            try{ state.access = await getAccess(phone); }catch(err){ log("digiy_has_access KO", { message:err?.message || String(err) }); state.access = false; }
-            try{ sub = await getSubscription(phone); }catch(err){ log("getSubscription KO", { message:err?.message || String(err) }); }
-          }else{
-            state.access = false;
-          }
-
-          state.plan = String(
-            sub?.plan ||
-            sub?.plan_code ||
-            sub?.subscription_plan ||
-            sub?.status ||
-            (state.access ? "actif" : "—")
-          ).trim() || "—";
-
-          paintMeta();
-          wireButtons();
-
-          if(state.access){
-            setStatus(
-              "ok", "ACCÈS OUVERT", "Ta boutique est reconnue",
-              "Ton accès est actif. Le bouton principal ouvre maintenant ta caisse.",
-              `Boutique : <b>${state.storeName}</b><br>Ta caisse et ton espace de travail sont prêts.`
-            );
-          }else{
-            setStatus(
-              "warn", "APERÇU + CONTRÔLE", "Boutique repérée, accès fermé",
-              "La page a reconnu ton identifiant, mais l'accès reste fermé tant que tu n'es pas abonné actif.",
-              "Compte reconnu.<br>Tu peux rejoindre DIGIY ou entrer avec ton code pour vérifier ton accès."
-            );
-          }
-        }catch(err){
-          console.error(err);
-          log("Hydratation fatale", { message:err?.message || String(err) });
-          setStatus(
-            "bad", "CONTRÔLE INCOMPLET", "La page reste visible",
-            "L'affichage tient debout, mais la lecture de ton contexte boutique a rencontré un problème.",
-            "Vérifie ton identifiant, puis relance le contrôle."
-          );
-        }finally{
-          state.loading = false;
-          paintMeta();
-          wireButtons();
-          revealPage();
-          refreshPosAudioText();
-        }
-      }
-
-      async function bootGuardSoft(){
-        try{
-          const ready = window.DIGIY_GUARD?.ready;
-          if(!ready) return;
-          if(typeof ready === "function"){ await ready(); return; }
-          await ready;
-        }catch(err){
-          log("guard ready KO", { message:err?.message || String(err) });
-        }
-      }
-
-      function bindCamembert(){
-        const menu = $("digiyCamembert");
-        const btn = $("digiyCamembertBtn");
-        if(!menu || !btn) return;
-
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          menu.classList.toggle("open");
-        });
-
-        document.addEventListener("click", (e) => {
-          if(!menu.contains(e.target)) menu.classList.remove("open");
-        });
-
-        document.addEventListener("keydown", (e) => {
-          if(e.key === "Escape") menu.classList.remove("open");
-        });
-      }
-
-      function bind(){
-        bindCamembert();
-
-        const btnCheck = $("btnCheck");
-        if(btnCheck){
-          btnCheck.addEventListener("click", async () => {
-            const menu = $("digiyCamembert");
-            if(menu) menu.classList.remove("open");
-            btnCheck.disabled = true;
-            btnCheck.textContent = "Contrôle…";
-            try{ await hydrate(); }
-            finally{
-              btnCheck.disabled = false;
-              btnCheck.textContent = "🔄 Vérifier mon accès";
-            }
-          });
-        }
-      }
-
-      async function init(){
-        revealPage();
-        cleanVisibleUrl();
-        bind();
-        await bootGuardSoft();
-        await hydrate();
-        await loadPublicCommerceGallery();
-      }
-
-      init();
-    })();
-  </script>
-
-  <script>
-    window.DIGIY_AUDIO_CONFIG = {
-      label:"Écouter",
-      stopLabel:"Arrêter",
-      text:window.DIGIY_POS_AUDIO_TEXT || "Tu peux ouvrir ta caisse.",
-      buttonBg:"linear-gradient(135deg,#facc15,#f59e0b)",
-      buttonColor:"#07110d",
-      bottom:"24px",
-      left:"24px",
-      rate:.82,
-      pitch:1,
-      volume:1,
-      zIndex:99998,
-      shadow:"0 10px 30px rgba(0,0,0,.26)"
-    };
-  </script>
-
-  <button id="digiy-audio-btn" type="button" aria-label="Écouter">
-    <span class="digiy-audio-ico">&#9654;</span>
-    <span class="digiy-audio-lbl">Écouter</span>
-  </button>
-
-  <div id="digiy-audio-progress-wrap" aria-hidden="true">
-    <div id="digiy-audio-progress"></div>
+  <div class="header-right">
+    <div class="time-badge" id="clockDisplay">--:--</div>
+    <button class="btn-icon" onclick="openSettings()" title="Paramètres">⚙️</button>
+  </div>
+</header>
+
+<main>
+  <!-- Gauche : catalogue -->
+  <div class="left-panel">
+    <div class="search-bar">
+      <input class="search-input" id="searchInput" type="text"
+             placeholder="Rechercher un article…" oninput="renderProducts()">
+    </div>
+    <div class="cats" id="catsBar"></div>
+    <div class="products-grid" id="productsGrid"></div>
   </div>
 
-  <script>
-    (function(){
-      var cfg = window.DIGIY_AUDIO_CONFIG || {};
-      var config = {
-        label:cfg.label || "Écouter DIGIY",
-        stopLabel:cfg.stopLabel || "Arrêter",
-        text:cfg.text || "Bienvenue sur DIGIYLYFE.",
-        buttonBg:cfg.buttonBg || "linear-gradient(135deg,#d4af37,#b78b34)",
-        buttonColor:cfg.buttonColor || "#111827",
-        bottom:cfg.bottom || "24px",
-        left:cfg.left || "24px",
-        right:cfg.right || null,
-        rate:typeof cfg.rate === "number" ? cfg.rate : .82,
-        pitch:typeof cfg.pitch === "number" ? cfg.pitch : 1,
-        volume:typeof cfg.volume === "number" ? cfg.volume : 1,
-        zIndex:cfg.zIndex || 99998,
-        shadow:cfg.shadow || "0 8px 28px rgba(0,0,0,.24)"
-      };
+  <!-- Droite : panier -->
+  <div class="right-panel">
+    <div class="panier-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="panier-title">Panier</span>
+        <span class="panier-count" id="cartCount">0</span>
+      </div>
+      <button class="btn-clear" onclick="clearCart()">Vider</button>
+    </div>
+    <div class="client-row">
+      <input class="client-input" id="clientInput" type="text"
+             placeholder="👤 Nom du client (optionnel)">
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty">
+        <div class="ei">🛒</div>
+        <span>Panier vide</span>
+        <span style="font-size:11px;color:var(--muted)">Cliquez sur un article</span>
+      </div>
+    </div>
+    <div class="totaux">
+      <div class="total-row"><span>Sous-total</span><span id="subtotalDisplay">0 F</span></div>
+      <div class="remise-row">
+        <input class="remise-input" id="remiseInput" type="number"
+               placeholder="Remise…" min="0" oninput="updateTotals()">
+        <select class="remise-type" id="remiseType" onchange="updateTotals()">
+          <option value="pct">%</option>
+          <option value="fix">F</option>
+        </select>
+      </div>
+      <div class="total-row" id="remiseRow" style="display:none;">
+        <span>Remise</span>
+        <span id="remiseDisplay" style="color:var(--red)"></span>
+      </div>
+      <div class="total-row big"><span>TOTAL</span><span id="totalDisplay">0 F</span></div>
+    </div>
+    <div class="payment-section">
+      <div class="payment-modes">
+        <div class="pay-btn active" id="pay-esp" onclick="selectPay('esp')">
+          <div class="pay-icon">💵</div><div class="pay-label">Espèces</div>
+        </div>
+        <div class="pay-btn" id="pay-mob" onclick="selectPay('mob')">
+          <div class="pay-icon">📱</div><div class="pay-label">Mobile</div>
+        </div>
+        <div class="pay-btn" id="pay-crd" onclick="selectPay('crd')">
+          <div class="pay-icon">💳</div><div class="pay-label">Carte</div>
+        </div>
+      </div>
+      <button class="encaisser-btn" id="encaisserBtn" onclick="encaisser()" disabled>
+        💰 Encaisser
+      </button>
+    </div>
+  </div>
+</main>
 
-      var btn = document.getElementById("digiy-audio-btn");
-      var lbl = btn ? btn.querySelector(".digiy-audio-lbl") : null;
-      var ico = btn ? btn.querySelector(".digiy-audio-ico") : null;
-      var progressWrap = document.getElementById("digiy-audio-progress-wrap");
-      var progressBar = document.getElementById("digiy-audio-progress");
-      if(!btn || !lbl || !ico || !progressWrap || !progressBar) return;
+<!-- Reçu modal -->
+<div class="modal-overlay" id="modalRecu">
+  <div class="modal">
+    <div class="recu-header">
+      <div class="recu-logo">🧾</div>
+      <div class="recu-shop" id="recuShop">Ma Boutique</div>
+      <div class="recu-date" id="recuDate"></div>
+    </div>
+    <div class="recu-items" id="recuItems"></div>
+    <div class="recu-total"><span>TOTAL</span><span id="recuTotal"></span></div>
+    <div class="recu-payment" id="recuPayment"></div>
+    <div class="recu-thanks">✅ Merci pour votre achat !</div>
+    <div class="recu-actions">
+      <button class="btn-secondary" onclick="closeRecu()">Fermer</button>
+      <button class="btn-primary" onclick="window.print()">🖨️ Imprimer</button>
+    </div>
+  </div>
+</div>
 
-      btn.style.bottom = config.bottom;
-      btn.style.left = config.left ? config.left : "auto";
-      btn.style.right = config.right ? config.right : "auto";
-      btn.style.background = config.buttonBg;
-      btn.style.color = config.buttonColor;
-      btn.style.boxShadow = config.shadow;
-      btn.style.zIndex = String(config.zIndex);
-      progressWrap.style.background = "rgba(212,175,55,.2)";
-      progressBar.style.background = "linear-gradient(90deg,#d4af37,#b78b34)";
+<div class="toast" id="toast"></div>
 
-      if(!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)){
-        btn.style.display = "none";
-        return;
-      }
+<script>
+/* ── CATALOGUE ── Modifie librement cette liste ── */
+const PRODUCTS = [
+  {id:1, name:"Riz 5 kg",       cat:"Alimentation", emoji:"🌾", price:3500, stock:50},
+  {id:2, name:"Huile 1 L",      cat:"Alimentation", emoji:"🫙", price:1500, stock:30},
+  {id:3, name:"Pain",           cat:"Alimentation", emoji:"🍞", price:250,  stock:20},
+  {id:4, name:"Sucre 1 kg",     cat:"Alimentation", emoji:"🍬", price:800,  stock:40},
+  {id:5, name:"Lait en poudre", cat:"Alimentation", emoji:"🥛", price:2200, stock:15},
+  {id:6, name:"Oeufs x6",       cat:"Alimentation", emoji:"🥚", price:1200, stock:25},
+  {id:7, name:"Eau 1,5 L",      cat:"Boissons",     emoji:"💧", price:500,  stock:60},
+  {id:8, name:"Jus Bissap",     cat:"Boissons",     emoji:"🍹", price:700,  stock:20},
+  {id:9, name:"Coca Cola",      cat:"Boissons",     emoji:"🥤", price:800,  stock:24},
+  {id:10,name:"Cafe soluble",   cat:"Boissons",     emoji:"☕", price:1000, stock:18},
+  {id:11,name:"Savon",          cat:"Hygiene",      emoji:"🧼", price:400,  stock:35},
+  {id:12,name:"Dentifrice",     cat:"Hygiene",      emoji:"🪥", price:1200, stock:15},
+  {id:13,name:"Deodorant",      cat:"Hygiene",      emoji:"🧴", price:1800, stock:10},
+  {id:14,name:"Papier WC x4",   cat:"Hygiene",      emoji:"🧻", price:1500, stock:20},
+  {id:15,name:"Allumettes",     cat:"Maison",       emoji:"🔥", price:150,  stock:80},
+  {id:16,name:"Bougie",         cat:"Maison",       emoji:"🕯️", price:500,  stock:30},
+  {id:17,name:"Lessive 1 kg",   cat:"Maison",       emoji:"🧺", price:1800, stock:20},
+  {id:18,name:"Biscuits",       cat:"Snacks",       emoji:"🍪", price:500,  stock:40},
+  {id:19,name:"Chips",          cat:"Snacks",       emoji:"🥔", price:400,  stock:35},
+  {id:20,name:"Cacahuetes",     cat:"Snacks",       emoji:"🥜", price:300,  stock:50},
+  {id:21,name:"Chewing-gum",    cat:"Snacks",       emoji:"🍬", price:200,  stock:60},
+];
 
-      var synth = window.speechSynthesis;
-      var utterance = null;
-      var playing = false;
-      var timer = null;
-      var launchId = 0;
+let cart = [], selectedCat = "Tous", selectedPay = "esp";
+let shopName = localStorage.getItem("caisse_shop") || "Ma Boutique";
 
-      function currentAudioText(){
-        if(typeof window.DIGIY_GET_AUDIO_TEXT === "function") return window.DIGIY_GET_AUDIO_TEXT();
-        return window.DIGIY_POS_AUDIO_TEXT || config.text;
-      }
+function init() {
+  document.getElementById("shopNameDisplay").textContent = shopName;
+  document.getElementById("recuShop").textContent = shopName;
+  buildCats();
+  renderProducts();
+  setInterval(() => {
+    const n = new Date();
+    document.getElementById("clockDisplay").textContent =
+      n.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit", second:"2-digit"});
+  }, 1000);
+}
 
-      function getFrenchVoice(){
-        var voices = synth.getVoices() || [];
-        if(!voices.length) return null;
-        return voices.find(function(v){ return /fr[-_]?FR/i.test(v.lang) && /google/i.test(v.name); }) ||
-          voices.find(function(v){ return /fr[-_]?FR/i.test(v.lang); }) ||
-          voices.find(function(v){ return /^fr/i.test(v.lang); }) || null;
-      }
+function buildCats() {
+  const cats = ["Tous", ...new Set(PRODUCTS.map(p => p.cat))];
+  document.getElementById("catsBar").innerHTML = cats.map(c =>
+    `<button class="cat-btn${c === selectedCat ? " active" : ""}" onclick="selectCat('${c}')">${c}</button>`
+  ).join("");
+}
+function selectCat(c) { selectedCat = c; buildCats(); renderProducts(); }
 
-      function setIdle(){
-        playing = false;
-        ico.innerHTML = "&#9654;";
-        lbl.textContent = config.label;
-        btn.setAttribute("aria-label", config.label);
-        clearInterval(timer);
-        timer = null;
-        progressWrap.style.opacity = "0";
-        progressBar.style.width = "0%";
-      }
+function renderProducts() {
+  const q = document.getElementById("searchInput").value.toLowerCase();
+  const f = PRODUCTS.filter(p =>
+    (selectedCat === "Tous" || p.cat === selectedCat) &&
+    (!q || p.name.toLowerCase().includes(q))
+  );
+  const g = document.getElementById("productsGrid");
+  if (!f.length) {
+    g.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:40px;font-size:13px;">Aucun article</div>`;
+    return;
+  }
+  g.innerHTML = f.map(p => `
+    <div class="product-card${p.stock === 0 ? " oos" : ""}" onclick="addToCart(${p.id})">
+      <span class="p-stock${p.stock <= 5 ? " low" : ""}">${p.stock}</span>
+      <div class="p-emoji">${p.emoji}</div>
+      <div class="p-name">${p.name}</div>
+      <div class="p-cat">${p.cat}</div>
+      <div class="p-price">${fmt(p.price)}</div>
+    </div>`).join("");
+}
 
-      function setPlaying(){
-        playing = true;
-        ico.innerHTML = "&#9632;";
-        lbl.textContent = config.stopLabel;
-        btn.setAttribute("aria-label", config.stopLabel);
-      }
+function addToCart(id) {
+  const p = PRODUCTS.find(x => x.id === id); if (!p) return;
+  const ex = cart.find(x => x.id === id);
+  if (ex) ex.qty++; else cart.push({...p, qty: 1});
+  renderCart();
+  showToast("+ " + p.name);
+}
+function changeQty(id, d) {
+  const i = cart.find(x => x.id === id); if (!i) return;
+  i.qty += d;
+  if (i.qty <= 0) cart = cart.filter(x => x.id !== id);
+  renderCart();
+}
+function clearCart() {
+  cart = [];
+  document.getElementById("remiseInput").value = "";
+  renderCart();
+}
 
-      function stop(){
-        clearInterval(timer);
-        timer = null;
-        try{ synth.cancel(); }catch(e){}
-        utterance = null;
-        setIdle();
-      }
+function renderCart() {
+  const el = document.getElementById("cartItems");
+  const cnt = cart.reduce((s, i) => s + i.qty, 0);
+  document.getElementById("cartCount").textContent = cnt;
+  if (!cart.length) {
+    el.innerHTML = `<div class="cart-empty"><div class="ei">🛒</div><span>Panier vide</span></div>`;
+    document.getElementById("encaisserBtn").disabled = true;
+    updateTotals(); return;
+  }
+  el.innerHTML = cart.map(i => `
+    <div class="cart-item">
+      <div class="ci-emoji">${i.emoji}</div>
+      <div class="ci-info">
+        <div class="ci-name">${i.name}</div>
+        <div class="ci-unit">${fmt(i.price)}/u</div>
+      </div>
+      <div class="ci-qty">
+        <button class="qty-btn minus" onclick="changeQty(${i.id},-1)">−</button>
+        <span class="qty-num">${i.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${i.id},1)">+</button>
+      </div>
+      <div class="ci-total">${fmt(i.price * i.qty)}</div>
+    </div>`).join("");
+  document.getElementById("encaisserBtn").disabled = false;
+  updateTotals();
+}
 
-      function startProgress(text, currentId){
-        var words = (text.trim().match(/\S+/g) || []).length;
-        var estimatedDuration = Math.max(2500, words * 520);
-        var elapsed = 0;
-        clearInterval(timer);
-        progressBar.style.width = "0%";
-        progressWrap.style.opacity = "1";
-        timer = setInterval(function(){
-          if(!playing || currentId !== launchId){ clearInterval(timer); timer = null; return; }
-          elapsed += 150;
-          var pct = Math.min(96, (elapsed / estimatedDuration) * 100);
-          progressBar.style.width = pct + "%";
-        },150);
-      }
+function updateTotals() {
+  const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const rv = parseFloat(document.getElementById("remiseInput").value) || 0;
+  const rt = document.getElementById("remiseType").value;
+  const rem = rv > 0 ? (rt === "pct" ? Math.round(sub * rv / 100) : Math.min(rv, sub)) : 0;
+  const total = Math.max(0, sub - rem);
+  document.getElementById("subtotalDisplay").textContent = fmt(sub);
+  document.getElementById("totalDisplay").textContent = fmt(total);
+  const rr = document.getElementById("remiseRow");
+  if (rem > 0) { rr.style.display = "flex"; document.getElementById("remiseDisplay").textContent = "- " + fmt(rem); }
+  else rr.style.display = "none";
+}
+function getTotal() {
+  const sub = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const rv = parseFloat(document.getElementById("remiseInput").value) || 0;
+  const rt = document.getElementById("remiseType").value;
+  const rem = rv > 0 ? (rt === "pct" ? Math.round(sub * rv / 100) : Math.min(rv, sub)) : 0;
+  return Math.max(0, sub - rem);
+}
 
-      function speak(){
-        var text = String(currentAudioText() || "").trim();
-        if(!text) return;
-        stop();
-        launchId += 1;
-        var id = launchId;
-        utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "fr-FR";
-        utterance.rate = config.rate;
-        utterance.pitch = config.pitch;
-        utterance.volume = config.volume;
-        var voice = getFrenchVoice();
-        if(voice) utterance.voice = voice;
-        utterance.onstart = function(){ setPlaying(); startProgress(text,id); };
-        utterance.onend = function(){ progressBar.style.width = "100%"; setTimeout(setIdle,180); };
-        utterance.onerror = function(){ setIdle(); };
-        synth.cancel();
-        setTimeout(function(){ synth.speak(utterance); }, 80);
-      }
+function selectPay(m) {
+  selectedPay = m;
+  document.querySelectorAll(".pay-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("pay-" + m).classList.add("active");
+}
 
-      btn.addEventListener("click", function(){ playing ? stop() : speak(); });
-      if(synth.onvoiceschanged !== undefined) synth.onvoiceschanged = function(){};
-      window.addEventListener("beforeunload", stop);
-      setIdle();
-    })();
-  </script>
+function encaisser() {
+  if (!cart.length) return;
+  const now = new Date();
+  const client = document.getElementById("clientInput").value.trim();
+  const pl = {esp:"Especes 💵", mob:"Mobile Money 📱", crd:"Carte 💳"};
+  document.getElementById("recuDate").textContent =
+    now.toLocaleDateString("fr-FR", {weekday:"long", day:"numeric", month:"long"}) +
+    " — " + now.toLocaleTimeString("fr-FR", {hour:"2-digit", minute:"2-digit"}) +
+    (client ? " · " + client : "");
+  document.getElementById("recuItems").innerHTML = cart.map(i =>
+    `<div class="recu-item"><span>${i.emoji} ${i.name} x${i.qty}</span><span>${fmt(i.price * i.qty)}</span></div>`
+  ).join("");
+  document.getElementById("recuTotal").textContent = fmt(getTotal());
+  document.getElementById("recuPayment").textContent = "Paiement : " + pl[selectedPay];
+  document.getElementById("modalRecu").classList.add("open");
+}
+function closeRecu() {
+  document.getElementById("modalRecu").classList.remove("open");
+  cart = [];
+  document.getElementById("clientInput").value = "";
+  document.getElementById("remiseInput").value = "";
+  renderCart();
+  showToast("Vente enregistree !");
+}
+
+function openSettings() {
+  const n = prompt("Nom de la boutique :", shopName);
+  if (n && n.trim()) {
+    shopName = n.trim();
+    localStorage.setItem("caisse_shop", shopName);
+    document.getElementById("shopNameDisplay").textContent = shopName;
+    document.getElementById("recuShop").textContent = shopName;
+  }
+}
+
+function fmt(n) { return n.toLocaleString("fr-FR") + " F"; }
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+document.getElementById("modalRecu").addEventListener("click", function(e) {
+  if (e.target === this) closeRecu();
+});
+
+init();
+</script>
 </body>
 </html>
 
