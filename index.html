@@ -7,8 +7,9 @@
   <meta name="theme-color" content="#07140f" />
   <meta
     name="description"
-    content="MON COMMERCE by DIGIY — ta caisse élégante pour boutiques de mode, sacs, accessoires et commerce raffiné. Accès sécurisé, 0% commission."
+    content="MON COMMERCE by DIGIY — ta caisse élégante pour boutiques, commerce local et activité terrain. Accès sécurisé, 0% commission."
   />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -54,14 +55,10 @@
       --gold:#facc15;
       --gold2:#f59e0b;
       --green:#22c55e;
-      --green2:#16a34a;
       --red:#ef4444;
       --warn:#f59e0b;
-      --blue:#00a651;
       --shadow:0 22px 56px rgba(0,0,0,.28);
       --shadow-soft:0 14px 34px rgba(0,0,0,.22);
-      --radius:26px;
-      --radius-sm:18px;
       --max:1180px;
       --fontA:"Outfit", system-ui, sans-serif;
       --fontB:"Cormorant Garamond", Georgia, serif;
@@ -82,114 +79,129 @@
     button{font:inherit}
     .wrap{width:min(100%,var(--max));margin:0 auto;padding:0 16px}
 
-    /* ── FLOAT BUTTON ── */
+    /* ━━━ Sécurité visuelle : aucune grosse bande ne doit apparaître ━━━ */
+    .topbar,
+    .routeNav,
     .floating-site-btn{
+      display:none!important;
+    }
+
+    /* ━━━ Camembert discret ━━━ */
+    .digiy-camembert{
       position:fixed;
-      left:16px;
-      bottom:calc(16px + env(safe-area-inset-bottom, 0px));
-      z-index:80;
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      min-height:48px;padding:14px 16px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(5,16,12,.88);backdrop-filter:blur(10px);
-      color:var(--text);font-size:13px;font-weight:900;letter-spacing:.2px;
-      box-shadow:0 16px 36px rgba(0,0,0,.28);
-      transition:transform .14s ease, border-color .14s ease, background .14s ease;
-    }
-    .floating-site-btn:hover{
-      transform:translateY(-1px);border-color:rgba(250,204,21,.26);background:rgba(8,20,15,.94);
+      top:12px;
+      right:12px;
+      z-index:99999;
     }
 
-    /* ── TOPBAR ── */
-    .topbar{
-      position:sticky;top:0;z-index:50;
-      backdrop-filter:blur(12px);background:rgba(4,17,13,.76);
-      border-bottom:1px solid rgba(255,255,255,.07);
-    }
-    .topbar-inner{
-      width:min(100%,var(--max));margin:0 auto;padding:14px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
-    }
-
-    .brand{display:flex;align-items:center;gap:12px;min-width:0;}
-    .brand-badge{
-      width:48px;height:48px;border-radius:18px;display:grid;place-items:center;font-size:22px;
-      border:1px solid rgba(250,204,21,.16);
-      background:linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.08));
-      box-shadow:0 16px 34px rgba(250,204,21,.10);
-    }
-    .brand-kicker{
-      color:var(--gold);font-size:12px;letter-spacing:.14em;
-      text-transform:uppercase;font-weight:900;margin-bottom:3px;
-    }
-    .brand-title{
-      font-family:var(--fontB);font-size:28px;line-height:1;font-weight:700;letter-spacing:.02em;
-    }
-    .brand-sub{
-      margin-top:3px;color:var(--muted);font-size:12px;font-weight:800;
-      letter-spacing:.08em;text-transform:uppercase;
-    }
-
-    .top-actions{
-      display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;
-    }
-
-    .routeNav{
-      width:min(100%,var(--max));
-      margin:0 auto;
-      padding:0 16px 12px;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-
-    .routeNav a{
-      min-height:40px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:7px;
-      padding:9px 12px;
+    .digiy-camembert-btn{
+      width:44px;
+      height:44px;
       border-radius:999px;
+      border:1px solid rgba(250,204,21,.28);
+      background:rgba(4,17,13,.90);
+      color:#fff7c2;
+      display:grid;
+      place-items:center;
+      font-size:21px;
+      font-weight:1000;
+      box-shadow:0 12px 30px rgba(0,0,0,.30);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      cursor:pointer;
+    }
+
+    .digiy-camembert-panel{
+      position:absolute;
+      top:52px;
+      right:0;
+      width:min(292px,calc(100vw - 24px));
+      display:none;
+      padding:10px;
+      border-radius:20px;
       border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.045);
-      color:var(--text);
+      background:rgba(4,17,13,.96);
+      box-shadow:0 20px 50px rgba(0,0,0,.45);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+
+    .digiy-camembert.open .digiy-camembert-panel{
+      display:grid;
+      gap:7px;
+    }
+
+    .digiy-camembert-title{
+      padding:8px 10px 2px;
+      color:#facc15;
+      font-size:11px;
+      font-weight:1000;
+      letter-spacing:.13em;
+      text-transform:uppercase;
+    }
+
+    .digiy-camembert-sub{
+      padding:0 10px 8px;
+      color:rgba(247,251,248,.72);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.35;
+    }
+
+    .digiy-camembert-status{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:rgba(250,204,21,.10);
+      border:1px solid rgba(250,204,21,.18);
+      color:#fde68a;
       font-size:12px;
       font-weight:950;
-      box-shadow:0 8px 20px rgba(0,0,0,.18);
-      white-space:nowrap;
     }
 
-    .routeNav a.hub{
-      border-color:rgba(250,204,21,.30);
-      background:rgba(250,204,21,.10);
-      color:#fff3bf;
+    .digiy-camembert-panel a,
+    .digiy-camembert-panel button{
+      width:100%;
+      min-height:42px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.045);
+      color:#f7fbf8;
+      text-decoration:none;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:9px;
+      font-size:13px;
+      font-weight:950;
+      cursor:pointer;
+      font-family:inherit;
     }
 
-    .routeNav a.pro{
-      border-color:rgba(34,197,94,.32);
-      background:rgba(34,197,94,.10);
-      color:#bbf7d0;
-    }
-
-    .routeNav a:hover{
-      filter:brightness(1.12);
+    .digiy-camembert-panel a:hover,
+    .digiy-camembert-panel button:hover{
       border-color:rgba(250,204,21,.35);
+      background:rgba(250,204,21,.08);
     }
+
+    .digiy-camembert-panel .quiet{color:rgba(247,251,248,.72)}
 
     .pill{
       display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;
       background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.11);
       color:var(--muted);font-size:12px;font-weight:900;backdrop-filter:blur(10px);
     }
+
     .dot{
       width:9px;height:9px;border-radius:999px;background:var(--warn);
       flex:0 0 auto;box-shadow:0 0 0 4px rgba(255,255,255,.04);
     }
-    .dot.ok{background:var(--green)}.dot.bad{background:var(--red)}
+    .dot.ok{background:var(--green)}
+    .dot.bad{background:var(--red)}
 
-    /* ── BUTTONS ── */
     .btn,.btn-outline,.btn-ghost{
       appearance:none;border:none;cursor:pointer;
       display:inline-flex;align-items:center;justify-content:center;gap:10px;
@@ -200,12 +212,11 @@
     }
     .btn:hover,.btn-outline:hover,.btn-ghost:hover{transform:translateY(-1px)}
     .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled{opacity:.55;cursor:not-allowed;transform:none}
-    .btn{color:#07110d;background:linear-gradient(135deg,var(--gold),var(--gold2));box-shadow:0 14px 30px rgba(250,204,21,.18);}
-    .btn-outline{color:var(--text);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12);}
-    .btn-ghost{color:var(--muted);background:transparent;border:1px solid rgba(255,255,255,.12);}
+    .btn{color:#07110d;background:linear-gradient(135deg,var(--gold),var(--gold2));box-shadow:0 14px 30px rgba(250,204,21,.18)}
+    .btn-outline{color:var(--text);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12)}
+    .btn-ghost{color:var(--muted);background:transparent;border:1px solid rgba(255,255,255,.12)}
 
-    /* ── HERO ── */
-    .hero{padding:34px 0 20px;}
+    .hero{padding:34px 0 20px}
     .hero-grid{
       display:grid;grid-template-columns:minmax(0,1.18fr) minmax(330px,.82fr);
       gap:18px;align-items:stretch;
@@ -217,7 +228,7 @@
       box-shadow:var(--shadow);overflow:hidden;
     }
 
-    .hero-main{padding:28px 24px 24px;position:relative;}
+    .hero-main{padding:28px 24px 24px;position:relative}
     .hero-main::after{
       content:"";position:absolute;right:-80px;bottom:-90px;
       width:240px;height:240px;border-radius:999px;
@@ -237,26 +248,21 @@
       font-size:clamp(42px, 6vw, 78px);line-height:.94;
       letter-spacing:-.03em;font-weight:700;margin-bottom:14px;max-width:10.6ch;
     }
-    .hero-title em{color:var(--gold);font-style:italic;}
+    .hero-title em{color:var(--gold);font-style:italic}
 
-    .hero-sub{
-      color:var(--muted);font-size:17px;line-height:1.75;max-width:64ch;font-weight:600;
-    }
-
-    .hero-points{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;}
+    .hero-sub{color:var(--muted);font-size:17px;line-height:1.75;max-width:64ch;font-weight:600}
+    .hero-points{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
     .hero-point{
       padding:10px 13px;border-radius:999px;font-size:13px;font-weight:900;
       color:var(--muted);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);
     }
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+    .helper{margin-top:14px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:800}
 
-    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px;}
-
-    .helper{margin-top:14px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:800;}
-
-    .hero-mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px;}
-    .mini-box{padding:14px 12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
-    .mini-label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;}
-    .mini-value{margin-top:6px;font-size:19px;font-weight:950;letter-spacing:-.02em;word-break:break-word;}
+    .hero-mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+    .mini-box{padding:14px 12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+    .mini-label{color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em}
+    .mini-value{margin-top:6px;font-size:19px;font-weight:950;letter-spacing:-.02em;word-break:break-word}
 
     .hero-side{
       padding:18px;display:flex;flex-direction:column;gap:14px;
@@ -264,376 +270,138 @@
         linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)),var(--card2);
     }
 
-    .status-box{padding:16px;border-radius:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);}
-    .status-top{display:flex;align-items:flex-start;gap:10px;}
-    .status-title{font-size:20px;font-weight:950;line-height:1.15;}
-    .status-sub{margin-top:5px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:700;}
+    .status-box{padding:16px;border-radius:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+    .status-top{display:flex;align-items:flex-start;gap:10px}
+    .status-title{font-size:20px;font-weight:950;line-height:1.15}
+    .status-sub{margin-top:5px;color:var(--muted);font-size:13px;line-height:1.7;font-weight:700}
+    .status-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+    .mini{padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);min-width:0}
+    .mini .mini-label{font-size:10px}
+    .mini .mini-value{font-size:14px;margin-top:5px}
 
-    .status-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
-    .mini{padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);min-width:0;}
-    .mini .mini-label{font-size:10px;}
-    .mini .mini-value{font-size:14px;margin-top:5px;}
-
-    .diag{
-      margin-top:14px;padding:12px;border-radius:16px;background:#081119;
-      border:1px solid rgba(255,255,255,.08);color:#d8e1ff;
-      font:12px/1.58 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      white-space:pre-wrap;word-break:break-word;max-height:230px;overflow:auto;
-    }
-
-    /* ── SECTIONS ── */
-    .section{padding:24px 0;}
-    .section-head{text-align:center;margin-bottom:18px;}
-    .section-kicker{
-      color:var(--gold);font-size:12px;font-weight:900;
-      text-transform:uppercase;letter-spacing:.15em;margin-bottom:8px;
-    }
-    .section-title{
-      font-family:var(--fontB);font-size:clamp(30px,4vw,48px);line-height:1;margin-bottom:8px;
-    }
-    .section-sub{
-      color:var(--muted);font-size:14px;line-height:1.8;max-width:760px;
-      margin:0 auto;font-weight:600;
-    }
+    .section{padding:24px 0}
+    .section-head{text-align:center;margin-bottom:18px}
+    .section-kicker{color:var(--gold);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.15em;margin-bottom:8px}
+    .section-title{font-family:var(--fontB);font-size:clamp(30px,4vw,48px);line-height:1;margin-bottom:8px}
+    .section-sub{color:var(--muted);font-size:14px;line-height:1.8;max-width:760px;margin:0 auto;font-weight:600}
 
     .preview-shell,.section-card,.price-card{
       background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);
       border:1px solid rgba(255,255,255,.08);border-radius:26px;box-shadow:var(--shadow-soft);
     }
 
-    .preview-shell{padding:18px;overflow:hidden;}
-    .preview-top{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      flex-wrap:wrap;margin-bottom:14px;
-    }
+    .preview-shell{padding:18px;overflow:hidden}
+    .preview-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
     .preview-badge{
       display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
       background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);
       color:var(--gold);font-size:11px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;
     }
 
-    .cockpit{
-      background:var(--card2);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px;
-    }
-    .cockpit-head{
-      display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;
-    }
-    .cockpit-title{font-size:20px;font-weight:950;line-height:1.15;font-family:var(--fontA);}
-    .cockpit-sub{margin-top:4px;color:var(--muted);font-size:12px;font-weight:700;}
+    .cockpit{background:var(--card2);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:16px}
+    .cockpit-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+    .cockpit-title{font-size:20px;font-weight:950;line-height:1.15;font-family:var(--fontA)}
+    .cockpit-sub{margin-top:4px;color:var(--muted);font-size:12px;font-weight:700}
+    .cockpit-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:14px}
+    .pane{border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.03);padding:14px}
+    .pane-title{font-size:13px;font-weight:950;margin-bottom:10px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+    .demo-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+    .demo-stat{padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+    .demo-stat small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.10em;font-weight:900}
+    .demo-stat strong{display:block;margin-top:6px;font-size:22px;font-weight:950;letter-spacing:-.02em}
+    .sale-form{display:grid;grid-template-columns:1.1fr .6fr .7fr;gap:10px;margin-top:10px}
+    .mock-field{min-height:48px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);color:#c4d3ca;font-size:12px;display:flex;align-items:center;font-weight:700}
+    .mock-list{display:grid;gap:8px}
+    .mock-item{padding:11px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .mock-item strong{font-size:14px;line-height:1.4}
+    .mock-item small{display:block;color:var(--muted);font-size:11px;margin-top:4px;line-height:1.55;font-weight:700}
+    .mock-tag{padding:6px 9px;border-radius:999px;border:1px solid rgba(250,204,21,.20);background:rgba(250,204,21,.08);color:var(--gold);font-size:10px;font-weight:950;white-space:nowrap}
+    .lock-strip{margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);color:#ffc9c9;font-size:12px;font-weight:800;line-height:1.7}
 
-    .cockpit-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:14px;}
+    .features,.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+    .section-card{padding:20px;transition:transform .16s ease, border-color .16s ease}
+    .section-card:hover{transform:translateY(-2px);border-color:rgba(250,204,21,.20)}
+    .feat-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:24px;margin-bottom:12px;background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.16)}
+    .feat-title{font-family:var(--fontB);font-size:24px;color:var(--gold);margin-bottom:7px;line-height:1}
+    .feat-text{font-size:13px;line-height:1.9;color:var(--muted);font-weight:700}
+    .step-num{width:34px;height:34px;border-radius:999px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07110d;display:flex;align-items:center;justify-content:center;font-weight:950;font-size:13px;margin-bottom:12px;box-shadow:0 10px 20px rgba(250,204,21,.16)}
 
-    .pane{border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(255,255,255,.03);padding:14px;}
-    .pane-title{
-      font-size:13px;font-weight:950;margin-bottom:10px;letter-spacing:.03em;
-      text-transform:uppercase;color:var(--muted);
-    }
+    .commerce-gallery-shell{padding:18px;background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);border:1px solid rgba(255,255,255,.08);border-radius:26px;box-shadow:var(--shadow-soft)}
+    .commerce-gallery-status{color:var(--muted);font-size:13px;font-weight:800;line-height:1.7;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);margin-bottom:14px}
+    .commerce-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+    .commerce-card{overflow:hidden;border-radius:22px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.035);box-shadow:0 14px 34px rgba(0,0,0,.18);display:flex;flex-direction:column;min-height:100%}
+    .commerce-photo{width:100%;height:170px;object-fit:cover;display:block;background:rgba(255,255,255,.05)}
+    .commerce-body{padding:15px;display:flex;flex-direction:column;gap:10px;flex:1}
+    .commerce-title{font-size:18px;line-height:1.15;font-weight:950;letter-spacing:-.02em}
+    .commerce-meta{display:flex;flex-wrap:wrap;gap:7px;color:var(--muted);font-size:11px;font-weight:900}
+    .commerce-chip{padding:7px 9px;border-radius:999px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04)}
+    .commerce-bio{color:var(--muted);font-size:13px;line-height:1.75;font-weight:700;flex:1}
+    .commerce-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+    .commerce-actions .btn,.commerce-actions .btn-outline{flex:1;min-width:130px;min-height:42px;padding:10px 12px;font-size:12px}
 
-    .demo-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
-    .demo-stat{padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);}
-    .demo-stat small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.10em;font-weight:900;}
-    .demo-stat strong{display:block;margin-top:6px;font-size:22px;font-weight:950;letter-spacing:-.02em;}
+    .pricing{padding:30px 0 56px}
+    .price-wrap{max-width:780px;margin:0 auto}
+    .price-card{padding:30px 24px;border:2px solid rgba(250,204,21,.22);text-align:center;position:relative;overflow:hidden}
+    .price-card::before{content:"";position:absolute;inset:-120px auto auto -120px;width:260px;height:260px;border-radius:999px;background:radial-gradient(circle, rgba(250,204,21,.10), transparent 70%);pointer-events:none}
+    .price-badge{display:inline-flex;padding:8px 12px;border-radius:999px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07110d;font-weight:950;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
+    .price-name{font-family:var(--fontB);font-size:34px;line-height:1;margin-bottom:8px}
+    .price-amount{font-family:var(--fontB);font-size:64px;font-weight:700;color:var(--gold);line-height:1;letter-spacing:-.02em}
+    .price-period{margin-top:8px;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:900}
+    .price-list{list-style:none;max-width:460px;margin:22px auto 0;text-align:left;display:grid;gap:8px}
+    .price-list li{padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);font-size:13px;color:#d8e2db;line-height:1.65;font-weight:700}
+    .cta-box{margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .footer{border-top:1px solid rgba(255,255,255,.07);padding:20px 0 40px;color:var(--muted);font-size:12px}
+    .footer-inner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;line-height:1.7;font-weight:800}
 
-    .sale-form{display:grid;grid-template-columns:1.1fr .6fr .7fr;gap:10px;margin-top:10px;}
-    .mock-field{
-      min-height:48px;padding:12px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.02);
-      color:#c4d3ca;font-size:12px;display:flex;align-items:center;font-weight:700;
-    }
-
-    .mock-list{display:grid;gap:8px;}
-    .mock-item{
-      padding:11px 12px;border-radius:14px;border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.03);display:flex;justify-content:space-between;
-      gap:10px;align-items:flex-start;
-    }
-    .mock-item strong{font-size:14px;line-height:1.4;}
-    .mock-item small{display:block;color:var(--muted);font-size:11px;margin-top:4px;line-height:1.55;font-weight:700;}
-    .mock-tag{
-      padding:6px 9px;border-radius:999px;border:1px solid rgba(250,204,21,.20);
-      background:rgba(250,204,21,.08);color:var(--gold);font-size:10px;font-weight:950;white-space:nowrap;
-    }
-
-    .lock-strip{
-      margin-top:14px;padding:12px 14px;border-radius:14px;
-      background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);
-      color:#ffc9c9;font-size:12px;font-weight:800;line-height:1.7;
-    }
-
-    .features,.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
-
-    .section-card{padding:20px;transition:transform .16s ease, border-color .16s ease;}
-    .section-card:hover{transform:translateY(-2px);border-color:rgba(250,204,21,.20);}
-
-    .feat-icon{
-      width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
-      font-size:24px;margin-bottom:12px;
-      background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.16);
-    }
-    .feat-title{font-family:var(--fontB);font-size:24px;color:var(--gold);margin-bottom:7px;line-height:1;}
-    .feat-text{font-size:13px;line-height:1.9;color:var(--muted);font-weight:700;}
-
-    .step-num{
-      width:34px;height:34px;border-radius:999px;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07110d;
-      display:flex;align-items:center;justify-content:center;
-      font-weight:950;font-size:13px;margin-bottom:12px;
-      box-shadow:0 10px 20px rgba(250,204,21,.16);
-    }
-
-
-
-    /* ── COMMERCES PUBLIÉS ── */
-    .commerce-gallery-shell{
-      padding:18px;
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:26px;
-      box-shadow:var(--shadow-soft);
-    }
-    .commerce-gallery-status{
-      color:var(--muted);
-      font-size:13px;
-      font-weight:800;
-      line-height:1.7;
-      padding:12px 14px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.03);
-      margin-bottom:14px;
-    }
-    .commerce-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-      gap:14px;
-    }
-    .commerce-card{
-      overflow:hidden;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.09);
-      background:rgba(255,255,255,.035);
-      box-shadow:0 14px 34px rgba(0,0,0,.18);
-      display:flex;
-      flex-direction:column;
-      min-height:100%;
-    }
-    .commerce-photo{
-      width:100%;
-      height:170px;
-      object-fit:cover;
-      display:block;
-      background:rgba(255,255,255,.05);
-    }
-    .commerce-body{
-      padding:15px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      flex:1;
-    }
-    .commerce-title{
-      font-size:18px;
-      line-height:1.15;
-      font-weight:950;
-      letter-spacing:-.02em;
-    }
-    .commerce-meta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:7px;
-      color:var(--muted);
-      font-size:11px;
-      font-weight:900;
-    }
-    .commerce-chip{
-      padding:7px 9px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-    }
-    .commerce-bio{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.75;
-      font-weight:700;
-      flex:1;
-    }
-    .commerce-actions{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:2px;
-    }
-    .commerce-actions .btn,
-    .commerce-actions .btn-outline{
-      flex:1;
-      min-width:130px;
-      min-height:42px;
-      padding:10px 12px;
-      font-size:12px;
-    }
-
-    /* ── PRICING ── */
-    .pricing{padding:30px 0 56px;}
-    .price-wrap{max-width:780px;margin:0 auto;}
-    .price-card{
-      padding:30px 24px;border:2px solid rgba(250,204,21,.22);
-      text-align:center;position:relative;overflow:hidden;
-    }
-    .price-card::before{
-      content:"";position:absolute;inset:-120px auto auto -120px;
-      width:260px;height:260px;border-radius:999px;
-      background:radial-gradient(circle, rgba(250,204,21,.10), transparent 70%);pointer-events:none;
-    }
-    .price-badge{
-      display:inline-flex;padding:8px 12px;border-radius:999px;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07110d;
-      font-weight:950;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px;
-    }
-    .price-name{font-family:var(--fontB);font-size:34px;line-height:1;margin-bottom:8px;}
-    .price-amount{font-family:var(--fontB);font-size:64px;font-weight:700;color:var(--gold);line-height:1;letter-spacing:-.02em;}
-    .price-period{margin-top:8px;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;}
-    .price-list{
-      list-style:none;max-width:460px;margin:22px auto 0;
-      text-align:left;display:grid;gap:8px;
-    }
-    .price-list li{
-      padding:11px 12px;border-radius:14px;background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.08);font-size:13px;color:#d8e2db;
-      line-height:1.65;font-weight:700;
-    }
-
-    .cta-box{margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-
-    /* ── FOOTER ── */
-    .footer{border-top:1px solid rgba(255,255,255,.07);padding:20px 0 40px;color:var(--muted);font-size:12px;}
-    .footer-inner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;line-height:1.7;font-weight:800;}
-
-    /* ── AUDIO ── */
-    #digiy-audio-btn{
-      position:fixed;
-      display:inline-flex;
-      align-items:center;
-      gap:12px;
-      padding:16px 26px;
-      border:none;
-      border-radius:999px;
-      cursor:pointer;
-      font-family:'Outfit',sans-serif;
-      font-weight:900;
-      font-size:17px;
-      line-height:1;
-      -webkit-tap-highlight-color:transparent;
-      user-select:none;
-      transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;
-      z-index:99999;
-    }
+    #digiy-audio-btn{position:fixed;display:inline-flex;align-items:center;gap:12px;padding:16px 26px;border:none;border-radius:999px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:900;font-size:17px;line-height:1;-webkit-tap-highlight-color:transparent;user-select:none;transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;z-index:99998}
     #digiy-audio-btn:hover{transform:translateY(-2px)}
     #digiy-audio-btn:active{transform:scale(.97)}
     #digiy-audio-btn:disabled{opacity:.65;cursor:not-allowed}
-    #digiy-audio-btn .digiy-audio-ico{
-      font-size:18px;
-      line-height:1;
-    }
-    #digiy-audio-progress-wrap{
-      position:fixed;
-      left:0;
-      right:0;
-      bottom:0;
-      height:3px;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .25s ease;
-      z-index:99998;
-    }
-    #digiy-audio-progress{
-      width:0%;
-      height:100%;
-      transition:width .18s linear;
-    }
+    #digiy-audio-btn .digiy-audio-ico{font-size:18px;line-height:1}
+    #digiy-audio-progress-wrap{position:fixed;left:0;right:0;bottom:0;height:3px;opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:99997}
+    #digiy-audio-progress{width:0%;height:100%;transition:width .18s linear}
 
-    /* ── RESPONSIVE ── */
-    @media(max-width:980px){
-      .hero-grid{grid-template-columns:1fr}
-      .hero-title{max-width:none}
-      .cockpit-grid{grid-template-columns:1fr}
-    }
-    @media(max-width:760px){
-      .hero-mini-grid,.status-meta,.demo-stats,.sale-form{grid-template-columns:1fr;}
-    }
+    @media(max-width:980px){.hero-grid{grid-template-columns:1fr}.hero-title{max-width:none}.cockpit-grid{grid-template-columns:1fr}}
+    @media(max-width:760px){.hero-mini-grid,.status-meta,.demo-stats,.sale-form{grid-template-columns:1fr}}
     @media(max-width:700px){
-      .floating-site-btn{
-        left:12px;
-        right:12px;
-        bottom:calc(78px + env(safe-area-inset-bottom, 0px));
-        min-height:46px;
-        padding:14px 14px;
-        font-size:12px;
-        justify-content:center;
-      }
       .wrap{padding:0 12px}
-      .topbar-inner{padding:12px}
-      .brand-title{font-size:24px}
-      .routeNav{padding:0 12px 10px}
-      .routeNav a{flex:1;min-width:128px}
       .hero-main{padding:22px 18px 20px}
       .hero-side{padding:14px}
       .preview-shell,.section-card,.price-card{border-radius:22px}
+      .digiy-camembert{top:10px;right:10px}
+      .digiy-camembert-btn{width:42px;height:42px;font-size:20px}
     }
-    @media (max-width:600px){
-      #digiy-audio-btn{
-        left:12px !important;
-        right:12px !important;
-        bottom:12px !important;
-        justify-content:center;
-        font-size:16px;
-        padding:15px 18px;
-        gap:11px;
-      }
-      #digiy-audio-btn .digiy-audio-ico{
-        font-size:17px;
-      }
+    @media(max-width:600px){
+      #digiy-audio-btn{left:12px!important;right:12px!important;bottom:12px!important;justify-content:center;font-size:16px;padding:15px 18px;gap:11px}
+      #digiy-audio-btn .digiy-audio-ico{font-size:17px}
     }
   </style>
 </head>
 <body>
 
-  <a
-    class="floating-site-btn"
-    id="btnBackPublic"
-    href="https://mon-commerce.digiylyfe.com/"
-    aria-label="Retour à la vitrine MON COMMERCE"
-  >⬅️ Retour à la vitrine</a>
+  <div class="digiy-camembert" id="digiyCamembert">
+    <button class="digiy-camembert-btn" id="digiyCamembertBtn" type="button" aria-label="Menu DIGIY">☰</button>
 
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="brand-badge">🏪</div>
-        <div>
-          <div class="brand-kicker">DIGIYLYFE</div>
-          <div class="brand-title">MON COMMERCE</div>
-          <div class="brand-sub">Ma caisse élégante • accès sécurisé</div>
-        </div>
+    <div class="digiy-camembert-panel" id="digiyCamembertPanel">
+      <div class="digiy-camembert-title">MON COMMERCE</div>
+      <div class="digiy-camembert-sub">Ma caisse · accès sécurisé</div>
+
+      <div class="digiy-camembert-status">
+        <span id="statusDot" class="dot"></span>
+        <span id="statusPillText">Chargement…</span>
       </div>
 
-      <div class="top-actions">
-        <div class="pill">
-          <span id="statusDot" class="dot"></span>
-          <span id="statusPillText">Chargement…</span>
-        </div>
-        <a class="btn-ghost" id="btnPinTop" href="./pin.html">🔐 Mon code d'accès</a>
-        <button class="btn-outline" id="btnCheck" type="button">🔄 Vérifier mon accès</button>
-        <a class="btn" id="btnTopAction" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence</a>
-      </div>
+      <a class="btn-ghost" id="btnPinTop" href="./pin.html">🔐 Mon code d'accès</a>
+      <button class="btn-outline" id="btnCheck" type="button">🔄 Vérifier mon accès</button>
+      <a class="btn" id="btnTopAction" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence</a>
+
+      <a class="quiet" id="btnBackPublic" href="https://mon-commerce.digiylyfe.com/">⬅️ Vitrine</a>
+      <a class="quiet" href="https://digiylyfe.com/" rel="noopener noreferrer">🌍 Site</a>
+      <a class="quiet" href="https://digiy-hub.digiylyfe.com/" rel="noopener noreferrer">🧭 HUB</a>
+      <a class="quiet" href="https://tarifs.digiylyfe.com/" target="_blank" rel="noopener noreferrer">📦 Tarifs</a>
+      <a class="quiet" href="https://pro-espace.digiylyfe.com/" rel="noopener noreferrer">🏢 Espace pro</a>
     </div>
-
-    <nav class="routeNav" aria-label="Navigation DIGIYLYFE">
-      <a href="https://digiylyfe.com/" rel="noopener noreferrer">🌍 Site</a>
-      <a class="hub" href="https://digiy-hub.digiylyfe.com/" rel="noopener noreferrer">🧭 HUB</a>
-      <a href="https://tarifs.digiylyfe.com/" target="_blank" rel="noopener noreferrer">📦 Tarifs</a>
-      <a class="pro" href="https://pro-espace.digiylyfe.com/" rel="noopener noreferrer">🏢 Espace pro</a>
-    </nav>
-  </header>
+  </div>
 
   <main class="wrap">
     <section class="hero">
@@ -648,8 +416,7 @@
 
           <p class="hero-sub">
             MON COMMERCE te donne une caisse propre pour encaisser, suivre ton stock et lire ton activité
-            sans te battre avec l'outil.
-            Tu entres avec ton accès, tu travailles — c'est tout.
+            sans te battre avec l'outil. Tu entres avec ton accès, tu travailles — c'est tout.
           </p>
 
           <div class="hero-points">
@@ -746,10 +513,7 @@
               <div class="cockpit-title">Ma caisse — exemple boutique</div>
               <div class="cockpit-sub">Aperçu visuel pour montrer comment tu travailles</div>
             </div>
-            <div class="pill">
-              <span class="dot ok"></span>
-              <span>Exemple</span>
-            </div>
+            <div class="pill"><span class="dot ok"></span><span>Exemple</span></div>
           </div>
 
           <div class="cockpit-grid">
@@ -757,18 +521,9 @@
               <div class="pane-title">Aujourd'hui</div>
 
               <div class="demo-stats">
-                <div class="demo-stat">
-                  <small>Ventes du jour</small>
-                  <strong>87 500 F</strong>
-                </div>
-                <div class="demo-stat">
-                  <small>Transactions</small>
-                  <strong>18</strong>
-                </div>
-                <div class="demo-stat">
-                  <small>Panier moyen</small>
-                  <strong>4 860 F</strong>
-                </div>
+                <div class="demo-stat"><small>Ventes du jour</small><strong>87 500 F</strong></div>
+                <div class="demo-stat"><small>Transactions</small><strong>18</strong></div>
+                <div class="demo-stat"><small>Panier moyen</small><strong>4 860 F</strong></div>
               </div>
 
               <div class="pane-title">Nouvelle vente</div>
@@ -791,51 +546,22 @@
             <div class="pane">
               <div class="pane-title">Dernières ventes</div>
               <div class="mock-list">
-                <div class="mock-item">
-                  <div>
-                    <strong>Riz parfumé 5kg</strong>
-                    <small>Qté 1 · Wave · 10:42</small>
-                  </div>
-                  <div class="mock-tag">12 500 F</div>
-                </div>
-                <div class="mock-item">
-                  <div>
-                    <strong>Pack boissons</strong>
-                    <small>Qté 3 · Espèces · 10:26</small>
-                  </div>
-                  <div class="mock-tag">6 000 F</div>
-                </div>
-                <div class="mock-item">
-                  <div>
-                    <strong>Recharge divers</strong>
-                    <small>Qté 2 · Orange Money · 09:58</small>
-                  </div>
-                  <div class="mock-tag">3 500 F</div>
-                </div>
+                <div class="mock-item"><div><strong>Riz parfumé 5kg</strong><small>Qté 1 · Wave · 10:42</small></div><div class="mock-tag">12 500 F</div></div>
+                <div class="mock-item"><div><strong>Pack boissons</strong><small>Qté 3 · Espèces · 10:26</small></div><div class="mock-tag">6 000 F</div></div>
+                <div class="mock-item"><div><strong>Recharge divers</strong><small>Qté 2 · Orange Money · 09:58</small></div><div class="mock-tag">3 500 F</div></div>
               </div>
 
               <div class="pane-title" style="margin-top:14px">Mon stock</div>
               <div class="mock-list">
-                <div class="mock-item">
-                  <div><strong>Sucre</strong><small>18 unités</small></div>
-                  <div class="mock-tag">OK</div>
-                </div>
-                <div class="mock-item">
-                  <div><strong>Huile 1L</strong><small>6 unités</small></div>
-                  <div class="mock-tag">Bas</div>
-                </div>
-                <div class="mock-item">
-                  <div><strong>Eau 1.5L</strong><small>42 unités</small></div>
-                  <div class="mock-tag">OK</div>
-                </div>
+                <div class="mock-item"><div><strong>Sucre</strong><small>18 unités</small></div><div class="mock-tag">OK</div></div>
+                <div class="mock-item"><div><strong>Huile 1L</strong><small>6 unités</small></div><div class="mock-tag">Bas</div></div>
+                <div class="mock-item"><div><strong>Eau 1.5L</strong><small>42 unités</small></div><div class="mock-tag">OK</div></div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </section>
-
-
 
     <section class="section" id="commerces-equipes">
       <div class="section-head">
@@ -858,8 +584,7 @@
         <div class="section-kicker">Ce que tu gagnes</div>
         <h2 class="section-title">Une caisse pensée pour le terrain, pas pour les ingénieurs.</h2>
         <p class="section-sub">
-          Structure nette, boutique réelle, travail fluide.
-          La technologie sert ta tenue — elle ne t'alourdit pas.
+          Structure nette, boutique réelle, travail fluide. La technologie sert ta tenue — elle ne t'alourdit pas.
         </p>
       </div>
 
@@ -867,33 +592,22 @@
         <article class="section-card">
           <div class="feat-icon">🛒</div>
           <div class="feat-title">Caisse rapide</div>
-          <div class="feat-text">
-            Produits, panier, vente et encaissement sans détour. Sur téléphone, tablette ou ordinateur.
-          </div>
+          <div class="feat-text">Produits, panier, vente et encaissement sans détour. Sur téléphone, tablette ou ordinateur.</div>
         </article>
-
         <article class="section-card">
           <div class="feat-icon">📦</div>
           <div class="feat-title">Stock simple</div>
-          <div class="feat-text">
-            Ruptures visibles, quantités claires, catalogue vivant. Pas besoin d'un système complexe pour vendre au quartier.
-          </div>
+          <div class="feat-text">Ruptures visibles, quantités claires, catalogue vivant. Pas besoin d'un système complexe pour vendre au quartier.</div>
         </article>
-
         <article class="section-card">
           <div class="feat-icon">💰</div>
-          <div class="feat-title">TVA maîtrisée</div>
-          <div class="feat-text">
-            Mode TVA souple selon ta réalité. La caisse s'adapte au terrain, pas l'inverse.
-          </div>
+          <div class="feat-title">Argent direct</div>
+          <div class="feat-text">DIGIY ne garde pas l’argent. Le client paie le professionnel directement. 0% commission.</div>
         </article>
-
         <article class="section-card">
           <div class="feat-icon">📊</div>
           <div class="feat-title">Lecture claire</div>
-          <div class="feat-text">
-            Recettes, rythme, historique — lisibles d'un coup d'œil, sans te noyer sous les menus.
-          </div>
+          <div class="feat-text">Recettes, rythme, historique — lisibles d'un coup d'œil, sans te noyer sous les menus.</div>
         </article>
       </div>
     </section>
@@ -902,34 +616,24 @@
       <div class="section-head">
         <div class="section-kicker">Comment ça marche</div>
         <h2 class="section-title">Tu vois. Tu entres. Tu travailles.</h2>
-        <p class="section-sub">
-          La ligne DIGIY reste claire : regarder librement, puis entrer par l'accès sécurisé.
-        </p>
+        <p class="section-sub">La ligne DIGIY reste claire : regarder librement, puis entrer par l'accès sécurisé.</p>
       </div>
 
       <div class="how-grid">
         <article class="section-card">
           <div class="step-num">1</div>
           <div class="feat-title">Tu regardes</div>
-          <div class="feat-text">
-            Cette page te montre la valeur, le ton, la structure et un aperçu de ta future caisse.
-          </div>
+          <div class="feat-text">Cette page te montre la valeur, le ton, la structure et un aperçu de ta future caisse.</div>
         </article>
-
         <article class="section-card">
           <div class="step-num">2</div>
           <div class="feat-title">Tu entres</div>
-          <div class="feat-text">
-            Ton code d'accès t'ouvre directement ton espace de travail, sans détour inutile.
-          </div>
+          <div class="feat-text">Ton code d'accès t'ouvre directement ton espace de travail, sans détour inutile.</div>
         </article>
-
         <article class="section-card">
           <div class="step-num">3</div>
           <div class="feat-title">Tu travailles</div>
-          <div class="feat-text">
-            Une fois dedans, ton espace de travail devient la porte centrale — et ta caisse, ton outil métier quotidien.
-          </div>
+          <div class="feat-text">Une fois dedans, ton espace de travail devient la porte centrale — et ta caisse, ton outil métier quotidien.</div>
         </article>
       </div>
     </section>
@@ -952,12 +656,7 @@
 
           <div class="cta-box">
             <a class="btn" id="btnPriceAction" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence maintenant</a>
-            <a
-              class="btn-outline"
-              href="https://wa.me/221771342889?text=Bonjour%20JB%2C%20je%20veux%20ouvrir%20MON%20COMMERCE%20by%20DIGIY"
-              target="_blank"
-              rel="noopener"
-            >💬 WhatsApp</a>
+            <a class="btn-outline" href="https://wa.me/221771342889?text=Bonjour%20JB%2C%20je%20veux%20ouvrir%20MON%20COMMERCE%20by%20DIGIY" target="_blank" rel="noopener">💬 WhatsApp</a>
           </div>
         </div>
       </div>
@@ -984,56 +683,32 @@
       const SUPPORT_PHONE = "221771342889";
 
       const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
-      const SUPABASE_ANON_KEY =
-        String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
+      const SUPABASE_ANON_KEY = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
 
-      const canUseSupabase =
-        !!window.supabase &&
-        typeof window.supabase.createClient === "function" &&
-        !!SUPABASE_URL &&
-        !!SUPABASE_ANON_KEY;
-
+      const canUseSupabase = !!window.supabase && typeof window.supabase.createClient === "function" && !!SUPABASE_URL && !!SUPABASE_ANON_KEY;
       const sb = canUseSupabase
-        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
-          })
+        ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } })
         : null;
 
       const state = { slug: "", phone: "", access: false, storeName: "", plan: "", loading: false };
       const $ = (id) => document.getElementById(id);
       const diagLines = [];
 
-      function revealPage() { document.documentElement.style.visibility = ""; }
-
-      function safeStringify(v){
-        try { return JSON.stringify(v, null, 2); } catch(_) { return String(v); }
-      }
-
+      function revealPage(){ document.documentElement.style.visibility = ""; }
+      function safeStringify(v){ try { return JSON.stringify(v, null, 2); } catch(_) { return String(v); } }
       function log(msg, data){
         const line = `[${new Date().toLocaleTimeString("fr-FR")}] ${msg}`;
         diagLines.push(data === undefined ? line : `${line}\n${safeStringify(data)}`);
-        if ($("diagBox")) $("diagBox").textContent = diagLines.join("\n\n");
+        if($("diagBox")) $("diagBox").textContent = diagLines.join("\n\n");
         console.log("[DIGIY POS INDEX]", msg, data ?? "");
       }
 
       function getParam(name){ return new URL(location.href).searchParams.get(name) || ""; }
-
       function cleanVisibleUrl(){
         const params = new URLSearchParams(location.search);
-        const sensitive = [
-          "slug",
-          "phone",
-          "tel",
-          "module",
-          "owner_phone",
-          "subscription_phone",
-          "checkout_phone",
-          "p_phone"
-        ];
-        if (!sensitive.some((key) => params.has(key))) return;
-        try {
-          history.replaceState({}, document.title, location.pathname + location.hash);
-        } catch (_) {}
+        const sensitive = ["slug","phone","tel","module","owner_phone","subscription_phone","checkout_phone","p_phone"];
+        if(!sensitive.some((key) => params.has(key))) return;
+        try{ history.replaceState({}, document.title, location.pathname + location.hash); }catch(_){}
       }
 
       function cleanPath(path){
@@ -1057,38 +732,27 @@
       }
 
       function remember(slug, phone){
-        if (slug) { localStorage.setItem("digiy_pos_last_slug", slug); sessionStorage.setItem("digiy_pos_last_slug", slug); }
-        if (phone) { localStorage.setItem("digiy_pos_last_phone", phone); sessionStorage.setItem("digiy_pos_last_phone", phone); }
+        try{
+          if(slug){ localStorage.setItem("digiy_pos_last_slug", slug); sessionStorage.setItem("digiy_pos_last_slug", slug); }
+          if(phone){ localStorage.setItem("digiy_pos_last_phone", phone); sessionStorage.setItem("digiy_pos_last_phone", phone); }
+        }catch(_){}
       }
 
       function buildUrl(base, params){
-        const baseStr = (base == null ? "" : String(base)).trim();
+        const baseStr = String(base || "").trim();
         if(!baseStr) return location.href;
-
         let u;
-        try {
-          if(/^https?:\/\//i.test(baseStr)){
-            u = new URL(baseStr);
-          } else {
-            const origin = location.protocol + "//" + location.host;
-            const full = baseStr.startsWith("/")
-              ? origin + baseStr
-              : origin + "/" + baseStr;
-            u = new URL(full);
-          }
-        } catch(e){
+        try{
+          if(/^https?:\/\//i.test(baseStr)) u = new URL(baseStr);
+          else u = new URL(baseStr, location.href);
+          Object.entries(params || {}).forEach(([k,v]) => {
+            if(v !== undefined && v !== null && String(v) !== "") u.searchParams.set(k, String(v));
+          });
+          return u.toString();
+        }catch(e){
           log("buildUrl KO: " + baseStr + " — " + e.message);
           return baseStr;
         }
-
-        try {
-          Object.entries(params || {}).forEach(([k, v]) => {
-            if(v !== undefined && v !== null && String(v) !== "")
-              u.searchParams.set(k, String(v));
-          });
-        } catch(e){}
-
-        return u.toString();
       }
 
       function buildPublicUrl(){ return PUBLIC_URL; }
@@ -1097,92 +761,60 @@
       function buildCaisseUrl(){ return cleanPath(CAISSE_URL); }
       function buildPinUrl(extra = {}){
         const safe = {};
-        if (extra && extra.target) safe.target = extra.target;
+        if(extra && extra.target) safe.target = extra.target;
         return buildUrl(PIN_URL, safe);
       }
 
       function buildSupportUrl(){
-        const text = [
-          "Bonjour JB,",
-          "j'ai besoin d'aide pour MON COMMERCE by DIGIY.",
-          "Mon compte est reconnu dans mon espace."
-        ].join(" ");
+        const text = "Bonjour JB, j'ai besoin d'aide pour MON COMMERCE by DIGIY.";
         return `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(text)}`;
       }
 
       function setDots(kind){
-        const map = { ok: "dot ok", bad: "dot bad", warn: "dot" };
-        $("statusDot").className = map[kind] || "dot";
-        $("statusDotSide").className = map[kind] || "dot";
+        const map = { ok:"dot ok", bad:"dot bad", warn:"dot" };
+        if($("statusDot")) $("statusDot").className = map[kind] || "dot";
+        if($("statusDotSide")) $("statusDotSide").className = map[kind] || "dot";
       }
 
       function setStatus(kind, pillText, title, sub, helperHtml){
         setDots(kind);
-        $("statusPillText").textContent = pillText;
-        $("statusTitle").textContent = title;
-        $("statusSub").textContent = sub;
-        $("statusHelper").innerHTML = helperHtml;
+        if($("statusPillText")) $("statusPillText").textContent = pillText;
+        if($("statusTitle")) $("statusTitle").textContent = title;
+        if($("statusSub")) $("statusSub").textContent = sub;
+        if($("statusHelper")) $("statusHelper").innerHTML = helperHtml;
       }
 
       function paintMeta(){
-        const account = $("metaAccount");
-        const access = $("metaAccess");
-        if (account) account.textContent = state.slug || state.phone ? "Compte reconnu" : "Aperçu libre";
-        if (access) access.textContent = state.access ? "Accès ouvert" : (state.slug || state.phone ? "À ouvrir" : "Libre");
-        $("metaStore").textContent = state.storeName || "Aperçu libre";
-        $("metaPlan").textContent = state.plan || "—";
+        if($("metaAccount")) $("metaAccount").textContent = state.slug || state.phone ? "Compte reconnu" : "Aperçu libre";
+        if($("metaAccess")) $("metaAccess").textContent = state.access ? "Accès ouvert" : (state.slug || state.phone ? "À ouvrir" : "Libre");
+        if($("metaStore")) $("metaStore").textContent = state.storeName || "Aperçu libre";
+        if($("metaPlan")) $("metaPlan").textContent = state.plan || "—";
       }
 
       function digiyPosAudio(){
-  const hasSlug = !!state.slug;
-  const hasAccess = !!state.access;
-
-  if(!hasSlug){
-    return "Entre dans ton commerce avec ton identifiant pour commencer.";
-  }
-
-  if(!hasAccess){
-    return "Ton commerce est reconnu, mais il faut d'abord ouvrir ton accès avant de préparer ta caisse.";
-  }
-
-  return "Avant d'encaisser, ajoute d'abord tes produits un par un. Mets le nom du produit, son prix de vente, puis la quantité que tu as en stock.";
-}
+        const hasSlug = !!state.slug;
+        const hasAccess = !!state.access;
+        if(!hasSlug) return "Entre dans ton commerce avec ton identifiant pour commencer.";
+        if(!hasAccess) return "Ton commerce est reconnu, mais il faut d'abord ouvrir ton accès avant de préparer ta caisse.";
+        return "Avant d'encaisser, ajoute d'abord tes produits un par un. Mets le nom du produit, son prix de vente, puis la quantité que tu as en stock.";
+      }
 
       function refreshPosAudioText(){
-  const nextText = digiyPosAudio();
-  window.DIGIY_POS_AUDIO_TEXT = nextText;
+        const nextText = digiyPosAudio();
+        window.DIGIY_POS_AUDIO_TEXT = nextText;
+        if(!window.DIGIY_AUDIO_CONFIG) window.DIGIY_AUDIO_CONFIG = {};
+        window.DIGIY_AUDIO_CONFIG.text = nextText;
+        console.log("[DIGIY POS AUDIO TEXT]", nextText);
+      }
 
-  if (!window.DIGIY_AUDIO_CONFIG) {
-    window.DIGIY_AUDIO_CONFIG = {};
-  }
-
-  window.DIGIY_AUDIO_CONFIG.text = nextText;
-
-  console.log("[DIGIY POS AUDIO TEXT]", nextText);
-}
-      function refreshPosAudioText(){
-  const nextText = digiyPosAudio();
-  window.DIGIY_POS_AUDIO_TEXT = nextText;
-
-  if (!window.DIGIY_AUDIO_CONFIG) {
-    window.DIGIY_AUDIO_CONFIG = {};
-  }
-  window.DIGIY_AUDIO_CONFIG.text = nextText;
-
-  console.log("[DIGIY POS AUDIO TEXT]", nextText);
-}
-
-window.DIGIY_GET_AUDIO_TEXT = function(){
-  return digiyPosAudio();
-};
+      window.DIGIY_GET_AUDIO_TEXT = function(){ return digiyPosAudio(); };
 
       function wireButtons(){
-        try {
+        try{
           const abos = buildAbosUrl();
           const dashboard = buildDashboardUrl();
           const caisse = buildCaisseUrl();
           const pinDefault = buildPinUrl();
-          const pinForCaisse = buildPinUrl({ target: "caisse" });
           const publicUrl = buildPublicUrl();
 
           const btnBackPublic = $("btnBackPublic");
@@ -1191,61 +823,29 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
           const btnOpenPin = $("btnOpenPin");
           const btnTopAction = $("btnTopAction");
           const btnHeroPrimary = $("btnHeroPrimary");
-          const btnOpenDashboard = $("btnOpenDashboard");
-          const btnOpenCaisse = $("btnOpenCaisse");
 
-          if (btnBackPublic) btnBackPublic.href = publicUrl;
-          if (btnPriceAction) btnPriceAction.href = abos;
-          if (btnPinTop) btnPinTop.href = pinDefault;
-          if (btnOpenPin) btnOpenPin.href = pinDefault;
+          if(btnBackPublic) btnBackPublic.href = publicUrl;
+          if(btnPriceAction) btnPriceAction.href = abos;
+          if(btnPinTop) btnPinTop.href = pinDefault;
+          if(btnOpenPin) btnOpenPin.href = pinDefault;
 
           if(state.access){
-            if (btnTopAction) {
-              btnTopAction.href = dashboard;
-              btnTopAction.textContent = "🧭 Mon espace de travail";
-            }
-            if (btnHeroPrimary) {
-              btnHeroPrimary.href = caisse;
-              btnHeroPrimary.textContent = "💰 Ouvrir ma caisse";
-            }
-            if (btnOpenDashboard) {
-              btnOpenDashboard.href = dashboard;
-              btnOpenDashboard.textContent = "🧭 Mon espace de travail";
-            }
-            if (btnOpenCaisse) {
-              btnOpenCaisse.href = caisse;
-              btnOpenCaisse.textContent = "🧾 Ouvrir ma caisse";
-            }
-          } else {
-            if (btnTopAction) {
-              btnTopAction.href = abos;
-              btnTopAction.textContent = "💳 Je commence";
-            }
-            if (btnHeroPrimary) {
-              btnHeroPrimary.href = abos;
-              btnHeroPrimary.textContent = "💳 Je commence maintenant";
-            }
-            if (btnOpenDashboard) {
-              btnOpenDashboard.href = pinDefault;
-              btnOpenDashboard.textContent = "🔐 Mon espace via PIN";
-            }
-            if (btnOpenCaisse) {
-              btnOpenCaisse.href = pinForCaisse;
-              btnOpenCaisse.textContent = "🔐 Ma caisse via PIN";
-            }
+            if(btnTopAction){ btnTopAction.href = dashboard; btnTopAction.textContent = "🧭 Mon espace de travail"; }
+            if(btnHeroPrimary){ btnHeroPrimary.href = caisse; btnHeroPrimary.textContent = "💰 Ouvrir ma caisse"; }
+          }else{
+            if(btnTopAction){ btnTopAction.href = abos; btnTopAction.textContent = "💳 Je commence"; }
+            if(btnHeroPrimary){ btnHeroPrimary.href = abos; btnHeroPrimary.textContent = "💳 Je commence maintenant"; }
           }
 
-          try {
-            const btnCheck = $("btnCheck");
-            if (btnCheck) btnCheck.setAttribute("data-support", buildSupportUrl());
-          } catch(e){}
-        } catch(e) {
-          log("wireButtons: erreur silencieuse", { message: e.message || String(e) });
+          const btnCheck = $("btnCheck");
+          if(btnCheck) btnCheck.setAttribute("data-support", buildSupportUrl());
+        }catch(e){
+          log("wireButtons: erreur silencieuse", { message:e.message || String(e) });
         }
       }
 
       async function resolvePhoneFromSlug(slug){
-        if (!sb || !slug) return "";
+        if(!sb || !slug) return "";
         const { data, error } = await sb
           .from("digiy_subscriptions_public")
           .select("phone,module,slug")
@@ -1257,23 +857,21 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
       }
 
       async function rpcFirstSuccess(name, payloads){
-        if (!sb) throw new Error("supabase_not_ready");
+        if(!sb) throw new Error("supabase_not_ready");
         let lastError = null;
         for(const payload of payloads){
           try{
-            log(`RPC ${name} tentative`, payload);
             const { data, error } = await sb.rpc(name, payload);
-            if(error){ lastError = error; log(`RPC ${name} erreur`, { message: error.message, details: error.details, hint: error.hint }); continue; }
-            log(`RPC ${name} OK`, data);
+            if(error){ lastError = error; continue; }
             return data;
-          }catch(err){ lastError = err; log(`RPC ${name} exception`, { message: err?.message || String(err) }); }
+          }catch(err){ lastError = err; }
         }
         throw lastError || new Error(`RPC ${name} échouée`);
       }
 
       async function getAccess(phone){
-        if (!phone || !sb) return false;
-        const res = await rpcFirstSuccess("digiy_has_access", [{ p_phone: phone, p_module: MODULE }, { phone, module: MODULE }]);
+        if(!phone || !sb) return false;
+        const res = await rpcFirstSuccess("digiy_has_access", [{ p_phone:phone, p_module:MODULE }, { phone, module:MODULE }]);
         if(typeof res === "boolean") return res;
         if(res && typeof res.ok === "boolean") return res.ok;
         if(res && typeof res.has_access === "boolean") return res.has_access;
@@ -1283,27 +881,31 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
       }
 
       async function getSubscription(phone){
-        if (!phone || !sb) return null;
+        if(!phone || !sb) return null;
         try{
-          const data = await rpcFirstSuccess("digiy_get_subscription_status", [{ p_phone: phone, p_module: MODULE }, { phone, module: MODULE }]);
-          return data || null;
-        }catch(err){ log("digiy_get_subscription_status indisponible", { message: err?.message || String(err) }); return null; }
+          return await rpcFirstSuccess("digiy_get_subscription_status", [{ p_phone:phone, p_module:MODULE }, { phone, module:MODULE }]);
+        }catch(err){
+          log("digiy_get_subscription_status indisponible", { message:err?.message || String(err) });
+          return null;
+        }
       }
 
       async function getStoreContext(slug){
-        if (!slug || !sb) return null;
+        if(!slug || !sb) return null;
         const attempts = [
-          ["pos_get_store_context_by_slug", [{ p_slug: slug }, { slug }]],
-          ["digiy_pos_get_store_context_by_slug", [{ p_slug: slug }, { slug }]]
+          ["pos_get_store_context_by_slug", [{ p_slug:slug }, { slug }]],
+          ["digiy_pos_get_store_context_by_slug", [{ p_slug:slug }, { slug }]]
         ];
-        for (const [name, payloads] of attempts) {
-          try { const data = await rpcFirstSuccess(name, payloads); if (data) return data; }
-          catch (err) { log(`${name} indisponible`, { message: err?.message || String(err) }); }
+        for(const [name, payloads] of attempts){
+          try{
+            const data = await rpcFirstSuccess(name, payloads);
+            if(data) return data;
+          }catch(err){
+            log(`${name} indisponible`, { message:err?.message || String(err) });
+          }
         }
         return null;
       }
-
-
 
       function escapeHtml(value){
         return String(value ?? "")
@@ -1338,7 +940,6 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
         const box = $("commerceGallery");
         const status = $("commerceGalleryStatus");
         if(!box || !status) return;
-
         box.innerHTML = "";
 
         if(!items.length){
@@ -1349,13 +950,13 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
         status.textContent = `${items.length} commerce(s) publié(s) dans MON COMMERCE.`;
 
         items.forEach((item) => {
-          const name = item.display_name || "Commerce DIGIY";
-          const photo = item.photo_url || "https://digiylyfe.net/wp-content/uploads/2026/03/digiylyfe_logo_qr.jpeg";
-          const city = item.city || "Ville non précisée";
+          const name = item.display_name || item.shop_name || item.name || "Commerce DIGIY";
+          const photo = item.photo_url || item.image_url || "https://digiylyfe.net/wp-content/uploads/2026/03/digiylyfe_logo_qr.jpeg";
+          const city = item.city || item.ville || "Ville non précisée";
           const category = item.category || "Commerce";
           const badge = item.badge || item.hub_badge || "💳 MON COMMERCE";
           const bio = item.bio || "Commerce équipé avec MON COMMERCE by DIGIY.";
-          const wa = publicWhatsappUrl(item.whatsapp, name);
+          const wa = publicWhatsappUrl(item.whatsapp || item.whatsapp_phone || item.phone, name);
           const profile = publicProfileUrl(item);
 
           const card = document.createElement("article");
@@ -1383,7 +984,6 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
       async function loadPublicCommerceGallery(){
         const status = $("commerceGalleryStatus");
         if(!status) return;
-
         if(!sb){
           status.textContent = "Galerie indisponible pour le moment : connexion non prête.";
           return;
@@ -1407,8 +1007,10 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
         try{
           let slug = getStoredSlug();
           let phone = getStoredPhone();
-          state.slug = slug; state.phone = phone;
-          paintMeta(); wireButtons();
+          state.slug = slug;
+          state.phone = phone;
+          paintMeta();
+          wireButtons();
           log("Hydratation démarrée", { slug, phone });
 
           if(!slug){
@@ -1428,8 +1030,8 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
             try{
               phone = await resolvePhoneFromSlug(slug);
               log("Téléphone résolu depuis slug", { slug, phone });
-            } catch(err){
-              log("resolvePhoneFromSlug KO", { message: err?.message || String(err) });
+            }catch(err){
+              log("resolvePhoneFromSlug KO", { message:err?.message || String(err) });
             }
           }
 
@@ -1438,8 +1040,7 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
           remember(state.slug, state.phone);
 
           let storeCtx = null;
-          try{ storeCtx = await getStoreContext(slug); }
-          catch(err){ log("getStoreContext KO", { message: err?.message || String(err) }); }
+          try{ storeCtx = await getStoreContext(slug); }catch(err){ log("getStoreContext KO", { message:err?.message || String(err) }); }
 
           if(storeCtx){
             state.storeName = String(
@@ -1449,17 +1050,15 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
               storeCtx?.profile?.display_name ||
               "Boutique active"
             ).trim();
-          } else {
+          }else{
             state.storeName = "Boutique détectée";
           }
 
           let sub = null;
           if(phone){
-            try{ state.access = await getAccess(phone); }
-            catch(err){ log("digiy_has_access KO", { message: err?.message || String(err) }); state.access = false; }
-            try{ sub = await getSubscription(phone); }
-            catch(err){ log("getSubscription KO", { message: err?.message || String(err) }); }
-          } else {
+            try{ state.access = await getAccess(phone); }catch(err){ log("digiy_has_access KO", { message:err?.message || String(err) }); state.access = false; }
+            try{ sub = await getSubscription(phone); }catch(err){ log("getSubscription KO", { message:err?.message || String(err) }); }
+          }else{
             state.access = false;
           }
 
@@ -1480,16 +1079,16 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
               "Ton accès est actif. Le bouton principal ouvre maintenant ta caisse.",
               `Boutique : <b>${state.storeName}</b><br>Ta caisse et ton espace de travail sont prêts.`
             );
-          } else {
+          }else{
             setStatus(
               "warn", "APERÇU + CONTRÔLE", "Boutique repérée, accès fermé",
               "La page a reconnu ton identifiant, mais l'accès reste fermé tant que tu n'es pas abonné actif.",
-              `Compte reconnu.<br>Tu peux rejoindre DIGIY ou entrer avec ton code pour vérifier ton accès.`
+              "Compte reconnu.<br>Tu peux rejoindre DIGIY ou entrer avec ton code pour vérifier ton accès."
             );
           }
         }catch(err){
           console.error(err);
-          log("Hydratation fatale", { message: err?.message || String(err) });
+          log("Hydratation fatale", { message:err?.message || String(err) });
           setStatus(
             "bad", "CONTRÔLE INCOMPLET", "La page reste visible",
             "L'affichage tient debout, mais la lecture de ton contexte boutique a rencontré un problème.",
@@ -1508,20 +1107,44 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
         try{
           const ready = window.DIGIY_GUARD?.ready;
           if(!ready) return;
-          if(typeof ready === "function") { await ready(); return; }
+          if(typeof ready === "function"){ await ready(); return; }
           await ready;
-        }catch(err){ log("guard ready KO", { message: err?.message || String(err) }); }
+        }catch(err){
+          log("guard ready KO", { message:err?.message || String(err) });
+        }
+      }
+
+      function bindCamembert(){
+        const menu = $("digiyCamembert");
+        const btn = $("digiyCamembertBtn");
+        if(!menu || !btn) return;
+
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          menu.classList.toggle("open");
+        });
+
+        document.addEventListener("click", (e) => {
+          if(!menu.contains(e.target)) menu.classList.remove("open");
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if(e.key === "Escape") menu.classList.remove("open");
+        });
       }
 
       function bind(){
+        bindCamembert();
+
         const btnCheck = $("btnCheck");
-        if (btnCheck) {
+        if(btnCheck){
           btnCheck.addEventListener("click", async () => {
+            const menu = $("digiyCamembert");
+            if(menu) menu.classList.remove("open");
             btnCheck.disabled = true;
             btnCheck.textContent = "Contrôle…";
-            try{
-              await hydrate();
-            } finally {
+            try{ await hydrate(); }
+            finally{
               btnCheck.disabled = false;
               btnCheck.textContent = "🔄 Vérifier mon accès";
             }
@@ -1544,18 +1167,18 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
 
   <script>
     window.DIGIY_AUDIO_CONFIG = {
-      label: "Écouter",
-      stopLabel: "Arrêter",
-      text: window.DIGIY_POS_AUDIO_TEXT || "Tu peux ouvrir ta caisse.",
-      buttonBg: "linear-gradient(135deg,#facc15,#f59e0b)",
-      buttonColor: "#07110d",
-      bottom: "24px",
-      left: "24px",
-      rate: 0.82,
-      pitch: 1,
-      volume: 1,
-      zIndex: 99999,
-      shadow: "0 10px 30px rgba(0,0,0,.26)"
+      label:"Écouter",
+      stopLabel:"Arrêter",
+      text:window.DIGIY_POS_AUDIO_TEXT || "Tu peux ouvrir ta caisse.",
+      buttonBg:"linear-gradient(135deg,#facc15,#f59e0b)",
+      buttonColor:"#07110d",
+      bottom:"24px",
+      left:"24px",
+      rate:.82,
+      pitch:1,
+      volume:1,
+      zIndex:99998,
+      shadow:"0 10px 30px rgba(0,0,0,.26)"
     };
   </script>
 
@@ -1571,21 +1194,20 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
   <script>
     (function(){
       var cfg = window.DIGIY_AUDIO_CONFIG || {};
-
       var config = {
-        label: cfg.label || "Écouter DIGIY",
-        stopLabel: cfg.stopLabel || "Arrêter",
-        text: cfg.text || "Bienvenue sur DIGIYLYFE.",
-        buttonBg: cfg.buttonBg || "linear-gradient(135deg,#d4af37,#b78b34)",
-        buttonColor: cfg.buttonColor || "#111827",
-        bottom: cfg.bottom || "24px",
-        left: cfg.left || "24px",
-        right: cfg.right || null,
-        rate: typeof cfg.rate === "number" ? cfg.rate : 0.82,
-        pitch: typeof cfg.pitch === "number" ? cfg.pitch : 1,
-        volume: typeof cfg.volume === "number" ? cfg.volume : 1,
-        zIndex: cfg.zIndex || 99999,
-        shadow: cfg.shadow || "0 8px 28px rgba(0,0,0,.24)"
+        label:cfg.label || "Écouter DIGIY",
+        stopLabel:cfg.stopLabel || "Arrêter",
+        text:cfg.text || "Bienvenue sur DIGIYLYFE.",
+        buttonBg:cfg.buttonBg || "linear-gradient(135deg,#d4af37,#b78b34)",
+        buttonColor:cfg.buttonColor || "#111827",
+        bottom:cfg.bottom || "24px",
+        left:cfg.left || "24px",
+        right:cfg.right || null,
+        rate:typeof cfg.rate === "number" ? cfg.rate : .82,
+        pitch:typeof cfg.pitch === "number" ? cfg.pitch : 1,
+        volume:typeof cfg.volume === "number" ? cfg.volume : 1,
+        zIndex:cfg.zIndex || 99998,
+        shadow:cfg.shadow || "0 8px 28px rgba(0,0,0,.24)"
       };
 
       var btn = document.getElementById("digiy-audio-btn");
@@ -1593,8 +1215,7 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
       var ico = btn ? btn.querySelector(".digiy-audio-ico") : null;
       var progressWrap = document.getElementById("digiy-audio-progress-wrap");
       var progressBar = document.getElementById("digiy-audio-progress");
-
-      if (!btn || !lbl || !ico || !progressWrap || !progressBar) return;
+      if(!btn || !lbl || !ico || !progressWrap || !progressBar) return;
 
       btn.style.bottom = config.bottom;
       btn.style.left = config.left ? config.left : "auto";
@@ -1603,11 +1224,10 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
       btn.style.color = config.buttonColor;
       btn.style.boxShadow = config.shadow;
       btn.style.zIndex = String(config.zIndex);
-
       progressWrap.style.background = "rgba(212,175,55,.2)";
       progressBar.style.background = "linear-gradient(90deg,#d4af37,#b78b34)";
 
-      if (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) {
+      if(!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)){
         btn.style.display = "none";
         return;
       }
@@ -1619,19 +1239,16 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
       var launchId = 0;
 
       function currentAudioText(){
+        if(typeof window.DIGIY_GET_AUDIO_TEXT === "function") return window.DIGIY_GET_AUDIO_TEXT();
         return window.DIGIY_POS_AUDIO_TEXT || config.text;
       }
 
       function getFrenchVoice(){
         var voices = synth.getVoices() || [];
-        if (!voices.length) return null;
-
-        return (
-          voices.find(function(v){ return /fr[-_]?FR/i.test(v.lang) && /google/i.test(v.name); }) ||
+        if(!voices.length) return null;
+        return voices.find(function(v){ return /fr[-_]?FR/i.test(v.lang) && /google/i.test(v.name); }) ||
           voices.find(function(v){ return /fr[-_]?FR/i.test(v.lang); }) ||
-          voices.find(function(v){ return /^fr/i.test(v.lang); }) ||
-          null
-        );
+          voices.find(function(v){ return /^fr/i.test(v.lang); }) || null;
       }
 
       function setIdle(){
@@ -1655,7 +1272,7 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
       function stop(){
         clearInterval(timer);
         timer = null;
-        try { synth.cancel(); } catch(e){}
+        try{ synth.cancel(); }catch(e){}
         utterance = null;
         setIdle();
       }
@@ -1664,108 +1281,43 @@ window.DIGIY_GET_AUDIO_TEXT = function(){
         var words = (text.trim().match(/\S+/g) || []).length;
         var estimatedDuration = Math.max(2500, words * 520);
         var elapsed = 0;
-
         clearInterval(timer);
         progressBar.style.width = "0%";
         progressWrap.style.opacity = "1";
-
         timer = setInterval(function(){
-          if (!playing || currentId !== launchId) {
-            clearInterval(timer);
-            timer = null;
-            return;
-          }
+          if(!playing || currentId !== launchId){ clearInterval(timer); timer = null; return; }
           elapsed += 150;
-          var pct = Math.min((elapsed / estimatedDuration) * 100, 97);
+          var pct = Math.min(96, (elapsed / estimatedDuration) * 100);
           progressBar.style.width = pct + "%";
-        }, 150);
+        },150);
       }
 
-      function launch(){
+      function speak(){
+        var text = String(currentAudioText() || "").trim();
+        if(!text) return;
+        stop();
         launchId += 1;
-        var currentId = launchId;
-        var smartText = currentAudioText();
-
-        try { synth.cancel(); } catch(e){}
-
-        utterance = new SpeechSynthesisUtterance(smartText);
+        var id = launchId;
+        utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = "fr-FR";
         utterance.rate = config.rate;
         utterance.pitch = config.pitch;
         utterance.volume = config.volume;
-
         var voice = getFrenchVoice();
-        if (voice) utterance.voice = voice;
-
-        utterance.onstart = function(){
-          if (currentId !== launchId) return;
-          setPlaying();
-          startProgress(smartText, currentId);
-        };
-
-        utterance.onend = function(){
-          if (currentId !== launchId) return;
-          clearInterval(timer);
-          timer = null;
-          progressBar.style.width = "100%";
-          setTimeout(function(){
-            if (currentId === launchId) setIdle();
-          }, 250);
-        };
-
-        utterance.onerror = function(){
-          if (currentId !== launchId) return;
-          stop();
-        };
-
-        synth.speak(utterance);
+        if(voice) utterance.voice = voice;
+        utterance.onstart = function(){ setPlaying(); startProgress(text,id); };
+        utterance.onend = function(){ progressBar.style.width = "100%"; setTimeout(setIdle,180); };
+        utterance.onerror = function(){ setIdle(); };
+        synth.cancel();
+        setTimeout(function(){ synth.speak(utterance); }, 80);
       }
 
-      function play(){
-        if (playing) return;
-
-        if (synth.speaking || synth.pending) {
-          try { synth.cancel(); } catch(e){}
-        }
-
-        var voices = synth.getVoices();
-        if (voices && voices.length) {
-          launch();
-          return;
-        }
-
-        var launched = false;
-
-        function handleVoicesChanged(){
-          if (launched) return;
-          launched = true;
-          synth.removeEventListener("voiceschanged", handleVoicesChanged);
-          launch();
-        }
-
-        synth.addEventListener("voiceschanged", handleVoicesChanged);
-
-        setTimeout(function(){
-          if (launched) return;
-          launched = true;
-          synth.removeEventListener("voiceschanged", handleVoicesChanged);
-          launch();
-        }, 700);
-      }
-
-      btn.addEventListener("click", function(){
-        if (playing) stop();
-        else play();
-      });
-
+      btn.addEventListener("click", function(){ playing ? stop() : speak(); });
+      if(synth.onvoiceschanged !== undefined) synth.onvoiceschanged = function(){};
       window.addEventListener("beforeunload", stop);
-
-      document.addEventListener("visibilitychange", function(){
-        if (document.hidden && playing) stop();
-      });
-
       setIdle();
     })();
   </script>
 </body>
 </html>
+
