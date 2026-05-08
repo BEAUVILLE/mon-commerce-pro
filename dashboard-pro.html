@@ -747,6 +747,10 @@
       const MODULE_LABEL = "MON COMMERCE";
       const SUPPORT_PHONE = "221771342889";
 
+      const ALLOWED_MODULES = ["POS","pos","POS_PRO","COMMERCE","CAISSE","MON_COMMERCE"];
+      const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
+      const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
+
       const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
       const SUPABASE_ANON = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
 
@@ -792,7 +796,79 @@
       }
 
       function normSlug(v){
-        return String(v || "").trim().toLowerCase();
+        return String(v || "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g,"-")
+          .replace(/[^a-z0-9-]/g,"")
+          .replace(/-+/g,"-")
+          .replace(/^-|-$/g,"");
+      }
+
+      function upper(v){
+        return String(v || "").trim().toUpperCase();
+      }
+
+      function isAllowedModule(v){
+        const raw = String(v || "").trim();
+        if(!raw) return false;
+        return ALLOWED_MODULES.some((m) => upper(m) === upper(raw));
+      }
+
+      function isForbiddenSlug(slug){
+        const s = normSlug(slug);
+        if(!s) return false;
+        return FORBIDDEN_SLUG_PREFIXES.some((prefix) => s.startsWith(prefix));
+      }
+
+      function isPosSlug(slug){
+        const s = normSlug(slug);
+        if(!s) return false;
+        if(isForbiddenSlug(s)) return false;
+        return ALLOWED_SLUG_PREFIXES.some((prefix) => s.startsWith(prefix));
+      }
+
+      function purgeBadLocalRail(){
+        const slugKeys = ["digiy_pos_slug","digiy_pos_last_slug"];
+        slugKeys.forEach((key) => {
+          try{
+            const local = normSlug(localStorage.getItem(key) || "");
+            const session = normSlug(sessionStorage.getItem(key) || "");
+            if(local && !isPosSlug(local)) localStorage.removeItem(key);
+            if(session && !isPosSlug(session)) sessionStorage.removeItem(key);
+          }catch(_){}
+        });
+
+        const sessionKeys = [
+          "DIGIY_POS_PIN_SESSION",
+          "DIGIY_PIN_SESSION",
+          "DIGIY_ACCESS",
+          "DIGIY_SESSION_POS",
+          "digiy_pos_session",
+          "DIGIY_POS_SESSION"
+        ];
+
+        sessionKeys.forEach((key) => {
+          try{
+            const raw = localStorage.getItem(key);
+            const parsed = raw ? JSON.parse(raw) : null;
+            const slug = normSlug(parsed?.slug || "");
+            const module = parsed?.module || parsed?.module_code || "";
+            if(parsed && ((module && !isAllowedModule(module)) || (slug && !isPosSlug(slug)))){
+              localStorage.removeItem(key);
+            }
+          }catch(_){}
+
+          try{
+            const raw = sessionStorage.getItem(key);
+            const parsed = raw ? JSON.parse(raw) : null;
+            const slug = normSlug(parsed?.slug || "");
+            const module = parsed?.module || parsed?.module_code || "";
+            if(parsed && ((module && !isAllowedModule(module)) || (slug && !isPosSlug(slug)))){
+              sessionStorage.removeItem(key);
+            }
+          }catch(_){}
+        });
       }
 
       function fmtDateFR(iso){
@@ -872,8 +948,9 @@
       }
 
       function getSlug(){
+        purgeBadLocalRail();
         const gs = getGuardSession();
-        return normSlug(
+        const candidate = normSlug(
           getParam("slug") ||
           gs.slug ||
           sessionStorage.getItem("digiy_pos_last_slug") ||
@@ -882,6 +959,13 @@
           localStorage.getItem("digiy_pos_slug") ||
           ""
         );
+
+        if(candidate && !isPosSlug(candidate)){
+          purgeBadLocalRail();
+          return "";
+        }
+
+        return candidate;
       }
 
       function getPhone(){
@@ -898,21 +982,45 @@
         );
       }
 
-      function saveLocalAccess(slug,phone){
+      function saveIdentityOnly(slug,phone){
         try{
-          if(slug){
+          if(slug && isPosSlug(slug)){
             localStorage.setItem("digiy_pos_last_slug",slug);
             sessionStorage.setItem("digiy_pos_last_slug",slug);
+            localStorage.setItem("digiy_pos_slug",slug);
+            sessionStorage.setItem("digiy_pos_slug",slug);
           }
 
           if(phone){
             localStorage.setItem("digiy_pos_last_phone",phone);
             sessionStorage.setItem("digiy_pos_last_phone",phone);
+            localStorage.setItem("digiy_pos_phone",phone);
+            sessionStorage.setItem("digiy_pos_phone",phone);
           }
+        }catch(_){}
+      }
 
-          const payload = { slug:slug || "", phone:phone || "", module:MODULE_CODE, verified:true, ts:Date.now() };
+      function saveAccessSession(slug,phone){
+        if(!slug || !isPosSlug(slug) || !phone) return;
+
+        try{
+          const payload = {
+            slug,
+            phone,
+            module:MODULE_CODE,
+            access:true,
+            access_ok:true,
+            ok:true,
+            verified:true,
+            verified_at:Date.now(),
+            validated_at:new Date().toISOString(),
+            ts:Date.now()
+          };
+
           localStorage.setItem("DIGIY_POS_SESSION",JSON.stringify(payload));
+          sessionStorage.setItem("DIGIY_POS_SESSION",JSON.stringify(payload));
           localStorage.setItem("DIGIY_ACCESS",JSON.stringify(payload));
+          sessionStorage.setItem("DIGIY_ACCESS",JSON.stringify(payload));
         }catch(_){}
       }
 
@@ -997,25 +1105,37 @@
 
       async function resolvePhoneFromSlug(slug){
         const client = await getSb();
-        if(!client || !slug) return "";
+        const s = normSlug(slug);
+        if(!client || !s || !isPosSlug(s)) return "";
 
-        const { data,error } = await client
-          .from("digiy_subscriptions_public")
-          .select("phone,module,slug")
-          .eq("slug",slug)
-          .limit(1)
-          .maybeSingle();
+        for(const moduleName of ALLOWED_MODULES){
+          const { data,error } = await client
+            .from("digiy_subscriptions_public")
+            .select("phone,module,slug")
+            .eq("slug",s)
+            .eq("module",moduleName)
+            .limit(1)
+            .maybeSingle();
 
-        if(error) throw error;
+          if(error) continue;
 
-        return cleanDigits(data?.phone || "");
+          if(data?.phone && isAllowedModule(data.module) && isPosSlug(data.slug)){
+            return cleanDigits(data.phone);
+          }
+        }
+
+        return "";
       }
 
       async function digiyHasAccess(phone,module){
-        const res = await rpcFirstSuccess("digiy_has_access",[
-          { p_phone:phone, p_module:module },
-          { phone,module }
-        ]);
+        const tries = [];
+
+        for(const moduleName of ALLOWED_MODULES){
+          tries.push({ p_phone:phone, p_module:moduleName });
+          tries.push({ phone, module:moduleName });
+        }
+
+        const res = await rpcFirstSuccess("digiy_has_access",tries);
 
         if(typeof res === "boolean") return res;
         if(res && typeof res.ok === "boolean") return res.ok;
@@ -1027,25 +1147,30 @@
       }
 
       async function digiyGetSubscriptionFull(phone,module){
-        try{
-          return await rpcFirstSuccess("digiy_get_subscription_status",[
-            { p_phone:phone, p_module:module },
-            { phone,module }
-          ]);
-        }catch(_){
-          return null;
+        for(const moduleName of ALLOWED_MODULES){
+          try{
+            const data = await rpcFirstSuccess("digiy_get_subscription_status",[
+              { p_phone:phone, p_module:moduleName },
+              { phone, module:moduleName }
+            ]);
+            if(data) return data;
+          }catch(_){}
         }
+        return null;
       }
 
       async function digiyGetDashboardStats(phone,module){
-        try{
-          return await rpcFirstSuccess("digiy_get_dashboard_stats",[
-            { p_phone:phone, p_module:module },
-            { phone,module }
-          ]);
-        }catch(_){
-          return { month_xof:null, tx_count:null, today_hint:"Aujourd’hui" };
+        for(const moduleName of ALLOWED_MODULES){
+          try{
+            const data = await rpcFirstSuccess("digiy_get_dashboard_stats",[
+              { p_phone:phone, p_module:moduleName },
+              { phone, module:moduleName }
+            ]);
+            if(data) return data;
+          }catch(_){}
         }
+
+        return { month_xof:null, tx_count:null, today_hint:"Aujourd’hui" };
       }
 
       async function digiyGetBoostStatus(phone){
@@ -1067,6 +1192,8 @@
       }
 
       async function getStoreContext(slug){
+        if(!slug || !isPosSlug(slug)) return null;
+
         try{
           return await rpcFirstSuccess("digiy_pos_get_store_context_by_slug",[
             { p_slug:slug },
@@ -1176,13 +1303,22 @@
           div.className = "notif";
           div.innerHTML = `
             <div>
-              <b>${it.title}</b>
-              <div class="muted" style="font-size:13px;margin-top:3px">${it.text}</div>
+              <b>${escapeHtml(it.title)}</b>
+              <div class="muted" style="font-size:13px;margin-top:3px">${escapeHtml(it.text)}</div>
             </div>
-            <div class="tag ${tagClass}">${it.tag}</div>
+            <div class="tag ${tagClass}">${escapeHtml(it.tag)}</div>
           `;
           box.appendChild(div);
         }
+      }
+
+      function escapeHtml(value){
+        return String(value ?? "")
+          .replace(/&/g,"&amp;")
+          .replace(/</g,"&lt;")
+          .replace(/>/g,"&gt;")
+          .replace(/"/g,"&quot;")
+          .replace(/'/g,"&#039;");
       }
 
       function wireNav(){
@@ -1221,7 +1357,6 @@
         const abos = $("btnBlockedAbos");
         if(abos) abos.href = buildUrl(ABOS_URL,buildAbosParams());
 
-        const support = buildSupportUrl();
         const audioBtn = $("digiy-audio-btn");
         if(audioBtn) audioBtn.title = "Écouter l’accueil";
       }
@@ -1245,6 +1380,7 @@
         reveal();
         cleanVisibleUrl();
         wireNav();
+        purgeBadLocalRail();
 
         await awaitGuardReady();
         await bootGuard();
@@ -1255,10 +1391,10 @@
         state.slug = slug;
         state.phone = phone;
 
-        if(!slug){
+        if(!slug || !isPosSlug(slug)){
           showBlocked(
             "Identifiant manquant",
-            "Entre avec ton code d’accès ou passe par ton lien d’accès pour ouvrir ton espace.",
+            "Entre avec ton code d’accès ou passe par ton lien MON COMMERCE pour ouvrir ton espace.",
             "Accès requis"
           );
           return;
@@ -1273,7 +1409,7 @@
         state.slug = slug;
         state.phone = phone || "";
 
-        saveLocalAccess(slug,state.phone);
+        saveIdentityOnly(slug,state.phone);
 
         if(!state.phone){
           showBlocked(
@@ -1301,6 +1437,7 @@
           return;
         }
 
+        saveAccessSession(state.slug,state.phone);
         showDashboard();
 
         const storeCtx = await getStoreContext(slug);
