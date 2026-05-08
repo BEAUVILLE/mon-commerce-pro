@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#020617"/>
   <title>DIGIY ADMIN — Créer un commerçant</title>
+  <meta name="description" content="Atelier interne DIGIY — créer un accès commerçant, préparer le PIN et ouvrir la bonne porte PRO."/>
 
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -17,22 +17,29 @@
       --ink:#F9FAFB;
       --muted:#94A3B8;
       --gold:#facc15;
+      --orange:#f97316;
       --green:#22c55e;
       --red:#ef4444;
+      --blue:#38bdf8;
       --shadow:0 18px 60px rgba(0,0,0,.55);
       --r:18px;
     }
+
     *{box-sizing:border-box;margin:0;padding:0}
+
     body{
       min-height:100vh;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto;
-      background:radial-gradient(circle at 20% 10%,rgba(250,204,21,.10),transparent 55%),
-                 radial-gradient(circle at 80% 90%,rgba(34,211,238,.10),transparent 60%),
-                 var(--bg);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%,rgba(250,204,21,.12),transparent 55%),
+        radial-gradient(circle at 80% 90%,rgba(56,189,248,.10),transparent 60%),
+        var(--bg);
       color:var(--ink);
       padding:18px;
     }
+
     .wrap{max-width:980px;margin:0 auto}
+
     .top{
       border:1px solid var(--line);
       background:rgba(2,6,23,.78);
@@ -41,15 +48,26 @@
       display:flex;
       justify-content:space-between;
       align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
       box-shadow:var(--shadow);
     }
+
     h1{
       font-size:15px;
       font-weight:950;
       letter-spacing:.10em;
       text-transform:uppercase;
     }
-    .sub{font-size:12px;color:var(--muted);margin-top:6px}
+
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:6px;
+      line-height:1.55;
+      font-weight:750;
+    }
+
     .pill{
       border:1px solid var(--line);
       border-radius:999px;
@@ -57,6 +75,7 @@
       background:rgba(250,204,21,.10);
       font-weight:900;
       font-size:12px;
+      white-space:nowrap;
     }
 
     .card{
@@ -67,6 +86,25 @@
       padding:16px;
       box-shadow:var(--shadow);
     }
+
+    .notice{
+      margin-top:12px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid rgba(56,189,248,.28);
+      background:rgba(56,189,248,.08);
+      color:#dff7ff;
+      font-size:13px;
+      line-height:1.6;
+      font-weight:750;
+    }
+
+    .notice.warn{
+      border-color:rgba(250,204,21,.30);
+      background:rgba(250,204,21,.08);
+      color:#fef3c7;
+    }
+
     label{
       display:block;
       margin:10px 0 6px;
@@ -74,6 +112,7 @@
       font-size:12px;
       color:#fff;
     }
+
     input,select{
       width:100%;
       padding:12px 14px;
@@ -83,16 +122,20 @@
       color:var(--ink);
       font-weight:850;
       outline:none;
+      min-height:48px;
     }
+
     input:focus,select:focus{
       border-color:rgba(250,204,21,.8);
       box-shadow:0 0 0 3px rgba(250,204,21,.12);
     }
+
     .grid{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:12px;
     }
+
     @media(max-width:800px){
       .grid{grid-template-columns:1fr}
     }
@@ -105,10 +148,12 @@
       border-radius:14px;
       font-weight:950;
       cursor:pointer;
-      background:linear-gradient(135deg,var(--gold),#f97316);
+      background:linear-gradient(135deg,var(--gold),var(--orange));
       color:#111827;
       font-size:14px;
+      min-height:52px;
     }
+
     .btn:hover{filter:brightness(1.03)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
 
@@ -120,27 +165,37 @@
       border-radius:16px;
       display:none;
     }
+
     .out.bad{
       border-color:rgba(239,68,68,.35);
       background:rgba(239,68,68,.08);
     }
+
+    .out b{
+      display:block;
+      margin-bottom:6px;
+    }
+
     .code{
       margin-top:10px;
       padding:10px;
       border-radius:14px;
       border:1px solid var(--line);
       background:rgba(0,0,0,.25);
-      font-family:ui-monospace,Menlo,monospace;
+      font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
       font-size:12px;
       white-space:pre-wrap;
-      word-break:break-all;
+      word-break:break-word;
+      line-height:1.55;
     }
+
     .miniRow{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
       margin-top:10px;
     }
+
     .miniBtn{
       flex:1;
       min-width:220px;
@@ -151,8 +206,18 @@
       color:#fff;
       font-weight:900;
       cursor:pointer;
+      min-height:46px;
     }
+
     .miniBtn:hover{border-color:rgba(250,204,21,.6)}
+
+    .small{
+      margin-top:8px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+      font-weight:750;
+    }
   </style>
 </head>
 
@@ -162,53 +227,64 @@
   <div class="top">
     <div>
       <h1>Créer un commerçant</h1>
-      <div class="sub">Identité boutique + code + carte d'accès immédiate • activation du service</div>
+      <div class="sub">Identité boutique + PIN + porte PRO correcte. Atelier interne DIGIY.</div>
     </div>
-    <div class="pill">Atelier commerçant 🦅</div>
+    <div class="pill">Coffre interne 🦅</div>
   </div>
 
   <div class="card">
+    <div class="notice warn">
+      Cet outil doit rester interne. La clé utilisée ici doit être une clé publishable/anon seulement.
+      Le vrai verrou doit être dans la RPC Supabase : jamais de service_role dans une page web.
+    </div>
+
     <div class="grid">
-
       <div>
-        <label>Nom commerce</label>
-        <input id="name" placeholder="Chez Astou Saly"/>
+        <label for="name">Nom commerce</label>
+        <input id="name" placeholder="Chez Astou Saly" autocomplete="off"/>
       </div>
 
       <div>
-        <label>Téléphone</label>
-        <input id="phone" placeholder="+22177xxxxxxx"/>
+        <label for="phone">Téléphone</label>
+        <input id="phone" placeholder="+22177xxxxxxx" inputmode="tel" autocomplete="off"/>
       </div>
 
       <div>
-        <label>Service initial</label>
-        <select id="module">
-          <option value="loc_pro">Location</option>
-          <option value="driver_pro">Je conduis</option>
-          <option value="caisse_pro">Mon commerce</option>
-          <option value="resto_pro">Restaurant</option>
-          <option value="market_pro">Marché</option>
-          <option value="qr_pro">Mon QR</option>
+        <label for="service">Service initial</label>
+        <select id="service">
+          <option value="POS">Mon commerce</option>
+          <option value="LOC">Je loue</option>
+          <option value="DRIVER">Je conduis</option>
+          <option value="RESA">Je réserve</option>
+          <option value="MARKET">Je vends</option>
+          <option value="BUILD">Mes services</option>
+          <option value="JOBS">Je cherche du travail</option>
+          <option value="EXPLORE">Je fais découvrir mon lieu</option>
+          <option value="PAY">Mon argent</option>
         </select>
       </div>
 
       <div>
-        <label>Code d'accès (auto si vide)</label>
-        <input id="pin" placeholder="1234"/>
+        <label for="pin">Code d’accès</label>
+        <input id="pin" placeholder="Auto si vide" inputmode="numeric" maxlength="8" autocomplete="off"/>
       </div>
-
     </div>
 
-    <button id="btn" class="btn">⚡ Créer le commerçant</button>
+    <button id="btn" class="btn" type="button">⚡ Créer le commerçant</button>
+
+    <div class="small">
+      Sortie attendue : PIN, identifiant, porte d’entrée PRO, lien espace, lien vitrine quand disponible.
+    </div>
 
     <div id="out" class="out">
       <b id="titleOut">✅ Créé</b>
       <div class="code" id="codeBox"></div>
 
       <div class="miniRow">
-        <button class="miniBtn" id="copyBtn">📋 Copier tout</button>
-        <button class="miniBtn" id="openPin">🔐 Ouvrir l'accès</button>
-        <button class="miniBtn" id="openQR">📷 Ouvrir le QR</button>
+        <button class="miniBtn" id="copyBtn" type="button">📋 Copier tout</button>
+        <button class="miniBtn" id="openPin" type="button">🔐 Ouvrir le code</button>
+        <button class="miniBtn" id="openPro" type="button">🏠 Ouvrir l’espace</button>
+        <button class="miniBtn" id="openPublic" type="button">🌍 Ouvrir vitrine</button>
       </div>
     </div>
   </div>
@@ -216,103 +292,240 @@
 </div>
 
 <script>
-(async()=>{
-  // ✅ SUPABASE CONFIG
-  const SUPABASE_URL="https://wesqmwjjtsefyjnluosj.supabase.co";
-  const SUPABASE_ANON_KEY="YOUR_ANON_KEY_HERE";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+(async () => {
+  "use strict";
 
-  const $=(id)=>document.getElementById(id);
-  const out=$("out");
-  const codeBox=$("codeBox");
-  const btn=$("btn");
+  const SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
 
-  function slugify(str){
-    return (str||"")
-      .trim().toLowerCase()
-      .replace(/[^a-z0-9\s-]/g,"")
-      .replace(/\s+/g,"-")
-      .replace(/-+/g,"-");
+  /*
+    Important :
+    - mettre ici la clé publishable / anon seulement ;
+    - ne jamais mettre une clé service_role dans ce fichier ;
+    - la RPC digiy_admin_create_merchant_v1 doit faire le vrai contrôle côté Supabase.
+  */
+  const SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    }
+  });
+
+  const $ = (id) => document.getElementById(id);
+
+  const out = $("out");
+  const codeBox = $("codeBox");
+  const btn = $("btn");
+
+  const SERVICE_MAP = {
+    POS: {
+      slugPrefix: "pos",
+      label: "MON COMMERCE",
+      proHome: "https://commerce-pro.digiylyfe.com/dashboard-pro.html",
+      pin: "https://commerce-pro.digiylyfe.com/pin.html",
+      publicUrl: "https://mon-commerce.digiylyfe.com/"
+    },
+    LOC: {
+      slugPrefix: "loc",
+      label: "JE LOUE",
+      proHome: "https://pro-loc.digiylyfe.com/dashboard-pro.html",
+      pin: "https://pro-loc.digiylyfe.com/pin.html",
+      publicUrl: "https://loc.digiylyfe.com/"
+    },
+    DRIVER: {
+      slugPrefix: "driver",
+      label: "JE CONDUIS",
+      proHome: "https://pro-driver.digiylyfe.com/dashboard-pro.html",
+      pin: "https://pro-driver.digiylyfe.com/pin.html",
+      publicUrl: "https://driver.digiylyfe.com/"
+    },
+    RESA: {
+      slugPrefix: "resa",
+      label: "JE RÉSERVE",
+      proHome: "https://pro-resa-resto.digiylyfe.com/dashboard-pro.html",
+      pin: "https://pro-resa-resto.digiylyfe.com/pin.html",
+      publicUrl: "https://resa.digiylyfe.com/"
+    },
+    MARKET: {
+      slugPrefix: "market",
+      label: "JE VENDS",
+      proHome: "https://pro-market.digiylyfe.com/dashboard-pro.html",
+      pin: "https://pro-market.digiylyfe.com/pin.html",
+      publicUrl: "https://market.digiylyfe.com/"
+    },
+    BUILD: {
+      slugPrefix: "build",
+      label: "MES SERVICES",
+      proHome: "https://pro-build.digiylyfe.com/dashboard-pro.html",
+      pin: "https://pro-build.digiylyfe.com/pin.html",
+      publicUrl: "https://build.digiylyfe.com/"
+    },
+    JOBS: {
+      slugPrefix: "jobs",
+      label: "JOBS",
+      proHome: "https://pro-job.digiylyfe.com/cockpit.html",
+      pin: "https://pro-job.digiylyfe.com/pin.html",
+      publicUrl: "https://digiy-jobs.digiylyfe.com/"
+    },
+    EXPLORE: {
+      slugPrefix: "explore",
+      label: "EXPLORE",
+      proHome: "https://pro-explore.digiylyfe.com/dashboard-pro.html",
+      pin: "https://pro-explore.digiylyfe.com/pin.html",
+      publicUrl: "https://explore.digiylyfe.com/"
+    },
+    PAY: {
+      slugPrefix: "pay",
+      label: "MON ARGENT",
+      proHome: "https://pro-pay.digiylyfe.com/admin.html",
+      pin: "https://pro-pay.digiylyfe.com/pin.html",
+      publicUrl: "https://pro-pay.digiylyfe.com/"
+    }
+  };
+
+  function normPhone(value){
+    let p = String(value || "").replace(/[^\d]/g, "");
+    if(p.startsWith("00")) p = p.slice(2);
+    return p;
   }
 
   function genPin(){
-    return String(Math.floor(1000 + Math.random()*9000));
+    return String(Math.floor(1000 + Math.random() * 9000));
   }
 
-  async function copy(txt){
-    await navigator.clipboard.writeText(txt);
-    alert("✅ Copié frérot");
+  function slugifyName(value){
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
   }
 
-  btn.onclick = async ()=>{
-    out.style.display="none";
+  function serviceSlug(service, phone, name){
+    const cfg = SERVICE_MAP[service] || SERVICE_MAP.POS;
+    const p = normPhone(phone);
+    if(p) return cfg.slugPrefix + "-" + p;
+
+    const nameSlug = slugifyName(name);
+    return cfg.slugPrefix + "-" + (nameSlug || Date.now());
+  }
+
+  function withSlug(url, slug){
+    const u = new URL(url);
+    if(slug) u.searchParams.set("slug", slug);
+    return u.toString();
+  }
+
+  function setOutput(ok, title, text){
+    out.classList.toggle("bad", !ok);
+    out.style.display = "block";
+    $("titleOut").textContent = title;
+    codeBox.textContent = text;
+  }
+
+  async function copyText(txt){
+    try{
+      await navigator.clipboard.writeText(txt);
+      alert("✅ Copié");
+    }catch(_){
+      const area = document.createElement("textarea");
+      area.value = txt;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+      alert("✅ Copié");
+    }
+  }
+
+  function humanService(service){
+    return (SERVICE_MAP[service] || SERVICE_MAP.POS).label;
+  }
+
+  btn.onclick = async () => {
+    out.style.display = "none";
+    out.classList.remove("bad");
 
     const name = $("name").value.trim();
-    const phone = $("phone").value.trim();
-    const module = $("module").value;
-    let pin = $("pin").value.trim();
+    const phoneRaw = $("phone").value.trim();
+    const phone = normPhone(phoneRaw);
+    const service = $("service").value;
+    let pin = $("pin").value.trim().replace(/[^\d]/g, "");
 
     if(!name || !phone){
-      alert("Nom + téléphone requis frérot");
+      alert("Nom + téléphone requis frérot.");
       return;
     }
 
     if(!pin) pin = genPin();
 
-    const slug = slugify(name);
+    const slug = serviceSlug(service, phone, name);
+    const cfg = SERVICE_MAP[service] || SERVICE_MAP.POS;
 
-    btn.disabled=true;
-    btn.textContent="Création…";
+    btn.disabled = true;
+    btn.textContent = "Création…";
 
     try{
-      // ✅ RPC ADMIN (à créer côté Supabase)
-      const { data, error } = await sb.rpc("digiy_admin_create_merchant_v1",{
+      const { data, error } = await sb.rpc("digiy_admin_create_merchant_v1", {
         p_name: name,
         p_phone: phone,
         p_slug: slug,
         p_pin: pin,
-        p_module: module
+        p_module: service
       });
 
       if(error) throw error;
-      if(!data?.ok) throw new Error(data?.reason||"Erreur création");
+      if(!data?.ok) throw new Error(data?.reason || "Erreur création");
 
-      const pinUrl = `https://beauville.github.io/${module}/pin.html?slug=${slug}`;
-      const qrUrl  = `https://beauville.github.io/digiy-qr-pro/?slug=${slug}`;
+      const pinUrl = withSlug(cfg.pin, slug);
+      const proUrl = withSlug(cfg.proHome, slug);
+      const publicUrl = cfg.publicUrl;
 
       const text =
-`✅ DIGIY MERCHANT CRÉÉ
+`✅ DIGIY — ACCÈS CRÉÉ
 
-Nom   : ${name}
-Tel   : ${phone}
-Identifiant : ${slug}
-PIN   : ${pin}
-Module: ${module}
+Nom commerce : ${name}
+Téléphone    : ${phone}
+Service      : ${humanService(service)}
+Identifiant  : ${slug}
+Code d’accès : ${pin}
 
-🔐 Lien d'accès :
+🔐 Entrer avec mon code :
 ${pinUrl}
 
-📷 Carte d'accès :
-${qrUrl}
+🏠 Mon espace :
+${proUrl}
+
+🌍 Vitrine :
+${publicUrl}
+
+Rappel :
+DIGIY ne garde pas l'argent.
+0% commission.
+Paiement direct au professionnel.
 `;
 
-      codeBox.textContent=text;
-      out.style.display="block";
+      setOutput(true, "✅ Commerçant créé", text);
 
-      $("copyBtn").onclick=()=>copy(text);
-      $("openPin").onclick=()=>window.open(pinUrl,"_blank");
-      $("openQR").onclick=()=>window.open(qrUrl,"_blank");
+      $("copyBtn").onclick = () => copyText(text);
+      $("openPin").onclick = () => window.open(pinUrl, "_blank", "noopener");
+      $("openPro").onclick = () => window.open(proUrl, "_blank", "noopener");
+      $("openPublic").onclick = () => window.open(publicUrl, "_blank", "noopener");
 
     }catch(e){
-      out.classList.add("bad");
-      out.style.display="block";
-      codeBox.textContent="❌ ERREUR:\n"+(e.message||e);
+      const msg = e?.message || String(e);
+      setOutput(false, "❌ Création impossible", "ERREUR :\n" + msg + "\n\nÀ vérifier : RPC, grants, RLS, clé publishable, module envoyé.");
+    }finally{
+      btn.disabled = false;
+      btn.textContent = "⚡ Créer le commerçant";
     }
-
-    btn.disabled=false;
-    btn.textContent="⚡ CRÉER LE COMMERÇANT";
   };
-
 })();
 </script>
 
