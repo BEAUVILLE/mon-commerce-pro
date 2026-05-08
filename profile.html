@@ -55,6 +55,8 @@
       padding:16px 16px calc(104px + env(safe-area-inset-bottom,0px));
     }
 
+    a{text-decoration:none;color:inherit}
+
     #guard_status{
       position:fixed;
       top:14px;
@@ -169,12 +171,6 @@
       line-height:1.7;
     }
 
-    .subgrid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:16px;
-    }
-
     .row{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -188,7 +184,7 @@
     }
 
     @media(max-width:860px){
-      .subgrid,.row,.row3{grid-template-columns:1fr}
+      .row,.row3{grid-template-columns:1fr}
     }
 
     label{
@@ -377,7 +373,7 @@
       }
     }
 
-    #publicProfile, #shopInfo, #billingInfo{scroll-margin-top:96px}
+    #publicProfile,#shopInfo,#billingInfo{scroll-margin-top:96px}
 
     .bottomNav{
       position:fixed;
@@ -435,7 +431,6 @@
       .profileFastRow{grid-template-columns:1fr 1fr}
       #guard_status{display:none}
     }
-
   </style>
 </head>
 
@@ -447,7 +442,8 @@
       <div class="card">
         <h1>🏪 Ma boutique</h1>
         <p class="sub">
-          Ici tu règles ce que le client voit : nom, adresse, WhatsApp, photo, description. Les infos administratives restent séparées.
+          Ici tu règles ce que le client voit : nom, adresse, WhatsApp, photo, description.
+          Les infos administratives restent séparées.
         </p>
 
         <div class="pillrow">
@@ -494,11 +490,11 @@
 
           <div class="row">
             <div>
-              <label>WhatsApp (sans espaces)</label>
-              <input id="whatsapp" inputmode="numeric" placeholder="Ex: 22177..." />
+              <label>WhatsApp</label>
+              <input id="whatsapp" inputmode="numeric" placeholder="Ex: 221771342889" />
             </div>
             <div>
-              <label>Photo vitrine (URL)</label>
+              <label>Photo vitrine</label>
               <input id="photo_url" placeholder="https://...jpg/png" />
               <div class="photoPreviewWrap" id="photoPreviewWrap">
                 <img id="photoPreview" alt="Aperçu de la photo vitrine" />
@@ -512,11 +508,11 @@
 
           <div class="row">
             <div>
-              <label>Tags (séparés par des virgules)</label>
+              <label>Tags</label>
               <input id="tags" placeholder="Ex: wave, orange-money, alimentation" />
             </div>
             <div>
-              <label>Priorité (0–100)</label>
+              <label>Priorité</label>
               <input id="priority" type="number" min="0" max="100" value="1"/>
             </div>
           </div>
@@ -550,8 +546,8 @@
 
           <div class="row">
             <div>
-              <label>Lien vitrine (optionnel)</label>
-              <input id="profile_url" placeholder="Lien public direct si tu en as un" />
+              <label>Lien vitrine</label>
+              <input id="profile_url" placeholder="Optionnel : lien public direct si tu en as un" />
               <div class="hint">Si vide, le bouton ouvrira la vitrine publique MON COMMERCE.</div>
             </div>
             <div>
@@ -644,7 +640,7 @@
               <input id="vat_rate" type="number" min="0" step="0.01" placeholder="Ex: 18" />
             </div>
             <div>
-              <label>Code interne (optionnel)</label>
+              <label>Code interne</label>
               <input id="billing_code" placeholder="Ex: BOUTIQUE-SALY-01" />
             </div>
           </div>
@@ -670,14 +666,13 @@
     </div>
   </div>
 
-
   <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
     <div class="bottomNavInner">
       <a id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
-      <a id="navArticles" href="./caisse.html#articles"><span class="ico">📦</span><span>Articles</span></a>
+      <a id="navArticles" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
       <a id="navCash" href="./caisse.html"><span class="ico">💰</span><span>Encaisser</span></a>
       <a id="navNotes" href="./caisse.html#notes"><span class="ico">✍️</span><span>Notes</span></a>
-      <a class="active" id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Plus</span></a>
+      <a class="active" id="navProfile" href="./profile.html"><span class="ico">🏪</span><span>Fiche</span></a>
     </div>
   </nav>
 
@@ -686,9 +681,14 @@
   "use strict";
 
   const DASHBOARD_URL = "./dashboard-pro.html";
-  const PUBLIC_INDEX_URL = "./index.html";
+  const PUBLIC_INDEX_URL = "https://mon-commerce.digiylyfe.com/";
   const CAISSE_URL = "./caisse.html";
   const ADMIN_URL = "./admin.html";
+  const PROFILE_URL = "./profile.html";
+  const PIN_URL = "./pin.html";
+
+  const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
+  const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
 
   const gs = document.getElementById("guard_status");
   const msg = document.getElementById("msg");
@@ -733,6 +733,23 @@
       .replace(/[^a-z0-9-]/g, "")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
+  }
+
+  function normPhone(v){
+    return String(v || "").replace(/[^\d]/g, "");
+  }
+
+  function isForbiddenSlug(slug){
+    const s = normSlug(slug);
+    if(!s) return false;
+    return FORBIDDEN_SLUG_PREFIXES.some(prefix => s.startsWith(prefix));
+  }
+
+  function isPosSlug(slug){
+    const s = normSlug(slug);
+    if(!s) return false;
+    if(isForbiddenSlug(s)) return false;
+    return ALLOWED_SLUG_PREFIXES.some(prefix => s.startsWith(prefix));
   }
 
   function parseTags(raw){
@@ -807,47 +824,15 @@
     return u.pathname + u.hash;
   }
 
-  function buildSafeUrl(base, params){
-    const baseStr = (base == null ? "" : String(base)).trim();
-    if(!baseStr) return location.href;
-    let u;
-    try{
-      if(/^https?:\/\//i.test(baseStr)){
-        u = new URL(baseStr);
-      }else{
-        const origin = location.protocol + "//" + location.host;
-        const full = baseStr.startsWith("/") ? origin + baseStr : origin + "/" + baseStr;
-        u = new URL(full);
-      }
-    }catch(e){
-      console.warn("[DIGIY] buildSafeUrl KO:", baseStr, e.message);
-      return baseStr;
-    }
-
-    try{
-      Object.entries(params || {}).forEach(([k,v]) => {
-        if(v !== null && v !== undefined && String(v) !== ""){
-          u.searchParams.set(k, String(v));
-        }
-      });
-    }catch(_){}
-
-    return u.toString();
-  }
-
-  function withSlug(url, slug){
-    return url;
-  }
-
   function wireMobileLinks(){
     const map = {
       btnFastCash: CAISSE_URL,
       btnFastMore: ADMIN_URL,
       navHome: DASHBOARD_URL,
-      navArticles: CAISSE_URL + "#articles",
+      navArticles: ADMIN_URL + "#articleList",
       navCash: CAISSE_URL,
       navNotes: CAISSE_URL + "#notes",
-      navMore: ADMIN_URL
+      navProfile: PROFILE_URL
     };
 
     Object.entries(map).forEach(([id, base]) => {
@@ -872,7 +857,11 @@
     if(window.supabase?.createClient && url && key){
       try{
         SB_FALLBACK = window.supabase.createClient(url, key, {
-          auth: { persistSession: false }
+          auth: {
+            persistSession:false,
+            autoRefreshToken:false,
+            detectSessionInUrl:false
+          }
         });
         return SB_FALLBACK;
       }catch(e){
@@ -882,19 +871,13 @@
     return null;
   }
 
-  function currentIdentityKey(){
-    const slug = normSlug(ACTIVE_SLUG || $("slug")?.value || "");
-    const phone = String(SESSION?.phone || "").replace(/[^\d]/g, "");
-    return slug || phone || "default";
-  }
-
   function adminDraftKeyBySlug(slug){
     const s = normSlug(slug || "");
     return s ? `digiy_pos_admin_profile:${s}` : "";
   }
 
   function adminDraftKeyByPhone(phone){
-    const p = String(phone || "").replace(/[^\d]/g, "");
+    const p = normPhone(phone || "");
     return p ? `digiy_pos_admin_profile_phone:${p}` : "";
   }
 
@@ -974,7 +957,7 @@
     const payload = {
       ...readAdminForm(),
       slug: ACTIVE_SLUG || $("slug").value.trim(),
-      phone: String(SESSION?.phone || "").replace(/[^\d]/g, ""),
+      phone: normPhone(SESSION?.phone || ""),
       saved_at: new Date().toISOString()
     };
 
@@ -994,7 +977,7 @@
     const payload = saveAdminDraft(true);
     const sb = getSb();
     const slug = normSlug(payload.slug || ACTIVE_SLUG || "");
-    const phone = String(payload.phone || SESSION?.phone || "").replace(/[^\d]/g, "");
+    const phone = normPhone(payload.phone || SESSION?.phone || "");
     const workCurrency = normalizeCurrency(payload.currency);
 
     if(!sb){
@@ -1055,11 +1038,12 @@
     const is_published = ($("is_published").value === "true");
 
     if(!display_name) throw new Error("Nom affiché requis");
-    if(!whatsapp) throw new Error("WhatsApp requis (22177...)");
+    if(!whatsapp) throw new Error("WhatsApp requis");
 
-    let slug = String($("slug").value || "").trim();
-    if(EXISTING?.slug) slug = EXISTING.slug;
+    let slug = normSlug($("slug").value || "");
+    if(EXISTING?.slug) slug = normSlug(EXISTING.slug);
     if(!slug) slug = ACTIVE_SLUG || slugify(display_name);
+    if(!isPosSlug(slug)) slug = "commerce-" + slugify(display_name);
 
     ACTIVE_SLUG = slug;
     $("slug").value = slug;
@@ -1081,25 +1065,25 @@
       priority,
       badge: badge || "✅ Commerce équipé",
       hub_badge: hub_badge || "💳 MON COMMERCE",
-      price_label: price_label || "0% commission • paiement direct"
+      price_label: price_label || "0% commission • paiement direct",
+      module_code: "POS",
+      module_label: "MON COMMERCE"
     };
 
-    const ownerPhone = String(SESSION?.phone || "").replace(/[^\d]/g, "");
+    const ownerPhone = normPhone(SESSION?.phone || "");
     if(isUuid(SESSION?.owner_id)) payload.owner_id = SESSION.owner_id;
     if(ownerPhone) payload.owner_phone = ownerPhone;
     if(ACTIVE_SLUG) {
       payload.workspace_slug = ACTIVE_SLUG;
       payload.last_slug = ACTIVE_SLUG;
     }
-    payload.module_code = "POS";
-    payload.module_label = "MON COMMERCE";
 
     return payload;
   }
 
   async function loadWorkCurrencyFromStore(){
     const sb = getSb();
-    if(!sb || !ACTIVE_SLUG) return;
+    if(!sb || !ACTIVE_SLUG || !isPosSlug(ACTIVE_SLUG)) return;
 
     try{
       const { data, error } = await sb
@@ -1133,7 +1117,7 @@
     let error = null;
 
     try{
-      if(ACTIVE_SLUG){
+      if(ACTIVE_SLUG && isPosSlug(ACTIVE_SLUG)){
         const res = await sb
           .from("digiy_pos_public_profiles")
           .select("*")
@@ -1141,7 +1125,7 @@
           .maybeSingle();
         data = res.data || null;
         error = res.error || null;
-      } else if(SESSION?.owner_id){
+      }else if(SESSION?.owner_id){
         const res = await sb
           .from("digiy_pos_public_profiles")
           .select("*")
@@ -1205,7 +1189,7 @@
 
     try{
       const payload = buildPublicPayload();
-      const phone = String(SESSION?.phone || payload.owner_phone || "").replace(/[^\d]/g, "");
+      const phone = normPhone(SESSION?.phone || payload.owner_phone || "");
 
       if(!phone){
         setDbPill("Accès incomplet", false);
@@ -1256,29 +1240,22 @@
     }
   }
 
-  function reSlug(){
-    if(EXISTING?.slug){
-      $("slug").value = EXISTING.slug;
-      ACTIVE_SLUG = EXISTING.slug;
-      setMsg("Référence interne conservée ✅", true);
-      return;
-    }
-
-    const dn = $("display_name").value.trim();
-    const newSlug = slugify(dn || "commerce");
-    $("slug").value = newSlug;
-    ACTIVE_SLUG = newSlug;
-    saveAdminDraft(true);
-    setMsg("Référence interne préparée ✅ — pense à enregistrer", true);
-  }
-
   function openPublic(){
     const explicit = $("profile_url").value.trim();
-    window.location.href = explicit || "https://mon-commerce.digiylyfe.com/";
+    window.location.href = explicit || PUBLIC_INDEX_URL;
   }
 
   function goBack(){
     window.location.href = cleanPath(DASHBOARD_URL);
+  }
+
+  function extractGuardSession(){
+    const guardSession = (typeof window.DIGIY_GUARD?.getSession === "function")
+      ? (window.DIGIY_GUARD.getSession() || {})
+      : {};
+
+    const state = window.DIGIY_GUARD?.state || {};
+    return Object.assign({}, state || {}, guardSession || {});
   }
 
   async function init(){
@@ -1293,66 +1270,64 @@
     }
 
     let readyResult = null;
-    let guardState = window.DIGIY_GUARD.state || null;
+
     try{
       if(typeof window.DIGIY_GUARD.ready === "function"){
         readyResult = await window.DIGIY_GUARD.ready();
-        guardState = readyResult || guardState;
       }
     }catch(err){
       console.warn("[DIGIY profil] guard ready KO", err?.message || err);
-      guardState = window.DIGIY_GUARD.state || null;
     }
 
-    const guardSession = (typeof window.DIGIY_GUARD.getSession === "function")
-      ? (window.DIGIY_GUARD.getSession() || {})
-      : {};
+    SESSION = extractGuardSession();
 
-    const st = window.DIGIY_GUARD.state || guardState || {};
-    const readySession = readyResult?.session || null;
+    if(readyResult && typeof readyResult === "object"){
+      SESSION = Object.assign({}, SESSION, readyResult);
+    }
+
     const hasAccess =
-      !!st.access_ok ||
-      !!st.access ||
-      readyResult?.ok === true ||
-      !!readySession ||
-      !!guardSession.phone ||
-      !!guardSession.slug;
+      SESSION.access_ok === true ||
+      SESSION.access === true ||
+      readyResult?.access_ok === true ||
+      readyResult?.access === true;
 
-    if(!hasAccess){
-      if(gs) gs.textContent = "🔐 Accès requis";
-      setDbPill("Accès requis", false);
-      setMsg("Entre avec ton code pour ouvrir ta boutique.", false);
-      return;
-    }
-
-    const lsSlug = normSlug(
+    const localSlug = normSlug(
       sessionStorage.getItem("digiy_pos_last_slug") ||
       localStorage.getItem("digiy_pos_last_slug") ||
       sessionStorage.getItem("digiy_pos_slug") ||
       localStorage.getItem("digiy_pos_slug") || ""
     );
 
-    const lsPhone = String(
+    const localPhone = normPhone(
       sessionStorage.getItem("digiy_pos_last_phone") ||
       localStorage.getItem("digiy_pos_last_phone") ||
       sessionStorage.getItem("digiy_pos_phone") ||
       localStorage.getItem("digiy_pos_phone") || ""
-    ).replace(/[^\d]/g, "");
+    );
 
-    SESSION = Object.assign({}, st || {}, readySession || {}, guardSession || {});
+    if(!SESSION.phone && localPhone) SESSION.phone = localPhone;
 
-    if(!SESSION.phone && lsPhone) SESSION.phone = lsPhone;
-    ACTIVE_SLUG = INITIAL_URL_SLUG || normSlug(SESSION.slug || st.slug || "") || lsSlug;
-    if(!SESSION.slug && ACTIVE_SLUG) SESSION.slug = ACTIVE_SLUG;
-
-    const sessionPhone = String(SESSION.phone || lsPhone || "").replace(/[^\d]/g, "");
-    if(sessionPhone) SESSION.phone = sessionPhone;
-    if(sessionPhone) SESSION.owner_phone = sessionPhone;
-
-    if(!ACTIVE_SLUG && sessionPhone){
-      ACTIVE_SLUG = `pos-${sessionPhone}`;
-      SESSION.slug = ACTIVE_SLUG;
+    ACTIVE_SLUG = normSlug(INITIAL_URL_SLUG || SESSION.slug || localSlug || "");
+    if(!ACTIVE_SLUG && SESSION.phone){
+      ACTIVE_SLUG = `pos-${normPhone(SESSION.phone)}`;
     }
+
+    if(!isPosSlug(ACTIVE_SLUG)){
+      ACTIVE_SLUG = "";
+    }
+
+    if(!hasAccess || !ACTIVE_SLUG){
+      if(gs) gs.textContent = "🔐 Accès requis";
+      setDbPill("Accès requis", false);
+      setMsg("Entre avec ton code pour ouvrir ta boutique.", false);
+      setTimeout(() => {
+        location.href = PIN_URL + "?target=profile";
+      }, 650);
+      return;
+    }
+
+    SESSION.slug = ACTIVE_SLUG;
+    SESSION.phone = normPhone(SESSION.phone || localPhone || "");
 
     document.documentElement.classList.add("access-ok");
 
@@ -1413,8 +1388,6 @@
 
     $("btnSave").addEventListener("click", saveAll);
     $("btnSaveAdmin").addEventListener("click", () => saveAdminInfo(false));
-    const btnReSlug = $("btnReSlug");
-    if(btnReSlug) btnReSlug.addEventListener("click", reSlug);
     $("btnOpenListing").addEventListener("click", openPublic);
     $("btnBack").addEventListener("click", goBack);
   }
