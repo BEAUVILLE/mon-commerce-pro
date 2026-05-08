@@ -919,6 +919,29 @@
       const CAISSE_STORAGE_META = "caisse_meta";
       const LOW_STOCK_LIMIT = 5;
 
+      const STARTER_CAISSE_PRODUCTS = [
+        {name:"Riz 5 kg",cat:"Alimentation",emoji:"🌾",price:3500,stock:50},
+        {name:"Huile 1 L",cat:"Alimentation",emoji:"🫙",price:1500,stock:30},
+        {name:"Pain",cat:"Alimentation",emoji:"🍞",price:250,stock:20},
+        {name:"Sucre 1 kg",cat:"Alimentation",emoji:"🍬",price:800,stock:40},
+        {name:"Lait poudre",cat:"Alimentation",emoji:"🥛",price:2200,stock:15},
+        {name:"Oeufs x6",cat:"Alimentation",emoji:"🥚",price:1200,stock:25},
+        {name:"Eau 1,5 L",cat:"Boissons",emoji:"💧",price:500,stock:60},
+        {name:"Jus Bissap",cat:"Boissons",emoji:"🍹",price:700,stock:20},
+        {name:"Coca Cola",cat:"Boissons",emoji:"🥤",price:800,stock:24},
+        {name:"Café soluble",cat:"Boissons",emoji:"☕",price:1000,stock:18},
+        {name:"Savon",cat:"Hygiène",emoji:"🧼",price:400,stock:35},
+        {name:"Dentifrice",cat:"Hygiène",emoji:"🪥",price:1200,stock:15},
+        {name:"Déodorant",cat:"Hygiène",emoji:"🧴",price:1800,stock:10},
+        {name:"Papier WC x4",cat:"Hygiène",emoji:"🧻",price:1500,stock:20},
+        {name:"Allumettes",cat:"Maison",emoji:"🔥",price:150,stock:80},
+        {name:"Bougie",cat:"Maison",emoji:"🕯️",price:500,stock:30},
+        {name:"Lessive 1 kg",cat:"Maison",emoji:"🧺",price:1800,stock:20},
+        {name:"Biscuits",cat:"Snacks",emoji:"🍪",price:500,stock:40},
+        {name:"Chips",cat:"Snacks",emoji:"🥔",price:400,stock:35},
+        {name:"Cacahuètes",cat:"Snacks",emoji:"🥜",price:300,stock:50}
+      ];
+
       const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
       const SUPABASE_ANON_KEY = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
 
@@ -971,6 +994,7 @@
         const raw = String(mode || "").toLowerCase();
         if(raw === "supabase") return "En ligne";
         if(raw === "local") return "Sur cet appareil";
+        if(raw === "starter") return "Articles de départ";
         return "—";
       }
 
@@ -1232,6 +1256,51 @@
         }catch(_){}
       }
 
+      function readCaisseProducts(){
+        try{
+          const raw = localStorage.getItem(CAISSE_STORAGE_PRODUCTS);
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        }catch(_){
+          return [];
+        }
+      }
+
+      function caisseItemsToAdminProducts(items){
+        return (Array.isArray(items) ? items : [])
+          .filter(item => item && String(item.name || "").trim())
+          .map((item) => normalizeProduct({
+            id:String(item.source_id || item.id || makeId()).startsWith("prd_") ? String(item.source_id || item.id) : makeId(),
+            slug:STATE.slug,
+            owner_phone:STATE.phone,
+            name:item.name,
+            category:item.cat || item.category || "Autres",
+            price_xof:item.price ?? item.price_xof ?? 0,
+            stock_qty:item.stock ?? item.stock_qty ?? 0,
+            emoji:item.emoji || "📦",
+            is_published:item.published !== false,
+            created_at:item.created_at || new Date().toISOString(),
+            updated_at:item.updated_at || new Date().toISOString()
+          }));
+      }
+
+      function starterProducts(){
+        return STARTER_CAISSE_PRODUCTS.map((item) => normalizeProduct({
+          id:makeId(),
+          slug:STATE.slug,
+          owner_phone:STATE.phone,
+          name:item.name,
+          category:item.cat,
+          price_xof:item.price,
+          stock_qty:item.stock,
+          emoji:item.emoji,
+          is_published:true,
+          note_text:"Article de départ — à modifier selon la boutique.",
+          created_at:new Date().toISOString(),
+          updated_at:new Date().toISOString()
+        }));
+      }
+
       function categoryEmoji(category,name){
         const txt = (String(category || "") + " " + String(name || "")).toLowerCase();
 
@@ -1252,7 +1321,7 @@
           source_id:p.id,
           name:p.name || "Article",
           cat:p.category || "Autres",
-          emoji:categoryEmoji(p.category,p.name),
+          emoji:p.emoji || categoryEmoji(p.category,p.name),
           price:Number(p.price_xof || 0) || 0,
           stock:Math.max(0,Number(p.stock_qty || 0) || 0),
           published:!!p.is_published,
@@ -1309,6 +1378,7 @@
           stock_qty:Number(r.stock_qty ?? r.stock ?? 0) || 0,
           note_text:String(r.note_text || r.note || r.description || "").trim(),
           image_url:String(r.image_url || r.photo_url || "").trim(),
+          emoji:String(r.emoji || "").trim(),
           is_published:typeof r.is_published === "boolean" ? r.is_published : !!r.published,
           created_at:r.created_at || new Date().toISOString(),
           updated_at:r.updated_at || new Date().toISOString()
@@ -1349,15 +1419,34 @@
               .eq("slug",slug)
               .order("updated_at",{ ascending:false });
 
-            if(!error && Array.isArray(data)){
+            if(!error && Array.isArray(data) && data.length){
               STATE.mode = "supabase";
               return data.map(normalizeProduct);
             }
           }catch(_){}
         }
 
-        STATE.mode = "local";
-        return readLocalProducts(slug).map(normalizeProduct);
+        const localItems = readLocalProducts(slug).map(normalizeProduct);
+        if(localItems.length){
+          STATE.mode = "local";
+          return localItems;
+        }
+
+        const caisseItems = caisseItemsToAdminProducts(readCaisseProducts());
+        if(caisseItems.length){
+          STATE.mode = "local";
+          writeLocalProducts(slug,caisseItems);
+          return caisseItems;
+        }
+
+        const starters = starterProducts();
+        STATE.mode = "starter";
+        writeLocalProducts(slug,starters);
+        try{
+          localStorage.setItem(CAISSE_STORAGE_PRODUCTS,JSON.stringify(starters.map(productToCaisseItem)));
+          localStorage.setItem(CAISSE_STORAGE_SHOP,STATE.storeName || "Ma Boutique");
+        }catch(_){}
+        return starters;
       }
 
       async function saveProduct(product){
@@ -1710,6 +1799,13 @@
         updateHeader();
         renderLive();
         renderList();
+
+        if(STATE.mode === "starter"){
+          syncCaisseFromProducts({ silent:true });
+          setFormNotice("Articles de départ chargés ✅ — tu peux les modifier dans Mes articles.", true);
+          setNotice("ok","Articles de départ chargés. Ouvre <b>Mes articles</b> pour les modifier, puis <b>Encaisser</b> pour vendre.");
+        }
+
         reveal();
       }
 
@@ -1778,6 +1874,7 @@
             stock_qty:item.stock_qty,
             note_text:item.note_text,
             image_url:item.image_url,
+            emoji:item.emoji,
             is_published:item.is_published,
             updated_at:item.updated_at
           }))
