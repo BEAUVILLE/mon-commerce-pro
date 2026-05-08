@@ -85,88 +85,118 @@
       padding:14px 12px calc(104px + env(safe-area-inset-bottom,0px));
     }
 
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:70;
-      margin-bottom:12px;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:22px;
-      background:rgba(4,17,13,.82);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      box-shadow:0 14px 34px rgba(0,0,0,.22);
+    /* ━━━ CAMEMBERT DISCRET — remplace la grosse bande ━━━ */
+    .digiy-camembert{
+      position:fixed;
+      top:12px;
+      right:12px;
+      z-index:99999;
     }
 
-    .topbarInner{
-      padding:12px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-
-    .brandBadge{
-      width:46px;
-      height:46px;
-      border-radius:17px;
+    .digiy-camembert-btn{
+      width:44px;
+      height:44px;
+      border-radius:999px;
+      border:1px solid rgba(250,204,21,.28);
+      background:rgba(4,17,13,.90);
+      color:#fff7c2;
       display:grid;
       place-items:center;
-      background:linear-gradient(135deg,rgba(250,204,21,.17),rgba(245,158,11,.08));
-      border:1px solid rgba(250,204,21,.18);
-      font-size:23px;
-      flex:0 0 auto;
+      font-size:21px;
+      font-weight:1000;
+      box-shadow:0 12px 30px rgba(0,0,0,.30);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
     }
 
-    .brandKicker{
-      color:var(--gold);
+    .digiy-camembert-panel{
+      position:absolute;
+      top:52px;
+      right:0;
+      width:min(292px,calc(100vw - 24px));
+      display:none;
+      padding:10px;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(4,17,13,.96);
+      box-shadow:0 20px 50px rgba(0,0,0,.45);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+
+    .digiy-camembert.open .digiy-camembert-panel{
+      display:grid;
+      gap:7px;
+    }
+
+    .digiy-camembert-title{
+      padding:8px 10px 2px;
+      color:#facc15;
       font-size:11px;
-      font-weight:950;
-      letter-spacing:.14em;
+      font-weight:1000;
+      letter-spacing:.13em;
       text-transform:uppercase;
     }
 
-    .brandTitle{
-      font-size:19px;
-      line-height:1.08;
-      font-weight:1000;
-      letter-spacing:-.02em;
-    }
-
-    .brandSub{
-      color:var(--muted);
+    .digiy-camembert-sub{
+      padding:0 10px 8px;
+      color:rgba(247,251,248,.72);
       font-size:12px;
       font-weight:800;
-      margin-top:2px;
+      line-height:1.35;
     }
 
-    .topActions{
+    .digiy-camembert-status{
       display:flex;
-      gap:8px;
       align-items:center;
-      flex-wrap:wrap;
+      gap:8px;
+      margin:0 0 6px;
+      padding:8px 10px;
+      border-radius:999px;
+      background:rgba(250,204,21,.10);
+      border:1px solid rgba(250,204,21,.18);
+      color:#fde68a;
+      font-size:12px;
+      font-weight:950;
     }
 
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:7px;
-      min-height:40px;
-      padding:9px 12px;
-      border-radius:999px;
+    .digiy-camembert-store{
+      margin-left:auto;
+      max-width:112px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      color:#fff;
+    }
+
+    .digiy-camembert-panel a,
+    .digiy-camembert-panel button{
+      width:100%;
+      min-height:42px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.045);
-      border:1px solid var(--line);
-      color:var(--muted);
-      font-size:12px;
-      font-weight:900;
+      color:#f7fbf8;
+      text-decoration:none;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:9px;
+      font-size:13px;
+      font-weight:950;
+      cursor:pointer;
+      font-family:inherit;
+    }
+
+    .digiy-camembert-panel a:hover,
+    .digiy-camembert-panel button:hover{
+      border-color:rgba(250,204,21,.35);
+      background:rgba(250,204,21,.08);
+    }
+
+    .digiy-camembert-panel .quiet{
+      color:rgba(247,251,248,.72);
     }
 
     .dot{
@@ -175,6 +205,7 @@
       border-radius:999px;
       background:var(--warn);
       box-shadow:0 0 0 4px rgba(255,255,255,.03);
+      flex:0 0 auto;
     }
 
     .dot.ok{background:var(--green)}
@@ -225,13 +256,6 @@
       background:rgba(255,255,255,.05);
       border:1px solid var(--line2);
       font-size:12px;
-    }
-
-    .navRow{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-bottom:12px;
     }
 
     .card{
@@ -706,9 +730,6 @@
 
     @media(max-width:720px){
       .wrap{padding:10px 10px calc(96px + env(safe-area-inset-bottom,0px))}
-      .navRow{display:none}
-      .topActions .btnOutline{display:none}
-      .brandSub{display:none}
       .heroBadge{margin-bottom:10px}
       .productsGrid{grid-template-columns:1fr}
       .payGrid{grid-template-columns:1fr 1fr}
@@ -716,11 +737,22 @@
       .miniStats{grid-template-columns:1fr}
       .card{padding:14px;border-radius:22px}
       .input.bigMoney{min-height:78px;font-size:38px}
+
+      .digiy-camembert{
+        top:10px;
+        right:10px;
+      }
+
+      .digiy-camembert-btn{
+        width:42px;
+        height:42px;
+        font-size:20px;
+      }
     }
 
     @media(print){
       body{background:#fff;color:#07140f}
-      .topbar,.bottomNav,.navRow,.tabs,.blockedShell,.btn,.btnOutline,.btnGhost,.smallBtn{display:none!important}
+      .digiy-camembert,.bottomNav,.tabs,.blockedShell,.btn,.btnOutline,.btnGhost,.smallBtn{display:none!important}
       .wrap{padding:0;max-width:none}
       .card{box-shadow:none;border:none;border-radius:0;background:#fff;color:#07140f}
       .notice{border:1px solid #e2e8f0;background:#fff;color:#07140f}
@@ -730,33 +762,36 @@
 
 <body>
   <div class="app" id="appRoot">
-    <div class="wrap">
-      <header class="topbar">
-        <div class="topbarInner">
-          <div class="brand">
-            <div class="brandBadge">🧾</div>
-            <div>
-              <div class="brandKicker">DIGIYLYFE</div>
-              <div class="brandTitle">MON COMMERCE</div>
-              <div class="brandSub">Un geste · une trace · Mon argent</div>
-            </div>
-          </div>
 
-          <div class="topActions">
-            <div class="pill"><span class="dot" id="dotAccess"></span><span id="pillAccess">Accès…</span></div>
-            <div class="pill"><strong id="pillStore">Boutique…</strong></div>
-            <button class="btnOutline" type="button" id="btnReloadTop">🔄 Recharger</button>
-          </div>
+    <div class="digiy-camembert" id="digiyCamembert">
+      <button class="digiy-camembert-btn" id="digiyCamembertBtn" type="button" aria-label="Menu DIGIY">
+        ☰
+      </button>
+
+      <div class="digiy-camembert-panel" id="digiyCamembertPanel">
+        <div class="digiy-camembert-title">MON COMMERCE</div>
+        <div class="digiy-camembert-sub">Caisse discrète · accès protégé</div>
+
+        <div class="digiy-camembert-status">
+          <span class="dot" id="dotAccess"></span>
+          <span id="pillAccess">Accès…</span>
+          <span class="digiy-camembert-store" id="pillStore">Boutique…</span>
         </div>
-      </header>
 
-      <div class="navRow">
-        <a class="btnGhost" href="./dashboard-pro.html" id="btnDashboard">🏠 Accueil</a>
-        <a class="btnGhost" href="./index.html" id="btnHall">🌍 Vitrine</a>
-        <a class="btnGhost" href="./profile.html" id="btnProfile">🏪 Boutique</a>
-        <a class="btnGhost" href="./admin.html" id="btnAdmin">⚙️ Plus</a>
-        <a class="btnOutline" href="./pin.html" id="btnPin">🔐 Mon code</a>
+        <a id="btnDashboard" href="./dashboard-pro.html">🏠 Accueil</a>
+        <button id="btnReloadTop" type="button">🔄 Vérifier mon accès</button>
+        <a id="btnPin" href="./pin.html">🔐 Mon code</a>
+        <a id="btnProfile" href="./profile.html">🏪 Boutique</a>
+        <a id="btnAdmin" href="./admin.html">⚙️ Plus</a>
+
+        <a id="btnHall" class="quiet" href="https://mon-commerce.digiylyfe.com/">🌍 Site</a>
+        <a id="btnHubTop" class="quiet" href="https://digiy-hub.digiylyfe.com/">🧭 HUB</a>
+        <a id="btnTarifsTop" class="quiet" href="https://tarifs.digiylyfe.com/">📦 Tarifs</a>
+        <a id="btnProSpaceTop" class="quiet" href="https://pro-espace.digiylyfe.com/">🏢 Espace pro</a>
       </div>
+    </div>
+
+    <div class="wrap">
 
       <section id="blockedShell" class="blockedShell">
         <div class="blockedInner">
@@ -956,7 +991,7 @@
       const MODULE_CODE = "POS";
       const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
       const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
-      const HALL_URL = digiyLocal("index.html");
+      const HALL_URL = "https://mon-commerce.digiylyfe.com/";
       const ADMIN_URL = digiyLocal("admin.html");
       const PROFILE_URL = digiyLocal("profile.html");
       const PIN_URL = digiyLocal("pin.html");
@@ -1038,9 +1073,44 @@
       }
 
       function cleanInternalUrl(path){
-        const u = new URL(path || "./caisse.html", location.href);
+        const raw = String(path || "./caisse.html").trim();
+        if(/^https?:\/\//i.test(raw)) return raw;
+
+        const u = new URL(raw, location.href);
         u.search = "";
         return u.pathname + u.hash;
+      }
+
+      function closeCamembert(){
+        document.getElementById("digiyCamembert")?.classList.remove("open");
+      }
+
+      function bindCamembert(){
+        const menu = document.getElementById("digiyCamembert");
+        const btn = document.getElementById("digiyCamembertBtn");
+
+        if(!menu || !btn) return;
+
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          menu.classList.toggle("open");
+        });
+
+        document.addEventListener("click", (e) => {
+          if(!menu.contains(e.target)) menu.classList.remove("open");
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if(e.key === "Escape") menu.classList.remove("open");
+        });
+
+        menu.querySelectorAll("a,button").forEach(el => {
+          if(el.id !== "digiyCamembertBtn") {
+            el.addEventListener("click", () => {
+              if(el.tagName === "A") closeCamembert();
+            });
+          }
+        });
       }
 
       function getGuardState(){
@@ -1960,7 +2030,13 @@
       }
 
       function bindUi(){
-        qs("btnReloadTop")?.addEventListener("click",() => hydrate(true));
+        bindCamembert();
+
+        qs("btnReloadTop")?.addEventListener("click",() => {
+          closeCamembert();
+          hydrate(true);
+        });
+
         qs("btnSaleReady")?.addEventListener("click",submitSale);
         qs("btnClearSale")?.addEventListener("click",clearSaleForm);
         qs("btnPrintReceipt")?.addEventListener("click",() => window.print());
