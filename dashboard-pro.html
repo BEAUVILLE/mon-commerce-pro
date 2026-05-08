@@ -604,7 +604,7 @@
       <div class="navRow">
         <a class="btnGhost" id="btnHall" href="https://mon-commerce.digiylyfe.com/">🌍 Vitrine</a>
         <a class="btnGhost" id="btnCaisse" href="./caisse.html">💰 Encaisser</a>
-        <a class="btnGhost" id="btnArticles" href="./caisse.html#articles">📦 Articles</a>
+        <a class="btnGhost" id="btnArticles" href="./admin.html#articleList">📦 Articles</a>
         <a class="btnGhost" id="btnNotes" href="./caisse.html#notes">✍️ Notes</a>
         <a class="btnGhost" id="btnAdmin" href="./admin.html">⚙️ Plus</a>
       </div>
@@ -633,8 +633,8 @@
               <a class="heroAction primary" id="btnHeroCash" href="./caisse.html">
                 <span>💰</span>Encaisser<small>montant · paiement</small>
               </a>
-              <a class="heroAction" id="btnHeroArticles" href="./caisse.html#articles">
-                <span>📦</span>Articles<small>ajouter au ticket</small>
+              <a class="heroAction" id="btnHeroArticles" href="./admin.html#articleList">
+                <span>📦</span>Articles<small>ajouter · modifier</small>
               </a>
               <a class="heroAction" id="btnHeroNotes" href="./caisse.html#notes">
                 <span>✍️</span>Notes<small>dépense · client doit</small>
@@ -724,7 +724,7 @@
   <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
     <div class="bottomNavInner">
       <a class="active" id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
-      <a id="navArticles" href="./caisse.html#articles"><span class="ico">📦</span><span>Articles</span></a>
+      <a id="navArticles" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
       <a id="navCash" href="./caisse.html"><span class="ico">💰</span><span>Encaisser</span></a>
       <a id="navNotes" href="./caisse.html#notes"><span class="ico">✍️</span><span>Notes</span></a>
       <a id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Plus</span></a>
@@ -1180,20 +1180,20 @@
         const links = {
           btnHall:PUBLIC_URL,
           btnCaisse:CAISSE_URL,
-          btnArticles:CAISSE_URL + "#articles",
+          btnArticles:ADMIN_URL + "#articleList",
           btnNotes:CAISSE_URL + "#notes",
           btnAdmin:ADMIN_URL,
           btnSettings:ADMIN_URL,
           btnPinTop:PIN_URL,
           btnBlockedPin:PIN_URL,
           btnHeroCash:CAISSE_URL,
-          btnHeroArticles:CAISSE_URL + "#articles",
+          btnHeroArticles:ADMIN_URL + "#articleList",
           btnHeroNotes:CAISSE_URL + "#notes",
           btnHeroPlus:ADMIN_URL,
           btnNoteFast:CAISSE_URL + "#notes",
           btnOpenPay:PAY_URL,
           navHome:DASHBOARD_URL,
-          navArticles:CAISSE_URL + "#articles",
+          navArticles:ADMIN_URL + "#articleList",
           navCash:CAISSE_URL,
           navNotes:CAISSE_URL + "#notes",
           navMore:ADMIN_URL
