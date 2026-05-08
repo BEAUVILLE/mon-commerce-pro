@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#07140f"/>
   <title>MON COMMERCE — Encaisser</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — encaisser, gérer les articles, écrire une note rapide et garder la trace vers Mon argent."/>
+  <meta name="description" content="MON COMMERCE by DIGIY — encaisser vite, noter une dépense, garder une trace vers Mon argent."/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -15,14 +15,14 @@
     window.DIGIY_LOGIN_URL = "./pin.html";
     document.documentElement.style.visibility = "hidden";
 
-    function digiyBasePath() {
+    function digiyBasePath(){
       const parts = location.pathname.split("/").filter(Boolean);
       const isGh = /\.github\.io$/i.test(location.hostname);
-      if (isGh && parts.length > 0) return "/" + parts[0] + "/";
+      if(isGh && parts.length > 0) return "/" + parts[0] + "/";
       return "/";
     }
 
-    function digiyLocal(path) {
+    function digiyLocal(path){
       path = String(path || "").replace(/^\/+/, "");
       return digiyBasePath() + path;
     }
@@ -38,389 +38,622 @@
 
   <style>
     :root{
-      --bg:#04110d;--bg2:#071a14;--bg3:#0b241b;
-      --card:rgba(8,24,18,.78);--card2:rgba(9,28,21,.92);--card3:rgba(255,255,255,.03);
-      --text:#f7fbf8;--muted:#bfd3c8;
-      --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.14);
-      --gold:#facc15;--gold2:#f59e0b;
-      --green:#22c55e;--green2:#16a34a;
-      --warn:#f59e0b;--danger:#ef4444;--info:#60a5fa;
-      --shadow:0 22px 56px rgba(0,0,0,.28);--shadow-soft:0 14px 34px rgba(0,0,0,.22);
-      --radius:26px;--radius-sm:18px;--max:1240px;
-      --fontA:"Outfit",system-ui,-apple-system,sans-serif;
+      --bg:#04110d;
+      --bg2:#071a14;
+      --card:rgba(8,24,18,.86);
+      --card2:rgba(9,28,21,.94);
+      --text:#f7fbf8;
+      --muted:#bfd3c8;
+      --line:rgba(255,255,255,.11);
+      --line2:rgba(255,255,255,.16);
+      --gold:#facc15;
+      --gold2:#f59e0b;
+      --green:#22c55e;
+      --green2:#16a34a;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --info:#60a5fa;
+      --shadow:0 22px 56px rgba(0,0,0,.28);
+      --radius:26px;
+      --font:"Outfit",system-ui,-apple-system,sans-serif;
     }
 
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
     html{scroll-behavior:smooth}
+
     body{
-      min-height:100vh;color:var(--text);font-family:var(--fontA);
+      min-height:100vh;
+      color:var(--text);
+      font-family:var(--font);
       background:
-        radial-gradient(circle at top left, rgba(250,204,21,.10), transparent 28%),
-        radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 22%),
-        linear-gradient(180deg, #07140f 0%, #04110d 42%, #020906 100%);
+        radial-gradient(circle at top left, rgba(250,204,21,.11), transparent 30%),
+        radial-gradient(circle at top right, rgba(34,197,94,.08), transparent 26%),
+        linear-gradient(180deg,#07140f 0%,#04110d 48%,#020906 100%);
     }
 
     a{text-decoration:none;color:inherit}
     button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
 
     .app{display:none}
     html.app-ready .app{display:block}
 
-    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px calc(104px + env(safe-area-inset-bottom,0px));}
-
-    .floating-site-btn{
-      position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:90;
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      min-height:48px;padding:14px 16px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);background:rgba(5,16,12,.88);
-      backdrop-filter:blur(10px);color:var(--text);font-size:13px;font-weight:900;letter-spacing:.2px;
-      box-shadow:0 16px 36px rgba(0,0,0,.28);
-      transition:transform .14s ease, border-color .14s ease, background .14s ease;
+    .wrap{
+      width:min(100%,1120px);
+      margin:0 auto;
+      padding:14px 12px calc(104px + env(safe-area-inset-bottom,0px));
     }
-    .floating-site-btn:hover{transform:translateY(-1px);border-color:rgba(250,204,21,.28);background:rgba(8,20,15,.94);}
 
     .topbar{
-      position:sticky;top:0;z-index:70;margin-bottom:14px;
-      backdrop-filter:blur(12px);background:rgba(4,17,13,.76);
-      border:1px solid rgba(255,255,255,.07);border-radius:24px;box-shadow:var(--shadow-soft);
+      position:sticky;
+      top:0;
+      z-index:70;
+      margin-bottom:12px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      background:rgba(4,17,13,.82);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      box-shadow:0 14px 34px rgba(0,0,0,.22);
     }
-    .topbar-inner{padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
 
-    .brand{display:flex;align-items:center;gap:12px;min-width:0;}
+    .topbarInner{
+      padding:12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
     .brandBadge{
-      width:48px;height:48px;border-radius:18px;display:grid;place-items:center;
-      background:linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.08));
-      border:1px solid rgba(250,204,21,.16);box-shadow:0 16px 34px rgba(250,204,21,.10);
-      font-size:24px;flex:0 0 auto;
+      width:46px;
+      height:46px;
+      border-radius:17px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,rgba(250,204,21,.17),rgba(245,158,11,.08));
+      border:1px solid rgba(250,204,21,.18);
+      font-size:23px;
+      flex:0 0 auto;
     }
-    .brandKicker{color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px;}
-    .brandTitle{font-size:20px;line-height:1.08;font-weight:1000;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .brandSub{color:var(--muted);font-size:12px;font-weight:800;margin-top:3px;letter-spacing:.04em;}
 
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-    .navRow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .brandKicker{
+      color:var(--gold);
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .brandTitle{
+      font-size:19px;
+      line-height:1.08;
+      font-weight:1000;
+      letter-spacing:-.02em;
+    }
+
+    .brandSub{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      margin-top:2px;
+    }
+
+    .topActions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
 
     .pill{
-      display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;
-      background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);
-      font-weight:900;font-size:12px;backdrop-filter:blur(10px);
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      min-height:40px;
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.045);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
     }
-    .pill strong{color:var(--text);font-weight:950;}
-    .dot{width:10px;height:10px;border-radius:999px;background:var(--warn);flex:0 0 auto;box-shadow:0 0 0 4px rgba(255,255,255,.03);}
+
+    .dot{
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:var(--warn);
+      box-shadow:0 0 0 4px rgba(255,255,255,.03);
+    }
+
     .dot.ok{background:var(--green)}
     .dot.bad{background:var(--danger)}
 
-    .btn,.btn-outline,.btn-ghost,.btn-danger,.smallBtn{
-      appearance:none;border:none;cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;gap:10px;
-      min-height:46px;padding:12px 16px;border-radius:999px;
-      font-weight:900;font-size:13px;letter-spacing:.02em;white-space:nowrap;
-      transition:transform .12s ease, opacity .12s ease, background .12s ease, border-color .12s ease;
-    }
-    .btn:hover,.btn-outline:hover,.btn-ghost:hover,.btn-danger:hover,.smallBtn:hover{transform:translateY(-1px)}
-    .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled,.btn-danger:disabled,.smallBtn:disabled{opacity:.56;cursor:not-allowed;transform:none;}
-    .btn{color:#07110d;background:linear-gradient(135deg, var(--gold), var(--gold2));box-shadow:0 14px 30px rgba(250,204,21,.18);}
-    .btn-outline{background:rgba(255,255,255,.04);color:var(--text);border:1px solid var(--line2);}
-    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line2);}
-    .btn-danger{background:linear-gradient(135deg, rgba(239,68,68,.95), rgba(239,68,68,.72));color:#fff;}
-    .smallBtn{
-      min-height:38px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);
-      background:rgba(255,255,255,.04);color:var(--text);
-    }
-
-    .hero{display:grid;grid-template-columns:1.04fr .96fr;gap:12px;margin-bottom:12px;}
-    .sectionGrid{display:grid;gap:12px;grid-template-columns:1.08fr .92fr;margin-top:12px;}
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);
-      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;overflow:hidden;
-    }
-    .heroBadge{
-      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
-      background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);color:var(--gold);
-      font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;
-    }
-    .bigTitle{margin:0;font-size:clamp(30px, 5vw, 54px);line-height:.96;letter-spacing:-.04em;font-weight:1000;max-width:12ch;}
-    .bigTitle .accent{color:var(--gold);}
-    .mainSub{margin-top:10px;color:var(--muted);font-size:16px;line-height:1.7;font-weight:700;max-width:64ch;}
-
-    .subInfo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px;}
-    .miniCard{min-width:0;padding:13px 12px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);}
-    .tiny{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:900;}
-    .value{font-size:20px;font-weight:950;margin-top:6px;line-height:1.1;word-break:break-word;letter-spacing:-.02em;}
-
-    .notice{padding:14px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03);margin-top:14px;line-height:1.65;font-size:14px;font-weight:700;}
-    .notice.ok{border-color:rgba(34,197,94,.22);background:rgba(34,197,94,.08);}
-    .notice.warn{border-color:rgba(245,158,11,.22);background:rgba(245,158,11,.08);}
-    .notice.bad{border-color:rgba(239,68,68,.22);background:rgba(239,68,68,.08);}
-    .notice.info{border-color:rgba(96,165,250,.22);background:rgba(96,165,250,.08);}
-
-    .actionRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
-    .helper{color:var(--muted);font-size:13px;font-weight:800;margin-top:10px;line-height:1.65;}
-
-    .kpiGrid{display:grid;gap:12px;grid-template-columns:repeat(4,1fr);margin-top:14px;}
-    .kpi{padding:13px 12px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);}
-    .kpi .k{color:var(--muted);font-size:11px;font-weight:900;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;}
-    .kpi .v{font-size:24px;font-weight:1000;line-height:1;letter-spacing:-.03em;word-break:break-word;}
-
-    .searchRow{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:10px;}
-    .field{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
-    .field label{font-size:13px;font-weight:900;color:var(--muted);letter-spacing:.03em;}
-    .input,.select,.textarea{
-      width:100%;padding:14px 14px;border-radius:16px;border:1px solid var(--line);
-      background:rgba(255,255,255,.04);color:var(--text);outline:none;font-size:15px;font-weight:800;
-    }
-    .textarea{min-height:96px;resize:vertical}
-    .input::placeholder,.textarea::placeholder{color:#92a0c7}
-    .hr{height:1px;background:var(--line);margin:14px 0}
-
-    .productsGrid{
-      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px;
-    }
-    .productCard{
-      padding:14px;border-radius:20px;border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:10px;
-      box-shadow:var(--shadow-soft);
-    }
-    .productTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-    .productName{font-size:16px;font-weight:950;line-height:1.2;}
-    .productMeta{color:var(--muted);font-size:12px;font-weight:800;line-height:1.5;}
-    .productPrice{font-size:22px;font-weight:1000;letter-spacing:-.03em;color:var(--gold);}
-    .productStock{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;
-      font-size:12px;font-weight:950;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);
-    }
-    .badge.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#d7ffe1;}
-    .badge.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#ffe3b8;}
-    .badge.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.28);color:#ffd2d2;}
-    .badge.info{background:rgba(96,165,250,.10);border-color:rgba(96,165,250,.28);color:#d8ecff;}
-    .productActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;}
-
-    .cartList{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
-    .cartItem{
-      padding:12px;border-radius:16px;border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.03);display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
-    }
-    .cartMain{display:flex;flex-direction:column;gap:4px;min-width:0}
-    .cartTitle{font-weight:950;font-size:14px;line-height:1.25}
-    .cartSub{color:var(--muted);font-size:12px;font-weight:800}
-    .cartControls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-    .qtyBtn{
-      width:34px;height:34px;border-radius:12px;border:1px solid var(--line2);
-      background:rgba(255,255,255,.04);color:var(--text);font-weight:1000;cursor:pointer;
-    }
-    .qty{min-width:28px;text-align:center;font-weight:950}
-
-    .empty{color:var(--muted);font-weight:800;font-size:13px;line-height:1.6;padding:18px}
-    .blockedShell{display:none;min-height:320px;place-items:center;text-align:center;padding:24px;}
-    .blockedInner{max-width:680px;padding:22px;border-radius:22px;border:1px solid var(--line);background:rgba(255,255,255,.03);box-shadow:var(--shadow-soft);}
-    .blockedTitle{font-size:26px;font-weight:1000;margin-bottom:8px;line-height:1.1;}
-    .blockedText{color:var(--muted);font-size:14px;line-height:1.8;font-weight:700;}
-    .footerNote{margin-top:12px;color:var(--muted);font-size:12px;font-weight:800;line-height:1.6;}
-
-
-    .quickCommerce{
-      border-color:rgba(250,204,21,.20);
-      background:
-        radial-gradient(circle at top right, rgba(250,204,21,.10), transparent 34%),
-        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02)),var(--card);
-    }
-
-    .quickGuide{
-      padding:13px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.12);
-      display:grid;
+    .btn,.btnOutline,.btnGhost,.smallBtn{
+      appearance:none;
+      border:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       gap:8px;
+      min-height:46px;
+      padding:12px 15px;
+      border-radius:999px;
+      font-weight:950;
+      font-size:13px;
+      letter-spacing:.01em;
+      transition:transform .12s ease, opacity .12s ease, border-color .12s ease;
+    }
+
+    .btn:hover,.btnOutline:hover,.btnGhost:hover,.smallBtn:hover{transform:translateY(-1px)}
+    .btn:disabled,.btnOutline:disabled,.btnGhost:disabled,.smallBtn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .btn{
+      color:#07110d;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      box-shadow:0 14px 30px rgba(250,204,21,.17);
+    }
+
+    .btnOutline{
+      color:var(--text);
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line2);
+    }
+
+    .btnGhost{
+      color:var(--muted);
+      background:transparent;
+      border:1px solid var(--line2);
+    }
+
+    .smallBtn{
+      min-height:36px;
+      padding:8px 11px;
+      border-radius:12px;
+      color:var(--text);
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line2);
+      font-size:12px;
+    }
+
+    .navRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
       margin-bottom:12px;
     }
 
-    .quickGuide strong{
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.025)),var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      overflow:hidden;
+    }
+
+    .blockedShell{
+      display:none;
+      min-height:360px;
+      place-items:center;
+      text-align:center;
+      padding:22px;
+    }
+
+    .blockedInner{
+      max-width:660px;
+      padding:22px;
+      border-radius:22px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      box-shadow:0 14px 34px rgba(0,0,0,.22);
+    }
+
+    .blockedTitle{
+      font-size:26px;
+      font-weight:1000;
+      margin-bottom:8px;
+    }
+
+    .blockedText{
+      color:var(--muted);
+      line-height:1.75;
+      font-weight:750;
+    }
+
+    .hero{
+      display:grid;
+      grid-template-columns:.92fr 1.08fr;
+      gap:12px;
+      align-items:start;
+    }
+
+    .heroBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(250,204,21,.10);
+      border:1px solid rgba(250,204,21,.18);
       color:var(--gold);
-      font-size:13px;
+      font-size:12px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:12px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(34px,8vw,58px);
+      line-height:.94;
+      letter-spacing:-.055em;
       font-weight:1000;
     }
 
-    .quickGuide p{
-      margin:0;
+    h1 .accent{color:var(--gold)}
+
+    h2{
+      margin:0 0 10px;
+      font-size:19px;
+      font-weight:1000;
+    }
+
+    .mainSub{
+      margin-top:10px;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.65;
+      font-weight:750;
+    }
+
+    .miniStats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:9px;
+      margin-top:14px;
+    }
+
+    .mini{
+      min-width:0;
+      padding:12px;
+      border-radius:17px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+
+    .mini .k{
+      color:var(--muted);
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:950;
+    }
+
+    .mini .v{
+      margin-top:5px;
+      font-size:18px;
+      font-weight:1000;
+      letter-spacing:-.025em;
+      word-break:break-word;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+      margin-top:12px;
+    }
+
+    .field label{
       color:var(--muted);
       font-size:13px;
-      font-weight:800;
-      line-height:1.55;
+      font-weight:900;
     }
 
-    .quickExamples{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .quickExamples button{
+    .input,.select,.textarea{
+      width:100%;
+      padding:14px;
+      border-radius:17px;
       border:1px solid var(--line);
       background:rgba(255,255,255,.05);
       color:var(--text);
-      border-radius:999px;
-      padding:8px 11px;
-      font-size:12px;
-      font-weight:900;
-      cursor:pointer;
+      outline:none;
+      font-size:16px;
+      font-weight:850;
     }
 
-    .quickExamples button:hover{
-      border-color:rgba(250,204,21,.28);
-      color:var(--gold);
-    }
-
-    .quickDraft{
-      display:none;
-      margin-top:12px;
-      padding:13px;
-      border-radius:18px;
-      border:1px solid rgba(34,197,94,.28);
-      background:rgba(34,197,94,.08);
-      color:#d7ffe1;
-      font-size:13px;
-      font-weight:800;
-      line-height:1.55;
-    }
-
-    .quickDraft strong{color:#fff}
-
-    .memoryBox{
-      margin-top:12px;
-      padding:13px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.12);
-      display:grid;
-      gap:10px;
-    }
-
-    .memoryHead{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:flex-start;
-    }
-
-    .memoryTitle{
-      font-size:13px;
+    .input.bigMoney{
+      min-height:74px;
+      font-size:34px;
       font-weight:1000;
-      color:var(--gold);
+      letter-spacing:-.04em;
+      text-align:center;
+      background:rgba(250,204,21,.08);
+      border-color:rgba(250,204,21,.23);
+      color:#fff7c2;
+    }
+
+    .textarea{
+      min-height:78px;
+      resize:vertical;
+      line-height:1.45;
+    }
+
+    .quickChips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .chip{
+      min-height:40px;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      font-weight:900;
+      font-size:12px;
+    }
+
+    .chip.active{
+      color:#07110d;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      border-color:rgba(250,204,21,.55);
+    }
+
+    .payGrid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .payBtn{
+      min-height:48px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      font-weight:950;
+    }
+
+    .payBtn.active{
+      background:linear-gradient(135deg,var(--green),var(--gold));
+      color:#07110d;
+      border:none;
+    }
+
+    .actionRow{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      margin-top:13px;
+    }
+
+    .actionRow .btn,
+    .actionRow .btnOutline,
+    .actionRow .btnGhost{
+      flex:1;
+      min-width:150px;
+    }
+
+    .notice{
+      padding:13px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.035);
+      margin-top:12px;
+      line-height:1.6;
+      font-size:13px;
+      font-weight:750;
+      color:var(--muted);
+    }
+
+    .notice.ok{border-color:rgba(34,197,94,.24);background:rgba(34,197,94,.09);color:#dcffe6}
+    .notice.warn{border-color:rgba(245,158,11,.24);background:rgba(245,158,11,.09);color:#ffe8bd}
+    .notice.bad{border-color:rgba(239,68,68,.24);background:rgba(239,68,68,.09);color:#ffd5d5}
+    .notice.info{border-color:rgba(96,165,250,.24);background:rgba(96,165,250,.08)}
+
+    .tabs{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin:12px 0;
+    }
+
+    .tab{
+      flex:1;
+      min-width:130px;
+      min-height:44px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.045);
+      color:var(--muted);
+      font-weight:950;
+    }
+
+    .tab.active{
+      color:#07110d;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      border-color:rgba(250,204,21,.55);
+    }
+
+    .section{
+      margin-top:12px;
+      scroll-margin-top:96px;
+    }
+
+    .section.hidden{display:none}
+
+    .productsGrid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:12px;
+    }
+
+    .productCard{
+      padding:13px;
+      border-radius:19px;
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(255,255,255,.04);
+      display:grid;
+      gap:9px;
+    }
+
+    .productName{
+      font-weight:1000;
       line-height:1.25;
     }
 
-    .memoryHelp{
-      margin-top:4px;
+    .productMeta{
       color:var(--muted);
       font-size:12px;
       font-weight:800;
       line-height:1.45;
+    }
+
+    .productPrice{
+      color:var(--gold);
+      font-size:22px;
+      font-weight:1000;
+      letter-spacing:-.035em;
+    }
+
+    .badge{
+      display:inline-flex;
+      width:max-content;
+      max-width:100%;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:950;
+    }
+
+    .badge.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#d7ffe1}
+    .badge.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#ffe3b8}
+    .badge.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.28);color:#ffd2d2}
+
+    .cartList{
+      display:grid;
+      gap:9px;
+      margin-top:12px;
+    }
+
+    .cartItem{
+      padding:12px;
+      border-radius:17px;
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(255,255,255,.04);
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+    }
+
+    .cartTitle{font-weight:1000}
+    .cartSub{color:var(--muted);font-size:12px;font-weight:800;margin-top:3px}
+
+    .cartControls{
+      display:flex;
+      gap:6px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .qtyBtn{
+      width:34px;
+      height:34px;
+      border-radius:12px;
+      border:1px solid var(--line2);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      font-weight:1000;
+    }
+
+    .qty{min-width:26px;text-align:center;font-weight:1000}
+
+    .empty{
+      color:var(--muted);
+      padding:14px;
+      border:1px dashed rgba(255,255,255,.14);
+      border-radius:17px;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.5;
+    }
+
+    .noteModeGrid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .noteMode{
+      min-height:50px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      font-weight:950;
+    }
+
+    .noteMode.active{
+      background:linear-gradient(135deg,var(--gold),var(--green));
+      color:#07110d;
+      border:none;
     }
 
     .memoryList{
       display:grid;
-      gap:8px;
+      gap:9px;
+      margin-top:12px;
     }
 
     .memoryItem{
-      padding:11px;
-      border-radius:16px;
-      border:1px solid var(--line);
+      padding:12px;
+      border-radius:17px;
+      border:1px solid rgba(255,255,255,.10);
       background:rgba(255,255,255,.04);
-      display:grid;
-      gap:5px;
     }
 
-    .memoryItemTop{
+    .memoryTop{
       display:flex;
       justify-content:space-between;
       gap:8px;
-      flex-wrap:wrap;
       align-items:flex-start;
-    }
-
-    .memoryItemTitle{
-      font-size:13px;
+      flex-wrap:wrap;
       font-weight:1000;
-      color:var(--text);
-      line-height:1.35;
     }
 
-    .memoryItemAmount{
-      font-size:12px;
-      font-weight:1000;
-      color:#d7ffe1;
-      white-space:nowrap;
-    }
-
-    .memoryItemMeta{
-      color:var(--muted);
-      font-size:12px;
-      font-weight:800;
-      line-height:1.4;
-    }
-
-    .memoryEmpty{
-      padding:11px;
-      border-radius:16px;
-      border:1px dashed rgba(255,255,255,.16);
+    .memoryMeta{
       color:var(--muted);
       font-size:12px;
       font-weight:800;
       line-height:1.45;
+      margin-top:5px;
     }
 
-    .memoryPayAction{
-      margin-top:6px;
-      display:inline-flex;
-      width:max-content;
-      max-width:100%;
-      min-height:36px;
-      align-items:center;
-      justify-content:center;
-      gap:7px;
-      padding:8px 11px;
-      border-radius:999px;
-      border:1px solid rgba(250,204,21,.28);
-      background:rgba(250,204,21,.10);
-      color:var(--gold);
-      font-size:12px;
-      font-weight:1000;
-    }
-
-    .memoryPayHint{
-      color:rgba(191,211,200,.78);
-      font-size:11px;
-      font-weight:800;
-      line-height:1.35;
-    }
-
-    @media(max-width:1100px){
-      .hero{grid-template-columns:1fr}
-      .sectionGrid{grid-template-columns:1fr}
-      .subInfo{grid-template-columns:repeat(2,minmax(0,1fr))}
-    }
-    @media(max-width:820px){
-      .productsGrid{grid-template-columns:1fr}
-      .searchRow{grid-template-columns:1fr}
-      .kpiGrid{grid-template-columns:repeat(2,1fr)}
-    }
-    @media(max-width:700px){
-      .wrap{padding:12px 12px 96px}
-      .topbar-inner{padding:12px}
-      .brandTitle{white-space:normal}
-      .subInfo{grid-template-columns:1fr}
-      .kpiGrid{grid-template-columns:1fr}
-      .floating-site-btn{display:none}
-    }
-
-    #articles, #notes{scroll-margin-top:96px}
-
-    /* ━━━ MENU BAS MOBILE — doctrine DIGIY ━━━ */
     .bottomNav{
       position:fixed;
       left:0;
@@ -428,11 +661,12 @@
       bottom:0;
       z-index:96;
       padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
-      background:rgba(4,17,13,.94);
+      background:rgba(4,17,13,.95);
       border-top:1px solid rgba(255,255,255,.10);
       backdrop-filter:blur(16px);
       -webkit-backdrop-filter:blur(16px);
     }
+
     .bottomNavInner{
       width:min(100%,760px);
       margin:0 auto;
@@ -440,6 +674,7 @@
       grid-template-columns:repeat(5,1fr);
       gap:6px;
     }
+
     .bottomNav a{
       min-height:58px;
       border-radius:16px;
@@ -454,7 +689,9 @@
       border:1px solid transparent;
       text-decoration:none;
     }
+
     .bottomNav .ico{font-size:18px;line-height:1}
+
     .bottomNav a.active{
       color:#07110d;
       background:linear-gradient(135deg,var(--gold),var(--gold2));
@@ -462,79 +699,74 @@
       box-shadow:0 10px 24px rgba(250,204,21,.16);
     }
 
-    .cashFastRow{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:10px;
-      margin-top:14px;
+    @media(max-width:880px){
+      .hero{grid-template-columns:1fr}
+      .miniStats{grid-template-columns:1fr 1fr}
     }
 
     @media(max-width:720px){
+      .wrap{padding:10px 10px calc(96px + env(safe-area-inset-bottom,0px))}
       .navRow{display:none}
-      .cashFastRow{grid-template-columns:1fr 1fr}
-      .bigTitle{max-width:100%;font-size:clamp(34px,10vw,48px)}
-      .mainSub{font-size:15px}
+      .topActions .btnOutline{display:none}
+      .brandSub{display:none}
+      .heroBadge{margin-bottom:10px}
+      .productsGrid{grid-template-columns:1fr}
+      .payGrid{grid-template-columns:1fr 1fr}
+      .noteModeGrid{grid-template-columns:1fr}
+      .miniStats{grid-template-columns:1fr}
+      .card{padding:14px;border-radius:22px}
+      .input.bigMoney{min-height:78px;font-size:38px}
     }
 
-    @media print{
-      body{background:#fff;color:#07140f;padding:0}
-      .topbar,.navRow,.bottomNav,.floating-site-btn,.quickCommerce,#articles,.blockedShell,.actionRow button.btn-ghost{display:none!important}
+    @media(print){
+      body{background:#fff;color:#07140f}
+      .topbar,.bottomNav,.navRow,.tabs,.blockedShell,.btn,.btnOutline,.btnGhost,.smallBtn{display:none!important}
       .wrap{padding:0;max-width:none}
-      .hero,.sectionGrid{display:block}
       .card{box-shadow:none;border:none;border-radius:0;background:#fff;color:#07140f}
-      .mainSub,.helper,.tiny{color:#475569}
       .notice{border:1px solid #e2e8f0;background:#fff;color:#07140f}
     }
-
   </style>
 </head>
 
 <body>
-  <a class="floating-site-btn" href="./index.html" aria-label="Retour à la vitrine MON COMMERCE">⬅️ Retour à la vitrine</a>
-
   <div class="app" id="appRoot">
     <div class="wrap">
       <header class="topbar">
-        <div class="topbar-inner">
+        <div class="topbarInner">
           <div class="brand">
             <div class="brandBadge">🧾</div>
             <div>
               <div class="brandKicker">DIGIYLYFE</div>
               <div class="brandTitle">MON COMMERCE</div>
-              <div class="brandSub">Encaisser · articles · notes · Mon argent</div>
+              <div class="brandSub">Un geste · une trace · Mon argent</div>
             </div>
           </div>
 
-          <div class="row">
-            <div class="pill">
-              <span class="dot" id="dotAccess"></span>
-              <span id="pillAccess">Accès…</span>
-            </div>
-            <div class="pill">
-              <strong id="pillStore">Boutique…</strong>
-            </div>
-            <button class="btn-outline" type="button" id="btnReloadTop">🔄 Recharger</button>
+          <div class="topActions">
+            <div class="pill"><span class="dot" id="dotAccess"></span><span id="pillAccess">Accès…</span></div>
+            <div class="pill"><strong id="pillStore">Boutique…</strong></div>
+            <button class="btnOutline" type="button" id="btnReloadTop">🔄 Recharger</button>
           </div>
         </div>
       </header>
 
       <div class="navRow">
-        <a class="btn-ghost" href="./index.html" id="btnHall">🏠 Accueil</a>
-        <a class="btn-ghost" href="./dashboard-pro.html" id="btnDashboard">🏠 Accueil</a>
-        <a class="btn-ghost" href="./admin.html" id="btnAdmin">⚙️ Plus</a>
-        <a class="btn-ghost" href="./profile.html" id="btnProfile">🏪 Boutique</a>
-        <a class="btn-outline" href="./pin.html" id="btnPin">🔐 Mon code</a>
+        <a class="btnGhost" href="./dashboard-pro.html" id="btnDashboard">🏠 Accueil</a>
+        <a class="btnGhost" href="./index.html" id="btnHall">🌍 Vitrine</a>
+        <a class="btnGhost" href="./profile.html" id="btnProfile">🏪 Boutique</a>
+        <a class="btnGhost" href="./admin.html" id="btnAdmin">⚙️ Plus</a>
+        <a class="btnOutline" href="./pin.html" id="btnPin">🔐 Mon code</a>
       </div>
 
       <section id="blockedShell" class="blockedShell">
         <div class="blockedInner">
           <div class="blockedTitle">Caisse protégée</div>
           <div class="blockedText" id="blockedText">
-            Entre avec ton code d'accès ou active ton abonnement pour ouvrir ta caisse.
+            Entre avec ton code d’accès pour ouvrir la caisse.
           </div>
           <div class="actionRow" style="justify-content:center">
             <a class="btn" id="btnBlockedPin" href="./pin.html">🔐 Entrer avec mon code</a>
-            <a class="btn-outline" id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon abonnement</a>
+            <a class="btnOutline" id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon abonnement</a>
           </div>
         </div>
       </section>
@@ -542,208 +774,178 @@
       <section id="liveShell">
         <div class="hero">
           <div class="card">
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-              <div class="heroBadge">Encaisser maintenant</div>
-              <button id="digiy-audio-btn" class="smallBtn" type="button" aria-pressed="false">🔊 Écouter</button>
-            </div>
-
-            <h1 class="bigTitle"><span class="accent">Encaisser</span> maintenant</h1>
+            <div class="heroBadge">Caisse minute</div>
+            <h1><span class="accent">Encaisser</span><br>maintenant</h1>
             <div class="mainSub">
-              Choisis tes articles, valide le ticket, ou écris vite une note pour Mon argent.
+              Le téléphone ne porte pas tout le backend. Ici : montant, paiement, bouton. DIGIY range le reste.
             </div>
 
-            <div class="subInfo">
-              <div class="miniCard">
-                <div class="tiny">Boutique</div>
-                <div class="value" id="metaStoreName">—</div>
+            <div class="miniStats">
+              <div class="mini">
+                <div class="k">Boutique</div>
+                <div class="v" id="metaStoreName">—</div>
               </div>
-              <div class="miniCard">
-                <div class="tiny">Compte</div>
-                <div class="value" id="metaPhone">Sécurisé</div>
-              </div>
-              <div class="miniCard">
-                <div class="tiny">Ticket</div>
-                <div class="value" id="metaSlug">Prêt</div>
-              </div>
-              <div class="miniCard">
-                <div class="tiny">Lecture</div>
-                <div class="value" id="metaSource">—</div>
-              </div>
-            </div>
-
-            <div class="notice info" id="noticeBox">Initialisation…</div>
-
-            <div class="cashFastRow">
-              <a class="btn" id="btnFastCash" href="#saleAmount">💰 Encaisser</a>
-              <a class="btn-outline" id="btnFastArticles" href="#articles">📦 Articles</a>
-              <a class="btn-outline" id="btnFastNotes" href="#notes">✍️ Notes</a>
-              <a class="btn-outline" id="btnFastMore" href="./admin.html">⚙️ Plus</a>
-            </div>
-
-            <div class="actionRow">
-              <a class="btn-outline" id="btnGoDashboard" href="./dashboard-pro.html">🏠 Accueil</a>
-              <a class="btn-outline" id="btnGoAdmin" href="./admin.html">⚙️ Plus</a>
-              <a class="btn-outline" id="btnGoProfile" href="./profile.html">🏪 Boutique</a>
-            </div>
-          </div>
-
-          <div class="card">
-            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Ce qui est prêt</h2>
-
-            <div class="kpiGrid">
-              <div class="kpi">
-                <div class="k">Articles visibles</div>
+              <div class="mini">
+                <div class="k">Articles</div>
                 <div class="v" id="kpiProducts">0</div>
               </div>
-              <div class="kpi">
-                <div class="k">Stock total</div>
-                <div class="v" id="kpiStock">0</div>
-              </div>
-              <div class="kpi">
-                <div class="k">Valeur stock</div>
-                <div class="v" id="kpiValue">0 F</div>
-              </div>
-              <div class="kpi">
-                <div class="k">Encaisser</div>
+              <div class="mini">
+                <div class="k">Ticket</div>
                 <div class="v" id="kpiCart">0 F</div>
               </div>
             </div>
 
-            <div class="helper">
-              Ta caisse lit les vrais articles, prépare le ticket et garde le chemin vers Mon argent.
+            <div class="notice info" id="noticeBox">Initialisation…</div>
+          </div>
+
+          <div class="card" id="cash">
+            <h2>💰 Vente rapide</h2>
+
+            <div class="field">
+              <label for="saleAmount">Combien ?</label>
+              <input class="input bigMoney" id="saleAmount" type="number" inputmode="numeric" min="0" step="1" placeholder="0"/>
             </div>
-          </div>
-        </div>
 
-
-        <section class="card quickCommerce" id="notes">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
-            <div>
-              <h2 class="sideTitle" style="margin:0 0 6px 0;font-size:18px;font-weight:950;">Notes rapides</h2>
-              <div class="helper" style="margin-top:0">Écris comme tu parles. DIGIY prépare la trace vers Mon argent.</div>
+            <div class="quickChips" aria-label="Montants rapides">
+              <button class="chip" type="button" data-amount="500">500</button>
+              <button class="chip" type="button" data-amount="1000">1 000</button>
+              <button class="chip" type="button" data-amount="2000">2 000</button>
+              <button class="chip" type="button" data-amount="5000">5 000</button>
+              <button class="chip" type="button" data-amount="10000">10 000</button>
             </div>
-          </div>
 
-          <div class="quickGuide">
-            <strong>Une phrase suffit.</strong>
-            <p>Exemples : vente, achat stock, client qui doit, livraison ou petite dépense boutique.</p>
-            <div class="quickExamples" id="quickCommerceExamples">
-              <button type="button">Vente riz 15000 cash</button>
-              <button type="button">Achat stock 40000 fournisseur</button>
-              <button type="button">Client Awa doit 5000</button>
-              <button type="button">Livraison 2000 cash</button>
-              <button type="button">Dépense sachets 3000 cash</button>
+            <div class="field">
+              <label for="saleLabel">C’est quoi ?</label>
+              <input class="input" id="saleLabel" placeholder="Ex : vente comptoir, riz, boisson…" value="Vente comptoir"/>
             </div>
-          </div>
 
-          <textarea class="textarea" id="quickCommerceInput" placeholder="Ex : Vente riz 15000 cash"></textarea>
-
-          <div class="actionRow">
-            <button class="btn" id="btnQuickCommercePrepare" type="button">Préparer</button>
-            <button class="btn-outline" id="btnQuickCommerceConfirm" type="button" style="display:none">✅ Confirmer</button>
-            <button class="btn-ghost" id="btnQuickCommerceClear" type="button">Effacer</button>
-          </div>
-
-          <div class="quickDraft" id="quickCommerceDraft"></div>
-
-          <div class="memoryBox">
-            <div class="memoryHead">
-              <div>
-                <div class="memoryTitle">🧠 Aide-mémoire caisse</div>
-                <div class="memoryHelp">Dernières notes confirmées ici. Elles restent locales, puis peuvent nourrir Mon argent.</div>
+            <div class="field">
+              <label>Paiement</label>
+              <div class="payGrid" id="payGrid">
+                <button class="payBtn active" type="button" data-method="cash">Cash</button>
+                <button class="payBtn" type="button" data-method="wave">Wave</button>
+                <button class="payBtn" type="button" data-method="orange_money">OM</button>
+                <button class="payBtn" type="button" data-method="other">Autre</button>
               </div>
-              <button class="btn-ghost" id="btnQuickCommerceMemoryClear" type="button">Vider</button>
-            </div>
-            <div class="memoryList" id="quickCommerceMemoryList">
-              <div class="memoryEmpty">Aucune note commerce confirmée pour le moment.</div>
-            </div>
-          </div>
-        </section>
-
-        <div class="sectionGrid">
-          <div class="card" id="articles">
-            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Articles</h2>
-
-            <div class="searchRow">
-              <input class="input" id="searchText" placeholder="Chercher un article…"/>
-              <select class="select" id="filterStatus">
-                <option value="all">Tous</option>
-                <option value="published">Visibles</option>
-                <option value="draft">Brouillons</option>
-                <option value="low">Stock faible</option>
-              </select>
-              <select class="select" id="sortBy">
-                <option value="recent">Plus récents</option>
-                <option value="name">Nom A→Z</option>
-                <option value="price_desc">Prix ↓</option>
-                <option value="price_asc">Prix ↑</option>
-                <option value="stock_desc">Stock ↓</option>
-                <option value="stock_asc">Stock ↑</option>
-              </select>
-            </div>
-
-            <div id="productsGrid" class="productsGrid">
-              <div class="empty">Chargement des articles…</div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h2 class="sideTitle" style="margin:0 0 10px 0;font-size:18px;font-weight:950;">Encaisser</h2>
-
-            <div id="cartList" class="cartList">
-              <div class="empty">Aucun article dans le ticket.</div>
-            </div>
-
-            <div class="hr"></div>
-
-            <div class="field">
-              <label for="saleAmount">Montant (FCFA)</label>
-              <input class="input" id="saleAmount" type="number" inputmode="numeric" min="0" step="1" placeholder="Ex : 3 500"/>
-            </div>
-
-            <div class="field">
-              <label for="saleLabel">Ce que tu vends</label>
-              <textarea class="textarea" id="saleLabel" placeholder="Résumé de la vente…"></textarea>
-            </div>
-
-            <div class="field">
-              <label for="saleMethod">Paiement</label>
-              <select class="select" id="saleMethod">
+              <select class="select" id="saleMethod" style="display:none">
                 <option value="cash">Espèces</option>
                 <option value="wave">Wave</option>
                 <option value="orange_money">Orange Money</option>
-                <option value="card">Carte</option>
                 <option value="other">Autre</option>
               </select>
             </div>
 
             <div class="actionRow">
-              <button class="btn" type="button" id="btnSaleReady">✅ Encaisser</button>
-              <button class="btn-outline" type="button" id="btnPrintReceipt">🧾 Imprimer reçu</button>
-              <button class="btn-ghost" type="button" id="btnClearSale">Effacer</button>
+              <button class="btn" type="button" id="btnSaleReady">✅ Enregistrer</button>
+              <button class="btnGhost" type="button" id="btnClearSale">Effacer</button>
             </div>
 
-            <div class="helper" id="saleHelper">
-              Choisis des articles ou écris une vente simple pour encaisser maintenant.
-            </div>
-
-            <div class="notice info" id="salePreview" style="margin-top:12px">
-              Rien de préparé pour le moment.
+            <div class="notice info" id="salePreview">Rien de préparé pour le moment.</div>
+            <div class="mainSub" id="saleHelper" style="font-size:13px;margin-top:10px">
+              Clique simple. Le reste part dans la trace.
             </div>
           </div>
         </div>
+
+        <div class="tabs">
+          <button class="tab active" type="button" data-open="cash">💰 Encaisser</button>
+          <button class="tab" type="button" data-open="articles">📦 Articles</button>
+          <button class="tab" type="button" data-open="notes">✍️ Notes</button>
+          <button class="tab" type="button" data-open="plus">⚙️ Plus</button>
+        </div>
+
+        <section class="section card" id="articles">
+          <h2>📦 Articles rapides</h2>
+          <div class="mainSub" style="font-size:13px;margin-top:0">
+            Les articles sont là pour aller vite, pas pour gérer tout le catalogue. Le catalogue complet reste dans Plus.
+          </div>
+
+          <div class="field">
+            <label for="searchText">Chercher</label>
+            <input class="input" id="searchText" placeholder="Nom, catégorie, code…"/>
+          </div>
+
+          <div id="productsGrid" class="productsGrid">
+            <div class="empty">Chargement des articles…</div>
+          </div>
+
+          <div class="cartList" id="cartList">
+            <div class="empty">Aucun article dans le ticket.</div>
+          </div>
+        </section>
+
+        <section class="section card hidden" id="notes">
+          <h2>✍️ Note rapide</h2>
+          <div class="mainSub" style="font-size:13px;margin-top:0">
+            Écrire le moins possible : type, nom, montant, paiement, enregistrer.
+          </div>
+
+          <div class="noteModeGrid" id="noteModeGrid">
+            <button class="noteMode active" type="button" data-type="expense">Dépense</button>
+            <button class="noteMode" type="button" data-type="stock_purchase">Fournisseur</button>
+            <button class="noteMode" type="button" data-type="client_debt">Client doit</button>
+          </div>
+
+          <div class="field">
+            <label for="noteName">Nom</label>
+            <input class="input" id="noteName" placeholder="Ex : fournisseur, client, article…"/>
+          </div>
+
+          <div class="field">
+            <label for="noteAmount">Montant</label>
+            <input class="input bigMoney" id="noteAmount" type="number" inputmode="numeric" min="0" step="1" placeholder="0"/>
+          </div>
+
+          <div class="field">
+            <label>Paiement</label>
+            <div class="payGrid" id="notePayGrid">
+              <button class="payBtn active" type="button" data-note-method="cash">Cash</button>
+              <button class="payBtn" type="button" data-note-method="wave">Wave</button>
+              <button class="payBtn" type="button" data-note-method="orange_money">OM</button>
+              <button class="payBtn" type="button" data-note-method="other">Autre</button>
+            </div>
+          </div>
+
+          <div class="actionRow">
+            <button class="btn" type="button" id="btnNoteSave">✅ Enregistrer la note</button>
+            <button class="btnGhost" type="button" id="btnNoteClear">Effacer</button>
+          </div>
+
+          <div class="notice info" id="notePreview">Aucune note préparée.</div>
+
+          <div class="memoryList" id="memoryList">
+            <div class="empty">Aucune note confirmée pour le moment.</div>
+          </div>
+        </section>
+
+        <section class="section card hidden" id="plus">
+          <h2>⚙️ Plus</h2>
+          <div class="mainSub" style="font-size:13px;margin-top:0">
+            Ici on sort du geste minute : catalogue complet, boutique, reçu, support.
+          </div>
+
+          <div class="actionRow">
+            <a class="btnOutline" id="btnGoDashboard" href="./dashboard-pro.html">🏠 Accueil</a>
+            <a class="btnOutline" id="btnGoAdmin" href="./admin.html">⚙️ Gestion complète</a>
+            <a class="btnOutline" id="btnGoProfile" href="./profile.html">🏪 Boutique</a>
+            <button class="btnOutline" type="button" id="btnPrintReceipt">🧾 Imprimer</button>
+          </div>
+
+          <div class="notice info" id="plusInfo">
+            Puissant derrière. Léger devant. Le commerçant clique sa réalité, DIGIY range le reste.
+          </div>
+        </section>
       </section>
     </div>
   </div>
-
 
   <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
     <div class="bottomNavInner">
       <a id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
       <a id="navArticles" href="#articles"><span class="ico">📦</span><span>Articles</span></a>
-      <a class="active" id="navCash" href="#saleAmount"><span class="ico">💰</span><span>Encaisser</span></a>
+      <a class="active" id="navCash" href="#cash"><span class="ico">💰</span><span>Encaisser</span></a>
       <a id="navNotes" href="#notes"><span class="ico">✍️</span><span>Notes</span></a>
-      <a id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Plus</span></a>
+      <a id="navMore" href="#plus"><span class="ico">⚙️</span><span>Plus</span></a>
     </div>
   </nav>
 
@@ -758,45 +960,35 @@
       const ADMIN_URL = digiyLocal("admin.html");
       const PROFILE_URL = digiyLocal("profile.html");
       const PIN_URL = digiyLocal("pin.html");
-      const PRODUCTS_CACHE_TTL_MS = 5 * 60 * 1000;
+      const PAY_URL = "https://pro-pay.digiylyfe.com/admin.html";
       const LOW_STOCK_LIMIT = 5;
       const RPC_CATALOG_SALE = "zz_pos_sale_catalog_insert";
       const RPC_MANUAL_SALE = "zz_pos_sale_manual_insert";
 
       const qs = (id) => document.getElementById(id);
-      const DIAG = [];
+
       let SB_CLIENT = null;
 
       const STATE = {
-        slug: "",
-        phone: "",
-        access: false,
-        storeName: "MON COMMERCE",
-        products: [],
-        source: "none",
-        fetchedAt: null,
-        cart: [],
-        saleBusy: false
+        slug:"",
+        phone:"",
+        access:false,
+        storeName:"MON COMMERCE",
+        products:[],
+        cart:[],
+        saleBusy:false,
+        payMethod:"cash",
+        noteType:"expense",
+        noteMethod:"cash",
+        source:"none"
       };
-
-      window.STATE = STATE;
 
       function reveal(){
         document.documentElement.classList.add("app-ready");
         document.documentElement.style.visibility = "";
       }
+
       setTimeout(reveal, 2000);
-
-      function log(msg, data){
-        const line = `[${new Date().toLocaleTimeString("fr-FR")}] ${msg}`;
-        DIAG.push(data === undefined ? line : `${line}\n${safeStringify(data)}`);
-        console.log("[DIGIY POS CAISSE]", msg, data ?? "");
-      }
-
-      function safeStringify(v){
-        try { return JSON.stringify(v, null, 2); }
-        catch(_) { return String(v); }
-      }
 
       function esc(v){
         return String(v ?? "")
@@ -807,37 +999,16 @@
           .replace(/'/g,"&#39;");
       }
 
-      function buildUrl(base, params){
-        const baseStr = (base == null ? "" : String(base)).trim();
-        if(!baseStr) return location.href;
-        let u;
-        try{
-          if(/^https?:\/\//i.test(baseStr)){
-            u = new URL(baseStr);
-          } else {
-            const origin = location.protocol + "//" + location.host;
-            const full = baseStr.startsWith("/") ? origin + baseStr : origin + "/" + baseStr;
-            u = new URL(full);
-          }
-        }catch(e){
-          log("buildUrl KO", { base: baseStr, message: e.message });
-          return baseStr;
-        }
-        try{
-          Object.entries(params || {}).forEach(([k,v]) => {
-            if(v !== undefined && v !== null && String(v) !== "") u.searchParams.set(k, String(v));
-          });
-        }catch(_){}
-        return u.toString();
-      }
-
-      function normPhone(v){ return String(v || "").replace(/[^\d]/g, ""); }
-      function normSlug(v){ return String(v || "").trim().toLowerCase(); }
+      function normPhone(v){return String(v || "").replace(/[^\d]/g,"")}
+      function normSlug(v){return String(v || "").trim().toLowerCase()}
 
       function money(n){
-        const value = Number(n || 0);
-        if(!Number.isFinite(value)) return "0 F";
-        return `${value.toLocaleString("fr-FR")} F`;
+        const value = Number(String(n || "").replace(/[^\d]/g,"")) || 0;
+        return value.toLocaleString("fr-FR") + " F";
+      }
+
+      function amountNumber(v){
+        return Number(String(v || "").replace(/[^\d]/g,"")) || 0;
       }
 
       function getParam(name){
@@ -845,17 +1016,25 @@
       }
 
       function cleanVisibleUrl(){
-        const params = new URLSearchParams(location.search);
-        const sensitive = [
-          "phone","tel","owner_phone","checkout_phone","subscription_phone",
-          "slug","pos_slug","subscription_slug","pro_slug","module","from"
-        ];
-        const dirty = sensitive.some((k) => params.has(k));
-        if(!dirty) return;
+        try{
+          const url = new URL(location.href);
+          const sensitive = [
+            "phone","tel","owner_phone","checkout_phone","subscription_phone",
+            "slug","pos_slug","subscription_slug","pro_slug","module","from","return","v"
+          ];
+          let dirty = false;
 
-        const keep = new URLSearchParams();
-        const clean = location.pathname + (keep.toString() ? "?" + keep.toString() : "") + location.hash;
-        try{ history.replaceState({}, document.title, clean); }catch(_){}
+          sensitive.forEach((key) => {
+            if(url.searchParams.has(key)){
+              url.searchParams.delete(key);
+              dirty = true;
+            }
+          });
+
+          if(dirty){
+            history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+          }
+        }catch(_){}
       }
 
       function cleanInternalUrl(path){
@@ -871,18 +1050,31 @@
       function getResolvedSlug(){
         const gs = getGuardState();
         return normSlug(
-          getParam("slug") || gs.slug || gs.session?.slug || gs.identity?.slug ||
-          sessionStorage.getItem("digiy_pos_last_slug") || localStorage.getItem("digiy_pos_last_slug") ||
-          sessionStorage.getItem("digiy_pos_slug") || localStorage.getItem("digiy_pos_slug") || ""
+          getParam("slug") ||
+          gs.slug ||
+          gs.session?.slug ||
+          gs.identity?.slug ||
+          sessionStorage.getItem("digiy_pos_last_slug") ||
+          localStorage.getItem("digiy_pos_last_slug") ||
+          sessionStorage.getItem("digiy_pos_slug") ||
+          localStorage.getItem("digiy_pos_slug") ||
+          ""
         );
       }
 
       function getResolvedPhone(){
         const gs = getGuardState();
         return normPhone(
-          getParam("phone") || getParam("tel") || gs.phone || gs.session?.phone || gs.identity?.phone ||
-          sessionStorage.getItem("digiy_pos_last_phone") || localStorage.getItem("digiy_pos_last_phone") ||
-          sessionStorage.getItem("digiy_pos_phone") || localStorage.getItem("digiy_pos_phone") || ""
+          getParam("phone") ||
+          getParam("tel") ||
+          gs.phone ||
+          gs.session?.phone ||
+          gs.identity?.phone ||
+          sessionStorage.getItem("digiy_pos_last_phone") ||
+          localStorage.getItem("digiy_pos_last_phone") ||
+          sessionStorage.getItem("digiy_pos_phone") ||
+          localStorage.getItem("digiy_pos_phone") ||
+          ""
         );
       }
 
@@ -891,28 +1083,29 @@
           if(typeof window.DIGIY_GUARD?.ready === "function") await window.DIGIY_GUARD.ready();
           else if(window.DIGIY_GUARD?.ready?.then) await window.DIGIY_GUARD.ready;
         }catch(err){
-          log("guard ready KO", { message: err?.message || String(err) });
+          console.warn("[POS] guard ready", err);
         }
       }
 
       async function bootGuard(){
         if(typeof window.DIGIY_GUARD?.boot !== "function") return true;
+
         try{
           const res = await window.DIGIY_GUARD.boot({
-            module: MODULE_CODE,
-            dashboard: DASHBOARD_URL,
-            login: PIN_URL,
-            pay: ABOS_URL,
-            requireSlug: true,
-            checkSubscription: false
+            module:MODULE_CODE,
+            dashboard:DASHBOARD_URL,
+            login:PIN_URL,
+            pay:ABOS_URL,
+            requireSlug:true,
+            checkSubscription:false
           });
-          log("guard boot", res);
+
           if(res && res.ok === false) return false;
-          return true;
         }catch(err){
-          log("guard boot erreur", { message: err?.message || String(err) });
-          return true;
+          console.warn("[POS] guard boot", err);
         }
+
+        return true;
       }
 
       function ensureSupabase(){
@@ -925,9 +1118,7 @@
               SB_CLIENT = gsb;
               return SB_CLIENT;
             }
-          }catch(err){
-            log("guard getSb erreur", { message: err?.message || String(err) });
-          }
+          }catch(_){}
         }
 
         const url = String(window.DIGIY_SUPABASE_URL || "").trim();
@@ -936,30 +1127,29 @@
         if(!url || !key) throw new Error("configuration_supabase_manquante");
         if(!window.supabase || typeof window.supabase.createClient !== "function") throw new Error("lib_supabase_absente");
 
-        SB_CLIENT = window.supabase.createClient(url, key, {
-          auth: {
-            persistSession: false,
-            autoRefreshToken: false,
-            detectSessionInUrl: false,
-            storage: {
-              getItem: () => null,
-              setItem: () => {},
-              removeItem: () => {}
+        SB_CLIENT = window.supabase.createClient(url,key,{
+          auth:{
+            persistSession:false,
+            autoRefreshToken:false,
+            detectSessionInUrl:false,
+            storage:{
+              getItem:() => null,
+              setItem:() => {},
+              removeItem:() => {}
             }
-          },
-          global: {
-            fetch: (...args) => fetch(...args)
           }
         });
+
         return SB_CLIENT;
       }
 
-      async function rpcFirstSuccess(name, payloads){
+      async function rpcFirstSuccess(name,payloads){
         const client = ensureSupabase();
         let lastError = null;
+
         for(const args of payloads){
           try{
-            const { data, error } = await client.rpc(name, args);
+            const { data,error } = await client.rpc(name,args);
             if(error){
               lastError = error;
               continue;
@@ -969,29 +1159,34 @@
             lastError = err;
           }
         }
-        throw lastError || new Error(`rpc_${name}_failed`);
+
+        throw lastError || new Error("rpc_failed_" + name);
       }
 
       async function resolvePhoneFromSlug(slug){
         const client = ensureSupabase();
         if(!slug) return "";
-        const { data, error } = await client
+
+        const { data,error } = await client
           .from("digiy_subscriptions_public")
           .select("phone,slug,module")
-          .eq("slug", slug)
+          .eq("slug",slug)
           .limit(1)
           .maybeSingle();
+
         if(error) throw error;
         return normPhone(data?.phone || "");
       }
 
       async function getAccess(phone){
         if(!phone) return false;
+
         try{
-          const res = await rpcFirstSuccess("digiy_has_access", [
-            { p_phone: phone, p_module: MODULE_CODE },
-            { phone, module: MODULE_CODE }
+          const res = await rpcFirstSuccess("digiy_has_access",[
+            { p_phone:phone,p_module:MODULE_CODE },
+            { phone,module:MODULE_CODE }
           ]);
+
           if(typeof res === "boolean") return res;
           if(res && typeof res.ok === "boolean") return res.ok;
           if(res && typeof res.has_access === "boolean") return res.has_access;
@@ -999,7 +1194,7 @@
           if(res && typeof res.access === "boolean") return res.access;
           return !!res;
         }catch(err){
-          log("digiy_has_access KO", { message: err?.message || String(err) });
+          console.warn("[POS] access", err);
           return false;
         }
       }
@@ -1009,63 +1204,63 @@
         if(!slug) return null;
 
         try{
-          const { data, error } = await client
+          const { data,error } = await client
             .from("digiy_pos_public_profiles")
             .select("*")
-            .eq("slug", slug)
+            .eq("slug",slug)
             .maybeSingle();
+
           if(!error && data) return data;
         }catch(_){}
 
         try{
-          const caisse = await rpcFirstSuccess("digiy_pos_get_caisse_by_slug", [{ p_slug: slug }, { slug }]);
+          const caisse = await rpcFirstSuccess("digiy_pos_get_caisse_by_slug",[
+            { p_slug:slug },
+            { slug }
+          ]);
+
           if(caisse && caisse.ok === true){
             return caisse.profile || caisse.store || caisse;
           }
-        }catch(err){
-          log("digiy_pos_get_caisse_by_slug fallback", { message: err?.message || String(err) });
-        }
+        }catch(_){}
 
         return null;
-      }
-
-      function productsCacheKey(slug){
-        return `digiy_pos_products_cache:${slug || "unknown"}`;
-      }
-
-      function saleDraftKey(slug){
-        return `digiy_pos_sale_draft:${slug || "unknown"}`;
       }
 
       function normalizeProduct(row){
         const r = row || {};
         return {
-          id: String(r.id || ""),
-          slug: normSlug(r.slug || STATE.slug || ""),
-          owner_phone: normPhone(r.owner_phone || r.phone || STATE.phone || ""),
-          name: String(r.name || "").trim(),
-          category: String(r.category || "").trim(),
-          sku: String(r.sku || "").trim(),
-          price_xof: Number(r.price_xof ?? r.price ?? 0) || 0,
-          stock_qty: Number(r.stock_qty ?? r.stock ?? 0) || 0,
-          note_text: String(r.note_text || r.note || "").trim(),
-          image_url: String(r.image_url || "").trim(),
-          is_published: typeof r.is_published === "boolean" ? r.is_published : !!r.published,
-          created_at: r.created_at || "",
-          updated_at: r.updated_at || ""
+          id:String(r.id || ""),
+          slug:normSlug(r.slug || STATE.slug || ""),
+          owner_phone:normPhone(r.owner_phone || r.phone || STATE.phone || ""),
+          name:String(r.name || "").trim(),
+          category:String(r.category || "").trim(),
+          sku:String(r.sku || "").trim(),
+          price_xof:Number(r.price_xof ?? r.price ?? 0) || 0,
+          stock_qty:Number(r.stock_qty ?? r.stock ?? 0) || 0,
+          note_text:String(r.note_text || r.note || "").trim(),
+          is_published:typeof r.is_published === "boolean" ? r.is_published : !!r.published,
+          created_at:r.created_at || "",
+          updated_at:r.updated_at || ""
         };
       }
 
-      function writeProductsCache(slug, products){
-        try{
-          localStorage.setItem(
-            productsCacheKey(slug),
-            JSON.stringify({
-              ts: Date.now(),
-              products: Array.isArray(products) ? products : []
-            })
-          );
-        }catch(_){}
+      async function loadProductsLive(slug){
+        const client = ensureSupabase();
+
+        const { data,error } = await client
+          .from("digiy_pos_products")
+          .select("*")
+          .eq("slug",slug)
+          .order("updated_at",{ ascending:false });
+
+        if(error) throw error;
+
+        return Array.isArray(data) ? data.map(normalizeProduct) : [];
+      }
+
+      function productsCacheKey(slug){
+        return "digiy_pos_products_cache:" + (slug || "unknown");
       }
 
       function readProductsCache(slug){
@@ -1074,96 +1269,66 @@
           if(!raw) return null;
           const parsed = JSON.parse(raw);
           if(!parsed || !Array.isArray(parsed.products)) return null;
-          return {
-            ts: Number(parsed.ts || 0),
-            products: parsed.products.map(normalizeProduct)
-          };
+          return parsed.products.map(normalizeProduct);
         }catch(_){
           return null;
         }
       }
 
-      function writeSaleDraft(slug, draft){
+      function writeProductsCache(slug,products){
         try{
-          localStorage.setItem(saleDraftKey(slug), JSON.stringify(draft || {}));
+          localStorage.setItem(productsCacheKey(slug),JSON.stringify({
+            ts:Date.now(),
+            products:Array.isArray(products) ? products : []
+          }));
         }catch(_){}
-      }
-
-      function readSaleDraft(slug){
-        try{
-          const raw = localStorage.getItem(saleDraftKey(slug));
-          return raw ? JSON.parse(raw) : null;
-        }catch(_){
-          return null;
-        }
-      }
-
-      function clearSaleDraft(slug){
-        try{
-          localStorage.removeItem(saleDraftKey(slug));
-        }catch(_){}
-      }
-
-      async function loadProductsLive(slug){
-        const client = ensureSupabase();
-        const { data, error } = await client
-          .from("digiy_pos_products")
-          .select("*")
-          .eq("slug", slug)
-          .order("updated_at", { ascending: false });
-
-        if(error) throw error;
-        return Array.isArray(data) ? data.map(normalizeProduct) : [];
       }
 
       async function hydrateProducts(slug){
         const cached = readProductsCache(slug);
-        if(cached && cached.ts && (Date.now() - cached.ts) < PRODUCTS_CACHE_TTL_MS){
-          STATE.products = cached.products;
-          STATE.source = "cache";
-          STATE.fetchedAt = cached.ts;
-          log("Produits depuis cache frais", { slug, count: STATE.products.length });
-          return;
-        }
 
-        if(cached && cached.products.length){
-          STATE.products = cached.products;
+        if(cached && cached.length){
+          STATE.products = cached;
           STATE.source = "cache";
-          STATE.fetchedAt = cached.ts;
-          log("Produits depuis cache vieilli", { slug, count: STATE.products.length });
         }
 
         try{
           const live = await loadProductsLive(slug);
           STATE.products = live;
           STATE.source = "live";
-          STATE.fetchedAt = Date.now();
-          writeProductsCache(slug, live);
-          log("Produits live chargés", { slug, count: live.length });
+          writeProductsCache(slug,live);
         }catch(err){
-          log("Produits live KO", { message: err?.message || String(err) });
+          console.warn("[POS] products live", err);
           if(!cached){
             STATE.products = [];
             STATE.source = "vide";
-            STATE.fetchedAt = null;
           }
         }
       }
 
-      function setNotice(kind, html){
+      function setNotice(kind,html){
         const box = qs("noticeBox");
-        box.className = `notice ${kind || "info"}`;
+        if(!box) return;
+        box.className = "notice " + (kind || "info");
         box.innerHTML = html;
       }
 
-      function setSalePreview(kind, html){
+      function setSalePreview(kind,html){
         const box = qs("salePreview");
-        box.className = `notice ${kind || "info"}`;
+        if(!box) return;
+        box.className = "notice " + (kind || "info");
+        box.innerHTML = html;
+      }
+
+      function setNotePreview(kind,html){
+        const box = qs("notePreview");
+        if(!box) return;
+        box.className = "notice " + (kind || "info");
         box.innerHTML = html;
       }
 
       function renderBlocked(text){
-        qs("blockedText").textContent = text || "Entre avec ton code d'accès ou active ton abonnement pour ouvrir ta caisse.";
+        qs("blockedText").textContent = text || "Entre avec ton code d’accès pour ouvrir la caisse.";
         qs("liveShell").style.display = "none";
         qs("blockedShell").style.display = "grid";
       }
@@ -1174,121 +1339,32 @@
       }
 
       function updateHeader(){
-        qs("pillAccess").textContent = STATE.access ? "Accès actif" : "Accès requis";
-        qs("dotAccess").classList.toggle("ok", !!STATE.access);
-        qs("dotAccess").classList.toggle("bad", !STATE.access);
+        qs("pillAccess").textContent = STATE.access ? "Ouvert" : "Accès requis";
+        qs("dotAccess").classList.toggle("ok",!!STATE.access);
+        qs("dotAccess").classList.toggle("bad",!STATE.access);
         qs("pillStore").textContent = STATE.storeName || "Boutique";
         qs("metaStoreName").textContent = STATE.storeName || "—";
-        qs("metaPhone").textContent = STATE.access ? "Compte ouvert" : "Compte protégé";
-        qs("metaSlug").textContent = "Reçu possible";
-        qs("metaSource").textContent = STATE.source || "—";
 
         const cleanLinks = {
-          btnHall: HALL_URL,
-          btnDashboard: DASHBOARD_URL,
-          btnAdmin: ADMIN_URL,
-          btnProfile: PROFILE_URL,
-          btnPin: PIN_URL,
-          btnBlockedPin: PIN_URL,
-          btnGoDashboard: DASHBOARD_URL,
-          btnGoAdmin: ADMIN_URL,
-          btnGoProfile: PROFILE_URL,
-          btnFastMore: ADMIN_URL,
-          navHome: DASHBOARD_URL,
-          navMore: ADMIN_URL
+          btnHall:HALL_URL,
+          btnDashboard:DASHBOARD_URL,
+          btnAdmin:ADMIN_URL,
+          btnProfile:PROFILE_URL,
+          btnPin:PIN_URL,
+          btnBlockedPin:PIN_URL,
+          btnGoDashboard:DASHBOARD_URL,
+          btnGoAdmin:ADMIN_URL,
+          btnGoProfile:PROFILE_URL,
+          navHome:DASHBOARD_URL
         };
 
-        Object.entries(cleanLinks).forEach(([id, url]) => {
+        Object.entries(cleanLinks).forEach(([id,url]) => {
           const el = qs(id);
           if(el) el.href = cleanInternalUrl(url);
         });
 
         const abos = qs("btnBlockedAbos");
         if(abos) abos.href = ABOS_URL;
-
-        const navArticles = qs("navArticles");
-        const navCash = qs("navCash");
-        const navNotes = qs("navNotes");
-        const btnFastArticles = qs("btnFastArticles");
-        const btnFastCash = qs("btnFastCash");
-        const btnFastNotes = qs("btnFastNotes");
-        if(navArticles) navArticles.href = "#articles";
-        if(navCash) navCash.href = "#saleAmount";
-        if(navNotes) navNotes.href = "#notes";
-        if(btnFastArticles) btnFastArticles.href = "#articles";
-        if(btnFastCash) btnFastCash.href = "#saleAmount";
-        if(btnFastNotes) btnFastNotes.href = "#notes";
-      }
-
-      function filteredProducts(){
-        const text = String(qs("searchText").value || "").trim().toLowerCase();
-        const status = qs("filterStatus").value;
-        const sortBy = qs("sortBy").value;
-
-        let items = [...STATE.products];
-
-        if(text){
-          items = items.filter(item =>
-            item.name.toLowerCase().includes(text) ||
-            item.category.toLowerCase().includes(text) ||
-            item.sku.toLowerCase().includes(text) ||
-            item.note_text.toLowerCase().includes(text)
-          );
-        }
-
-        if(status === "published") items = items.filter(item => item.is_published);
-        if(status === "draft") items = items.filter(item => !item.is_published);
-        if(status === "low") items = items.filter(item => Number(item.stock_qty || 0) <= LOW_STOCK_LIMIT);
-
-        if(sortBy === "name") items.sort((a,b) => a.name.localeCompare(b.name, "fr"));
-        if(sortBy === "price_desc") items.sort((a,b) => Number(b.price_xof || 0) - Number(a.price_xof || 0));
-        if(sortBy === "price_asc") items.sort((a,b) => Number(a.price_xof || 0) - Number(b.price_xof || 0));
-        if(sortBy === "stock_desc") items.sort((a,b) => Number(b.stock_qty || 0) - Number(a.stock_qty || 0));
-        if(sortBy === "stock_asc") items.sort((a,b) => Number(a.stock_qty || 0) - Number(b.stock_qty || 0));
-        if(sortBy === "recent") items.sort((a,b) => new Date(b.updated_at || b.created_at || 0).getTime() - new Date(a.updated_at || a.created_at || 0).getTime());
-
-        return items;
-      }
-
-      function addToCart(productId){
-        const item = STATE.products.find(x => x.id === productId);
-        if(!item) return;
-        if(Number(item.stock_qty || 0) <= 0) return;
-
-        const found = STATE.cart.find(x => x.product_id === productId);
-        if(found){
-          if(found.qty < Number(item.stock_qty || 0)) found.qty += 1;
-        } else {
-          STATE.cart.push({ product_id: productId, qty: 1 });
-        }
-
-        persistDraft();
-        syncSaleFieldsFromCart();
-        renderCart();
-      }
-
-      function changeQty(productId, delta){
-        const item = STATE.products.find(x => x.id === productId);
-        const found = STATE.cart.find(x => x.product_id === productId);
-        if(!item || !found) return;
-
-        found.qty += delta;
-        if(found.qty <= 0){
-          STATE.cart = STATE.cart.filter(x => x.product_id !== productId);
-        } else if(found.qty > Number(item.stock_qty || 0)){
-          found.qty = Number(item.stock_qty || 0);
-        }
-
-        persistDraft();
-        syncSaleFieldsFromCart();
-        renderCart();
-      }
-
-      function clearCart(){
-        STATE.cart = [];
-        persistDraft();
-        syncSaleFieldsFromCart();
-        renderCart();
       }
 
       function cartLineData(){
@@ -1298,47 +1374,108 @@
           return {
             ...line,
             item,
-            total_xof: Number(line.qty || 0) * Number(item.price_xof || 0)
+            total_xof:Number(line.qty || 0) * Number(item.price_xof || 0)
           };
         }).filter(Boolean);
       }
 
       function cartTotal(){
-        return cartLineData().reduce((sum, line) => sum + Number(line.total_xof || 0), 0);
+        return cartLineData().reduce((sum,line) => sum + Number(line.total_xof || 0),0);
       }
 
       function syncSaleFieldsFromCart(){
         const lines = cartLineData();
-        if(!lines.length){
-          return;
-        }
+        if(!lines.length) return;
 
         qs("saleAmount").value = String(cartTotal());
         qs("saleLabel").value = lines.map(line => `${line.item.name} x${line.qty}`).join(" • ");
       }
 
-      function currentDraft(){
-        return {
-          cart: STATE.cart,
-          amount: qs("saleAmount").value || "",
-          label: qs("saleLabel").value || "",
-          method: qs("saleMethod").value || "cash"
-        };
+      function saleDraftKey(slug){
+        return "digiy_pos_sale_draft:" + (slug || "unknown");
       }
 
       function persistDraft(){
         if(!STATE.slug) return;
-        writeSaleDraft(STATE.slug, currentDraft());
+        try{
+          localStorage.setItem(saleDraftKey(STATE.slug),JSON.stringify({
+            cart:STATE.cart,
+            amount:qs("saleAmount").value || "",
+            label:qs("saleLabel").value || "",
+            method:STATE.payMethod || "cash"
+          }));
+        }catch(_){}
       }
 
       function restoreDraft(){
         if(!STATE.slug) return;
-        const draft = readSaleDraft(STATE.slug);
-        if(!draft) return;
-        STATE.cart = Array.isArray(draft.cart) ? draft.cart : [];
-        qs("saleAmount").value = draft.amount || "";
-        qs("saleLabel").value = draft.label || "";
-        qs("saleMethod").value = draft.method || "cash";
+
+        try{
+          const raw = localStorage.getItem(saleDraftKey(STATE.slug));
+          if(!raw) return;
+
+          const draft = JSON.parse(raw);
+          STATE.cart = Array.isArray(draft.cart) ? draft.cart : [];
+          qs("saleAmount").value = draft.amount || "";
+          qs("saleLabel").value = draft.label || "Vente comptoir";
+          STATE.payMethod = draft.method || "cash";
+          qs("saleMethod").value = STATE.payMethod;
+          syncPayButtons();
+        }catch(_){}
+      }
+
+      function clearSaleDraft(){
+        if(!STATE.slug) return;
+        try{ localStorage.removeItem(saleDraftKey(STATE.slug)); }catch(_){}
+      }
+
+      function addToCart(productId){
+        const item = STATE.products.find(x => x.id === productId);
+        if(!item) return;
+        if(Number(item.stock_qty || 0) <= 0) return;
+
+        const found = STATE.cart.find(x => x.product_id === productId);
+
+        if(found){
+          if(found.qty < Number(item.stock_qty || 0)) found.qty += 1;
+        }else{
+          STATE.cart.push({ product_id:productId,qty:1 });
+        }
+
+        persistDraft();
+        syncSaleFieldsFromCart();
+        renderCart();
+        renderProducts();
+        openPanel("cash");
+      }
+
+      function changeQty(productId,delta){
+        const item = STATE.products.find(x => x.id === productId);
+        const found = STATE.cart.find(x => x.product_id === productId);
+        if(!item || !found) return;
+
+        found.qty += delta;
+
+        if(found.qty <= 0){
+          STATE.cart = STATE.cart.filter(x => x.product_id !== productId);
+        }else if(found.qty > Number(item.stock_qty || 0)){
+          found.qty = Number(item.stock_qty || 0);
+        }
+
+        persistDraft();
+        syncSaleFieldsFromCart();
+        renderCart();
+        renderProducts();
+      }
+
+      function resetSaleInputs(){
+        qs("saleAmount").value = "";
+        qs("saleLabel").value = "Vente comptoir";
+        STATE.payMethod = "cash";
+        qs("saleMethod").value = "cash";
+        STATE.cart = [];
+        syncPayButtons();
+        clearSaleDraft();
       }
 
       function humanSaleError(reason){
@@ -1355,15 +1492,7 @@
         STATE.saleBusy = !!isBusy;
         const btn = qs("btnSaleReady");
         btn.disabled = !!isBusy;
-        btn.textContent = isBusy ? "⏳ Enregistrement…" : "✅ Encaisser";
-      }
-
-      function resetSaleInputs(){
-        qs("saleAmount").value = "";
-        qs("saleLabel").value = "";
-        qs("saleMethod").value = "cash";
-        STATE.cart = [];
-        if(STATE.slug) clearSaleDraft(STATE.slug);
+        btn.textContent = isBusy ? "⏳ Enregistrement…" : "✅ Enregistrer";
       }
 
       async function submitSale(){
@@ -1371,38 +1500,27 @@
 
         renderSalePreview();
 
-        const method = String(qs("saleMethod").value || "cash").trim();
-        const rawLabel = String(qs("saleLabel").value || "").trim();
-        const rawAmount = Number(qs("saleAmount").value || 0);
+        const method = STATE.payMethod || "cash";
+        const rawLabel = String(qs("saleLabel").value || "").trim() || "Vente comptoir";
+        const rawAmount = amountNumber(qs("saleAmount").value || 0);
         const cartLines = STATE.cart
           .filter(line => line && line.product_id && Number(line.qty || 0) > 0)
           .map(line => ({
-            product_id: String(line.product_id),
-            qty: Number(line.qty || 0)
+            product_id:String(line.product_id),
+            qty:Number(line.qty || 0)
           }));
 
         if(!STATE.slug || !STATE.phone){
-          qs("saleHelper").innerHTML = "Impossible de retrouver la boutique pour valider la vente.";
-          setSalePreview("bad", "Vente impossible : boutique introuvable.");
+          setSalePreview("bad","Vente impossible : boutique introuvable.");
           return;
         }
 
         const hasCart = cartLines.length > 0;
-        const saleLabel = rawLabel || (hasCart
-          ? cartLineData().map(line => `${line.item.name} x${line.qty}`).join(" • ")
-          : "");
+        const saleLabel = rawLabel || (hasCart ? cartLineData().map(line => `${line.item.name} x${line.qty}`).join(" • ") : "Vente comptoir");
 
-        if(!hasCart){
-          if(!(rawAmount > 0)){
-            qs("saleHelper").innerHTML = "Montant requis pour une vente manuelle.";
-            setSalePreview("bad", "Ajoute un montant ou choisis des articles.");
-            return;
-          }
-          if(!saleLabel){
-            qs("saleHelper").innerHTML = "Précise ce que tu vends pour une vente manuelle.";
-            setSalePreview("bad", "Description requise pour une vente manuelle.");
-            return;
-          }
+        if(!hasCart && !(rawAmount > 0)){
+          setSalePreview("bad","Ajoute un montant ou choisis des articles.");
+          return;
         }
 
         try{
@@ -1410,61 +1528,73 @@
           let res;
 
           if(hasCart){
-            res = await rpcFirstSuccess(RPC_CATALOG_SALE, [{
-              p_slug: STATE.slug,
-              p_owner_phone: STATE.phone,
-              p_payment_method: method,
-              p_label_text: saleLabel,
-              p_note_text: "caisse.html",
-              p_lines: cartLines
+            res = await rpcFirstSuccess(RPC_CATALOG_SALE,[{
+              p_slug:STATE.slug,
+              p_owner_phone:STATE.phone,
+              p_payment_method:method,
+              p_label_text:saleLabel,
+              p_note_text:"caisse.html",
+              p_lines:cartLines
             }]);
-          } else {
-            res = await rpcFirstSuccess(RPC_MANUAL_SALE, [{
-              p_slug: STATE.slug,
-              p_owner_phone: STATE.phone,
-              p_payment_method: method,
-              p_label_text: saleLabel,
-              p_note_text: "caisse.html",
-              p_amount_xof: rawAmount
+          }else{
+            res = await rpcFirstSuccess(RPC_MANUAL_SALE,[{
+              p_slug:STATE.slug,
+              p_owner_phone:STATE.phone,
+              p_payment_method:method,
+              p_label_text:saleLabel,
+              p_note_text:"caisse.html",
+              p_amount_xof:rawAmount
             }]);
           }
 
           if(!res || res.ok !== true){
             const msg = humanSaleError(res?.reason);
-            qs("saleHelper").innerHTML = msg;
-            setSalePreview("bad", msg);
+            setSalePreview("bad",msg);
             return;
           }
 
           const saleRef = String(res.sale_ref || "—");
           const totalXof = Number(res.total_xof || (hasCart ? cartTotal() : rawAmount) || 0);
-          const itemsCount = Number(
-            res.items_count ||
-            (hasCart ? cartLines.reduce((sum, line) => sum + Number(line.qty || 0), 0) : 1)
-          );
 
           resetSaleInputs();
           await hydrate(true);
 
           try{
-            localStorage.setItem("digiy_pos_last_sale_ref", saleRef);
-            localStorage.setItem("digiy_pos_last_sale_total", String(totalXof));
+            localStorage.setItem("digiy_pos_last_sale_ref",saleRef);
+            localStorage.setItem("digiy_pos_last_sale_total",String(totalXof));
           }catch(_){}
 
-          qs("saleHelper").innerHTML = `Vente enregistrée ✅ Réf : <b>${esc(saleRef)}</b>`;
-          setSalePreview(
-            "ok",
-            `Vente enregistrée ✅<br><b>Réf</b> : ${esc(saleRef)}<br><b>Total</b> : ${esc(money(totalXof))}<br><b>Articles</b> : ${esc(String(itemsCount))}<br><b>Paiement</b> : ${esc(method)}<br><br><button class="smallBtn" type="button" onclick="window.print()">🧾 Imprimer le reçu</button>`
-          );
-          setNotice("ok", `Dernière vente enregistrée : <b>${esc(saleRef)}</b>. Le stock a été relu en direct. Tu peux imprimer un reçu.`);
+          setSalePreview("ok",`Vente enregistrée ✅<br><b>Réf</b> : ${esc(saleRef)}<br><b>Total</b> : ${esc(money(totalXof))}<br><b>Paiement</b> : ${esc(method)}<br><br><button class="smallBtn" type="button" onclick="window.print()">🧾 Imprimer</button>`);
+          setNotice("ok",`Dernière vente enregistrée : <b>${esc(saleRef)}</b>. Le stock a été relu.`);
         }catch(err){
-          const msg = err?.message || String(err);
-          log("submitSale KO", { message: msg });
-          qs("saleHelper").innerHTML = "Impossible d’enregistrer la vente pour le moment.";
-          setSalePreview("bad", `Erreur vente : ${esc(msg)}`);
+          console.error("[POS] sale",err);
+          setSalePreview("bad",`Erreur vente : ${esc(err?.message || String(err))}`);
         }finally{
           setSaleBusy(false);
         }
+      }
+
+      function filteredProducts(){
+        const text = String(qs("searchText").value || "").trim().toLowerCase();
+        let items = STATE.products.filter(item => item.is_published || Number(item.stock_qty || 0) > 0);
+
+        if(text){
+          items = items.filter(item =>
+            item.name.toLowerCase().includes(text) ||
+            item.category.toLowerCase().includes(text) ||
+            item.sku.toLowerCase().includes(text)
+          );
+        }
+
+        items.sort((a,b) => {
+          const aStock = Number(a.stock_qty || 0);
+          const bStock = Number(b.stock_qty || 0);
+          if(aStock <= 0 && bStock > 0) return 1;
+          if(bStock <= 0 && aStock > 0) return -1;
+          return String(a.name || "").localeCompare(String(b.name || ""),"fr");
+        });
+
+        return items.slice(0,24);
       }
 
       function renderProducts(){
@@ -1472,57 +1602,38 @@
         const items = filteredProducts();
 
         if(!items.length){
-          box.innerHTML = `<div class="empty">Aucun article à afficher pour l’instant.</div>`;
+          box.innerHTML = `<div class="empty">Aucun article à afficher. Va dans Plus pour gérer le catalogue complet.</div>`;
           renderKpis();
           return;
         }
 
         box.innerHTML = items.map(item => {
           const stock = Number(item.stock_qty || 0);
+          const inCart = STATE.cart.find(x => x.product_id === item.id);
           const stockBadge = stock <= 0
             ? `<span class="badge bad">Rupture</span>`
             : stock <= LOW_STOCK_LIMIT
-            ? `<span class="badge warn">Stock faible</span>`
-            : `<span class="badge ok">En stock</span>`;
-
-          const pubBadge = item.is_published
-            ? `<span class="badge ok">Visible</span>`
-            : `<span class="badge info">Brouillon</span>`;
-
-          const inCart = STATE.cart.find(x => x.product_id === item.id);
-          const inCartText = inCart ? `Dans le ticket : ${inCart.qty}` : "Pas encore dans le ticket";
+              ? `<span class="badge warn">Stock ${stock}</span>`
+              : `<span class="badge ok">Stock ${stock}</span>`;
 
           return `
             <article class="productCard">
-              <div class="productTop">
-                <div>
-                  <div class="productName">${esc(item.name || "Article")}</div>
-                  <div class="productMeta">
-                    ${esc(item.category || "Sans catégorie")}
-                    ${item.sku ? ` • ${esc(item.sku)}` : ""}
-                  </div>
-                </div>
-                <div class="productPrice">${money(item.price_xof || 0)}</div>
+              <div>
+                <div class="productName">${esc(item.name || "Article")}</div>
+                <div class="productMeta">${esc(item.category || "Boutique")}${item.sku ? " • " + esc(item.sku) : ""}</div>
               </div>
-
-              <div class="productStock">
-                ${stockBadge}
-                ${pubBadge}
-                <span class="badge info">Stock : ${stock}</span>
-              </div>
-
-              <div class="helper" style="margin-top:0">${esc(item.note_text || inCartText)}</div>
-
-              <div class="productActions">
+              <div class="productPrice">${money(item.price_xof || 0)}</div>
+              ${stockBadge}
+              <div class="actionRow" style="margin-top:0">
                 <button class="smallBtn" data-add="${esc(item.id)}" ${stock <= 0 ? "disabled" : ""}>➕ Ajouter</button>
-                <a class="smallBtn" href="${buildUrl(ADMIN_URL, { edit: item.id })}">✏️ Modifier</a>
+                ${inCart ? `<span class="badge ok">Ticket x${Number(inCart.qty || 0)}</span>` : ""}
               </div>
             </article>
           `;
         }).join("");
 
         box.querySelectorAll("[data-add]").forEach(btn => {
-          btn.addEventListener("click", () => addToCart(btn.getAttribute("data-add")));
+          btn.addEventListener("click",() => addToCart(btn.getAttribute("data-add")));
         });
 
         renderKpis();
@@ -1533,7 +1644,7 @@
         const lines = cartLineData();
 
         if(!lines.length){
-          box.innerHTML = `<div class="empty">Aucun article dans le ticket.</div>`;
+          box.innerHTML = `<div class="empty">Aucun article dans le ticket. Tu peux encaisser seulement avec un montant.</div>`;
           qs("kpiCart").textContent = money(0);
           renderSalePreview();
           return;
@@ -1541,418 +1652,249 @@
 
         box.innerHTML = lines.map(line => `
           <div class="cartItem">
-            <div class="cartMain">
+            <div>
               <div class="cartTitle">${esc(line.item.name)}</div>
               <div class="cartSub">${money(line.item.price_xof)} × ${line.qty} = ${money(line.total_xof)}</div>
             </div>
             <div class="cartControls">
               <button class="qtyBtn" data-dec="${esc(line.item.id)}">−</button>
-              <div class="qty">${line.qty}</div>
+              <span class="qty">${line.qty}</span>
               <button class="qtyBtn" data-inc="${esc(line.item.id)}">+</button>
               <button class="qtyBtn" data-del="${esc(line.item.id)}">✕</button>
             </div>
           </div>
         `).join("");
 
-        box.querySelectorAll("[data-dec]").forEach(btn => btn.addEventListener("click", () => changeQty(btn.getAttribute("data-dec"), -1)));
-        box.querySelectorAll("[data-inc]").forEach(btn => btn.addEventListener("click", () => changeQty(btn.getAttribute("data-inc"), +1)));
-        box.querySelectorAll("[data-del]").forEach(btn => btn.addEventListener("click", () => changeQty(btn.getAttribute("data-del"), -999)));
+        box.querySelectorAll("[data-dec]").forEach(btn => btn.addEventListener("click",() => changeQty(btn.getAttribute("data-dec"),-1)));
+        box.querySelectorAll("[data-inc]").forEach(btn => btn.addEventListener("click",() => changeQty(btn.getAttribute("data-inc"),1)));
+        box.querySelectorAll("[data-del]").forEach(btn => btn.addEventListener("click",() => changeQty(btn.getAttribute("data-del"),-999)));
 
         qs("kpiCart").textContent = money(cartTotal());
         renderSalePreview();
       }
 
       function renderSalePreview(){
-        const amount = String(qs("saleAmount").value || "").trim();
+        const amount = amountNumber(qs("saleAmount").value || 0);
         const label = String(qs("saleLabel").value || "").trim();
-        const method = String(qs("saleMethod").value || "").trim();
         const lines = cartLineData();
+        const method = STATE.payMethod || "cash";
 
         if(!amount && !label && !lines.length){
-          setSalePreview("info", "Rien de préparé pour le moment.");
+          setSalePreview("info","Rien de préparé pour le moment.");
           return;
         }
 
-        const linesHtml = lines.length
-          ? `<div style="margin-top:8px">${lines.map(line =>
-              `<div style="margin-top:4px">• ${esc(line.item.name)} x${line.qty} = <b>${money(line.total_xof)}</b></div>`
-            ).join("")}</div>`
+        const lineHtml = lines.length
+          ? `<div style="margin-top:8px">${lines.map(line => `• ${esc(line.item.name)} x${line.qty} = <b>${money(line.total_xof)}</b>`).join("<br>")}</div>`
           : "";
 
-        setSalePreview(
-          "info",
-          `<div><b>Montant</b> : ${esc(amount ? money(amount) : "—")}</div>
-           <div style="margin-top:6px"><b>Ce que tu vends</b> : ${esc(label || "—")}</div>
-           <div style="margin-top:6px"><b>Paiement</b> : ${esc(method || "cash")}</div>
-           ${linesHtml}`
-        );
+        setSalePreview("info",`
+          <b>Montant</b> : ${amount ? esc(money(amount)) : "—"}<br>
+          <b>Vente</b> : ${esc(label || "—")}<br>
+          <b>Paiement</b> : ${esc(method)}
+          ${lineHtml}
+        `);
       }
 
       function renderKpis(){
         const items = STATE.products;
         const published = items.filter(x => x.is_published).length;
-        const stock = items.reduce((sum, item) => sum + Number(item.stock_qty || 0), 0);
-        const value = items.reduce((sum, item) => sum + (Number(item.stock_qty || 0) * Number(item.price_xof || 0)), 0);
-        const low = items.filter(x => Number(x.stock_qty || 0) <= LOW_STOCK_LIMIT).length;
-
         qs("kpiProducts").textContent = String(published);
-        qs("kpiStock").textContent = String(stock);
-        qs("kpiValue").textContent = money(value);
 
-        if(items.length === 0){
-          setNotice("warn", "Aucun article encore posé. Passe par <b>Mes articles</b> pour remplir ton catalogue.");
+        if(!items.length){
+          setNotice("warn","Aucun article posé. La vente manuelle reste disponible.");
           return;
         }
 
-        if(low > 0){
-          setNotice("warn", `Tu as <b>${low}</b> article(s) en stock faible. Catalogue chargé depuis <b>${STATE.source}</b>.`);
-          return;
-        }
+        setNotice("ok",`Caisse prête. <b>${published}</b> article(s) disponibles. Lecture : <b>${esc(STATE.source)}</b>.`);
+      }
 
-        setNotice("ok", `Catalogue prêt : <b>${published}</b> article(s) visibles. Lecture : <b>${STATE.source}</b>.`);
+      function syncPayButtons(){
+        qs("saleMethod").value = STATE.payMethod || "cash";
+
+        document.querySelectorAll("[data-method]").forEach(btn => {
+          btn.classList.toggle("active",btn.getAttribute("data-method") === STATE.payMethod);
+        });
+      }
+
+      function syncNotePayButtons(){
+        document.querySelectorAll("[data-note-method]").forEach(btn => {
+          btn.classList.toggle("active",btn.getAttribute("data-note-method") === STATE.noteMethod);
+        });
+      }
+
+      function openPanel(name){
+        const panels = ["articles","notes","plus"];
+
+        panels.forEach(id => {
+          const el = qs(id);
+          if(el) el.classList.toggle("hidden",id !== name);
+        });
+
+        document.querySelectorAll(".tab").forEach(btn => {
+          btn.classList.toggle("active",btn.getAttribute("data-open") === name);
+        });
+
+        document.querySelectorAll(".bottomNav a").forEach(a => a.classList.remove("active"));
+
+        if(name === "cash") qs("navCash")?.classList.add("active");
+        if(name === "articles") qs("navArticles")?.classList.add("active");
+        if(name === "notes") qs("navNotes")?.classList.add("active");
+        if(name === "plus") qs("navMore")?.classList.add("active");
+
+        if(name !== "cash"){
+          location.hash = "#" + name;
+        }else{
+          location.hash = "#cash";
+        }
       }
 
       function clearSaleForm(){
         resetSaleInputs();
         renderCart();
         renderSalePreview();
-        qs("saleHelper").innerHTML = "Ticket vidé.";
+        qs("saleHelper").textContent = "Ticket vidé.";
       }
 
-
-      function quickCommerceAmount(text){
-        const m = String(text || "").replace(/\s+/g, " ").match(/(\d[\d\s.,]*)\s*(f|fcfa|xof)?/i);
-        if(!m) return 0;
-        const raw = String(m[1] || "").replace(/[^\d]/g, "");
-        const n = Number(raw);
-        return Number.isFinite(n) ? n : 0;
+      function noteMemoryKey(){
+        return "digiy_pos_quick_memory:" + (STATE.slug || "unknown");
       }
 
-      function quickCommerceChannel(text){
-        const t = String(text || "").toLowerCase();
-        if(/\bwave\b/.test(t)) return "wave";
-        if(/\b(cash|espèces|especes|liquide)\b/.test(t)) return "cash";
-        if(/\b(orange money|om)\b/.test(t)) return "orange_money";
-        if(/\b(banque|virement)\b/.test(t)) return "bank";
-        return "other";
-      }
-
-      function quickCommerceComplement(text, type){
-        const s = String(text || "").trim();
-        const lower = s.toLowerCase();
-
-        if(/\b(riz|sucre|huile|lait|pain|eau|jus|sac|sacs|sachets|savon)\b/.test(lower)){
-          const found = lower.match(/\b(riz|sucre|huile|lait|pain|eau|jus|sac|sacs|sachets|savon)\b/);
-          return found ? found[1] : "";
-        }
-
-        if(/\b(stock|marchandise|fournisseur)\b/.test(lower)) return "stock";
-        if(/\b(livraison|transport)\b/.test(lower)) return "livraison";
-        if(/\b(client)\b/.test(lower) && /\b(doit|reste)\b/.test(lower)){
-          const words = s.replace(/[.,;:!?]/g, " ").split(/\s+/).filter(Boolean);
-          const banned = new Set(["client","doit","reste","payer","cash","wave","fcfa","xof","f"]);
-          const candidates = words.filter(w => {
-            const clean = w.toLowerCase().replace(/[^\p{L}\p{N}-]/gu, "");
-            if(!clean || /^\d+$/.test(clean)) return false;
-            return !banned.has(clean);
-          });
-          if(candidates.length){
-            const raw = candidates[candidates.length - 1].replace(/[^\p{L}\p{N}-]/gu, "");
-            return raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : "";
-          }
-        }
-
-        return "";
-      }
-
-      function quickCommerceDraftFromText(text){
-        const sentence = String(text || "").trim().replace(/\s+/g, " ");
-        const lower = sentence.toLowerCase();
-        const amount = quickCommerceAmount(sentence);
-        const channel = quickCommerceChannel(sentence);
-
-        let type = "note";
-        let title = "Note commerce";
-        let direction = "none";
-        let category = "commerce_note";
-        let kind = "other";
-        let impact = "à classer";
-
-        if(/\b(client)\b.*\b(doit|reste)\b|\b(doit|reste)\b/.test(lower)){
-          type = "client_debt";
-          title = "Client doit encore";
-          direction = "out";
-          category = "client_debt";
-          kind = "expense";
-          impact = "à suivre";
-        } else if(/\b(vente|vendu|encaissé|encaisse|recette|client payé|client paye)\b/.test(lower)){
-          type = "commerce_sale";
-          title = "Vente encaissée";
-          direction = "in";
-          category = "product_sale";
-          kind = "sale";
-          impact = "recette commerce";
-        } else if(/\b(achat|stock|marchandise|fournisseur)\b/.test(lower)){
-          type = "stock_purchase";
-          title = "Achat stock";
-          direction = "out";
-          category = "stock_purchase";
-          kind = "expense";
-          impact = "dépense stock";
-        } else if(/\b(livraison|transport)\b/.test(lower)){
-          type = "delivery_expense";
-          title = "Livraison payée";
-          direction = "out";
-          category = "delivery";
-          kind = "expense";
-          impact = "dépense commerce";
-        } else if(/\b(dépense|depense|payé|paye|sachets|sachet|sacs|sac)\b/.test(lower)){
-          type = "shop_expense";
-          title = "Dépense boutique";
-          direction = "out";
-          category = "shop_expense";
-          kind = "expense";
-          impact = "dépense commerce";
-        }
-
-        const complement = quickCommerceComplement(sentence, type);
-
-        return {
-          sentence,
-          type,
-          title,
-          amount_xof: amount,
-          channel,
-          direction,
-          category,
-          kind,
-          impact,
-          complement,
-          module: "COMMERCE",
-          status: "draft",
-          created_at: new Date().toISOString()
-        };
-      }
-
-      function quickCommerceMemoryKey(){
-        return STATE.slug ? `digiy_commerce_quick_memory:${STATE.slug}` : "digiy_commerce_quick_memory";
-      }
-
-      function quickCommerceDraftKey(){
-        return STATE.slug ? `digiy_commerce_quick_draft:${STATE.slug}` : "digiy_commerce_quick_draft";
-      }
-
-      function readQuickCommerceMemory(){
+      function readMemory(){
         try{
-          const raw = localStorage.getItem(quickCommerceMemoryKey());
+          const raw = localStorage.getItem(noteMemoryKey());
           const arr = raw ? JSON.parse(raw) : [];
           return Array.isArray(arr) ? arr : [];
-        }catch{
+        }catch(_){
           return [];
         }
       }
 
-      function writeQuickCommerceMemory(items){
+      function writeMemory(list){
         try{
-          localStorage.setItem(quickCommerceMemoryKey(), JSON.stringify((items || []).slice(0, 10)));
-          return true;
-        }catch{
-          return false;
-        }
+          localStorage.setItem(noteMemoryKey(),JSON.stringify((list || []).slice(0,12)));
+        }catch(_){}
       }
 
-      function saveQuickCommerceDraft(draft, confirmed = false){
-        try{
-          localStorage.setItem(quickCommerceDraftKey(), JSON.stringify({
-            ...draft,
-            status: confirmed ? "confirmed_local" : "draft",
-            confirmed_at: confirmed ? new Date().toISOString() : null
-          }));
-          return true;
-        }catch{
-          return false;
-        }
+      function noteTypeLabel(type){
+        if(type === "stock_purchase") return "Fournisseur";
+        if(type === "client_debt") return "Client doit";
+        return "Dépense";
       }
 
-      function addQuickCommerceMemory(draft){
-        const item = {
-          ...draft,
-          memory_id: "commerce_" + Date.now(),
-          confirmed_at: new Date().toISOString()
-        };
-        const list = readQuickCommerceMemory();
-        list.unshift(item);
-        writeQuickCommerceMemory(list);
-        renderQuickCommerceMemory();
+      function noteDirection(type){
+        if(type === "client_debt") return "out";
+        return "out";
       }
 
-      function isQuickCommerceFinancial(item){
-        const type = String(item?.type || "").toLowerCase();
-        return ["commerce_sale","stock_purchase","delivery_expense","shop_expense","client_debt"].includes(type);
+      function noteCategory(type){
+        if(type === "stock_purchase") return "stock_purchase";
+        if(type === "client_debt") return "client_debt";
+        return "business_expense";
       }
 
-      function paySlugFromCommercePhone(){
-        const p = normPhone(STATE.phone || getResolvedPhone());
-        return p ? "pay-" + p : "";
-      }
-
-      function payCommerceLabel(item){
-        const type = String(item?.type || "").toLowerCase();
-        const comp = String(item?.complement || "").trim();
-
-        if(type === "commerce_sale") return comp ? "Vente " + comp : "Vente commerce";
-        if(type === "stock_purchase") return "Achat stock";
-        if(type === "delivery_expense") return "Livraison";
-        if(type === "client_debt") return comp ? "Client doit " + comp : "Client doit encore";
-        if(type === "shop_expense") return comp ? comp.charAt(0).toUpperCase() + comp.slice(1) : "Dépense boutique";
-        return item?.title || "Note commerce";
-      }
-
-      function buildPayFromCommerceUrl(item){
-        const p = normPhone(STATE.phone || getResolvedPhone());
-        const paySlug = paySlugFromCommercePhone();
+      function buildPayUrl(item){
         const qsPay = new URLSearchParams();
+        const phone = normPhone(STATE.phone || "");
+        const paySlug = phone ? "pay-" + phone : "";
 
-        if(paySlug) qsPay.set("slug", paySlug);
-        if(p) qsPay.set("phone", p);
+        if(paySlug) qsPay.set("slug",paySlug);
+        if(phone) qsPay.set("phone",phone);
 
-        qsPay.set("fromDraft", "1");
-        qsPay.set("direction", item?.direction === "in" ? "in" : "out");
-        qsPay.set("scope", "pro");
-        qsPay.set("amount", String(Math.round(Number(item?.amount_xof || 0))));
-        qsPay.set("kind", item?.kind || (item?.direction === "in" ? "sale" : "expense"));
-        qsPay.set("channel", item?.channel ? String(item.channel) : "other");
-        qsPay.set("category", item?.category || "commerce_note");
-        qsPay.set("source_module", "COMMERCE");
-        qsPay.set("label", payCommerceLabel(item));
-        qsPay.set("note", String(item?.sentence || "").trim());
-        qsPay.set("complement", String(item?.complement || "").trim());
-        qsPay.set("intent", "commerce_quick_note");
+        qsPay.set("fromDraft","1");
+        qsPay.set("direction",item.direction || "out");
+        qsPay.set("scope","pro");
+        qsPay.set("amount",String(Math.round(Number(item.amount_xof || 0))));
+        qsPay.set("amount_xof",String(Math.round(Number(item.amount_xof || 0))));
+        qsPay.set("kind",item.kind || "expense");
+        qsPay.set("channel",item.channel || "cash");
+        qsPay.set("category",item.category || "business_expense");
+        qsPay.set("source_module","COMMERCE");
+        if(STATE.slug) qsPay.set("source_slug",STATE.slug);
+        qsPay.set("source_id",item.memory_id || ("commerce-note-" + Date.now()));
+        qsPay.set("label",item.label || "Note commerce");
+        qsPay.set("note",item.note || "");
+        qsPay.set("intent","quick_note");
 
-        return "https://pro-pay.digiylyfe.com/admin.html?" + qsPay.toString();
+        return PAY_URL + "?" + qsPay.toString();
       }
 
-      function renderQuickCommerceDraft(draft){
-        const box = qs("quickCommerceDraft");
-        const confirmBtn = qs("btnQuickCommerceConfirm");
-        if(!box) return;
+      function renderMemory(){
+        const box = qs("memoryList");
+        const list = readMemory();
 
-        if(!draft || !draft.sentence){
-          box.style.display = "none";
-          box.innerHTML = "";
-          if(confirmBtn) confirmBtn.style.display = "none";
-          return;
-        }
-
-        const amountText = draft.amount_xof ? money(draft.amount_xof) : "montant à préciser";
-        const channelText = draft.channel || "other";
-
-        box.style.display = "block";
-        if(confirmBtn) confirmBtn.style.display = "inline-flex";
-
-        box.innerHTML = `
-          <strong>Voilà ce que DIGIY COMMERCE a préparé :</strong><br>
-          Type : ${esc(draft.title)}<br>
-          Montant : ${esc(amountText)}<br>
-          Canal : ${esc(channelText)}<br>
-          Impact : ${esc(draft.impact)}<br>
-          ${draft.complement ? `Complément : ${esc(draft.complement)}<br>` : ``}
-          <br>
-          <span style="color:rgba(247,251,248,.72)">Brouillon seulement. Rien n’est envoyé en base automatiquement.</span>
-        `;
-      }
-
-      function renderQuickCommerceMemory(){
-        const box = qs("quickCommerceMemoryList");
-        if(!box) return;
-
-        const list = readQuickCommerceMemory();
         if(!list.length){
-          box.innerHTML = `<div class="memoryEmpty">Aucune note commerce confirmée pour le moment.</div>`;
+          box.innerHTML = `<div class="empty">Aucune note confirmée pour le moment.</div>`;
           return;
         }
 
-        box.innerHTML = list.slice(0, 10).map(item => {
-          const amount = item.amount_xof ? money(item.amount_xof) : "montant à préciser";
-          const channel = item.channel ? item.channel : "canal à préciser";
-          const comp = item.complement ? " · " + item.complement : "";
-
-          return `
-            <div class="memoryItem">
-              <div class="memoryItemTop">
-                <div class="memoryItemTitle">✅ ${esc(item.title || "Note commerce")}</div>
-                <div class="memoryItemAmount">${esc(amount)}</div>
-              </div>
-              <div class="memoryItemMeta">${esc(channel)} · ${esc(item.impact || "à classer")}${esc(comp)}</div>
-              <div class="memoryItemMeta">${esc(item.sentence || "")}</div>
-              ${isQuickCommerceFinancial(item) ? `
-                <a class="memoryPayAction" href="${esc(buildPayFromCommerceUrl(item))}">
-                  💼 Envoyer vers Mon argent
-                </a>
-                <div class="memoryPayHint">Abonnement Mon argent requis pour enregistrer.</div>
-              ` : ``}
+        box.innerHTML = list.map(item => `
+          <div class="memoryItem">
+            <div class="memoryTop">
+              <span>${esc(item.label || "Note commerce")}</span>
+              <span>${esc(money(item.amount_xof || 0))}</span>
             </div>
-          `;
-        }).join("");
+            <div class="memoryMeta">${esc(item.channel || "cash")} · ${esc(item.note || "")}</div>
+            <div class="actionRow" style="margin-top:8px">
+              <a class="smallBtn" href="${esc(buildPayUrl(item))}">💼 Envoyer vers Mon argent</a>
+            </div>
+          </div>
+        `).join("");
       }
 
-      function clearQuickCommerceMemory(){
-        const ok = window.confirm("Vider l’aide-mémoire commerce sur cet appareil ?");
-        if(!ok) return;
-        writeQuickCommerceMemory([]);
-        renderQuickCommerceMemory();
-        setNotice("info", "Aide-mémoire caisse vidé sur cet appareil.");
+      function updateNotePreview(){
+        const amount = amountNumber(qs("noteAmount").value || 0);
+        const name = String(qs("noteName").value || "").trim();
+        const type = STATE.noteType;
+        const channel = STATE.noteMethod || "cash";
+
+        if(!amount && !name){
+          setNotePreview("info","Aucune note préparée.");
+          return;
+        }
+
+        setNotePreview("info",`
+          <b>Type</b> : ${esc(noteTypeLabel(type))}<br>
+          <b>Nom</b> : ${esc(name || "—")}<br>
+          <b>Montant</b> : ${amount ? esc(money(amount)) : "—"}<br>
+          <b>Paiement</b> : ${esc(channel)}
+        `);
       }
 
-      function bindQuickCommerceNote(){
-        const input = qs("quickCommerceInput");
-        const prepare = qs("btnQuickCommercePrepare");
-        const confirm = qs("btnQuickCommerceConfirm");
-        const clear = qs("btnQuickCommerceClear");
+      function saveNote(){
+        const amount = amountNumber(qs("noteAmount").value || 0);
+        const name = String(qs("noteName").value || "").trim();
+        const type = STATE.noteType || "expense";
+        const channel = STATE.noteMethod || "cash";
 
-        qs("quickCommerceExamples")?.querySelectorAll("button").forEach(btn => {
-          btn.addEventListener("click", () => {
-            if(!input) return;
-            input.value = btn.textContent.trim();
-            input.focus();
-          });
-        });
+        if(!(amount > 0)){
+          setNotePreview("bad","Ajoute un montant.");
+          return;
+        }
 
-        prepare?.addEventListener("click", () => {
-          const sentence = String(input?.value || "").trim();
-          if(!sentence){
-            setNotice("warn", "Écris une note commerce avant de préparer.");
-            return;
-          }
+        const label = noteTypeLabel(type);
+        const item = {
+          memory_id:"commerce_" + Date.now(),
+          type,
+          label,
+          amount_xof:amount,
+          channel,
+          direction:noteDirection(type),
+          category:noteCategory(type),
+          kind:"expense",
+          note:name ? `${label} · ${name}` : label,
+          created_at:new Date().toISOString()
+        };
 
-          const draft = quickCommerceDraftFromText(sentence);
-          saveQuickCommerceDraft(draft, false);
-          renderQuickCommerceDraft(draft);
-          setNotice("info", "Brouillon commerce préparé. Vérifie puis confirme.");
-        });
+        const list = readMemory();
+        list.unshift(item);
+        writeMemory(list);
 
-        confirm?.addEventListener("click", () => {
-          const draft = quickCommerceDraftFromText(String(input?.value || "").trim());
-          if(!draft.sentence){
-            setNotice("warn", "Prépare d’abord une note commerce.");
-            return;
-          }
-
-          saveQuickCommerceDraft(draft, true);
-          addQuickCommerceMemory(draft);
-          renderQuickCommerceDraft({...draft, status:"confirmed_local"});
-          if(confirm) confirm.style.display = "none";
-          setNotice("ok", "Note commerce confirmée dans l’aide-mémoire.");
-        });
-
-        clear?.addEventListener("click", () => {
-          if(input) input.value = "";
-          renderQuickCommerceDraft(null);
-          setNotice("info", "Note commerce effacée.");
-        });
-
-        qs("btnQuickCommerceMemoryClear")?.addEventListener("click", clearQuickCommerceMemory);
-        renderQuickCommerceMemory();
+        qs("noteName").value = "";
+        qs("noteAmount").value = "";
+        updateNotePreview();
+        renderMemory();
+        setNotice("ok","Note enregistrée localement. Elle peut nourrir Mon argent.");
       }
 
       async function hydrate(forceLive = false){
@@ -1960,7 +1902,7 @@
         let phone = getResolvedPhone();
 
         if(!slug){
-          renderBlocked("Ta caisse n'a pas pu identifier ta boutique. Passe par ton lien pro ou ton QR DIGIY.");
+          renderBlocked("Ta caisse n’a pas pu identifier ta boutique. Passe par ton lien pro ou ton QR DIGIY.");
           return;
         }
 
@@ -1968,20 +1910,24 @@
           try{
             phone = await resolvePhoneFromSlug(slug);
           }catch(err){
-            log("resolvePhoneFromSlug KO", { message: err?.message || String(err) });
+            console.warn("[POS] resolve phone",err);
           }
         }
 
         STATE.slug = slug;
         STATE.phone = phone || "";
-        localStorage.setItem("digiy_pos_last_slug", slug);
-        sessionStorage.setItem("digiy_pos_last_slug", slug);
-        if(phone){
-          localStorage.setItem("digiy_pos_last_phone", phone);
-          sessionStorage.setItem("digiy_pos_last_phone", phone);
-        }
+
+        try{
+          localStorage.setItem("digiy_pos_last_slug",slug);
+          sessionStorage.setItem("digiy_pos_last_slug",slug);
+          if(phone){
+            localStorage.setItem("digiy_pos_last_phone",phone);
+            sessionStorage.setItem("digiy_pos_last_phone",phone);
+          }
+        }catch(_){}
 
         STATE.access = await getAccess(STATE.phone);
+
         if(!STATE.phone || !STATE.access){
           updateHeader();
           renderBlocked("Entre avec ton code d’accès ou active ton abonnement pour ouvrir ta caisse.");
@@ -2002,131 +1948,112 @@
         }
 
         await hydrateProducts(slug);
+
         updateHeader();
         renderLive();
         restoreDraft();
-        syncSaleFieldsFromCart();
         renderProducts();
         renderCart();
+        renderMemory();
+        renderSalePreview();
+        updateNotePreview();
+      }
+
+      function bindUi(){
+        qs("btnReloadTop")?.addEventListener("click",() => hydrate(true));
+        qs("btnSaleReady")?.addEventListener("click",submitSale);
+        qs("btnClearSale")?.addEventListener("click",clearSaleForm);
+        qs("btnPrintReceipt")?.addEventListener("click",() => window.print());
+
+        ["saleAmount","saleLabel"].forEach(id => {
+          qs(id)?.addEventListener("input",() => {
+            persistDraft();
+            renderSalePreview();
+          });
+        });
+
+        qs("searchText")?.addEventListener("input",renderProducts);
+
+        document.querySelectorAll("[data-amount]").forEach(btn => {
+          btn.addEventListener("click",() => {
+            qs("saleAmount").value = btn.getAttribute("data-amount") || "";
+            persistDraft();
+            renderSalePreview();
+          });
+        });
+
+        document.querySelectorAll("[data-method]").forEach(btn => {
+          btn.addEventListener("click",() => {
+            STATE.payMethod = btn.getAttribute("data-method") || "cash";
+            qs("saleMethod").value = STATE.payMethod;
+            syncPayButtons();
+            persistDraft();
+            renderSalePreview();
+          });
+        });
+
+        document.querySelectorAll("[data-note-method]").forEach(btn => {
+          btn.addEventListener("click",() => {
+            STATE.noteMethod = btn.getAttribute("data-note-method") || "cash";
+            syncNotePayButtons();
+            updateNotePreview();
+          });
+        });
+
+        document.querySelectorAll("[data-type]").forEach(btn => {
+          btn.addEventListener("click",() => {
+            STATE.noteType = btn.getAttribute("data-type") || "expense";
+            document.querySelectorAll("[data-type]").forEach(b => b.classList.toggle("active",b === btn));
+            updateNotePreview();
+          });
+        });
+
+        ["noteName","noteAmount"].forEach(id => {
+          qs(id)?.addEventListener("input",updateNotePreview);
+        });
+
+        qs("btnNoteSave")?.addEventListener("click",saveNote);
+        qs("btnNoteClear")?.addEventListener("click",() => {
+          qs("noteName").value = "";
+          qs("noteAmount").value = "";
+          updateNotePreview();
+        });
+
+        document.querySelectorAll(".tab").forEach(btn => {
+          btn.addEventListener("click",() => openPanel(btn.getAttribute("data-open") || "cash"));
+        });
+
+        qs("navCash")?.addEventListener("click",(e) => { e.preventDefault(); openPanel("cash"); });
+        qs("navArticles")?.addEventListener("click",(e) => { e.preventDefault(); openPanel("articles"); });
+        qs("navNotes")?.addEventListener("click",(e) => { e.preventDefault(); openPanel("notes"); });
+        qs("navMore")?.addEventListener("click",(e) => { e.preventDefault(); openPanel("plus"); });
       }
 
       async function boot(){
-        reveal();
         try{
           cleanVisibleUrl();
-          log("Boot caisse POS", { href: location.href, module: MODULE_CODE });
+          bindUi();
+          syncPayButtons();
+          syncNotePayButtons();
+
           await awaitGuardReady();
           await bootGuard();
           ensureSupabase();
 
-          qs("btnReloadTop").addEventListener("click", () => hydrate(true));
-          qs("btnSaleReady").addEventListener("click", submitSale);
-          qs("btnPrintReceipt").addEventListener("click", () => window.print());
-          qs("btnClearSale").addEventListener("click", clearSaleForm);
-          bindQuickCommerceNote();
-
-          ["saleAmount", "saleLabel", "saleMethod"].forEach(id => {
-            qs(id).addEventListener("input", () => { persistDraft(); renderSalePreview(); });
-            qs(id).addEventListener("change", () => { persistDraft(); renderSalePreview(); });
-          });
-
-          ["searchText", "filterStatus", "sortBy"].forEach(id => {
-            qs(id).addEventListener("input", renderProducts);
-            qs(id).addEventListener("change", renderProducts);
-          });
-
           await hydrate(false);
+
+          const hash = String(location.hash || "").replace("#","");
+          if(["articles","notes","plus"].includes(hash)) openPanel(hash);
+          else openPanel("cash");
         }catch(err){
-          log("Boot général KO", { message: err?.message || String(err) });
-          renderBlocked("Erreur au démarrage de ta caisse.");
+          console.error("[POS] boot",err);
+          renderBlocked(err?.message || "Erreur d’ouverture de la caisse.");
         }finally{
           reveal();
         }
       }
 
       boot();
-    })();
-  </script>
-
-  <script>
-    (function(){
-      const btn = document.getElementById("digiy-audio-btn");
-      if(!btn) return;
-
-      const synth = window.speechSynthesis;
-      if(!synth || typeof window.SpeechSynthesisUtterance !== "function") return;
-
-      let playing = false;
-
-      function updateBtn(){
-        btn.setAttribute("aria-pressed", playing ? "true" : "false");
-        btn.textContent = playing ? "⏹️ Stop" : "🔊 Écouter";
-      }
-
-      function getAudioText(){
-        const state = window.STATE || {};
-        const products = Array.isArray(state.products) ? state.products : [];
-        const cart = Array.isArray(state.cart) ? state.cart : [];
-
-        const hasProducts = products.length > 0;
-        const cartCount = cart.reduce((sum, line) => sum + Number(line?.qty || 0), 0);
-        const lowStockCount = products.filter(p => Number(p?.stock_qty || 0) > 0 && Number(p?.stock_qty || 0) <= 5).length;
-
-        if(!hasProducts){
-          return "Ta caisse est ouverte. Commence par ajouter tes produits avec leur nom, leur prix et la quantité disponible.";
-        }
-
-        if(cartCount === 0){
-          if(lowStockCount > 0){
-            return "Tes produits sont prêts. Attention, tu as aussi du stock faible sur certains articles. Choisis un article pour commencer une vente.";
-          }
-          return "Tes produits sont prêts. Choisis un article pour commencer une vente.";
-        }
-
-        return "Ton ticket est en cours. Vérifie les quantités puis valide la vente.";
-      }
-
-      function speak(){
-        const text = getAudioText();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = "fr-FR";
-        u.rate = 1;
-        u.pitch = 1;
-
-        u.onstart = function(){
-          playing = true;
-          updateBtn();
-        };
-
-        u.onend = function(){
-          playing = false;
-          updateBtn();
-        };
-
-        u.onerror = function(){
-          playing = false;
-          updateBtn();
-        };
-
-        synth.cancel();
-        synth.speak(u);
-      }
-
-      btn.addEventListener("click", function(){
-        if(playing){
-          synth.cancel();
-          playing = false;
-          updateBtn();
-          return;
-        }
-        speak();
-      });
-
-      window.addEventListener("beforeunload", function(){
-        try{ synth.cancel(); }catch(_){}
-      });
-
-      updateBtn();
     })();
   </script>
 </body>
