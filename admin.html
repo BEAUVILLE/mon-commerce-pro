@@ -680,12 +680,12 @@
       </header>
 
       <div class="navRow">
-        <a class="btnGhost" href="https://mon-commerce.digiylyfe.com/" id="btnHall">🌍 Fiche publique</a>
+        <a class="btnGhost" href="https://mon-commerce.digiylyfe.com/" id="btnHall">🌍 Voir côté client</a>
         <a class="btnGhost" href="./dashboard-pro.html" id="btnDashboard">🏠 Accueil</a>
         <a class="btnGhost" href="https://pro-espace.digiylyfe.com/" id="btnCamembert">🧭 Camembert</a>
         <a class="btnGhost" href="./caisse.html" id="btnCaisse">💰 Encaisser</a>
         <a class="btnGhost" href="./caisse.html#notes" id="btnNotes">✍️ Notes</a>
-        <a class="btnGhost" href="./profile.html" id="btnProfile">🏪 Boutique</a>
+        <a class="btnGhost" href="./profile.html" id="btnProfile">🏪 Ma fiche commerce</a>
         <a class="btnOutline" href="./pin.html" id="btnPin">🔐 Mon code</a>
       </div>
 
@@ -719,8 +719,8 @@
               <button class="quickBtn" id="btnInitCaisse" type="button"><span>🚀</span>Initialiser<small>préparer la caisse</small></button>
               <button class="quickBtn" id="btnLoadStarter" type="button"><span>🌾</span>Départ<small>charger les exemples</small></button>
               <a class="quickBtn" id="btnFastCash" href="./caisse.html"><span>💰</span>Encaisser<small>retour caisse</small></a>
-              <a class="quickBtn" id="btnFastPublic" href="https://mon-commerce.digiylyfe.com/"><span>🌍</span>Fiche publique<small>voir côté client</small></a>
-              <a class="quickBtn" id="btnFastProfile" href="./profile.html"><span>🏪</span>Boutique<small>réglages fiche</small></a>
+              <a class="quickBtn" id="btnFastPublic" href="https://mon-commerce.digiylyfe.com/"><span>🌍</span>Voir côté client<small>vitrine publique</small></a>
+              <a class="quickBtn" id="btnFastProfile" href="./profile.html"><span>🏪</span>Ma fiche commerce<small>modifier la fiche</small></a>
             </div>
 
             <div class="miniStats">
@@ -746,7 +746,7 @@
               <button class="btnOutline" id="btnExport" type="button">📤 Télécharger</button>
               <button class="btnOutline" id="btnImport" type="button">📥 Ajouter fichier</button>
               <button class="btnOutline" id="btnDownloadAdmin" type="button">⬇️ Admin</button>
-              <a class="btnOutline" id="btnPublicAction" href="https://mon-commerce.digiylyfe.com/">🌍 Fiche publique</a>
+              <a class="btnOutline" id="btnPublicAction" href="./profile.html">🏪 Ma fiche commerce</a>
               <input type="file" id="fileImport" accept="application/json" style="display:none"/>
             </div>
 
@@ -759,7 +759,7 @@
                 <b>Corriger</b> : clique sur modifier, puis enregistre.<br>
                 <b>Initialiser la caisse</b> : envoie les articles visibles vers la caisse verte du téléphone.<br>
                 <b>Départ</b> : recharge les articles exemples si la boutique n’a qu’un ou deux articles de test.<br>
-                <b>Fiche publique</b> : ouvre la page que voit le client.
+                <b>Ma fiche commerce</b> : ouvre la page où tu règles la fiche. <b>Voir côté client</b> : ouvre la vitrine publique.
               </div>
             </div>
           </div>
@@ -1645,7 +1645,7 @@
         if(fastPublic) fastPublic.href = PUBLIC_URL;
 
         const publicAction = qs("btnPublicAction");
-        if(publicAction) publicAction.href = PUBLIC_URL;
+        if(publicAction) publicAction.href = PROFILE_URL;
 
         const cam = qs("btnCamembert");
         if(cam) cam.href = CAMEMBERT_URL;
@@ -2211,6 +2211,7 @@
   </script>
 </body>
 </html>
+
 
 
 
