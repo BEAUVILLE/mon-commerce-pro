@@ -234,7 +234,8 @@
         PHONE_KEY: "digiy_pos_phone",
         LAST_SLUG_KEY: "digiy_pos_last_slug",
         RPC_VERIFY_PIN: "digiy_verify_pin",
-        TABLE_SUBS: "digiy_subscriptions_public"
+        TABLE_SUBS: "digiy_subscriptions_public",
+        ALLOWED_SLUG_PREFIXES: ["pos-","commerce-","mon-commerce-","caisse-"]
       };
 
       const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
@@ -298,6 +299,36 @@
       function normPin(value)   { return String(value || "").trim().replace(/\s+/g,""); }
       function safeJsonParse(raw) { try { return JSON.parse(raw); } catch { return null; } }
 
+      function isPosSlug(value) {
+        const s = normSlug(value);
+        if (!s) return false;
+        return CFG.ALLOWED_SLUG_PREFIXES.some(prefix => s.startsWith(prefix));
+      }
+
+      function isPosModule(value) {
+        return String(value || "").trim().toUpperCase() === CFG.MODULE;
+      }
+
+      function isPosSub(row) {
+        if (!row) return false;
+        const moduleName = String(row.module || "").trim().toUpperCase();
+        const slug = normSlug(row.slug || "");
+        return moduleName === CFG.MODULE || (!moduleName && isPosSlug(slug));
+      }
+
+      function clearWrongCommerceIdentity() {
+        const keys = [
+          ...CFG.STORAGE_KEYS,
+          CFG.SLUG_KEY, CFG.PHONE_KEY, CFG.LAST_SLUG_KEY,
+          "digiy_pos_last_phone", "DIGIY_MODULE", "DIGIY_CURRENT_MODULE"
+        ];
+
+        keys.forEach((key) => {
+          try { localStorage.removeItem(key); } catch (_) {}
+          try { sessionStorage.removeItem(key); } catch (_) {}
+        });
+      }
+
       function setStatus(message, type = "") {
         el.status.className = `status${type ? " " + type : ""}`;
         el.status.textContent = message;
@@ -322,6 +353,9 @@
 
       function saveSession(payload) {
         const session = buildNormalizedSession(payload);
+        if (session.slug && !isPosSlug(session.slug)) {
+          throw new Error("Mauvaise porte détectée : session MON COMMERCE refusée.");
+        }
         for (const key of CFG.STORAGE_KEYS) {
           try { localStorage.setItem(key, JSON.stringify(session)); } catch (_) {}
           try { sessionStorage.setItem(key, JSON.stringify(session)); } catch (_) {}
@@ -345,8 +379,15 @@
           } catch (_) {}
 
           if (!parsed || typeof parsed !== "object") continue;
+
           const moduleName = String(parsed.module || parsed.module_code || "").trim().toUpperCase();
           if (moduleName && moduleName !== CFG.MODULE) continue;
+
+          const slug = normSlug(parsed.slug || "");
+          if (slug && !isPosSlug(slug)) {
+            clearWrongCommerceIdentity();
+            continue;
+          }
 
           const access = !!parsed.access || !!parsed.access_ok || !!parsed.ok || !!parsed.has_access;
           const verifiedAt = Number(parsed.verified_at || parsed.validated_at_ms || parsed.ts || 0) || 0;
@@ -361,7 +402,7 @@
           if (!access || !recent) continue;
 
           return {
-            slug: normSlug(parsed.slug || ""),
+            slug,
             phone: normPhone(parsed.phone || ""),
             owner_id: parsed.owner_id || null,
             verified_at: verifiedAt,
@@ -399,29 +440,72 @@
         return u.toString();
       }
 
+      function normalizeSub(row) {
+        if (!row || !isPosSub(row)) return null;
+        const slug = normSlug(row.slug || "");
+        if (slug && !isPosSlug(slug)) return null;
+        return {
+          slug,
+          phone: normPhone(row.phone || ""),
+          module: CFG.MODULE
+        };
+      }
+
       async function resolveSubBySlug(slug) {
         const s = normSlug(slug);
-        if (!s) return null;
-        const tries = [{ slug: s, module: CFG.MODULE }, { slug: s, module: CFG.MODULE_LOWER }, { slug: s }];
+        if (!s || !isPosSlug(s)) return null;
+
+        const tries = [
+          { slug: s, module: CFG.MODULE },
+          { slug: s, module: CFG.MODULE_LOWER }
+        ];
+
         for (const q of tries) {
           const { data, error } = await supabase.from(CFG.TABLE_SUBS).select("phone,slug,module").match(q).limit(1);
-          if (!error && Array.isArray(data) && data[0]) {
-            return { slug: normSlug(data[0].slug), phone: normPhone(data[0].phone), module: String(data[0].module || CFG.MODULE).toUpperCase() };
-          }
+          const sub = !error && Array.isArray(data) ? normalizeSub(data[0]) : null;
+          if (sub) return sub;
         }
+
+        const { data,error } = await supabase
+          .from(CFG.TABLE_SUBS)
+          .select("phone,slug,module")
+          .eq("slug",s)
+          .limit(10);
+
+        if (!error && Array.isArray(data)) {
+          const sub = data.map(normalizeSub).find(Boolean);
+          if (sub) return sub;
+        }
+
         return null;
       }
 
       async function resolveSubByPhone(phone) {
         const p = normPhone(phone);
         if (!p) return null;
-        const tries = [{ phone: p, module: CFG.MODULE }, { phone: p, module: CFG.MODULE_LOWER }, { phone: p }];
+
+        const tries = [
+          { phone: p, module: CFG.MODULE },
+          { phone: p, module: CFG.MODULE_LOWER }
+        ];
+
         for (const q of tries) {
           const { data, error } = await supabase.from(CFG.TABLE_SUBS).select("phone,slug,module").match(q).limit(1);
-          if (!error && Array.isArray(data) && data[0]) {
-            return { slug: normSlug(data[0].slug), phone: normPhone(data[0].phone), module: String(data[0].module || CFG.MODULE).toUpperCase() };
-          }
+          const sub = !error && Array.isArray(data) ? normalizeSub(data[0]) : null;
+          if (sub) return sub;
         }
+
+        const { data,error } = await supabase
+          .from(CFG.TABLE_SUBS)
+          .select("phone,slug,module")
+          .eq("phone",p)
+          .limit(25);
+
+        if (!error && Array.isArray(data)) {
+          const sub = data.map(normalizeSub).find(Boolean);
+          if (sub) return sub;
+        }
+
         return null;
       }
 
@@ -544,30 +628,41 @@
       }
 
       function hydrate() {
-        const qSlug  = normSlug(qs("slug"));
+        const qSlugRaw  = normSlug(qs("slug"));
         const qPhone = normPhone(qs("phone"));
         cleanVisibleUrl();
 
         const saved  = readSession();
 
-        el.slug.value = qSlug || saved?.slug ||
-          normSlug(sessionStorage.getItem(CFG.SLUG_KEY) || localStorage.getItem(CFG.SLUG_KEY) || localStorage.getItem(CFG.LAST_SLUG_KEY) || "");
+        const storedSlugRaw = normSlug(
+          sessionStorage.getItem(CFG.SLUG_KEY) ||
+          localStorage.getItem(CFG.SLUG_KEY) ||
+          localStorage.getItem(CFG.LAST_SLUG_KEY) ||
+          ""
+        );
 
+        const candidateSlug = qSlugRaw || saved?.slug || storedSlugRaw || "";
+        const safeSlug = isPosSlug(candidateSlug) ? candidateSlug : "";
+
+        if (candidateSlug && !safeSlug) {
+          clearWrongCommerceIdentity();
+          setStatus("Ancienne porte détectée. Entre ton téléphone et ton code pour rouvrir MON COMMERCE proprement.", "err");
+        }
+
+        el.slug.value = safeSlug;
         el.phone.value = qPhone || saved?.phone ||
           normPhone(sessionStorage.getItem(CFG.PHONE_KEY) || localStorage.getItem(CFG.PHONE_KEY) || "");
 
-        const hasIdentity = !!(saved?.slug || saved?.phone || el.slug.value || el.phone.value);
+        const hasIdentity = !!(safeSlug || saved?.phone || el.phone.value);
         paintIdentityMode(hasIdentity);
 
-        if (saved?.slug || saved?.phone) {
-          refreshLinks(saved.slug || el.slug.value, saved.phone || el.phone.value);
-        } else if (el.slug.value || el.phone.value) {
-          refreshLinks(el.slug.value, el.phone.value);
+        if (safeSlug || saved?.phone || el.phone.value) {
+          refreshLinks(safeSlug, saved?.phone || el.phone.value);
         } else {
           refreshLinks("", "");
         }
 
-        if (saved?.verified_at || saved?.validated_at) {
+        if ((saved?.verified_at || saved?.validated_at) && safeSlug) {
           setStatus("Accès déjà ouvert. Tu peux reprendre directement.", "ok");
         }
       }
@@ -578,8 +673,15 @@
           let phone = normPhone(el.phone.value);
           const pin = normPin(el.pin.value);
 
+          if (slug && !isPosSlug(slug)) {
+            clearWrongCommerceIdentity();
+            slug = "";
+            el.slug.value = "";
+            setStatus("Cet identifiant appartient à une autre porte. Entre ton téléphone pour ouvrir MON COMMERCE.", "err");
+          }
+
           if (!slug && !phone) {
-            setStatus("Renseigne ton identifiant ou ton téléphone.", "err");
+            setStatus("Renseigne ton identifiant boutique ou ton téléphone.", "err");
             return;
           }
 
@@ -591,31 +693,35 @@
           el.btnOpen.disabled = true;
           setStatus("Vérification en cours…");
 
-          if (slug && !phone) {
+          if (slug) {
             const sub = await resolveSubBySlug(slug);
-            if (sub?.phone) phone = sub.phone;
+            if (!sub) {
+              setStatus("Cet identifiant n’ouvre pas MON COMMERCE. Utilise ton téléphone ou contacte le support.", "err");
+              return;
+            }
+            slug = sub.slug;
+            phone = phone || sub.phone;
           }
 
           if (phone && !slug) {
             const sub = await resolveSubByPhone(phone);
             if (sub?.slug) slug = sub.slug;
+            if (sub?.phone) phone = sub.phone;
           }
 
-          if (!slug) {
-            /* ━━━ AVANT : "Slug inconnu." → jargon banni ━━━ */
-            setStatus("Identifiant introuvable. Vérifie ton lien pro ou contacte le support.", "err");
+          if (!slug || !isPosSlug(slug)) {
+            setStatus("MON COMMERCE n’est pas trouvé pour ce compte. Vérifie l’abonnement ou contacte le support.", "err");
             return;
           }
 
           if (!phone) {
-            /* ━━━ AVANT : "Téléphone introuvable pour ce slug." → jargon banni ━━━ */
             setStatus("Téléphone introuvable. Contacte le support DIGIY.", "err");
             return;
           }
 
           const auth = await verifyPin(phone, pin);
-          if (!auth?.ok) {
-            setStatus("Code invalide. Vérifie et réessaie.", "err");
+          if (!auth?.ok || !isPosModule(auth.module)) {
+            setStatus("Code invalide pour MON COMMERCE. Vérifie et réessaie.", "err");
             return;
           }
 
@@ -623,7 +729,6 @@
           paintIdentityMode(true);
           refreshLinks(session.slug, session.phone);
 
-          /* ━━━ AVANT : "Ouverture de ton espace POS..." → "POS" banni ━━━ */
           setStatus("Code validé. Ouverture de MON COMMERCE…", "ok");
 
           setTimeout(() => { window.location.href = buildReturnUrl(session); }, 220);
