@@ -682,6 +682,7 @@
       <div class="navRow">
         <a class="btnGhost" href="https://mon-commerce.digiylyfe.com/" id="btnHall">🌍 Vitrine</a>
         <a class="btnGhost" href="./dashboard-pro.html" id="btnDashboard">🏠 Accueil</a>
+        <a class="btnGhost" href="https://pro-espace.digiylyfe.com/" id="btnCamembert">🧭 Camembert</a>
         <a class="btnGhost" href="./caisse.html" id="btnCaisse">💰 Encaisser</a>
         <a class="btnGhost" href="./caisse.html#notes" id="btnNotes">✍️ Notes</a>
         <a class="btnGhost" href="./profile.html" id="btnProfile">🏪 Boutique</a>
@@ -713,6 +714,8 @@
             <div class="quickGrid">
               <a class="quickBtn primary" id="btnFastAdd" href="#articleForm"><span>➕</span>Ajouter<small>nom · prix · quantité</small></a>
               <a class="quickBtn" id="btnFastList" href="#articleList"><span>📦</span>Articles<small>voir · modifier</small></a>
+              <a class="quickBtn" id="btnFastDashboard" href="./dashboard-pro.html"><span>🏠</span>Accueil<small>retour dashboard</small></a>
+              <a class="quickBtn" id="btnFastCamembert" href="https://pro-espace.digiylyfe.com/"><span>🧭</span>Camembert<small>toutes les portes</small></a>
               <button class="quickBtn" id="btnInitCaisse" type="button"><span>🚀</span>Initialiser<small>préparer la caisse</small></button>
               <button class="quickBtn" id="btnLoadStarter" type="button"><span>🌾</span>Départ<small>charger les exemples</small></button>
               <a class="quickBtn" id="btnFastCash" href="./caisse.html"><span>💰</span>Encaisser<small>retour caisse</small></a>
@@ -741,6 +744,7 @@
               <button class="btnOutline" id="digiy-audio-btn" type="button">Écouter</button>
               <button class="btnOutline" id="btnExport" type="button">📤 Télécharger</button>
               <button class="btnOutline" id="btnImport" type="button">📥 Ajouter fichier</button>
+              <button class="btnOutline" id="btnDownloadAdmin" type="button">⬇️ Admin</button>
               <input type="file" id="fileImport" accept="application/json" style="display:none"/>
             </div>
 
@@ -915,6 +919,7 @@
       const PIN_URL = digiyLocal("pin.html");
       const ADMIN_URL = digiyLocal("admin.html");
       const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
+      const CAMEMBERT_URL = "https://pro-espace.digiylyfe.com/";
       const CACHE_PREFIX = "digiy_pos_products_local:";
       const CAISSE_STORAGE_PRODUCTS = "caisse_prods";
       const CAISSE_STORAGE_SHOP = "caisse_shop";
@@ -1581,6 +1586,7 @@
 
         const cleanLinks = {
           btnDashboard:DASHBOARD_URL,
+          btnFastDashboard:DASHBOARD_URL,
           btnProfile:PROFILE_URL,
           btnCaisse:CAISSE_URL,
           btnNotes:CAISSE_URL + "#notes",
@@ -1602,6 +1608,12 @@
 
         const hall = qs("btnHall");
         if(hall) hall.href = PUBLIC_URL;
+
+        const cam = qs("btnCamembert");
+        if(cam) cam.href = CAMEMBERT_URL;
+
+        const fastCam = qs("btnFastCamembert");
+        if(fastCam) fastCam.href = CAMEMBERT_URL;
 
         const abos = qs("btnBlockedAbos");
         if(abos){
@@ -2073,6 +2085,33 @@
         updateAudioBtn();
       }
 
+      async function downloadAdminFile(){
+        try{
+          let html = "";
+          try{
+            const res = await fetch(location.href,{ cache:"no-store" });
+            if(res.ok) html = await res.text();
+          }catch(_){}
+
+          if(!html){
+            html = "<!doctype html>\n" + document.documentElement.outerHTML;
+          }
+
+          const blob = new Blob([html],{ type:"text/html;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "admin.html";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          setFormNotice("Admin téléchargé ✅",true);
+        }catch(_){
+          setFormNotice("Téléchargement admin impossible depuis ce navigateur.",false);
+        }
+      }
+
       function bindUi(){
         qs("btnReloadTop")?.addEventListener("click",() => hydrate());
         qs("btnSaveProduct")?.addEventListener("click",saveCurrentProduct);
@@ -2080,6 +2119,7 @@
         qs("btnDeleteProduct")?.addEventListener("click",deleteCurrentProduct);
         qs("btnExport")?.addEventListener("click",exportProducts);
         qs("btnImport")?.addEventListener("click",() => qs("fileImport").click());
+        qs("btnDownloadAdmin")?.addEventListener("click",downloadAdminFile);
         qs("btnInitCaisse")?.addEventListener("click",() => syncCaisseFromProducts({ silent:false }));
         qs("btnLoadStarter")?.addEventListener("click",reloadStarterProducts);
         qs("fileImport")?.addEventListener("change",(e) => importProducts(e.target.files?.[0] || null));
@@ -2134,18 +2174,3 @@
 </body>
 </html>
 
-
-        const hash = String(location.hash || "").replace("#","");
-        if(hash === "articleList") openPanel("articleList");
-        else openPanel("articleForm");
-      }
-
-      boot().catch((err) => {
-        console.error(err);
-        reveal();
-        renderBlocked("Problème technique. Entre avec ton code ou recharge la page.");
-      });
-    })();
-  </script>
-</body>
-</html>
