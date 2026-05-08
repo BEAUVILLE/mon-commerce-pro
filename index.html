@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MON COMMERCE — Ma caisse</title>
+  <title>MON COMMERCE PRO — Entrée</title>
   <meta name="theme-color" content="#07140f" />
   <meta
     name="description"
-    content="MON COMMERCE by DIGIY — ta caisse élégante pour boutiques, commerce local et activité terrain. Accès sécurisé, 0% commission."
+    content="MON COMMERCE PRO by DIGIY — entrée professionnelle vers Accueil, Articles, Encaisser, Notes, fiche commerce et vitrine côté client."
   />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -391,11 +391,16 @@
         <span id="statusPillText">Chargement…</span>
       </div>
 
+      <a class="btn" id="btnDashboardTop" href="./dashboard-pro.html">🏠 Accueil commerce</a>
+      <a class="btn-outline" id="btnArticlesTop" href="./admin.html#articleList">📦 Articles</a>
+      <a class="btn-outline" id="btnCaisseTop" href="./caisse.html">💰 Encaisser</a>
+      <a class="btn-outline" id="btnProfileTop" href="./profile.html">🏪 Ma fiche commerce</a>
+
       <a class="btn-ghost" id="btnPinTop" href="./pin.html">🔐 Mon code d'accès</a>
       <button class="btn-outline" id="btnCheck" type="button">🔄 Vérifier mon accès</button>
       <a class="btn" id="btnTopAction" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence</a>
 
-      <a class="quiet" id="btnBackPublic" href="https://mon-commerce.digiylyfe.com/">⬅️ Vitrine</a>
+      <a class="quiet" id="btnBackPublic" href="https://mon-commerce.digiylyfe.com/">🌍 Voir côté client</a>
       <a class="quiet" href="https://digiylyfe.com/" rel="noopener noreferrer">🌍 Site</a>
       <a class="quiet" href="https://digiy-hub.digiylyfe.com/" rel="noopener noreferrer">🧭 HUB</a>
       <a class="quiet" href="https://tarifs.digiylyfe.com/" target="_blank" rel="noopener noreferrer">📦 Tarifs</a>
@@ -675,8 +680,13 @@
       "use strict";
 
       const MODULE = "POS";
+      const ALLOWED_MODULES = ["POS", "pos", "POS_PRO", "COMMERCE", "CAISSE", "MON_COMMERCE"];
+      const ALLOWED_SLUG_PREFIXES = ["pos-", "commerce-", "mon-commerce-", "caisse-"];
+      const FORBIDDEN_SLUG_PREFIXES = ["loc-", "explore-", "driver-", "market-", "build-", "jobs-", "resa-", "pay-"];
       const CAISSE_URL = digiyLocal("caisse.html");
       const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
+      const ADMIN_URL = digiyLocal("admin.html");
+      const PROFILE_URL = digiyLocal("profile.html");
       const PIN_URL = digiyLocal("pin.html");
       const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
       const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
@@ -721,9 +731,29 @@
       function normSlug(v){ return String(v || "").trim().toLowerCase(); }
       function getGuardState(){ return window.DIGIY_GUARD?.state || {}; }
 
+      function isAllowedModule(value){
+        const raw = String(value || "").trim();
+        if(!raw) return false;
+        return ALLOWED_MODULES.some((m) => String(m).trim().toUpperCase() === raw.toUpperCase());
+      }
+
+      function isForbiddenSlug(value){
+        const s = normSlug(value);
+        if(!s) return false;
+        return FORBIDDEN_SLUG_PREFIXES.some((prefix) => s.startsWith(prefix));
+      }
+
+      function isPosSlug(value){
+        const s = normSlug(value);
+        if(!s) return false;
+        if(isForbiddenSlug(s)) return false;
+        return ALLOWED_SLUG_PREFIXES.some((prefix) => s.startsWith(prefix));
+      }
+
       function getStoredSlug(){
         const gs = getGuardState();
-        return normSlug(getParam("slug") || gs.slug || localStorage.getItem("digiy_pos_last_slug") || sessionStorage.getItem("digiy_pos_last_slug") || "");
+        const candidate = normSlug(getParam("slug") || gs.slug || localStorage.getItem("digiy_pos_last_slug") || sessionStorage.getItem("digiy_pos_last_slug") || "");
+        return isPosSlug(candidate) ? candidate : "";
       }
 
       function getStoredPhone(){
@@ -733,7 +763,8 @@
 
       function remember(slug, phone){
         try{
-          if(slug){ localStorage.setItem("digiy_pos_last_slug", slug); sessionStorage.setItem("digiy_pos_last_slug", slug); }
+          const s = normSlug(slug);
+          if(s && isPosSlug(s)){ localStorage.setItem("digiy_pos_last_slug", s); sessionStorage.setItem("digiy_pos_last_slug", s); }
           if(phone){ localStorage.setItem("digiy_pos_last_phone", phone); sessionStorage.setItem("digiy_pos_last_phone", phone); }
         }catch(_){}
       }
@@ -759,6 +790,9 @@
       function buildAbosUrl(){ return buildUrl(ABOS_URL, { module: MODULE, base_module: MODULE }); }
       function buildDashboardUrl(){ return cleanPath(DASHBOARD_URL); }
       function buildCaisseUrl(){ return cleanPath(CAISSE_URL); }
+      function buildAdminUrl(){ return cleanPath(ADMIN_URL); }
+      function buildArticlesUrl(){ return cleanPath(ADMIN_URL + "#articleList"); }
+      function buildProfileUrl(){ return cleanPath(PROFILE_URL); }
       function buildPinUrl(extra = {}){
         const safe = {};
         if(extra && extra.target) safe.target = extra.target;
@@ -814,6 +848,9 @@
           const abos = buildAbosUrl();
           const dashboard = buildDashboardUrl();
           const caisse = buildCaisseUrl();
+          const admin = buildAdminUrl();
+          const articles = buildArticlesUrl();
+          const profile = buildProfileUrl();
           const pinDefault = buildPinUrl();
           const publicUrl = buildPublicUrl();
 
@@ -823,11 +860,19 @@
           const btnOpenPin = $("btnOpenPin");
           const btnTopAction = $("btnTopAction");
           const btnHeroPrimary = $("btnHeroPrimary");
+          const btnDashboardTop = $("btnDashboardTop");
+          const btnArticlesTop = $("btnArticlesTop");
+          const btnCaisseTop = $("btnCaisseTop");
+          const btnProfileTop = $("btnProfileTop");
 
           if(btnBackPublic) btnBackPublic.href = publicUrl;
           if(btnPriceAction) btnPriceAction.href = abos;
           if(btnPinTop) btnPinTop.href = pinDefault;
           if(btnOpenPin) btnOpenPin.href = pinDefault;
+          if(btnDashboardTop) btnDashboardTop.href = dashboard;
+          if(btnArticlesTop) btnArticlesTop.href = articles;
+          if(btnCaisseTop) btnCaisseTop.href = caisse;
+          if(btnProfileTop) btnProfileTop.href = profile;
 
           if(state.access){
             if(btnTopAction){ btnTopAction.href = dashboard; btnTopAction.textContent = "🧭 Mon espace de travail"; }
@@ -845,15 +890,23 @@
       }
 
       async function resolvePhoneFromSlug(slug){
-        if(!sb || !slug) return "";
-        const { data, error } = await sb
-          .from("digiy_subscriptions_public")
-          .select("phone,module,slug")
-          .eq("slug", slug)
-          .limit(1)
-          .maybeSingle();
-        if(error) throw error;
-        return normPhone(data?.phone || "");
+        const s = normSlug(slug);
+        if(!sb || !s || !isPosSlug(s)) return "";
+
+        for(const moduleName of ALLOWED_MODULES){
+          const { data, error } = await sb
+            .from("digiy_subscriptions_public")
+            .select("phone,module,slug")
+            .eq("slug", s)
+            .eq("module", moduleName)
+            .limit(1)
+            .maybeSingle();
+
+          if(error) continue;
+          if(data && isAllowedModule(data.module) && isPosSlug(data.slug)) return normPhone(data.phone || "");
+        }
+
+        return "";
       }
 
       async function rpcFirstSuccess(name, payloads){
@@ -871,7 +924,12 @@
 
       async function getAccess(phone){
         if(!phone || !sb) return false;
-        const res = await rpcFirstSuccess("digiy_has_access", [{ p_phone:phone, p_module:MODULE }, { phone, module:MODULE }]);
+        const payloads = [];
+        ALLOWED_MODULES.forEach((moduleName) => {
+          payloads.push({ p_phone:phone, p_module:moduleName });
+          payloads.push({ phone, module:moduleName });
+        });
+        const res = await rpcFirstSuccess("digiy_has_access", payloads);
         if(typeof res === "boolean") return res;
         if(res && typeof res.ok === "boolean") return res.ok;
         if(res && typeof res.has_access === "boolean") return res.has_access;
@@ -883,7 +941,12 @@
       async function getSubscription(phone){
         if(!phone || !sb) return null;
         try{
-          return await rpcFirstSuccess("digiy_get_subscription_status", [{ p_phone:phone, p_module:MODULE }, { phone, module:MODULE }]);
+          const payloads = [];
+          ALLOWED_MODULES.forEach((moduleName) => {
+            payloads.push({ p_phone:phone, p_module:moduleName });
+            payloads.push({ phone, module:moduleName });
+          });
+          return await rpcFirstSuccess("digiy_get_subscription_status", payloads);
         }catch(err){
           log("digiy_get_subscription_status indisponible", { message:err?.message || String(err) });
           return null;
