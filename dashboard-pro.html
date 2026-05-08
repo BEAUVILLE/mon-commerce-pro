@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>MON COMMERCE — Mon espace de travail</title>
-  <meta name="theme-color" content="#07140f" />
-  <meta name="description" content="MON COMMERCE by DIGIY — Accueil mobile : ventes, argent, caisse, notes rapides et réglages." />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#07140f"/>
+  <title>MON COMMERCE — Accueil</title>
+  <meta name="description" content="MON COMMERCE by DIGIY — accueil simple : encaisser, voir l’argent, écrire une note, gérer plus loin."/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -15,18 +15,19 @@
     window.DIGIY_LOGIN_URL = "./pin.html";
     document.documentElement.style.visibility = "hidden";
 
-    function digiyBasePath() {
+    function digiyBasePath(){
       const parts = location.pathname.split("/").filter(Boolean);
       const isGh = /\.github\.io$/i.test(location.hostname);
-      if (isGh && parts.length > 0) return "/" + parts[0] + "/";
+      if(isGh && parts.length > 0) return "/" + parts[0] + "/";
       return "/";
     }
 
-    function digiyLocal(path) {
+    function digiyLocal(path){
       path = String(path || "").replace(/^\/+/, "");
       return digiyBasePath() + path;
     }
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./guard.js"></script>
   <script src="./claw-tools-pos.js"></script>
@@ -37,146 +38,476 @@
 
   <style>
     :root{
-      --bg:#04110d;--bg2:#071a14;
-      --card:rgba(8,24,18,.78);--card2:rgba(9,28,21,.92);
-      --muted:#bfd3c8;--text:#f7fbf8;
-      --ok:#22c55e;--warn:#f59e0b;--danger:#ef4444;--accent:#60a5fa;
-      --gold:#facc15;--gold2:#f59e0b;
-      --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.14);
-      --shadow:0 22px 56px rgba(0,0,0,.28);--shadow-soft:0 14px 34px rgba(0,0,0,.22);
-      --radius:26px;--max:1120px;
-      --fontA:"Outfit",system-ui,-apple-system,sans-serif;
+      --bg:#04110d;
+      --card:rgba(8,24,18,.84);
+      --text:#f7fbf8;
+      --muted:#bfd3c8;
+      --line:rgba(255,255,255,.11);
+      --line2:rgba(255,255,255,.16);
+      --gold:#facc15;
+      --gold2:#f59e0b;
+      --ok:#22c55e;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+      --blue:#60a5fa;
+      --shadow:0 22px 56px rgba(0,0,0,.28);
+      --radius:26px;
+      --font:"Outfit",system-ui,-apple-system,sans-serif;
     }
 
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
     html{scroll-behavior:smooth}
+
     body{
-      min-height:100vh;font-family:var(--fontA);
-      background:
-        radial-gradient(circle at top left, rgba(250,204,21,.10), transparent 28%),
-        radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 22%),
-        linear-gradient(180deg, #07140f 0%, #04110d 42%, #020906 100%);
+      min-height:100vh;
+      font-family:var(--font);
       color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(250,204,21,.10), transparent 30%),
+        radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 24%),
+        linear-gradient(180deg,#07140f 0%,#04110d 48%,#020906 100%);
     }
 
     a{text-decoration:none;color:inherit}
-    button{font:inherit}
+    button{font:inherit;cursor:pointer}
 
-    .wrap{width:min(100%, var(--max));margin:0 auto;padding:16px 14px calc(104px + env(safe-area-inset-bottom,0px))}
-
-    /* ━━━ ANTI-ÉCRAN NOIR ━━━ */
     .app{display:none}
     html.app-ready .app{display:block}
 
-    /* ── FLOAT ── */
-    .floating-site-btn{
-      position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:90;
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      min-height:48px;padding:14px 16px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);background:rgba(5,16,12,.88);
-      backdrop-filter:blur(10px);color:var(--text);font-size:13px;font-weight:900;
-      box-shadow:0 16px 36px rgba(0,0,0,.28);
-      transition:transform .14s ease, border-color .14s ease, background .14s ease;
+    .wrap{
+      width:min(100%,1120px);
+      margin:0 auto;
+      padding:14px 12px calc(104px + env(safe-area-inset-bottom,0px));
     }
-    .floating-site-btn:hover{transform:translateY(-1px);border-color:rgba(250,204,21,.28);background:rgba(8,20,15,.94)}
 
-    /* ── TOPBAR ── */
     .topbar{
-      position:sticky;top:0;z-index:70;margin-bottom:12px;
-      backdrop-filter:blur(12px);background:rgba(4,17,13,.76);
-      border:1px solid rgba(255,255,255,.07);border-radius:24px;box-shadow:var(--shadow-soft);
-    }
-    .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px}
-
-    .brand{display:flex;align-items:center;gap:12px;min-width:0}
-    .brand-badge{width:48px;height:48px;border-radius:18px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(250,204,21,.16), rgba(245,158,11,.08));border:1px solid rgba(250,204,21,.16);box-shadow:0 16px 34px rgba(250,204,21,.10);font-size:24px;flex:0 0 auto;}
-    .brand-kicker{color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px}
-    .brand-title{font-size:20px;font-weight:1000;line-height:1.08;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .brand-sub{color:var(--muted);font-size:12px;font-weight:800;margin-top:3px;letter-spacing:.04em}
-
-    .right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--muted);font-weight:900;font-size:12px;backdrop-filter:blur(10px);}
-    .pill b{color:var(--text);font-weight:950}
-
-    /* ── BOUTONS ── */
-    .btn,.btn-outline,.btn-ghost{
-      appearance:none;border:none;cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;gap:10px;
-      min-height:46px;padding:12px 16px;border-radius:999px;
-      font-weight:900;font-size:13px;white-space:nowrap;transition:.14s ease;
-    }
-    .btn:hover,.btn-outline:hover,.btn-ghost:hover{transform:translateY(-1px)}
-    .btn:disabled,.btn-outline:disabled,.btn-ghost:disabled{opacity:.55;cursor:not-allowed;transform:none}
-    .btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#07110d;box-shadow:0 14px 30px rgba(250,204,21,.18)}
-    .btn-outline{background:rgba(255,255,255,.04);border:1px solid var(--line2);color:var(--text)}
-    .btn-ghost{background:transparent;border:1px solid var(--line2);color:var(--muted)}
-
-    /* ── LAYOUT ── */
-    .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px;margin-top:8px}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;}
-    .card h3{margin:0 0 10px 0;font-size:16px;letter-spacing:.01em;line-height:1.2}
-
-    .heroBadge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);color:var(--gold);font-size:12px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px;}
-
-    .muted{color:var(--muted)}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-
-    .statusDot{width:10px;height:10px;border-radius:999px;background:var(--warn);box-shadow:0 0 0 4px rgba(255,255,255,.03)}
-    .statusDot.ok{background:var(--ok)}.statusDot.bad{background:var(--danger)}
-
-    .bigMoney{font-size:38px;font-weight:1000;letter-spacing:-.04em;margin:8px 0 4px 0;line-height:1}
-    .mini{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);font-weight:800;line-height:1.6}
-
-    .diag{margin-top:12px;padding:12px;border-radius:16px;background:#081119;border:1px solid var(--line);color:#d8e1ff;font:12px/1.58 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;}
-
-    .hr{height:1px;background:var(--line);margin:14px 0}
-
-    .boostBox{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px;border-radius:20px;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.20);}
-    .boostBox b{display:block;margin-bottom:5px;font-size:15px}
-
-    .notifList{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-    .notif{padding:12px 13px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
-
-    .tag{font-size:11px;font-weight:950;padding:7px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-    .tag.warn{color:#ffe2b0;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.10)}
-    .tag.ok{color:#c9ffd9;border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08)}
-    .tag.info{color:#cfd6ff;border-color:rgba(96,165,250,.35);background:rgba(96,165,250,.10)}
-
-    .footer{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-    .smallLink{color:var(--muted);text-decoration:none;font-weight:850}.smallLink:hover{color:var(--text)}
-
-    .navRow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-
-    .subPills{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .subPill{padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:12px;font-weight:900}
-
-    .shell{min-height:280px;display:grid;place-items:center;text-align:center;padding:24px}
-    .shellCard{max-width:640px;padding:22px;border-radius:22px;border:1px solid var(--line);background:rgba(255,255,255,.03);box-shadow:var(--shadow-soft)}
-    .shellTitle{font-size:24px;font-weight:1000;margin-bottom:8px;line-height:1.1}
-    .shellText{color:var(--muted);font-size:14px;line-height:1.8;font-weight:700}
-
-    @media(max-width:920px){.grid{grid-template-columns:1fr}}
-    @media(max-width:700px){
-      .wrap{padding:12px 12px 92px}.topbar-inner{padding:12px}.brand-title{white-space:normal}
-      .boostBox{flex-direction:column}
-      .floating-site-btn{display:none}
+      position:sticky;
+      top:0;
+      z-index:70;
+      margin-bottom:12px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      background:rgba(4,17,13,.82);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+      box-shadow:0 14px 34px rgba(0,0,0,.22);
     }
 
-    /* ━━━ MENU BAS MOBILE — doctrine DIGIY ━━━ */
+    .topbarInner{
+      padding:12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .brandBadge{
+      width:46px;
+      height:46px;
+      border-radius:17px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,rgba(250,204,21,.17),rgba(245,158,11,.08));
+      border:1px solid rgba(250,204,21,.18);
+      font-size:23px;
+      flex:0 0 auto;
+    }
+
+    .brandKicker{
+      color:var(--gold);
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .brandTitle{
+      font-size:19px;
+      line-height:1.08;
+      font-weight:1000;
+      letter-spacing:-.02em;
+    }
+
+    .brandSub{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+      margin-top:2px;
+    }
+
+    .topActions{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .pill{
+      min-height:40px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.045);
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:900;
+    }
+
+    .pill b{color:var(--text)}
+
+    .dot{
+      width:9px;
+      height:9px;
+      border-radius:999px;
+      background:var(--warn);
+      box-shadow:0 0 0 4px rgba(255,255,255,.03);
+    }
+
+    .dot.ok{background:var(--ok)}
+    .dot.bad{background:var(--danger)}
+
+    .btn,.btnOutline,.btnGhost,.smallBtn{
+      appearance:none;
+      border:none;
+      min-height:46px;
+      padding:12px 15px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      font-weight:950;
+      font-size:13px;
+      transition:transform .12s ease, opacity .12s ease, border-color .12s ease;
+    }
+
+    .btn:hover,.btnOutline:hover,.btnGhost:hover,.smallBtn:hover{transform:translateY(-1px)}
+    .btn:disabled,.btnOutline:disabled,.btnGhost:disabled,.smallBtn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .btn{
+      color:#07110d;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      box-shadow:0 14px 30px rgba(250,204,21,.17);
+    }
+
+    .btnOutline{
+      color:var(--text);
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line2);
+    }
+
+    .btnGhost{
+      color:var(--muted);
+      background:transparent;
+      border:1px solid var(--line2);
+    }
+
+    .smallBtn{
+      min-height:36px;
+      padding:8px 11px;
+      border-radius:12px;
+      color:var(--text);
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line2);
+      font-size:12px;
+    }
+
+    .navRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:12px;
+      align-items:start;
+    }
+
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.025)),var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      overflow:hidden;
+    }
+
+    .heroBadge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(250,204,21,.10);
+      border:1px solid rgba(250,204,21,.18);
+      color:var(--gold);
+      font-size:12px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin-bottom:12px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(34px,8vw,58px);
+      line-height:.94;
+      letter-spacing:-.055em;
+      font-weight:1000;
+    }
+
+    h1 .accent{color:var(--gold)}
+
+    h2{
+      margin:0 0 10px;
+      font-size:19px;
+      font-weight:1000;
+    }
+
+    .lead{
+      margin-top:10px;
+      color:var(--muted);
+      line-height:1.65;
+      font-size:15px;
+      font-weight:750;
+    }
+
+    .heroActions{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:9px;
+      margin-top:14px;
+    }
+
+    .heroAction{
+      min-height:76px;
+      padding:12px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.045);
+      display:grid;
+      place-items:center;
+      align-content:center;
+      gap:4px;
+      text-align:center;
+      font-weight:1000;
+    }
+
+    .heroAction.primary{
+      color:#07110d;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      border-color:rgba(250,204,21,.55);
+    }
+
+    .heroAction span{
+      display:block;
+      color:inherit;
+      font-size:20px;
+      line-height:1;
+    }
+
+    .heroAction small{
+      color:inherit;
+      opacity:.78;
+      font-size:11px;
+      font-weight:900;
+    }
+
+    .miniStats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:9px;
+      margin-top:14px;
+    }
+
+    .mini{
+      padding:12px;
+      border-radius:17px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      min-width:0;
+    }
+
+    .mini .k{
+      color:var(--muted);
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:950;
+    }
+
+    .mini .v{
+      margin-top:5px;
+      font-size:18px;
+      font-weight:1000;
+      letter-spacing:-.025em;
+      word-break:break-word;
+    }
+
+    .bigMoney{
+      font-size:clamp(34px,7vw,58px);
+      line-height:.95;
+      font-weight:1000;
+      letter-spacing:-.055em;
+      margin:10px 0 6px;
+      color:#fff7c2;
+    }
+
+    .muted{
+      color:var(--muted);
+      line-height:1.6;
+      font-weight:750;
+    }
+
+    .notice{
+      padding:13px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.035);
+      margin-top:12px;
+      line-height:1.6;
+      font-size:13px;
+      font-weight:750;
+      color:var(--muted);
+    }
+
+    .notice.ok{border-color:rgba(34,197,94,.24);background:rgba(34,197,94,.09);color:#dcffe6}
+    .notice.warn{border-color:rgba(245,158,11,.24);background:rgba(245,158,11,.09);color:#ffe8bd}
+    .notice.info{border-color:rgba(96,165,250,.24);background:rgba(96,165,250,.08)}
+
+    .row{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .actionRow{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      margin-top:13px;
+    }
+
+    .actionRow .btn,
+    .actionRow .btnOutline,
+    .actionRow .btnGhost{
+      flex:1;
+      min-width:150px;
+    }
+
+    .hr{
+      height:1px;
+      background:var(--line);
+      margin:14px 0;
+    }
+
+    .notifList{
+      display:grid;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .notif{
+      padding:12px;
+      border-radius:17px;
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(255,255,255,.04);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+
+    .tag{
+      display:inline-flex;
+      width:max-content;
+      max-width:100%;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      color:var(--muted);
+      font-size:11px;
+      font-weight:950;
+      white-space:nowrap;
+    }
+
+    .tag.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#d7ffe1}
+    .tag.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#ffe3b8}
+    .tag.info{background:rgba(96,165,250,.10);border-color:rgba(96,165,250,.28);color:#d8ecff}
+
+    .boostBox{
+      padding:14px;
+      border-radius:20px;
+      border:1px solid rgba(96,165,250,.22);
+      background:rgba(96,165,250,.08);
+      margin-top:12px;
+      display:flex;
+      gap:12px;
+      justify-content:space-between;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+
+    .blockedShell{
+      display:none;
+      min-height:360px;
+      place-items:center;
+      text-align:center;
+      padding:22px;
+    }
+
+    .blockedInner{
+      max-width:660px;
+      padding:22px;
+      border-radius:22px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      box-shadow:0 14px 34px rgba(0,0,0,.22);
+    }
+
+    .blockedTitle{
+      font-size:26px;
+      font-weight:1000;
+      margin-bottom:8px;
+    }
+
+    .blockedText{
+      color:var(--muted);
+      line-height:1.75;
+      font-weight:750;
+    }
+
     .bottomNav{
       position:fixed;
       left:0;
       right:0;
       bottom:0;
-      z-index:95;
+      z-index:96;
       padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
-      background:rgba(4,17,13,.94);
+      background:rgba(4,17,13,.95);
       border-top:1px solid rgba(255,255,255,.10);
       backdrop-filter:blur(16px);
       -webkit-backdrop-filter:blur(16px);
     }
+
     .bottomNavInner{
       width:min(100%,760px);
       margin:0 auto;
@@ -184,6 +515,7 @@
       grid-template-columns:repeat(5,1fr);
       gap:6px;
     }
+
     .bottomNav a{
       min-height:58px;
       border-radius:16px;
@@ -196,8 +528,11 @@
       font-weight:950;
       text-align:center;
       border:1px solid transparent;
+      text-decoration:none;
     }
+
     .bottomNav .ico{font-size:18px;line-height:1}
+
     .bottomNav a.active{
       color:#07110d;
       background:linear-gradient(135deg,var(--gold),var(--gold2));
@@ -205,176 +540,186 @@
       box-shadow:0 10px 24px rgba(250,204,21,.16);
     }
 
-    .mobileHeroActions{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:10px;
-      margin-top:14px;
+    #digiy-audio-btn{
+      position:fixed;
+      right:14px;
+      bottom:calc(86px + env(safe-area-inset-bottom,0px));
+      z-index:94;
+      min-height:42px;
+      padding:10px 13px;
+      border-radius:999px;
+      border:1px solid rgba(250,204,21,.25);
+      background:rgba(250,204,21,.12);
+      color:#fff7c2;
+      font-weight:950;
+      box-shadow:0 14px 34px rgba(0,0,0,.22);
+    }
+
+    @media(max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .heroActions{grid-template-columns:1fr 1fr}
     }
 
     @media(max-width:720px){
-      .right,.navRow{display:none}
-      .mobileHeroActions{grid-template-columns:1fr 1fr}
-      .bigMoney{font-size:32px}
+      .wrap{padding:10px 10px calc(96px + env(safe-area-inset-bottom,0px))}
+      .topActions .btnOutline,.navRow{display:none}
+      .brandSub{display:none}
+      .miniStats{grid-template-columns:1fr}
+      .card{padding:14px;border-radius:22px}
+      .heroAction{min-height:70px}
     }
 
+    @media(print){
+      body{background:#fff;color:#07140f}
+      .topbar,.navRow,.bottomNav,#digiy-audio-btn,.btn,.btnOutline,.btnGhost{display:none!important}
+      .wrap{padding:0;max-width:none}
+      .card{box-shadow:none;border:none;border-radius:0;background:#fff;color:#07140f}
+      .notice{border:1px solid #e2e8f0;background:#fff;color:#07140f}
+    }
   </style>
 </head>
 
 <body>
-  <!-- ━━━ FLOAT : retour vitrine ━━━ -->
-  <a class="floating-site-btn" id="btnPublicFloating" href="https://mon-commerce.digiylyfe.com/" aria-label="Retour à la vitrine MON COMMERCE">⬅️ Retour à la vitrine</a>
-
-  <div class="wrap app">
-    <div class="topbar">
-      <div class="topbar-inner">
-        <div class="brand">
-          <div class="brand-badge">🏪</div>
-          <div>
-            <div class="brand-kicker">DIGIYLYFE</div>
-            <!-- ━━━ AVANT : "MON COMMERCE — Dashboard Pro" → banni ━━━ -->
-            <div id="brandTitle" class="brand-title">MON COMMERCE — Accueil</div>
-            <div id="brandSub" class="brand-sub">Ventes · caisse · notes · argent</div>
-          </div>
-        </div>
-        <div class="right">
-          <div class="pill" id="pillStatus">Statut : <b>…</b></div>
-          <a class="btn-outline" id="btnPinTop" href="./pin.html">🔐 Mon code</a>
-          <!-- ━━━ AVANT : "⚙️ Admin" → banni ━━━ -->
-          <a class="btn-outline" id="btnSettings" href="./dashboard-pro.html">⚙️ Plus</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ━━━ NAV — doctrine façade ━━━ -->
-    <div class="navRow">
-      <a class="btn-ghost"   id="btnHall"       href="https://mon-commerce.digiylyfe.com/">🌍 Vitrine</a>
-      <a class="btn-ghost"   id="btnCaisse"     href="./caisse.html">💰 Encaisser</a>
-      <a class="btn-ghost"   id="btnAdmin"      href="./dashboard-pro.html">⚙️ Plus</a>
-      <a class="btn-outline" id="btnAbosTop"    href="https://commencer-a-payer.digiylyfe.com/">💳 Mon accès</a>
-      <a class="btn-outline" id="btnSupportTop" href="#" target="_blank" rel="noopener">💬 Support</a>
-    </div>
-
-    <!-- ━━━ ÉCRAN BLOQUÉ ━━━ -->
-    <div id="blockedShell" class="card shell" style="display:none">
-      <div class="shellCard">
-        <div class="shellTitle" id="blockedTitle">Accès requis</div>
-        <!-- ━━━ AVANT : "slug POS", "pin.html?slug=…" visibles → jargon banni ━━━ -->
-        <div class="shellText" id="blockedText">Entre avec ton code d'accès ou rejoins DIGIY pour accéder à ton espace.</div>
-        <div class="footer" style="justify-content:center;margin-top:18px">
-          <a class="btn-outline" id="btnBlockedPin"  href="./pin.html">🔐 Entrer avec mon code</a>
-          <a class="btn"         id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon accès</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ━━━ CONTENU PRINCIPAL ━━━ -->
-    <div id="dashboardContent" style="display:none">
-      <div class="grid">
-
-        <!-- CARTE STATUT -->
-        <div class="card" id="cardStatus">
-          <!-- ━━━ AVANT : "dashboard pro • abonnement • argent • boost" → banni ━━━ -->
-          <div class="heroBadge">Accueil · argent · caisse · boost</div>
-          <h3>Mon accès</h3>
-
-          <div class="row">
-            <div class="statusDot" id="dot"></div>
-            <div style="flex:1">
-              <div style="font-weight:1000;font-size:18px;line-height:1.15" id="statusLine">Chargement…</div>
-              <div class="muted" style="font-weight:800;font-size:13px;margin-top:3px" id="expiryLine">—</div>
-            </div>
-          </div>
-
-          <div class="subPills">
-            <div class="subPill">Compte : <b id="accountBox">Compte sécurisé</b></div>
-            <div class="subPill">Accès : <b id="accessBox">En vérification</b></div>
-            <div class="subPill">Service : <b>MON COMMERCE</b></div>
-          </div>
-
-          <div class="hr"></div>
-          <div class="mini" id="metaLine"><span>Abonnement : —</span><span>•</span><span>Paiement : —</span></div>
-
-          <div class="mobileHeroActions">
-            <a class="btn" id="btnHeroCash" href="./caisse.html">💰 Encaisser</a>
-            <a class="btn-outline" id="btnHeroArticles" href="./caisse.html#articles">📦 Articles</a>
-            <a class="btn-outline" id="btnHeroNotes" href="./caisse.html#notes">✍️ Notes</a>
-            <a class="btn-outline" id="btnHeroPlus" href="./admin.html">⚙️ Plus</a>
-          </div>
-
-          <div class="footer">
-            <button class="btn-outline" id="btnManageSub" type="button">Mon abonnement</button>
-          </div>
-        </div>
-
-        <!-- CARTE ARGENT -->
-        <div class="card" id="cardMoney">
-          <h3>Argent rentré</h3>
-          <div class="bigMoney" id="moneyMonth">—</div>
-          <div class="mini" id="moneyMeta">
-            <span id="txCount">— transactions</span>
-            <span>•</span>
-            <span id="todayHint">—</span>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="boostBox">
+  <div class="app">
+    <div class="wrap">
+      <header class="topbar">
+        <div class="topbarInner">
+          <div class="brand">
+            <div class="brandBadge">🏪</div>
             <div>
-              <b>🚀 BOOST visibilité</b>
-              <div class="muted" style="font-weight:800;font-size:13px" id="boostText">+50% d'apparition · 7 jours · 5 000 FCFA · 9 €</div>
-              <div class="muted" style="font-weight:800;font-size:12px;margin-top:6px" id="boostStatus">Statut boost : —</div>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:8px;min-width:170px">
-              <button class="btn"         id="btnBoost"     type="button">Activer</button>
-              <button class="btn-outline" id="btnBoostInfo" type="button">Détails</button>
+              <div class="brandKicker">DIGIYLYFE</div>
+              <div class="brandTitle">MON COMMERCE</div>
+              <div class="brandSub" id="brandSub">Accueil · caisse · notes · argent</div>
             </div>
           </div>
-        </div>
 
-        <!-- CARTE NOTES RAPIDES -->
-        <div class="card" id="cardNotes" style="grid-column:1/-1">
-          <div class="heroBadge">Notes rapides → Mon argent</div>
-          <h3>Écrire vite ce qui se passe</h3>
-          <div class="muted" style="font-weight:800;line-height:1.65">
-            Vente cash, achat stock, client qui doit, dépense sachets, remboursement fournisseur.
-            Une phrase suffit. DIGIY prépare la trace, puis Mon argent reçoit le brouillon.
-          </div>
-
-          <div class="mobileHeroActions">
-            <a class="btn" id="btnNoteFast" href="./caisse.html#notes">✍️ Écrire une note</a>
-            <a class="btn-outline" id="btnOpenPay" href="https://pro-pay.digiylyfe.com/admin.html">💰 Voir Mon argent</a>
-            <a class="btn-outline" id="btnOpenCaisse2" href="./caisse.html">💳 Encaisser</a>
-            <a class="btn-outline" id="btnOpenAdmin2" href="./admin.html">⚙️ Plus</a>
+          <div class="topActions">
+            <div class="pill"><span class="dot" id="dotAccess"></span><span id="pillStatus">Accès…</span></div>
+            <a class="btnOutline" id="btnPinTop" href="./pin.html">🔐 Mon code</a>
+            <a class="btnOutline" id="btnSettings" href="./admin.html">⚙️ Plus</a>
           </div>
         </div>
+      </header>
 
-        <!-- CARTE ACTION -->
-        <div class="card" id="cardAction" style="grid-column:1/-1">
-          <h3>Encaisser maintenant</h3>
-          <div class="muted" style="font-weight:800;margin-bottom:10px" id="actionDesc">Le geste maître de MON COMMERCE.</div>
-
-          <div class="row" style="justify-content:space-between">
-            <div class="muted" style="font-weight:900" id="actionHint">—</div>
-            <button class="btn" id="btnPrimaryAction" type="button">…</button>
-          </div>
-
-          <div class="hr"></div>
-
-          <h3>Notifications</h3>
-          <div class="notifList" id="notifList"></div>
-
-          <div class="footer">
-            <a class="smallLink" href="#" id="linkSupport">Support</a>
-            <a class="smallLink" href="#" id="linkPayments">Mes paiements</a>
-          </div>
-        </div>
-
+      <div class="navRow">
+        <a class="btnGhost" id="btnHall" href="https://mon-commerce.digiylyfe.com/">🌍 Vitrine</a>
+        <a class="btnGhost" id="btnCaisse" href="./caisse.html">💰 Encaisser</a>
+        <a class="btnGhost" id="btnArticles" href="./caisse.html#articles">📦 Articles</a>
+        <a class="btnGhost" id="btnNotes" href="./caisse.html#notes">✍️ Notes</a>
+        <a class="btnGhost" id="btnAdmin" href="./admin.html">⚙️ Plus</a>
       </div>
+
+      <section id="blockedShell" class="blockedShell">
+        <div class="blockedInner">
+          <div class="blockedTitle" id="blockedTitle">Accès requis</div>
+          <div class="blockedText" id="blockedText">Entre avec ton code d’accès pour ouvrir ton espace.</div>
+          <div class="actionRow" style="justify-content:center">
+            <a class="btn" id="btnBlockedPin" href="./pin.html">🔐 Entrer avec mon code</a>
+            <a class="btnOutline" id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon accès</a>
+          </div>
+        </div>
+      </section>
+
+      <main id="dashboardContent" style="display:none">
+        <div class="grid">
+          <section class="card">
+            <div class="heroBadge">Aujourd’hui</div>
+            <h1><span class="accent">Encaisser</span><br>sans pression</h1>
+            <div class="lead">
+              Le commerçant ne gère pas un backend sur téléphone. Il encaisse, note, regarde l’essentiel. DIGIY range le reste.
+            </div>
+
+            <div class="heroActions">
+              <a class="heroAction primary" id="btnHeroCash" href="./caisse.html">
+                <span>💰</span>Encaisser<small>montant · paiement</small>
+              </a>
+              <a class="heroAction" id="btnHeroArticles" href="./caisse.html#articles">
+                <span>📦</span>Articles<small>ajouter au ticket</small>
+              </a>
+              <a class="heroAction" id="btnHeroNotes" href="./caisse.html#notes">
+                <span>✍️</span>Notes<small>dépense · client doit</small>
+              </a>
+              <a class="heroAction" id="btnHeroPlus" href="./admin.html">
+                <span>⚙️</span>Plus<small>gestion complète</small>
+              </a>
+            </div>
+
+            <div class="miniStats">
+              <div class="mini">
+                <div class="k">Boutique</div>
+                <div class="v" id="storeNameBox">—</div>
+              </div>
+              <div class="mini">
+                <div class="k">Accès</div>
+                <div class="v" id="accessBox">…</div>
+              </div>
+              <div class="mini">
+                <div class="k">Service</div>
+                <div class="v">Commerce</div>
+              </div>
+            </div>
+
+            <div class="notice info" id="statusNotice">
+              Vérification de ton espace…
+            </div>
+          </section>
+
+          <section class="card">
+            <h2>💵 Argent rentré</h2>
+            <div class="bigMoney" id="moneyMonth">—</div>
+            <div class="muted">
+              <span id="txCount">— transactions</span> · <span id="todayHint">Aujourd’hui</span>
+            </div>
+
+            <div class="hr"></div>
+
+            <h2>🔎 À surveiller</h2>
+            <div class="notifList" id="notifList">
+              <div class="notif">
+                <div>
+                  <b>Chargement…</b>
+                  <div class="muted" style="font-size:13px;margin-top:3px">On prépare l’essentiel.</div>
+                </div>
+                <div class="tag info">INFO</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="heroBadge">Notes rapides</div>
+            <h2>Écrire vite ce qui se passe</h2>
+            <div class="muted">
+              Vente cash, achat fournisseur, client qui doit, sachets, livraison. Le moins d’écriture possible.
+            </div>
+            <div class="actionRow">
+              <a class="btn" id="btnNoteFast" href="./caisse.html#notes">✍️ Écrire une note</a>
+              <a class="btnOutline" id="btnOpenPay" href="https://pro-pay.digiylyfe.com/admin.html">💰 Mon argent</a>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="heroBadge">Visibilité</div>
+            <h2>BOOST commerce</h2>
+            <div class="muted" id="boostText">+50% d’apparition · 7 jours · 5 000 FCFA · 9 €</div>
+            <div class="boostBox">
+              <div>
+                <b id="boostStatus">Statut boost : —</b>
+                <div class="muted" style="font-size:13px;margin-top:4px">
+                  À utiliser seulement quand tu veux pousser ta boutique.
+                </div>
+              </div>
+              <div class="row">
+                <button class="btn" id="btnBoost" type="button">Activer</button>
+                <button class="btnOutline" id="btnBoostInfo" type="button">Détails</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
     </div>
+  </div>
 
-  </div><!-- /.wrap.app -->
-
+  <button id="digiy-audio-btn" type="button">🔊 Écouter</button>
 
   <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
     <div class="bottomNavInner">
@@ -386,670 +731,735 @@
     </div>
   </nav>
 
-<script>
-(() => {
-  "use strict";
+  <script>
+    (() => {
+      "use strict";
 
-  const MODULE_CODE          = "POS";
-  const MODULE_LABEL         = "MON COMMERCE";
-  const PRIMARY_ACTION_LABEL = "Encaisser maintenant";
-  const PRIMARY_ACTION_HINT  = "Ouvre la caisse, encaisse vite, puis garde une trace claire.";
-  const SUPPORT_PHONE        = "221771342889";
+      const MODULE_CODE = "POS";
+      const MODULE_LABEL = "MON COMMERCE";
+      const SUPPORT_PHONE = "221771342889";
 
-  const SUPABASE_URL  = String(window.DIGIY_SUPABASE_URL  || "").trim();
-  const SUPABASE_ANON = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
+      const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
+      const SUPABASE_ANON = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
 
-  const ABOS_URL      = "https://commencer-a-payer.digiylyfe.com/";
-  const CAISSE_URL    = digiyLocal("caisse.html");
-  const HALL_URL      = digiyLocal("index.html");
-  const ADMIN_URL     = digiyLocal("admin.html");
-  const PIN_URL       = digiyLocal("pin.html");
-  const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
-  const PUBLIC_URL    = "https://mon-commerce.digiylyfe.com/";
+      const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
+      const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
+      const PAY_URL = "https://pro-pay.digiylyfe.com/admin.html";
 
-  const BOOST = { module:"BOOST", plan:"boost_7d", price_xof:5000, price_eur:9, label:"BOOST visibilité", duration_days:7 };
+      const CAISSE_URL = digiyLocal("caisse.html");
+      const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
+      const ADMIN_URL = digiyLocal("admin.html");
+      const PIN_URL = digiyLocal("pin.html");
 
-  const $ = (id) => document.getElementById(id);
-  const diagLines = [];
-  let sb = null;
-  const state = { slug:"", phone:"", access:false, storeName:"", plan:"", statusPayload:null, workCurrency:"XOF" };
-
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     ANTI-ÉCRAN NOIR
-     1. setTimeout(reveal, 2000) — filet absolu
-     2. reveal() au début de init()
-     3. reveal() dans le catch fatal
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  function reveal() {
-    document.documentElement.classList.add("app-ready");
-    document.documentElement.style.visibility = "";
-  }
-  setTimeout(reveal, 2000); // filet absolu
-
-  function safeStringify(v) { try { return JSON.stringify(v, null, 2); } catch(_) { return String(v); } }
-
-  function log(msg, data) {
-    const line = `[${new Date().toLocaleTimeString("fr-FR")}] ${msg}`;
-    diagLines.push(data === undefined ? line : `${line}\n${safeStringify(data)}`);
-    if ($("diagBox")) $("diagBox").textContent = diagLines.join("\n\n");
-    console.log("[DIGIY POS DASHBOARD]", msg, data ?? "");
-  }
-
-  function fmtDateFR(iso) {
-    if (!iso) return "—";
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return "—";
-    return d.toLocaleDateString("fr-FR", { year:"numeric", month:"long", day:"numeric" });
-  }
-
-function normalizeWorkCurrency(value) {
-    const c = String(value || "").trim().toUpperCase();
-
-    if (["EUR", "EURO", "EUROS", "€"].includes(c)) return "EUR";
-    if (["XOF", "FCFA", "CFA", "F CFA"].includes(c)) return "XOF";
-
-    return "XOF";
-  }
-
-  function currencySuffix(currency) {
-    return normalizeWorkCurrency(currency) === "EUR" ? "€" : "FCFA";
-  }
-
-  function formatCommerceMoney(amount, currency) {
-    const n = Number(amount || 0);
-    const safe = Number.isFinite(n) ? n : 0;
-
-    return `${safe.toLocaleString("fr-FR")} ${currencySuffix(currency)}`;
-  }
-
-  function pickMonthAmount(stats, currency) {
-    const c = normalizeWorkCurrency(currency);
-
-    if (c === "EUR") {
-      return stats?.month_eur
-        ?? stats?.month_amount_eur
-        ?? stats?.amount_eur
-        ?? stats?.month_amount
-        ?? stats?.month_xof
-        ?? null;
-    }
-
-    return stats?.month_xof
-      ?? stats?.month_amount_xof
-      ?? stats?.amount_xof
-      ?? stats?.month_amount
-      ?? null;
-  }
-
-  function extractWorkCurrency(payload) {
-    const candidates = [
-      payload?.work_currency,
-      payload?.currency,
-      payload?.currency_code,
-      payload?.store?.work_currency,
-      payload?.store?.currency,
-      payload?.store?.currency_code,
-      payload?.profile?.work_currency,
-      payload?.profile?.currency,
-      payload?.profile?.currency_code,
-      payload?.data?.work_currency,
-      payload?.data?.currency,
-      payload?.data?.currency_code
-    ];
-
-    for (const item of candidates) {
-      const c = normalizeWorkCurrency(item);
-      if (item && c) return c;
-    }
-
-    return "";
-  }
-
-  async function resolveWorkCurrency(phone, slug, storeCtx) {
-    const fromContext = extractWorkCurrency(storeCtx);
-    if (fromContext) return fromContext;
-
-    const client = await getSb();
-    if (!client) return "XOF";
-
-    const cleanPhone = cleanDigits(phone);
-    const cleanSlug = normSlug(slug);
-
-    const attempts = [];
-
-    if (cleanSlug) {
-      attempts.push({ column: "store_id", value: cleanSlug });
-      attempts.push({ column: "workspace_slug", value: cleanSlug });
-    }
-
-    for (const attempt of attempts) {
-      try {
-        const { data, error } = await client
-          .from("pos_stores")
-          .select("work_currency")
-          .eq(attempt.column, attempt.value)
-          .limit(1)
-          .maybeSingle();
-
-        if (!error && data?.work_currency) {
-          return normalizeWorkCurrency(data.work_currency);
-        }
-      } catch (_) {}
-    }
-
-    if (cleanPhone) {
-      try {
-        const { data, error } = await client
-          .from("pos_stores")
-          .select("work_currency,store_id,workspace_slug")
-          .eq("owner_phone", cleanPhone)
-          .ilike("store_id", "pos-%")
-          .limit(1)
-          .maybeSingle();
-
-        if (!error && data?.work_currency) {
-          return normalizeWorkCurrency(data.work_currency);
-        }
-      } catch (_) {}
-    }
-
-    return "XOF";
-  }
-
-  function cleanDigits(v)  { return String(v || "").replace(/[^\d]/g, ""); }
-  function normSlug(v)     { return String(v || "").trim().toLowerCase(); }
-
-  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     buildUrl — VERSION BLINDÉE
-     new URL(relatif, location.href) fragile selon l'env.
-     On reconstruit l'origine manuellement.
-  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-  function buildUrl(base, params) {
-    const baseStr = (base == null ? "" : String(base)).trim();
-    if (!baseStr) return location.href;
-    let u;
-    try {
-      if (/^https?:\/\//i.test(baseStr)) {
-        u = new URL(baseStr);
-      } else {
-        const origin = location.protocol + "//" + location.host;
-        const full   = baseStr.startsWith("/") ? origin + baseStr : origin + "/" + baseStr;
-        u = new URL(full);
-      }
-    } catch(e) {
-      log("buildUrl KO: " + baseStr + " — " + e.message);
-      return baseStr;
-    }
-    try {
-      Object.entries(params || {}).forEach(([k, v]) => {
-        if (v !== null && v !== undefined && v !== "") u.searchParams.set(k, String(v));
-      });
-    } catch(e) { /* silencieux */ }
-    return u.toString();
-  }
-
-  function buildSupportUrl() {
-    const text = [
-      "Bonjour JB,",
-      "j'ai besoin d'aide pour MON COMMERCE by DIGIY.",
-      "Mon compte est reconnu dans mon espace."
-    ].join(" ");
-    return `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(text)}`;
-  }
-
-  function buildAbosParams(moduleCode = MODULE_CODE) {
-    return { base_module: MODULE_CODE, module: moduleCode };
-  }
-
-  function saveLocalAccess(slug, phone) {
-    if (slug)  { localStorage.setItem("digiy_pos_last_slug",  slug);  sessionStorage.setItem("digiy_pos_last_slug",  slug); }
-    if (phone) { localStorage.setItem("digiy_pos_last_phone", phone); sessionStorage.setItem("digiy_pos_last_phone", phone); }
-    const payload = { slug: slug||"", phone: phone||"", module: MODULE_CODE, verified:true, ts: Date.now() };
-    localStorage.setItem("DIGIY_POS_SESSION", JSON.stringify(payload));
-    localStorage.setItem("DIGIY_ACCESS",      JSON.stringify(payload));
-  }
-
-  function getParam(name) { return new URL(location.href).searchParams.get(name) || ""; }
-
-  function cleanVisibleUrl() {
-    const params = new URLSearchParams(location.search);
-    const sensitive = [
-      "slug",
-      "phone",
-      "tel",
-      "module",
-      "owner_phone",
-      "subscription_phone",
-      "checkout_phone",
-      "p_phone"
-    ];
-    if (!sensitive.some((key) => params.has(key))) return;
-    try {
-      history.replaceState({}, document.title, location.pathname + location.hash);
-    } catch (_) {}
-  }
-
-  function cleanPath(path) {
-    const u = new URL(path || "./dashboard-pro.html", location.href);
-    u.search = "";
-    return u.pathname + u.hash;
-  }
-
-  function getGuardSession() {
-    if (typeof window.DIGIY_GUARD?.getSession === "function") {
-      try { return window.DIGIY_GUARD.getSession() || {}; } catch(_) {}
-    }
-    return window.DIGIY_GUARD?.state || {};
-  }
-
-  function getSlug() {
-    const gs = getGuardSession();
-    return normSlug(
-      getParam("slug") || gs.slug ||
-      sessionStorage.getItem("digiy_pos_last_slug") || localStorage.getItem("digiy_pos_last_slug") ||
-      sessionStorage.getItem("digiy_pos_slug")      || localStorage.getItem("digiy_pos_slug") || ""
-    );
-  }
-
-  function getPhone() {
-    const gs = getGuardSession();
-    return cleanDigits(
-      getParam("phone") || getParam("tel") || gs.phone ||
-      sessionStorage.getItem("digiy_pos_last_phone") || localStorage.getItem("digiy_pos_last_phone") ||
-      sessionStorage.getItem("digiy_pos_phone")       || localStorage.getItem("digiy_pos_phone") || ""
-    );
-  }
-
-  function setNotifs(items) {
-    const box = $("notifList");
-    box.innerHTML = "";
-    if (!items.length) {
-      box.innerHTML = `<div class="notif"><div><b>Rien à signaler</b><div class="muted" style="font-weight:800;margin-top:2px">Tout roule.</div></div><div class="tag ok">OK</div></div>`;
-      return;
-    }
-    for (const it of items) {
-      const tagClass = it.level === "warn" ? "warn" : it.level === "ok" ? "ok" : "info";
-      const div = document.createElement("div");
-      div.className = "notif";
-      div.innerHTML = `<div><b>${it.title}</b><div class="muted" style="font-weight:800;margin-top:2px">${it.text}</div></div><div class="tag ${tagClass}">${it.tag}</div>`;
-      box.appendChild(div);
-    }
-  }
-
-  function daysBetween(aIso, bIso) {
-    const a = new Date(aIso).getTime(), b = new Date(bIso).getTime();
-    if (Number.isNaN(a) || Number.isNaN(b)) return null;
-    return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
-  }
-
-  async function awaitGuardReady() {
-    try {
-      if (typeof window.DIGIY_GUARD?.ready === "function") await window.DIGIY_GUARD.ready();
-      else if (window.DIGIY_GUARD?.ready?.then) await window.DIGIY_GUARD.ready;
-    } catch(err) { log("guard ready KO", { message: err?.message || String(err) }); }
-  }
-
-  async function bootGuard() {
-    if (typeof window.DIGIY_GUARD?.boot !== "function") return true;
-    try {
-      const res = await window.DIGIY_GUARD.boot({ module: MODULE_CODE, dashboard: DASHBOARD_URL, login: PIN_URL, pay: ABOS_URL, requireSlug:true, checkSubscription:false });
-      log("guard boot", res);
-      if (res && res.ok === false) return false;
-      return true;
-    } catch(err) { log("guard boot erreur", { message: err?.message || String(err) }); return true; }
-  }
-
-  function makeFallbackSb() {
-    if (window.supabase?.createClient && SUPABASE_URL && SUPABASE_ANON) {
-      return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, { auth:{ persistSession:false, autoRefreshToken:false, detectSessionInUrl:false } });
-    }
-    return null;
-  }
-
-  async function getSb() {
-    if (sb) return sb;
-    if (typeof window.DIGIY_GUARD?.getSb === "function") {
-      try { sb = window.DIGIY_GUARD.getSb(); if (sb) return sb; } catch(err) { log("guard getSb erreur", { message: err?.message || String(err) }); }
-    }
-    sb = makeFallbackSb();
-    return sb;
-  }
-
-  async function rpcFirstSuccess(name, payloads) {
-    const client = await getSb();
-    if (!client) throw new Error("supabase_not_ready");
-    let lastError = null;
-    for (const payload of payloads) {
-      try {
-        log(`RPC ${name} tentative`, payload);
-        const { data, error } = await client.rpc(name, payload);
-        if (error) { lastError = error; log(`RPC ${name} erreur`, { message: error.message, details: error.details, hint: error.hint }); continue; }
-        log(`RPC ${name} OK`, data);
-        return data;
-      } catch(err) { lastError = err; log(`RPC ${name} exception`, { message: err?.message || String(err) }); }
-    }
-    throw lastError || new Error(`RPC ${name} échouée`);
-  }
-
-  async function resolvePhoneFromSlug(slug) {
-    const client = await getSb();
-    if (!client || !slug) return "";
-    const { data, error } = await client.from("digiy_subscriptions_public").select("phone,module,slug").eq("slug", slug).limit(1).maybeSingle();
-    if (error) throw error;
-    return cleanDigits(data?.phone || "");
-  }
-
-  async function digiyHasAccess(phone, module) {
-    const res = await rpcFirstSuccess("digiy_has_access", [{ p_phone: phone, p_module: module }, { phone, module }]);
-    if (typeof res === "boolean") return res;
-    if (res && typeof res.ok         === "boolean") return res.ok;
-    if (res && typeof res.has_access === "boolean") return res.has_access;
-    if (res && typeof res.allowed    === "boolean") return res.allowed;
-    if (res && typeof res.access     === "boolean") return res.access;
-    return !!res;
-  }
-
-  async function digiyGetSubscriptionFull(phone, module) {
-    try { return await rpcFirstSuccess("digiy_get_subscription_status", [{ p_phone: phone, p_module: module }, { phone, module }]); }
-    catch(err) { log("digiy_get_subscription_status indisponible", { message: err?.message || String(err) }); return null; }
-  }
-
-  async function digiyGetDashboardStats(phone, module) {
-    try { return await rpcFirstSuccess("digiy_get_dashboard_stats", [{ p_phone: phone, p_module: module }, { phone, module }]); }
-    catch(err) { log("digiy_get_dashboard_stats indisponible", { message: err?.message || String(err) }); return { month_xof:null, tx_count:null, today_hint:"Aujourd'hui" }; }
-  }
-
-  async function digiyGetBoostStatus(phone) {
-    try { return await rpcFirstSuccess("digiy_get_boost_status", [{ p_phone: phone }, { phone }]); }
-    catch(err) { log("digiy_get_boost_status indisponible", { message: err?.message || String(err) }); return null; }
-  }
-
-  async function digiyBuildPayUrl(module, phone, plan) {
-    return await rpcFirstSuccess("digiy_build_pay_url", [{ p_module: module, p_phone: phone, p_plan: plan }, { module, phone, plan }]);
-  }
-
-  async function getStoreContext(slug) {
-    try { return await rpcFirstSuccess("digiy_pos_get_store_context_by_slug", [{ p_slug: slug }, { slug }]); }
-    catch(err1) {
-      try { return await rpcFirstSuccess("pos_get_store_context_by_slug", [{ p_slug: slug }, { slug }]); }
-      catch(err2) { log("store context indisponible", { first: err1?.message || String(err1), second: err2?.message || String(err2) }); return null; }
-    }
-  }
-
-  /* ━━━ wireNav : liens propres, coffre gardé en mémoire locale ━━━ */
-  function wireNav(phone, slug) {
-    try {
-      const safeLinks = {
-        btnHall: PUBLIC_URL,
-        btnCaisse: CAISSE_URL,
-        btnAdmin: ADMIN_URL,
-        btnSettings: ADMIN_URL,
-        btnPinTop: PIN_URL,
-        btnBlockedPin: PIN_URL,
-        btnHeroCash: CAISSE_URL,
-        btnHeroArticles: CAISSE_URL + "#articles",
-        btnHeroNotes: CAISSE_URL + "#notes",
-        btnHeroPlus: ADMIN_URL,
-        btnNoteFast: CAISSE_URL + "#notes",
-        btnOpenCaisse2: CAISSE_URL,
-        btnOpenAdmin2: ADMIN_URL,
-        navHome: DASHBOARD_URL,
-        navArticles: CAISSE_URL + "#articles",
-        navCash: CAISSE_URL,
-        navNotes: CAISSE_URL + "#notes",
-        navMore: ADMIN_URL
+      const BOOST = {
+        module:"BOOST",
+        plan:"boost_7d",
+        price_xof:5000,
+        price_eur:9
       };
 
-      Object.entries(safeLinks).forEach(([id, url]) => {
-        const el = $(id);
-        if (el) el.href = /^https?:\/\//i.test(url) ? url : cleanPath(url);
-      });
+      const $ = (id) => document.getElementById(id);
 
-      $("btnAbosTop").href = buildUrl(ABOS_URL, buildAbosParams());
-      $("btnBlockedAbos").href = buildUrl(ABOS_URL, buildAbosParams());
-      $("linkPayments").href = buildUrl(ABOS_URL, buildAbosParams());
+      let sb = null;
 
-      $("btnSupportTop").href = buildSupportUrl();
-      $("linkSupport").href = buildSupportUrl();
+      const state = {
+        slug:"",
+        phone:"",
+        access:false,
+        storeName:MODULE_LABEL,
+        plan:"",
+        workCurrency:"XOF"
+      };
 
-      $("btnPublicFloating").href = PUBLIC_URL;
-
-      const pay = $("btnOpenPay");
-      if (pay) pay.href = "https://pro-pay.digiylyfe.com/admin.html";
-    } catch(e) {
-      log("wireNav erreur silencieuse", { message: e.message || String(e) });
-    }
-  }
-
-  /* ━━━ showBlocked : langage humain, pills sans jargon ━━━ */
-  function showBlocked(title, text, pill) {
-    $("dashboardContent").style.display = "none";
-    $("blockedShell").style.display     = "grid";
-    $("blockedTitle").textContent        = title;
-    $("blockedText").innerHTML           = text;
-    /* ━━━ AVANT : "Bloqué", "Contrôle", "Inactif" → jargon banni ━━━ */
-    const pillLabel = pill || "Accès requis";
-    $("pillStatus").innerHTML = `Statut : <b>${pillLabel}</b>`;
-  }
-
-  function showDashboard() {
-    $("blockedShell").style.display     = "none";
-    $("dashboardContent").style.display = "block";
-  }
-
-  async function init() {
-    reveal(); // filet 1 : on révèle dès le départ
-    cleanVisibleUrl();
-
-    /* ━━━ Textes JS — doctrine façade ━━━ */
-    $("brandTitle").textContent       = `${MODULE_LABEL} — Mon espace de travail`;
-    $("brandSub").textContent         = "Ventes · caisse · notes · argent";
-    $("btnPrimaryAction").textContent = PRIMARY_ACTION_LABEL;
-    $("actionHint").textContent       = PRIMARY_ACTION_HINT;
-    $("actionDesc").textContent       = "Le commerçant doit comprendre en deux secondes : encaisser, voir l’argent, noter une dépense.";
-    $("pillStatus").innerHTML         = `Statut : <b>…</b>`;
-
-    await awaitGuardReady();
-    await bootGuard();
-
-    let slug  = getSlug();
-    let phone = getPhone();
-
-    state.slug  = slug;
-    state.phone = phone;
-
-    const accountBox = $("accountBox");
-    const accessBox = $("accessBox");
-    if (accountBox) accountBox.textContent = slug || phone ? "Compte reconnu" : "À ouvrir";
-    if (accessBox) accessBox.textContent = "Vérification";
-    wireNav(phone, slug);
-
-    if (!slug) {
-      log("slug manquant");
-      /* ━━━ AVANT : "slug POS", "pin.html?slug=…" → jargon banni ━━━ */
-      showBlocked(
-        "Identifiant manquant",
-        "Entre avec ton code d'accès ou passe par ton lien d'accès pour ouvrir ton espace.",
-        "Accès requis"
-      );
-      return;
-    }
-
-    try {
-      if (!phone) { phone = await resolvePhoneFromSlug(slug); log("phone résolu depuis slug", { slug, phone }); }
-    } catch(err) { log("resolvePhoneFromSlug KO", { message: err?.message || String(err) }); }
-
-    state.slug  = slug;
-    state.phone = phone || "";
-    saveLocalAccess(slug, state.phone);
-
-    if (accountBox) accountBox.textContent = "Compte reconnu";
-    if (accessBox) accessBox.textContent = "Vérification";
-    wireNav(state.phone, slug);
-
-    let access = false;
-    if (state.phone) {
-      try { access = await digiyHasAccess(state.phone, MODULE_CODE); }
-      catch(err) { log("digiyHasAccess KO", { message: err?.message || String(err) }); }
-    }
-    state.access = !!access;
-
-    if (!state.phone) {
-      showBlocked(
-        "Boutique introuvable",
-        "Le lien n'a pas permis d'identifier ta boutique. Entre avec ton code pour reconstruire ta session.",
-        "En attente"
-      );
-      return;
-    }
-
-    if (!state.access) {
-      showBlocked(
-        "Abonnement requis",
-        "Ta boutique est reconnue, mais ton accès MON COMMERCE n'est pas encore actif. Active ton abonnement ou entre par ton PIN.",
-        "À activer"
-      );
-      return;
-    }
-
-    showDashboard();
-
-    const storeCtx = await getStoreContext(slug);
-    state.storeName = String(storeCtx?.shop_name || storeCtx?.display_name || storeCtx?.store?.name || storeCtx?.profile?.display_name || MODULE_LABEL).trim();
-    state.workCurrency = await resolveWorkCurrency(state.phone, slug, storeCtx);
-
-    const status = await digiyGetSubscriptionFull(state.phone, MODULE_CODE);
-    state.statusPayload = status || null;
-
-    const expiresAt = status?.expires_at || status?.current_period_end || null;
-    const plan      = status?.plan || status?.plan_code || "";
-    const pay       = status?.payment_ref ? "validé" : "ok";
-    state.plan      = plan;
-
-    $("dot").classList.remove("bad");
-    $("dot").classList.add("ok");
-    if (accountBox) accountBox.textContent = "Compte reconnu";
-    if (accessBox) accessBox.textContent = "Accès actif";
-    $("statusLine").textContent = "Abonnement actif";
-    $("expiryLine").textContent = expiresAt ? `Expire le ${fmtDateFR(expiresAt)}` : "Expiration : —";
-    $("pillStatus").innerHTML   = `Statut : <b>Actif</b>`;
-    $("metaLine").innerHTML     = plan
-      ? `<span>Abonnement : ${plan}</span><span>•</span><span>Paiement : ${pay}</span>`
-      : `<span>Abonnement actif</span><span>•</span><span>Paiement : ${pay}</span>`;
-    /* ━━━ brandSub dynamique : nom boutique, pas jargon ━━━ */
-    $("brandSub").textContent   = state.storeName ? `${state.storeName} · mon espace de travail` : "Mon espace de travail · boutique active";
-    $("boostText").textContent = `+50% d'apparition · 7 jours · ${Number(BOOST.price_xof).toLocaleString("fr-FR")} FCFA · ${BOOST.price_eur} €`;
-
-    const stats = await digiyGetDashboardStats(state.phone, MODULE_CODE);
-    const month = pickMonthAmount(stats, state.workCurrency);
-    const tx    = stats?.tx_count ?? null;
-
-    $("moneyMonth").textContent = month !== null
-      ? formatCommerceMoney(month, state.workCurrency)
-      : formatCommerceMoney(0, state.workCurrency);
-
-    $("txCount").textContent    = tx !== null ? `${tx} transactions` : "— transactions";
-    $("todayHint").textContent  = stats?.today_hint || "Aujourd'hui";
-
-    const notifs = [];
-
-    if (expiresAt) {
-      const d = daysBetween(new Date().toISOString(), expiresAt);
-      notifs.push(d !== null && d <= 3
-        ? { level:"warn", tag:"J-3",   title:"Abonnement bientôt expiré",  text:`Expire dans ${d} jour(s). Renouvelle pour éviter la coupure.` }
-        : { level:"ok",   tag:"OK",    title:"Abonnement",                  text:"Actif — prochain contrôle : J-3." }
-      );
-    }
-
-    const boost = await digiyGetBoostStatus(state.phone);
-    if (boost?.active) {
-      $("boostStatus").textContent = `Statut boost : actif jusqu'au ${fmtDateFR(boost.expires_at)} · +${boost.views_today || 0} vues aujourd'hui`;
-      $("btnBoost").textContent    = "Actif";
-      $("btnBoost").disabled       = true;
-      notifs.push({ level:"info", tag:"BOOST",  title:"Boost actif",      text:"Visibilité augmentée. Continue ton activité." });
-    } else {
-      $("boostStatus").textContent = "Statut boost : inactif";
-      notifs.push({ level:"info", tag:"OPTION", title:"Boost disponible", text:"Active le BOOST si tu veux plus de visibilité." });
-    }
-
-    if (month === null || tx === null) {
-      notifs.push({ level:"info", tag:"DATA", title:"Stats à brancher", text:"Le chiffre exact arrive dès que la connexion données est posée." });
-    }
-
-    setNotifs(notifs);
-
-    $("btnManageSub").onclick     = () => { location.href = buildUrl(ABOS_URL, buildAbosParams()); };
-    $("btnPrimaryAction").onclick = () => { location.href = cleanPath(CAISSE_URL); };
-    $("btnBoostInfo").onclick     = () => { alert("BOOST : +50% d'apparition pendant 7 jours. Paiement direct. Aucun spam."); };
-
-    $("btnBoost").onclick = async () => {
-      try {
-        $("btnBoost").disabled    = true;
-        $("btnBoost").textContent = "…";
-        const payUrlPayload = await digiyBuildPayUrl(BOOST.module, state.phone, BOOST.plan);
-        const url = typeof payUrlPayload === "string" ? payUrlPayload : (payUrlPayload?.url || payUrlPayload?.pay_url || null);
-        if (!url) throw new Error("URL paiement BOOST manquante");
-        location.href = url;
-      } catch(e) {
-        console.error(e);
-        alert("Impossible d'activer le BOOST pour le moment. Réessaie ou contacte le support.");
-        $("btnBoost").disabled    = false;
-        $("btnBoost").textContent = "Activer";
+      function reveal(){
+        document.documentElement.classList.add("app-ready");
+        document.documentElement.style.visibility = "";
       }
-    };
 
-    log("dashboard ready", { slug, phone: state.phone, access: state.access, plan: state.plan, store: state.storeName, work_currency: state.workCurrency });
-  }
+      setTimeout(reveal, 2000);
 
-  init().catch((err) => {
-    console.error(err);
-    log("init fatale", { message: err?.message || String(err) });
-    reveal(); // filet 2 : catch fatal
-    showBlocked(
-      "Problème technique",
-      "Ton espace n'a pas pu finir de charger. Entre avec ton code ou contacte le support.",
-      "Erreur"
-    );
-  });
-})();
-</script>
-  <button id="digiy-audio-btn" type="button">
-  🔊 Écouter
-</button>
+      function cleanDigits(v){
+        return String(v || "").replace(/[^\d]/g,"");
+      }
 
-<script>
-(function(){
-  const btn = document.getElementById("digiy-audio-btn");
-  if(!btn) return;
+      function normSlug(v){
+        return String(v || "").trim().toLowerCase();
+      }
 
-  const synth = window.speechSynthesis;
-  let playing = false;
+      function fmtDateFR(iso){
+        if(!iso) return "—";
+        const d = new Date(iso);
+        if(Number.isNaN(d.getTime())) return "—";
+        return d.toLocaleDateString("fr-FR",{ year:"numeric", month:"long", day:"numeric" });
+      }
 
-  function getText(){
-    if(typeof window.DIGIY_GET_AUDIO_TEXT === "function"){
-      return window.DIGIY_GET_AUDIO_TEXT();
-    }
-    return "Bienvenue dans ton espace.";
-  }
+      function normalizeWorkCurrency(value){
+        const c = String(value || "").trim().toUpperCase();
+        if(["EUR","EURO","EUROS","€"].includes(c)) return "EUR";
+        return "XOF";
+      }
 
-  function speak(){
-    const text = getText();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "fr-FR";
-    synth.cancel();
-    synth.speak(u);
-    playing = true;
-  }
+      function formatMoney(amount,currency){
+        const n = Number(amount || 0);
+        const safe = Number.isFinite(n) ? n : 0;
+        return safe.toLocaleString("fr-FR") + " " + (normalizeWorkCurrency(currency) === "EUR" ? "€" : "FCFA");
+      }
 
-  btn.onclick = function(){
-    if(playing){
-      synth.cancel();
-      playing = false;
-    } else {
-      speak();
-    }
-  };
-})();
-</script>
+      function getParam(name){
+        return new URL(location.href).searchParams.get(name) || "";
+      }
+
+      function cleanVisibleUrl(){
+        try{
+          const url = new URL(location.href);
+          const sensitive = ["slug","phone","tel","module","owner_phone","subscription_phone","checkout_phone","p_phone","return","from"];
+          let dirty = false;
+
+          sensitive.forEach((key) => {
+            if(url.searchParams.has(key)){
+              url.searchParams.delete(key);
+              dirty = true;
+            }
+          });
+
+          if(dirty){
+            history.replaceState({},document.title,url.pathname + url.search + url.hash);
+          }
+        }catch(_){}
+      }
+
+      function cleanPath(path){
+        const u = new URL(path || "./dashboard-pro.html", location.href);
+        u.search = "";
+        return u.pathname + u.hash;
+      }
+
+      function buildUrl(base,params){
+        try{
+          const u = new URL(base, location.href);
+          Object.entries(params || {}).forEach(([k,v]) => {
+            if(v !== null && v !== undefined && String(v) !== "") u.searchParams.set(k,String(v));
+          });
+          return u.toString();
+        }catch(_){
+          return base;
+        }
+      }
+
+      function buildSupportUrl(){
+        const text = "Bonjour, j’ai besoin d’aide pour MON COMMERCE by DIGIY.";
+        return "https://wa.me/" + SUPPORT_PHONE + "?text=" + encodeURIComponent(text);
+      }
+
+      function buildAbosParams(moduleCode = MODULE_CODE){
+        return { base_module:MODULE_CODE, module:moduleCode };
+      }
+
+      function getGuardSession(){
+        if(typeof window.DIGIY_GUARD?.getSession === "function"){
+          try{return window.DIGIY_GUARD.getSession() || {};}catch(_){}
+        }
+        return window.DIGIY_GUARD?.state || {};
+      }
+
+      function getSlug(){
+        const gs = getGuardSession();
+        return normSlug(
+          getParam("slug") ||
+          gs.slug ||
+          sessionStorage.getItem("digiy_pos_last_slug") ||
+          localStorage.getItem("digiy_pos_last_slug") ||
+          sessionStorage.getItem("digiy_pos_slug") ||
+          localStorage.getItem("digiy_pos_slug") ||
+          ""
+        );
+      }
+
+      function getPhone(){
+        const gs = getGuardSession();
+        return cleanDigits(
+          getParam("phone") ||
+          getParam("tel") ||
+          gs.phone ||
+          sessionStorage.getItem("digiy_pos_last_phone") ||
+          localStorage.getItem("digiy_pos_last_phone") ||
+          sessionStorage.getItem("digiy_pos_phone") ||
+          localStorage.getItem("digiy_pos_phone") ||
+          ""
+        );
+      }
+
+      function saveLocalAccess(slug,phone){
+        try{
+          if(slug){
+            localStorage.setItem("digiy_pos_last_slug",slug);
+            sessionStorage.setItem("digiy_pos_last_slug",slug);
+          }
+
+          if(phone){
+            localStorage.setItem("digiy_pos_last_phone",phone);
+            sessionStorage.setItem("digiy_pos_last_phone",phone);
+          }
+
+          const payload = { slug:slug || "", phone:phone || "", module:MODULE_CODE, verified:true, ts:Date.now() };
+          localStorage.setItem("DIGIY_POS_SESSION",JSON.stringify(payload));
+          localStorage.setItem("DIGIY_ACCESS",JSON.stringify(payload));
+        }catch(_){}
+      }
+
+      async function awaitGuardReady(){
+        try{
+          if(typeof window.DIGIY_GUARD?.ready === "function") await window.DIGIY_GUARD.ready();
+          else if(window.DIGIY_GUARD?.ready?.then) await window.DIGIY_GUARD.ready;
+        }catch(err){
+          console.warn("[POS DASHBOARD] guard ready",err);
+        }
+      }
+
+      async function bootGuard(){
+        if(typeof window.DIGIY_GUARD?.boot !== "function") return true;
+
+        try{
+          const res = await window.DIGIY_GUARD.boot({
+            module:MODULE_CODE,
+            dashboard:DASHBOARD_URL,
+            login:PIN_URL,
+            pay:ABOS_URL,
+            requireSlug:true,
+            checkSubscription:false
+          });
+
+          if(res && res.ok === false) return false;
+        }catch(err){
+          console.warn("[POS DASHBOARD] guard boot",err);
+        }
+
+        return true;
+      }
+
+      function makeFallbackSb(){
+        if(window.supabase?.createClient && SUPABASE_URL && SUPABASE_ANON){
+          return window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON,{
+            auth:{
+              persistSession:false,
+              autoRefreshToken:false,
+              detectSessionInUrl:false
+            }
+          });
+        }
+        return null;
+      }
+
+      async function getSb(){
+        if(sb) return sb;
+
+        if(typeof window.DIGIY_GUARD?.getSb === "function"){
+          try{
+            sb = window.DIGIY_GUARD.getSb();
+            if(sb) return sb;
+          }catch(_){}
+        }
+
+        sb = makeFallbackSb();
+        return sb;
+      }
+
+      async function rpcFirstSuccess(name,payloads){
+        const client = await getSb();
+        if(!client) throw new Error("supabase_not_ready");
+
+        let lastError = null;
+
+        for(const payload of payloads){
+          try{
+            const { data,error } = await client.rpc(name,payload);
+            if(error){
+              lastError = error;
+              continue;
+            }
+            return data;
+          }catch(err){
+            lastError = err;
+          }
+        }
+
+        throw lastError || new Error("rpc_failed_" + name);
+      }
+
+      async function resolvePhoneFromSlug(slug){
+        const client = await getSb();
+        if(!client || !slug) return "";
+
+        const { data,error } = await client
+          .from("digiy_subscriptions_public")
+          .select("phone,module,slug")
+          .eq("slug",slug)
+          .limit(1)
+          .maybeSingle();
+
+        if(error) throw error;
+
+        return cleanDigits(data?.phone || "");
+      }
+
+      async function digiyHasAccess(phone,module){
+        const res = await rpcFirstSuccess("digiy_has_access",[
+          { p_phone:phone, p_module:module },
+          { phone,module }
+        ]);
+
+        if(typeof res === "boolean") return res;
+        if(res && typeof res.ok === "boolean") return res.ok;
+        if(res && typeof res.has_access === "boolean") return res.has_access;
+        if(res && typeof res.allowed === "boolean") return res.allowed;
+        if(res && typeof res.access === "boolean") return res.access;
+
+        return !!res;
+      }
+
+      async function digiyGetSubscriptionFull(phone,module){
+        try{
+          return await rpcFirstSuccess("digiy_get_subscription_status",[
+            { p_phone:phone, p_module:module },
+            { phone,module }
+          ]);
+        }catch(_){
+          return null;
+        }
+      }
+
+      async function digiyGetDashboardStats(phone,module){
+        try{
+          return await rpcFirstSuccess("digiy_get_dashboard_stats",[
+            { p_phone:phone, p_module:module },
+            { phone,module }
+          ]);
+        }catch(_){
+          return { month_xof:null, tx_count:null, today_hint:"Aujourd’hui" };
+        }
+      }
+
+      async function digiyGetBoostStatus(phone){
+        try{
+          return await rpcFirstSuccess("digiy_get_boost_status",[
+            { p_phone:phone },
+            { phone }
+          ]);
+        }catch(_){
+          return null;
+        }
+      }
+
+      async function digiyBuildPayUrl(module,phone,plan){
+        return await rpcFirstSuccess("digiy_build_pay_url",[
+          { p_module:module, p_phone:phone, p_plan:plan },
+          { module,phone,plan }
+        ]);
+      }
+
+      async function getStoreContext(slug){
+        try{
+          return await rpcFirstSuccess("digiy_pos_get_store_context_by_slug",[
+            { p_slug:slug },
+            { slug }
+          ]);
+        }catch(_){}
+
+        try{
+          return await rpcFirstSuccess("pos_get_store_context_by_slug",[
+            { p_slug:slug },
+            { slug }
+          ]);
+        }catch(_){
+          return null;
+        }
+      }
+
+      function extractWorkCurrency(payload){
+        const candidates = [
+          payload?.work_currency,
+          payload?.currency,
+          payload?.store?.work_currency,
+          payload?.store?.currency,
+          payload?.profile?.work_currency,
+          payload?.profile?.currency
+        ];
+
+        for(const item of candidates){
+          if(item) return normalizeWorkCurrency(item);
+        }
+
+        return "";
+      }
+
+      async function resolveWorkCurrency(phone,slug,storeCtx){
+        const fromCtx = extractWorkCurrency(storeCtx);
+        if(fromCtx) return fromCtx;
+
+        const client = await getSb();
+        if(!client) return "XOF";
+
+        try{
+          const { data,error } = await client
+            .from("pos_stores")
+            .select("work_currency")
+            .eq("owner_phone",cleanDigits(phone))
+            .ilike("store_id","pos-%")
+            .limit(1)
+            .maybeSingle();
+
+          if(!error && data?.work_currency) return normalizeWorkCurrency(data.work_currency);
+        }catch(_){}
+
+        return "XOF";
+      }
+
+      function daysBetween(aIso,bIso){
+        const a = new Date(aIso).getTime();
+        const b = new Date(bIso).getTime();
+
+        if(Number.isNaN(a) || Number.isNaN(b)) return null;
+
+        return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
+      }
+
+      function pickMonthAmount(stats,currency){
+        const c = normalizeWorkCurrency(currency);
+
+        if(c === "EUR"){
+          return stats?.month_eur ??
+            stats?.month_amount_eur ??
+            stats?.amount_eur ??
+            stats?.month_amount ??
+            stats?.month_xof ??
+            null;
+        }
+
+        return stats?.month_xof ??
+          stats?.month_amount_xof ??
+          stats?.amount_xof ??
+          stats?.month_amount ??
+          null;
+      }
+
+      function setNotifs(items){
+        const box = $("notifList");
+        if(!box) return;
+
+        box.innerHTML = "";
+
+        if(!items.length){
+          box.innerHTML = `
+            <div class="notif">
+              <div>
+                <b>Rien à signaler</b>
+                <div class="muted" style="font-size:13px;margin-top:3px">Tout roule.</div>
+              </div>
+              <div class="tag ok">OK</div>
+            </div>
+          `;
+          return;
+        }
+
+        for(const it of items){
+          const tagClass = it.level === "warn" ? "warn" : it.level === "ok" ? "ok" : "info";
+          const div = document.createElement("div");
+          div.className = "notif";
+          div.innerHTML = `
+            <div>
+              <b>${it.title}</b>
+              <div class="muted" style="font-size:13px;margin-top:3px">${it.text}</div>
+            </div>
+            <div class="tag ${tagClass}">${it.tag}</div>
+          `;
+          box.appendChild(div);
+        }
+      }
+
+      function wireNav(){
+        const links = {
+          btnHall:PUBLIC_URL,
+          btnCaisse:CAISSE_URL,
+          btnArticles:CAISSE_URL + "#articles",
+          btnNotes:CAISSE_URL + "#notes",
+          btnAdmin:ADMIN_URL,
+          btnSettings:ADMIN_URL,
+          btnPinTop:PIN_URL,
+          btnBlockedPin:PIN_URL,
+          btnHeroCash:CAISSE_URL,
+          btnHeroArticles:CAISSE_URL + "#articles",
+          btnHeroNotes:CAISSE_URL + "#notes",
+          btnHeroPlus:ADMIN_URL,
+          btnNoteFast:CAISSE_URL + "#notes",
+          btnOpenPay:PAY_URL,
+          navHome:DASHBOARD_URL,
+          navArticles:CAISSE_URL + "#articles",
+          navCash:CAISSE_URL,
+          navNotes:CAISSE_URL + "#notes",
+          navMore:ADMIN_URL
+        };
+
+        Object.entries(links).forEach(([id,url]) => {
+          const el = $(id);
+          if(!el) return;
+          el.href = /^https?:\/\//i.test(url) ? url : cleanPath(url);
+        });
+
+        const abos = $("btnBlockedAbos");
+        if(abos) abos.href = buildUrl(ABOS_URL,buildAbosParams());
+
+        const support = buildSupportUrl();
+        const audioBtn = $("digiy-audio-btn");
+        if(audioBtn) audioBtn.title = "Écouter l’accueil";
+      }
+
+      function showBlocked(title,text,pill){
+        $("dashboardContent").style.display = "none";
+        $("blockedShell").style.display = "grid";
+        $("blockedTitle").textContent = title;
+        $("blockedText").innerHTML = text;
+        $("pillStatus").textContent = pill || "Accès requis";
+        $("dotAccess").classList.remove("ok");
+        $("dotAccess").classList.add("bad");
+      }
+
+      function showDashboard(){
+        $("blockedShell").style.display = "none";
+        $("dashboardContent").style.display = "block";
+      }
+
+      async function init(){
+        reveal();
+        cleanVisibleUrl();
+        wireNav();
+
+        await awaitGuardReady();
+        await bootGuard();
+
+        let slug = getSlug();
+        let phone = getPhone();
+
+        state.slug = slug;
+        state.phone = phone;
+
+        if(!slug){
+          showBlocked(
+            "Identifiant manquant",
+            "Entre avec ton code d’accès ou passe par ton lien d’accès pour ouvrir ton espace.",
+            "Accès requis"
+          );
+          return;
+        }
+
+        if(!phone){
+          try{
+            phone = await resolvePhoneFromSlug(slug);
+          }catch(_){}
+        }
+
+        state.slug = slug;
+        state.phone = phone || "";
+
+        saveLocalAccess(slug,state.phone);
+
+        if(!state.phone){
+          showBlocked(
+            "Boutique introuvable",
+            "Le lien n’a pas permis d’identifier ta boutique. Entre avec ton code pour reconstruire ta session.",
+            "En attente"
+          );
+          return;
+        }
+
+        let access = false;
+
+        try{
+          access = await digiyHasAccess(state.phone,MODULE_CODE);
+        }catch(_){}
+
+        state.access = !!access;
+
+        if(!state.access){
+          showBlocked(
+            "Abonnement requis",
+            "Ta boutique est reconnue, mais ton accès MON COMMERCE n’est pas encore actif. Active ton abonnement ou entre par ton code.",
+            "À activer"
+          );
+          return;
+        }
+
+        showDashboard();
+
+        const storeCtx = await getStoreContext(slug);
+        state.storeName = String(
+          storeCtx?.shop_name ||
+          storeCtx?.display_name ||
+          storeCtx?.store?.name ||
+          storeCtx?.profile?.display_name ||
+          MODULE_LABEL
+        ).trim() || MODULE_LABEL;
+
+        state.workCurrency = await resolveWorkCurrency(state.phone,slug,storeCtx);
+
+        $("storeNameBox").textContent = state.storeName;
+        $("accessBox").textContent = "Ouvert";
+        $("brandSub").textContent = state.storeName + " · accueil simple";
+        $("pillStatus").textContent = "Ouvert";
+        $("dotAccess").classList.remove("bad");
+        $("dotAccess").classList.add("ok");
+
+        const status = await digiyGetSubscriptionFull(state.phone,MODULE_CODE);
+        const expiresAt = status?.expires_at || status?.current_period_end || null;
+        const plan = status?.plan || status?.plan_code || "";
+
+        const stats = await digiyGetDashboardStats(state.phone,MODULE_CODE);
+        const month = pickMonthAmount(stats,state.workCurrency);
+        const tx = stats?.tx_count ?? null;
+
+        $("moneyMonth").textContent = month !== null ? formatMoney(month,state.workCurrency) : formatMoney(0,state.workCurrency);
+        $("txCount").textContent = tx !== null ? tx + " transactions" : "— transactions";
+        $("todayHint").textContent = stats?.today_hint || "Aujourd’hui";
+
+        $("statusNotice").className = "notice ok";
+        $("statusNotice").innerHTML = expiresAt
+          ? "Accès actif jusqu’au <b>" + fmtDateFR(expiresAt) + "</b>."
+          : "Accès actif. Tu peux encaisser, noter, puis laisser DIGIY ranger.";
+
+        const notifs = [];
+
+        if(expiresAt){
+          const d = daysBetween(new Date().toISOString(),expiresAt);
+          if(d !== null && d <= 3){
+            notifs.push({
+              level:"warn",
+              tag:"J-" + d,
+              title:"Abonnement bientôt expiré",
+              text:"Renouvelle pour éviter la coupure."
+            });
+          }else{
+            notifs.push({
+              level:"ok",
+              tag:"OK",
+              title:"Abonnement actif",
+              text:plan ? "Plan : " + plan : "Ton accès est ouvert."
+            });
+          }
+        }else{
+          notifs.push({
+            level:"ok",
+            tag:"OK",
+            title:"Accès ouvert",
+            text:"Tu peux travailler sans repasser par les réglages."
+          });
+        }
+
+        const boost = await digiyGetBoostStatus(state.phone);
+
+        if(boost?.active){
+          $("boostStatus").textContent = "Boost actif jusqu’au " + fmtDateFR(boost.expires_at);
+          $("btnBoost").textContent = "Actif";
+          $("btnBoost").disabled = true;
+          notifs.push({
+            level:"info",
+            tag:"BOOST",
+            title:"Boost actif",
+            text:"Ta visibilité est augmentée."
+          });
+        }else{
+          $("boostStatus").textContent = "Statut boost : inactif";
+          notifs.push({
+            level:"info",
+            tag:"OPTION",
+            title:"Boost disponible",
+            text:"Active-le seulement quand tu veux pousser ta boutique."
+          });
+        }
+
+        if(month === null || tx === null){
+          notifs.push({
+            level:"info",
+            tag:"DATA",
+            title:"Stats à compléter",
+            text:"Les chiffres exacts arrivent quand les mouvements sont bien branchés."
+          });
+        }
+
+        setNotifs(notifs);
+
+        $("btnBoostInfo").onclick = () => {
+          alert("BOOST : +50% d’apparition pendant 7 jours. Paiement direct. À utiliser quand tu veux pousser la visibilité.");
+        };
+
+        $("btnBoost").onclick = async () => {
+          try{
+            $("btnBoost").disabled = true;
+            $("btnBoost").textContent = "…";
+
+            const payload = await digiyBuildPayUrl(BOOST.module,state.phone,BOOST.plan);
+            const url = typeof payload === "string" ? payload : (payload?.url || payload?.pay_url || null);
+
+            if(!url) throw new Error("URL paiement BOOST manquante");
+
+            location.href = url;
+          }catch(err){
+            console.error(err);
+            alert("Impossible d’activer le BOOST pour le moment. Réessaie ou contacte le support.");
+            $("btnBoost").disabled = false;
+            $("btnBoost").textContent = "Activer";
+          }
+        };
+      }
+
+      function initAudio(){
+        const btn = $("digiy-audio-btn");
+        if(!btn) return;
+
+        const synth = window.speechSynthesis;
+        let playing = false;
+
+        function text(){
+          return "Bienvenue dans Mon Commerce. Sur téléphone, va à l’essentiel. Encaisse, écris une note, regarde ton argent. Le reste est dans Plus.";
+        }
+
+        btn.onclick = () => {
+          if(!synth) return;
+
+          if(playing){
+            synth.cancel();
+            playing = false;
+            btn.textContent = "🔊 Écouter";
+            return;
+          }
+
+          const u = new SpeechSynthesisUtterance(text());
+          u.lang = "fr-FR";
+          u.rate = .88;
+          u.pitch = 1.02;
+
+          u.onend = () => {
+            playing = false;
+            btn.textContent = "🔊 Écouter";
+          };
+
+          synth.cancel();
+          synth.speak(u);
+          playing = true;
+          btn.textContent = "⏹ Stop";
+        };
+      }
+
+      initAudio();
+
+      init().catch((err) => {
+        console.error(err);
+        reveal();
+        showBlocked(
+          "Problème technique",
+          "Ton espace n’a pas pu finir de charger. Entre avec ton code ou contacte le support.",
+          "Erreur"
+        );
+      });
+    })();
+  </script>
 </body>
 </html>
