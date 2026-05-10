@@ -1,11 +1,11 @@
-<!doctype html>
+ml><!doctype html>
 <html lang="fr">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#07140f"/>
-  <title>MON COMMERCE — Plus</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — Plus : ajouter un article, corriger un prix, suivre le stock et gérer la boutique sans pression."/>
+  <title>MON COMMERCE — Arrière-boutique</title>
+  <meta name="description" content="MON COMMERCE by DIGIY — arrière-boutique : articles, stock, prix, visibilité et préparation de la caisse."/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -647,6 +647,38 @@
       .tabs{display:grid;grid-template-columns:1fr 1fr}
     }
 
+
+    /* Arrière-boutique : on garde les routes, mais on enlève le bruit visuel */
+    #btnHall,
+    #btnCamembert,
+    #btnNotes,
+    #btnDownloadAdmin,
+    #digiy-help-btn{
+      display:none!important;
+    }
+
+    .advancedTools{
+      margin-top:12px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:20px;
+      background:rgba(0,0,0,.12);
+      padding:12px;
+    }
+
+    .advancedTools summary{
+      cursor:pointer;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:1000;
+      list-style:none;
+    }
+
+    .advancedTools summary::-webkit-details-marker{display:none}
+
+    .advancedTools .actionRow{
+      margin-top:10px;
+    }
+
     @media(print){
       body{background:#fff;color:#07140f}
       .topbar,.navRow,.bottomNav,.tabs,.btn,.btnOutline,.btnGhost,.btnDanger,.smallBtn{display:none!important}
@@ -666,8 +698,8 @@
             <div class="brandBadge">📦</div>
             <div>
               <div class="brandKicker">DIGIYLYFE</div>
-              <div class="brandTitle">MON COMMERCE — Plus</div>
-              <div class="brandSub" id="brandSub">Articles · stock · boutique</div>
+              <div class="brandTitle">MON COMMERCE — Arrière-boutique</div>
+              <div class="brandSub" id="brandSub">Articles · stock · prix</div>
             </div>
           </div>
 
@@ -691,7 +723,7 @@
 
       <section id="blockedShell" class="blockedShell">
         <div class="blockedInner">
-          <div class="blockedTitle">Atelier protégé</div>
+          <div class="blockedTitle">Admin protégé</div>
           <div class="blockedText" id="blockedText">
             Entre avec ton code d’accès pour gérer tes articles.
           </div>
@@ -705,82 +737,35 @@
       <section id="liveShell">
         <div class="hero">
           <div class="card">
-            <div class="heroBadge">Plus · atelier calme</div>
-            <h1><span class="accent">Gérer</span><br>sans pression</h1>
+            <div class="heroBadge">Arrière-boutique</div>
+            <h1><span class="accent">Articles</span><br>stock · prix</h1>
             <div class="lead">
-              Ici, on sort du geste minute. Tu ajoutes un article, tu corriges un prix, tu vois le stock. Le reste reste rangé.
+              Ici, tu prépares ce que la caisse va vendre : marchandises, prix, quantités, visibilité. Le comptoir reste simple devant.
             </div>
 
             <div class="quickGrid">
               <a class="quickBtn primary" id="btnFastAdd" href="#articleForm"><span>➕</span>Ajouter<small>nom · prix · quantité</small></a>
               <a class="quickBtn" id="btnFastList" href="#articleList"><span>📦</span>Articles<small>voir · modifier</small></a>
-              <a class="quickBtn" id="btnFastDashboard" href="./dashboard-pro.html"><span>🏠</span>Accueil<small>retour dashboard</small></a>
-              <a class="quickBtn" id="btnFastCamembert" href="https://pro-espace.digiylyfe.com/"><span>🧭</span>Camembert<small>toutes les portes</small></a>
-              <button class="quickBtn" id="btnInitCaisse" type="button"><span>🚀</span>Initialiser<small>préparer la caisse</small></button>
-              <button class="quickBtn" id="btnLoadStarter" type="button"><span>🌾</span>Départ<small>charger les exemples</small></button>
-              <a class="quickBtn" id="btnFastCash" href="./caisse.html"><span>💰</span>Encaisser<small>retour caisse</small></a>
-              <a class="quickBtn" id="btnFastPublic" href="https://mon-commerce.digiylyfe.com/"><span>🌍</span>Voir côté client<small>vitrine publique</small></a>
-              <a class="quickBtn" id="btnFastProfile" href="./profile.html"><span>🏪</span>Ma fiche commerce<small>modifier la fiche</small></a>
+              <a class="quickBtn" id="btnFastCash" href="./caisse.html"><span>💰</span>Encaisser<small>retour comptoir</small></a>
+              <a class="quickBtn" id="btnFastProfile" href="./profile.html"><span>🏪</span>Ma fiche<small>côté client</small></a>
+
+              <a class="quickBtn" id="btnFastDashboard" href="./dashboard-pro.html" style="display:none"><span>🏠</span>Accueil<small>retour dashboard</small></a>
+              <a class="quickBtn" id="btnFastCamembert" href="https://pro-espace.digiylyfe.com/" style="display:none"><span>🧭</span>Camembert<small>toutes les portes</small></a>
+              <button class="quickBtn" id="btnInitCaisse" type="button" style="display:none"><span>🚀</span>Initialiser<small>préparer la caisse</small></button>
+              <button class="quickBtn" id="btnLoadStarter" type="button" style="display:none"><span>🌾</span>Départ<small>charger les exemples</small></button>
+              <a class="quickBtn" id="btnFastPublic" href="https://mon-commerce.digiylyfe.com/" style="display:none"><span>🌍</span>Voir côté client<small>vitrine publique</small></a>
             </div>
 
-            <div class="miniStats">
-              <div class="mini">
-                <div class="k">Boutique</div>
-                <div class="v" id="metaStoreName">—</div>
+            <details class="advancedTools">
+              <summary>⚙️ Outils avancés</summary>
+              <div class="actionRow">
+                <button class="btnOutline" id="btnInitCaisseProxy" type="button">🚀 Envoyer vers la caisse</button>
+                <button class="btnOutline" id="btnLoadStarterProxy" type="button">🌾 Charger les exemples</button>
+                <button class="btnOutline" id="btnExport" type="button">📤 Télécharger articles</button>
+                <button class="btnOutline" id="btnImport" type="button">📥 Ajouter fichier</button>
+                <input type="file" id="fileImport" accept="application/json" style="display:none"/>
               </div>
-              <div class="mini">
-                <div class="k">Sauvegarde</div>
-                <div class="v" id="metaMode">—</div>
-              </div>
-              <div class="mini">
-                <div class="k">Articles</div>
-                <div class="v" id="kpiCount">0</div>
-              </div>
-            </div>
-
-            <div class="notice info" id="noticeBox">Chargement…</div>
-
-            <div class="actionRow">
-              <button class="btnOutline" id="digiy-help-btn" type="button">Aide</button>
-              <button class="btnOutline" id="digiy-audio-btn" type="button">Écouter</button>
-              <button class="btnOutline" id="btnExport" type="button">📤 Télécharger</button>
-              <button class="btnOutline" id="btnImport" type="button">📥 Ajouter fichier</button>
-              <button class="btnOutline" id="btnDownloadAdmin" type="button">⬇️ Admin</button>
-              <a class="btnOutline" id="btnPublicAction" href="./profile.html">🏪 Ma fiche commerce</a>
-              <input type="file" id="fileImport" accept="application/json" style="display:none"/>
-            </div>
-
-            <div class="helpPanel card" id="digiy-help-panel">
-              <h2>Comment faire</h2>
-              <div class="lead" style="font-size:13px;margin-top:0">
-                <b>Ajouter</b> : nom, prix, quantité.<br>
-                <b>Vendre</b> : article visible dans la caisse.<br>
-                <b>Cacher</b> : article gardé, mais pas affiché.<br>
-                <b>Corriger</b> : clique sur modifier, puis enregistre.<br>
-                <b>Initialiser la caisse</b> : envoie les articles visibles vers la caisse verte du téléphone.<br>
-                <b>Départ</b> : recharge les articles exemples si la boutique n’a qu’un ou deux articles de test.<br>
-                <b>Ma fiche commerce</b> : ouvre la page où tu règles la fiche. <b>Voir côté client</b> : ouvre la vitrine publique.
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <h2>Lecture rapide</h2>
-
-            <div class="miniStats">
-              <div class="mini">
-                <div class="k">Quantité</div>
-                <div class="v" id="kpiStock">0</div>
-              </div>
-              <div class="mini">
-                <div class="k">Valeur stock</div>
-                <div class="v" id="kpiValue">0 F</div>
-              </div>
-              <div class="mini">
-                <div class="k">Bientôt finis</div>
-                <div class="v" id="kpiLow">0</div>
-              </div>
-            </div>
+            </details>
 
             <div class="miniStats">
               <div class="mini">
@@ -792,8 +777,8 @@
                 <div class="v" id="kpiHidden">0</div>
               </div>
               <div class="mini">
-                <div class="k">Atelier</div>
-                <div class="v">Plus</div>
+                <div class="k">Admin</div>
+                <div class="v">Admin</div>
               </div>
             </div>
 
@@ -806,7 +791,7 @@
                 <option value="low">Bientôt finis</option>
               </select>
               <select class="select" id="sortBy">
-                <option value="recent">Plus récents</option>
+                <option value="recent">Admin récents</option>
                 <option value="name">Nom A→Z</option>
                 <option value="price_desc">Prix ↓</option>
                 <option value="price_asc">Prix ↑</option>
@@ -847,18 +832,45 @@
             </div>
 
             <div class="field">
-              <label for="productPublished">Afficher dans la caisse ?</label>
+              <label for="productPublished">Visible dans la caisse ?</label>
               <select class="select" id="productPublished">
                 <option value="true">Oui, en vente</option>
-                <option value="false">Non, garder caché</option>
+                <option value="false">Non, garder derrière</option>
               </select>
             </div>
           </div>
 
           <div class="formGrid">
             <div class="field">
-              <label for="productCategory">Type d’article</label>
-              <input class="input" id="productCategory" type="text" placeholder="Ex : Alimentaire / Mode / Beauté"/>
+              <label for="productCost">Prix d’achat</label>
+              <input class="input" id="productCost" type="number" inputmode="numeric" min="0" step="1" placeholder="Optionnel"/>
+            </div>
+
+            <div class="field">
+              <label for="productTax">TVA / taxe</label>
+              <select class="select" id="productTax">
+                <option value="">Aucune / non utilisée</option>
+                <option value="0">0%</option>
+                <option value="10">10%</option>
+                <option value="18">18%</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="formGrid">
+            <div class="field">
+              <label for="productCategory">Famille</label>
+              <select class="select" id="productCategory">
+                <option value="">Choisir ou laisser vide</option>
+                <option value="Alimentation">Alimentation</option>
+                <option value="Boissons">Boissons</option>
+                <option value="Hygiène">Hygiène</option>
+                <option value="Maison">Maison</option>
+                <option value="Mode">Mode</option>
+                <option value="Beauté">Beauté</option>
+                <option value="Services">Services</option>
+                <option value="Autres">Autres</option>
+              </select>
             </div>
 
             <div class="field">
@@ -867,14 +879,38 @@
             </div>
           </div>
 
+          <div class="formGrid">
+            <div class="field">
+              <label for="productUnit">Unité</label>
+              <select class="select" id="productUnit">
+                <option value="unité">Unité</option>
+                <option value="kg">Kg</option>
+                <option value="litre">Litre</option>
+                <option value="paquet">Paquet</option>
+                <option value="carton">Carton</option>
+                <option value="service">Service</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="productLowLimit">Alerte stock bas</label>
+              <input class="input" id="productLowLimit" type="number" inputmode="numeric" min="0" step="1" placeholder="Ex : 5"/>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="productSupplier">Fournisseur / origine</label>
+            <input class="input" id="productSupplier" type="text" placeholder="Optionnel"/>
+          </div>
+
           <div class="field">
             <label for="productNote">Petit détail</label>
             <textarea class="textarea" id="productNote" placeholder="Optionnel : taille, couleur, fournisseur, remarque…"></textarea>
           </div>
 
           <div class="field">
-            <label for="productImage">Image</label>
-            <input class="input" id="productImage" type="text" placeholder="Optionnel : https://...jpg"/>
+            <label for="productImage">Image URL</label>
+            <input class="input" id="productImage" type="text" placeholder="URL uniquement : https://...jpg"/>
           </div>
 
           <div class="actionRow">
@@ -905,7 +941,7 @@
       <a id="navArticles" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
       <a id="navCash" href="./caisse.html"><span class="ico">💰</span><span>Encaisser</span></a>
       <a id="navNotes" href="./caisse.html#notes"><span class="ico">✍️</span><span>Notes</span></a>
-      <a class="active" id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Plus</span></a>
+      <a class="active" id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Admin</span></a>
     </div>
   </nav>
 
@@ -1035,12 +1071,41 @@
         return new URL(location.href).searchParams.get(name) || "";
       }
 
+      function rememberUrlContextBeforeClean(){
+        try{
+          const url = new URL(location.href);
+          const slug = normSlug(url.searchParams.get("slug") || "");
+          const phone = normPhone(
+            url.searchParams.get("phone") ||
+            url.searchParams.get("tel") ||
+            url.searchParams.get("owner_phone") ||
+            url.searchParams.get("subscription_phone") ||
+            url.searchParams.get("checkout_phone") ||
+            url.searchParams.get("p_phone") ||
+            ""
+          );
+
+          if(slug){
+            sessionStorage.setItem("digiy_pos_last_slug",slug);
+            localStorage.setItem("digiy_pos_last_slug",slug);
+          }
+
+          if(phone){
+            sessionStorage.setItem("digiy_pos_last_phone",phone);
+            localStorage.setItem("digiy_pos_last_phone",phone);
+          }
+        }catch(_){}
+      }
+
       function cleanVisibleUrl(){
+        rememberUrlContextBeforeClean();
+
         try{
           const url = new URL(location.href);
           const sensitive = [
             "slug","phone","tel","module","owner_phone",
-            "subscription_phone","checkout_phone","p_phone","return","from"
+            "subscription_phone","checkout_phone","p_phone","return","from",
+            "pin","pin4","token","session_token"
           ];
 
           let dirty = false;
@@ -1103,8 +1168,19 @@
 
       async function awaitGuardReady(){
         try{
-          if(typeof window.DIGIY_GUARD?.ready === "function") await window.DIGIY_GUARD.ready();
-          else if(window.DIGIY_GUARD?.ready?.then) await window.DIGIY_GUARD.ready;
+          if(typeof window.DIGIY_GUARD?.ready === "function"){
+            try{
+              await window.DIGIY_GUARD.ready({
+                redirect:false,
+                preserve_validation:true,
+                allow_soft_session:true
+              });
+            }catch(_){
+              await window.DIGIY_GUARD.ready();
+            }
+          }else if(window.DIGIY_GUARD?.ready?.then){
+            await window.DIGIY_GUARD.ready;
+          }
         }catch(_){}
       }
 
@@ -1335,6 +1411,9 @@
           price:Number(p.price_xof || 0) || 0,
           stock:Math.max(0,Number(p.stock_qty || 0) || 0),
           published:!!p.is_published,
+          unit:p.unit || "unité",
+          tax_rate:p.tax_rate || "",
+          cost_xof:Number(p.cost_xof || 0) || 0,
           updated_at:p.updated_at || new Date().toISOString()
         };
       }
@@ -1426,6 +1505,11 @@
           stock_qty:Number(r.stock_qty ?? r.stock ?? 0) || 0,
           note_text:String(r.note_text || r.note || r.description || "").trim(),
           image_url:String(r.image_url || r.photo_url || "").trim(),
+          cost_xof:Number(r.cost_xof ?? r.cost ?? 0) || 0,
+          tax_rate:String(r.tax_rate ?? r.tva ?? "").trim(),
+          unit:String(r.unit || "unité").trim(),
+          low_stock_limit:Number(r.low_stock_limit ?? r.stock_alert ?? 0) || 0,
+          supplier:String(r.supplier || r.provider || "").trim(),
           emoji:String(r.emoji || "").trim(),
           is_published:typeof r.is_published === "boolean" ? r.is_published : !!r.published,
           created_at:r.created_at || new Date().toISOString(),
@@ -1688,6 +1772,11 @@
           stock_qty:Number(qs("productStock").value || 0),
           note_text:qs("productNote").value.trim(),
           image_url:qs("productImage").value.trim(),
+          cost_xof:Number(qs("productCost")?.value || 0),
+          tax_rate:String(qs("productTax")?.value || "").trim(),
+          unit:String(qs("productUnit")?.value || "unité").trim(),
+          low_stock_limit:Number(qs("productLowLimit")?.value || 0),
+          supplier:String(qs("productSupplier")?.value || "").trim(),
           is_published:qs("productPublished").value === "true"
         });
       }
@@ -1701,6 +1790,11 @@
         qs("productPublished").value = "true";
         qs("productCategory").value = "";
         qs("productSku").value = "";
+        if(qs("productCost")) qs("productCost").value = "";
+        if(qs("productTax")) qs("productTax").value = "";
+        if(qs("productUnit")) qs("productUnit").value = "unité";
+        if(qs("productLowLimit")) qs("productLowLimit").value = "";
+        if(qs("productSupplier")) qs("productSupplier").value = "";
         qs("productNote").value = "";
         qs("productImage").value = "";
         qs("btnDeleteProduct").style.display = "none";
@@ -1717,6 +1811,11 @@
         qs("productPublished").value = item.is_published ? "true" : "false";
         qs("productCategory").value = item.category || "";
         qs("productSku").value = item.sku || "";
+        if(qs("productCost")) qs("productCost").value = item.cost_xof || "";
+        if(qs("productTax")) qs("productTax").value = item.tax_rate || "";
+        if(qs("productUnit")) qs("productUnit").value = item.unit || "unité";
+        if(qs("productLowLimit")) qs("productLowLimit").value = item.low_stock_limit || "";
+        if(qs("productSupplier")) qs("productSupplier").value = item.supplier || "";
         qs("productNote").value = item.note_text || "";
         qs("productImage").value = item.image_url || "";
         qs("btnDeleteProduct").style.display = "inline-flex";
@@ -1776,7 +1875,7 @@
           low > 0 ? "warn" : "ok",
           low > 0
             ? `Tu as <b>${low}</b> article(s) bientôt finis. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${modeLabel(STATE.mode)}</b>.`
-            : `Atelier prêt. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${modeLabel(STATE.mode)}</b>.`
+            : `Arrière-boutique prête. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${modeLabel(STATE.mode)}</b>.`
         );
       }
 
@@ -1794,7 +1893,7 @@
         box.innerHTML = items.map(item => {
           const stock = Number(item.stock_qty || 0);
           const stockBadge = stock <= 0
-            ? `<span class="badge bad">Plus en stock</span>`
+            ? `<span class="badge bad">Admin en stock</span>`
             : stock <= LOW_STOCK_LIMIT
               ? `<span class="badge warn">Bientôt fini</span>`
               : `<span class="badge ok">En stock</span>`;
@@ -1819,7 +1918,10 @@
               <div style="display:flex;gap:7px;flex-wrap:wrap">
                 ${stockBadge}
                 ${pubBadge}
-                <span class="badge">Quantité : ${stock}</span>
+                <span class="badge">Quantité : ${stock}${item.unit ? " " + esc(item.unit) : ""}</span>
+                ${item.cost_xof ? `<span class="badge">Achat : ${money(item.cost_xof)}</span>` : ""}
+                ${item.tax_rate ? `<span class="badge">TVA : ${esc(item.tax_rate)}%</span>` : ""}
+                ${item.supplier ? `<span class="badge">Fournisseur : ${esc(item.supplier)}</span>` : ""}
               </div>
 
               ${item.note_text ? `<div class="productMeta">${esc(item.note_text)}</div>` : ""}
@@ -1964,6 +2066,11 @@
             stock_qty:item.stock_qty,
             note_text:item.note_text,
             image_url:item.image_url,
+            cost_xof:item.cost_xof,
+            tax_rate:item.tax_rate,
+            unit:item.unit,
+            low_stock_limit:item.low_stock_limit,
+            supplier:item.supplier,
             emoji:item.emoji,
             is_published:item.is_published,
             updated_at:item.updated_at
@@ -2160,6 +2267,8 @@
         qs("btnDownloadAdmin")?.addEventListener("click",downloadAdminFile);
         qs("btnInitCaisse")?.addEventListener("click",() => syncCaisseFromProducts({ silent:false }));
         qs("btnLoadStarter")?.addEventListener("click",reloadStarterProducts);
+        qs("btnInitCaisseProxy")?.addEventListener("click",() => syncCaisseFromProducts({ silent:false }));
+        qs("btnLoadStarterProxy")?.addEventListener("click",reloadStarterProducts);
         qs("fileImport")?.addEventListener("change",(e) => importProducts(e.target.files?.[0] || null));
 
         ["searchText","filterStatus","sortBy"].forEach(id => {
@@ -2204,13 +2313,104 @@
           renderBlocked("Problème technique. Entre avec ton code ou recharge la page.");
         }catch(_){
           document.documentElement.style.visibility = "";
-          document.body.innerHTML = '<div style="min-height:100vh;background:#04110d;color:#fff;font-family:system-ui;padding:24px"><h1>MON COMMERCE — Plus</h1><p>Chargement bloqué. Recharge la page ou repasse par le code.</p><p><a style="color:#facc15" href="./pin.html">Entrer avec mon code</a></p></div>';
+          document.body.innerHTML = '<div style="min-height:100vh;background:#04110d;color:#fff;font-family:system-ui;padding:24px"><h1>MON COMMERCE — Admin</h1><p>Chargement bloqué. Recharge la page ou repasse par le code.</p><p><a style="color:#facc15" href="./pin.html">Entrer avec mon code</a></p></div>';
         }
       });
     })();
   </script>
+
+  <script>
+    (function(){
+      "use strict";
+
+      const TEXT = `
+Bienvenue dans l’arrière-boutique.
+
+Ici, tu prépares ce que la caisse va vendre.
+
+Pour ajouter un article :
+mets le nom,
+le prix de vente,
+et la quantité.
+
+Le reste est optionnel.
+
+Si l’article doit passer en caisse,
+laisse-le visible.
+
+Si tu veux le garder derrière,
+mets-le caché.
+
+L’image doit être une URL,
+pas un fichier lourd.
+
+Quand tu as fini,
+touche Enregistrer.
+
+Puis retourne à Encaisser.
+
+DIGIY range la boutique,
+mais le commerçant garde la main.
+`;
+
+      const btn = document.getElementById("btnAudioNotice");
+      if(!btn || !("speechSynthesis" in window)) return;
+
+      let speaking = false;
+
+      function stop(){
+        try{ speechSynthesis.cancel(); }catch(_){}
+        speaking = false;
+        btn.textContent = "🎧 Notice rapide";
+      }
+
+      function getVoice(){
+        const voices = speechSynthesis.getVoices() || [];
+        return voices.find(v => /fr[-_]?FR/i.test(v.lang) && /google/i.test(v.name)) ||
+               voices.find(v => /fr[-_]?FR/i.test(v.lang)) ||
+               voices.find(v => /^fr/i.test(v.lang)) ||
+               null;
+      }
+
+      function speak(){
+        stop();
+
+        const u = new SpeechSynthesisUtterance(TEXT.trim());
+        u.lang = "fr-FR";
+        u.rate = 0.86;
+        u.pitch = 1;
+        u.volume = 1;
+
+        const voice = getVoice();
+        if(voice) u.voice = voice;
+
+        u.onstart = function(){
+          speaking = true;
+          btn.textContent = "⏹ Arrêter la notice";
+        };
+
+        u.onend = stop;
+        u.onerror = stop;
+
+        setTimeout(function(){
+          try{ speechSynthesis.speak(u); }catch(_){ stop(); }
+        }, 80);
+      }
+
+      btn.addEventListener("click", function(){
+        speaking ? stop() : speak();
+      });
+
+      if(speechSynthesis.onvoiceschanged !== undefined){
+        speechSynthesis.onvoiceschanged = function(){};
+      }
+
+      window.addEventListener("beforeunload", stop);
+    })();
+  </script>
+
 </body>
-</html>
+</ht
 
 
 
