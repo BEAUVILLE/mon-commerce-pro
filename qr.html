@@ -3,449 +3,832 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <meta name="theme-color" content="#020617"/>
-  <title>Mon QR d'accès · MON COMMERCE by DIGIY</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — génère le QR d'accès de ta boutique." />
+  <meta name="theme-color" content="#06140f"/>
+  <title>MON COMMERCE — Mon QR</title>
+  <meta name="description" content="MON COMMERCE by DIGIY — QR boutique pour ouvrir le comptoir, le code d’accès ou la fiche côté client."/>
+
+  <script>
+    window.DIGIY_MODULE = "POS";
+    window.DIGIY_LOGIN_URL = "./pin.html";
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
 
   <style>
     :root{
-      --bg:#020617;--bg2:#0b1120;--card:rgba(11,17,32,.86);--line:rgba(148,163,184,.22);
-      --ink:#f8fafc;--muted:#cbd5e1;
-      --gold:#facc15;--green:#22c55e;--orange:#f97316;--cyan:#22d3ee;
-      --shadow:0 18px 50px rgba(0,0,0,.42);--radius:22px;
-      --fontA:"Outfit",system-ui,-apple-system,sans-serif;
+      --bg:#04110d;
+      --text:#f7fbf8;
+      --muted:#b8cfc4;
+      --gold:#facc15;
+      --gold2:#f59e0b;
+      --green:#22c55e;
+      --blue:#38bdf8;
+      --red:#ef4444;
+      --line:rgba(255,255,255,.12);
+      --shadow:0 22px 62px rgba(0,0,0,.38);
+      --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      --bottom:88px;
     }
+
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0}
+    html,body{margin:0;padding:0;min-height:100%}
+
     body{
-      min-height:100vh;color:var(--ink);font-family:var(--fontA);
+      min-height:100dvh;
+      font-family:var(--font);
+      color:var(--text);
       background:
-        radial-gradient(circle at top, rgba(250,204,21,.10), transparent 40%),
-        radial-gradient(circle at 20% 0%, rgba(34,197,94,.10), transparent 35%),
-        radial-gradient(circle at 100% 0%, rgba(34,211,238,.09), transparent 35%),
-        linear-gradient(180deg,#0b1120 0%,#020617 52%,#000 100%);
-      padding:18px;
+        radial-gradient(850px 520px at 0% -10%, rgba(250,204,21,.13), transparent 58%),
+        radial-gradient(800px 480px at 100% 0%, rgba(34,197,94,.13), transparent 58%),
+        linear-gradient(180deg,#06140f,var(--bg));
+      padding:12px 12px calc(var(--bottom) + env(safe-area-inset-bottom,0px) + 16px);
     }
-    .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 420px;gap:18px;}
-    @media(max-width:980px){.wrap{grid-template-columns:1fr}}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(10px);}
-    .panel{padding:18px}
-    .hero{padding:20px 20px 10px;}
-    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid rgba(250,204,21,.18);background:rgba(250,204,21,.08);color:#fde68a;font-size:12px;font-weight:900;letter-spacing:.02em;text-transform:uppercase;}
-    h1{margin:12px 0 8px;font-size:clamp(28px,4vw,44px);line-height:1.02;font-weight:1000;letter-spacing:-.02em;background:linear-gradient(135deg,#fff,var(--gold),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-    .sub{margin:0;color:var(--muted);font-size:15px;line-height:1.6;font-weight:700;}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
-    @media(max-width:720px){.grid{grid-template-columns:1fr}}
-    label{display:block;margin:0 0 7px;font-size:12px;font-weight:950;color:#cbd5e1;letter-spacing:.02em;}
-    .field{width:100%;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(2,6,23,.62);color:var(--ink);padding:14px 14px;outline:none;font-size:14px;font-weight:900;font-family:var(--fontA);}
-    .field:focus{border-color:rgba(250,204,21,.45);box-shadow:0 0 0 3px rgba(250,204,21,.10);}
-    .mini{margin-top:6px;color:#94a3b8;font-size:12px;font-weight:700;line-height:1.45;}
-    .line{height:1px;background:rgba(255,255,255,.08);margin:16px 0;}
-    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
-    .btn{appearance:none;border:none;cursor:pointer;border-radius:999px;padding:13px 16px;font-size:14px;font-weight:1000;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:170px;transition:transform .15s ease, opacity .15s ease, border-color .15s ease;font-family:var(--fontA);}
-    .btn:hover{transform:translateY(-1px);border-color:rgba(250,204,21,.32);}
-    .btn.primary{color:#081018;background:linear-gradient(135deg,var(--gold),var(--orange));border:none;box-shadow:0 14px 28px rgba(249,115,22,.18);}
-    .btn.green{color:#04110d;background:linear-gradient(135deg,#4ade80,#22c55e);border:none;box-shadow:0 14px 28px rgba(34,197,94,.18);}
-    .btn.cyan{color:#041118;background:linear-gradient(135deg,#67e8f9,#22d3ee);border:none;box-shadow:0 14px 28px rgba(34,211,238,.18);}
-    .stat{border:1px solid rgba(255,255,255,.09);background:rgba(2,6,23,.48);border-radius:18px;padding:13px;}
-    .stat .k{font-size:12px;color:#94a3b8;font-weight:900;text-transform:uppercase;letter-spacing:.04em;}
-    .stat .v{margin-top:6px;font-size:15px;font-weight:1000;color:#fff;word-break:break-word;}
-    .qr-side{padding:18px;display:flex;flex-direction:column;gap:14px;}
-    .qr-box{border-radius:24px;background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.92));color:#0f172a;padding:18px;border:1px solid rgba(255,255,255,.65);box-shadow:0 18px 44px rgba(0,0,0,.26);}
-    .qr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
-    .qr-brand{font-size:13px;font-weight:1000;color:#0f172a;letter-spacing:.03em;text-transform:uppercase;}
-    .qr-pub{font-size:11px;font-weight:900;color:#334155;}
-    .qr-canvas-wrap{display:flex;justify-content:center;align-items:center;padding:14px;background:#fff;border-radius:20px;border:1px solid rgba(15,23,42,.08);}
-    #qrCanvas{width:min(100%,300px);height:auto;display:block;}
-    .qr-title{margin:14px 0 6px;text-align:center;font-size:26px;line-height:1.05;font-weight:1000;color:#0f172a;letter-spacing:-.02em;}
-    .qr-slug{text-align:center;font-size:13px;font-weight:900;color:#334155;word-break:break-word;}
-    .qr-note{margin-top:12px;text-align:center;font-size:12px;color:#475569;line-height:1.5;font-weight:800;}
-    .status{border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(2,6,23,.45);padding:13px 14px;color:#cbd5e1;font-size:13px;font-weight:900;line-height:1.5;}
-    .ok{color:#bbf7d0}.bad{color:#fecaca}
-    .urlbox{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.5;word-break:break-all;color:#e2e8f0;background:rgba(2,6,23,.62);border:1px solid rgba(255,255,255,.08);padding:12px;border-radius:14px;}
+
+    a{color:inherit;text-decoration:none}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:1fr 390px;
+      gap:12px;
+      align-items:start;
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.035));
+      box-shadow:var(--shadow);
+      padding:16px;
+      overflow:hidden;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo{
+      width:58px;
+      height:58px;
+      border-radius:22px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      color:#06140f;
+      font-size:29px;
+      font-weight:1000;
+      box-shadow:0 16px 34px rgba(250,204,21,.20);
+      flex:0 0 auto;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(1.8rem,6vw,2.75rem);
+      line-height:.96;
+      letter-spacing:-.05em;
+      font-weight:1000;
+    }
+
+    .sub{
+      margin-top:7px;
+      color:var(--muted);
+      line-height:1.42;
+      font-size:1rem;
+      font-weight:850;
+    }
+
+    .notice{
+      margin-top:12px;
+      border:1px solid rgba(250,204,21,.25);
+      background:rgba(250,204,21,.08);
+      color:#fde68a;
+      border-radius:20px;
+      padding:12px;
+      line-height:1.45;
+      font-size:.92rem;
+      font-weight:850;
+    }
+
+    .notice.ok{
+      border-color:rgba(34,197,94,.28);
+      background:rgba(34,197,94,.10);
+      color:#bbf7d0;
+    }
+
+    .notice.err{
+      border-color:rgba(239,68,68,.28);
+      background:rgba(239,68,68,.10);
+      color:#fecaca;
+    }
+
+    .form{
+      margin-top:14px;
+      display:grid;
+      gap:12px;
+    }
+
+    .field{
+      display:grid;
+      gap:7px;
+    }
+
+    label{
+      font-size:.95rem;
+      font-weight:1000;
+      color:#eafff1;
+    }
+
+    input,select{
+      width:100%;
+      min-height:56px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.13);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      outline:none;
+      padding:12px 14px;
+      font-size:1.02rem;
+      font-weight:900;
+    }
+
+    input::placeholder{color:rgba(184,207,196,.64)}
+
+    input:focus,select:focus{
+      border-color:rgba(250,204,21,.55);
+      box-shadow:0 0 0 4px rgba(250,204,21,.11);
+    }
+
+    .hint{
+      color:rgba(184,207,196,.76);
+      font-size:.80rem;
+      line-height:1.45;
+      font-weight:800;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:14px;
+    }
+
+    .btn{
+      min-height:58px;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:12px;
+      font-size:.98rem;
+      font-weight:1000;
+      text-align:center;
+    }
+
+    .btn.primary{
+      border:none;
+      color:#06140f;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      box-shadow:0 14px 30px rgba(250,204,21,.17);
+    }
+
+    .btn.green{
+      border:none;
+      color:#06140f;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+    }
+
+    .btn.blue{
+      color:#bae6fd;
+      background:rgba(56,189,248,.12);
+      border-color:rgba(56,189,248,.25);
+    }
+
+    .wide{grid-column:1/-1}
+
+    .qrCard{
+      background:#fff;
+      color:#0f172a;
+      border-radius:28px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    .qrHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .qrBrand{
+      font-size:.82rem;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.10em;
+      color:#0f172a;
+    }
+
+    .qrSub{
+      margin-top:4px;
+      color:#475569;
+      font-size:.78rem;
+      font-weight:900;
+    }
+
+    .qrMark{
+      width:38px;
+      height:38px;
+      border-radius:14px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,#facc15,#22c55e);
+      color:#06140f;
+      font-weight:1000;
+    }
+
+    .qrBox{
+      border:1px solid rgba(15,23,42,.10);
+      border-radius:22px;
+      padding:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+    }
+
+    #qrCanvas{
+      width:min(100%,300px);
+      height:auto;
+      display:block;
+    }
+
+    .qrTitle{
+      margin-top:14px;
+      text-align:center;
+      font-size:1.75rem;
+      line-height:1.05;
+      letter-spacing:-.04em;
+      font-weight:1000;
+      color:#0f172a;
+    }
+
+    .qrInfo{
+      margin-top:7px;
+      text-align:center;
+      font-size:.88rem;
+      line-height:1.4;
+      color:#475569;
+      font-weight:900;
+    }
+
+    .qrNote{
+      margin-top:12px;
+      border:1px solid rgba(15,23,42,.08);
+      background:#f8fafc;
+      border-radius:18px;
+      padding:12px;
+      color:#334155;
+      text-align:center;
+      line-height:1.45;
+      font-size:.86rem;
+      font-weight:850;
+    }
+
+    .urlBox{
+      margin-top:12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(0,0,0,.16);
+      border-radius:18px;
+      padding:12px;
+      color:var(--muted);
+      line-height:1.45;
+      font-size:.80rem;
+      font-weight:800;
+      word-break:break-all;
+    }
+
+    .bottomNav{
+      position:fixed;
+      left:0;right:0;bottom:0;
+      z-index:80;
+      padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));
+      background:rgba(3,18,13,.94);
+      border-top:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(14px);
+    }
+
+    .bottomInner{
+      max-width:760px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:6px;
+    }
+
+    .navItem{
+      min-height:58px;
+      border-radius:17px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+      color:rgba(247,251,248,.72);
+      font-size:.72rem;
+      font-weight:1000;
+      border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.035);
+      text-align:center;
+    }
+
+    .navItem .ico{font-size:1.25rem;line-height:1}
+    .navItem.active{
+      color:#06140f;
+      background:linear-gradient(135deg,var(--gold),var(--green));
+      border-color:rgba(255,255,255,.18);
+    }
+
+    @media(max-width:860px){
+      .wrap{grid-template-columns:1fr}
+    }
+
+    @media(max-width:560px){
+      .actions{grid-template-columns:1fr}
+      .wide{grid-column:auto}
+      .card{border-radius:24px}
+    }
+
+    @media print{
+      body{background:#fff;padding:0}
+      .card:first-child,.bottomNav,.urlBox{display:none!important}
+      .wrap{display:block;max-width:none;margin:0;padding:0}
+      .qrCard{box-shadow:none;border-radius:0;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <section class="card">
-      <div class="hero">
-        <!-- ━━━ AVANT : "🧾 DIGIY CAISSE PRO • MON COMMERCE" → banni ━━━ -->
-        <div class="badge">🏪 MON COMMERCE · accès boutique</div>
-        <!-- ━━━ AVANT : "QR PRO COMMERCE / POS" → banni ━━━ -->
-        <h1>Mon QR d'accès boutique</h1>
-        <!-- ━━━ AVANT : "COMMERCE / POS", "slug-first" → jargon banni ━━━ -->
-        <p class="sub">
-          Génère le QR de ta boutique pour ouvrir l'accès pro directement.
-          Le QR principal mène à l'entrée sécurisée — ton client ne voit que ce qu'il faut voir.
-        </p>
+      <div class="brand">
+        <div class="logo">🔳</div>
+        <div>
+          <h1>Mon QR boutique</h1>
+          <div class="sub">
+            Un QR pour ouvrir le comptoir, le code d’accès ou la fiche côté client.
+          </div>
+        </div>
       </div>
 
-      <div class="panel">
-        <div class="grid">
-          <div>
-            <!-- ━━━ AVANT : "Slug pro" + placeholder "pos-221771342889" → bannis ━━━ -->
-            <label for="slug">Identifiant boutique</label>
-            <input id="slug" class="field" placeholder="Ton identifiant boutique" />
-            <div class="mini">Le QR principal ouvre l'accès sécurisé avec cet identifiant.</div>
-          </div>
-
-          <div>
-            <label for="publicName">Nom affiché</label>
-            <input id="publicName" class="field" placeholder="Ex: MON COMMERCE" />
-            <div class="mini">Nom visible sur la carte PNG.</div>
-          </div>
-
-          <div>
-            <label for="shopName">Nom de ta boutique</label>
-            <input id="shopName" class="field" placeholder="Ex: Boutique Beauville" />
-            <div class="mini">Sous-titre de la carte.</div>
-          </div>
-
-          <div>
-            <!-- ━━━ AVANT : options "PIN PRO", "Dashboard Pro" → bannis ━━━ -->
-            <label for="targetMode">Destination du QR</label>
-            <select id="targetMode" class="field">
-              <option value="pin">Mon code d'accès (recommandé)</option>
-              <option value="dashboard">Mon espace de travail</option>
-              <option value="public">Ma vitrine publique</option>
-            </select>
-            <div class="mini">Par défaut, le QR ouvre l'entrée sécurisée de ta boutique.</div>
-          </div>
-        </div>
-
-        <div class="line"></div>
-
-        <div class="grid">
-          <!-- ━━━ AVANT : "URL PIN PRO", "URL Dashboard Pro" → bannis ━━━ -->
-          <div class="stat">
-            <div class="k">Accès sécurisé</div>
-            <div id="pinUrl" class="v">Ouverture directe</div>
-          </div>
-          <div class="stat">
-            <div class="k">Espace boutique</div>
-            <div id="dashUrl" class="v">Ouverture directe</div>
-          </div>
-          <div class="stat">
-            <div class="k">Lien vitrine publique</div>
-            <div id="publicUrl" class="v">—</div>
-          </div>
-          <div class="stat">
-            <div class="k">Destination active</div>
-            <div id="qrTargetText" class="v">—</div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button id="btnGenerate"    class="btn primary" type="button">⚙️ Générer le QR</button>
-          <button id="btnCopy"        class="btn cyan"    type="button">📋 Copier le lien</button>
-          <button id="btnOpenTarget"  class="btn green"   type="button">🚪 Ouvrir la destination</button>
-          <!-- ━━━ AVANT : "Dashboard Pro" → banni ━━━ -->
-          <button id="btnOpenDash"    class="btn"         type="button">🧭 Mon espace de travail</button>
-          <button id="btnOpenPublic"  class="btn"         type="button">🏪 Ma vitrine publique</button>
-          <button id="btnDownload"    class="btn"         type="button">🖼️ Télécharger PNG</button>
-        </div>
-
-        <div class="line"></div>
-
-        <div class="status" id="status">
-          Statut : <span class="ok">prêt</span>
-        </div>
-
+      <div class="notice" id="statusBox">
+        Prépare ton QR. Aucun téléphone n’est affiché.
       </div>
+
+      <div class="form">
+        <div class="field">
+          <label for="shopName">Nom sur le QR</label>
+          <input id="shopName" placeholder="Ex : Boutique Ndiaye"/>
+          <div class="hint">Nom visible sur l’affiche QR.</div>
+        </div>
+
+        <div class="field">
+          <label for="slug">Identifiant boutique</label>
+          <input id="slug" placeholder="Reconnu automatiquement si possible"/>
+          <div class="hint">Ne mets pas le téléphone ici. Utilise l’identifiant boutique.</div>
+        </div>
+
+        <div class="field">
+          <label for="target">Destination</label>
+          <select id="target">
+            <option value="pin">Code d’accès</option>
+            <option value="counter">Comptoir</option>
+            <option value="public">Fiche côté client</option>
+          </select>
+          <div class="hint">Pour un commerçant, garde souvent “Code d’accès”.</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btnGenerate" type="button">⚙️ Générer</button>
+        <button class="btn blue" id="btnCopy" type="button">📋 Copier lien</button>
+        <button class="btn green" id="btnOpen" type="button">🚪 Ouvrir</button>
+        <button class="btn" id="btnPrint" type="button">🖨️ Imprimer</button>
+        <button class="btn wide" id="btnDownload" type="button">🖼️ Télécharger PNG</button>
+      </div>
+
+      <div class="urlBox" id="urlBox">Lien : —</div>
     </section>
 
-    <aside class="card qr-side">
-      <div class="qr-box" id="qrCard">
-        <div class="qr-head">
+    <aside>
+      <div class="qrCard" id="qrCard">
+        <div class="qrHead">
           <div>
-            <!-- ━━━ AVANT : "DIGIY CAISSE PRO" → banni ━━━ -->
-            <div class="qr-brand">MON COMMERCE</div>
-            <div class="qr-pub">DIGIYLYFE · accès boutique</div>
+            <div class="qrBrand">MON COMMERCE</div>
+            <div class="qrSub">DIGIYLYFE · accès boutique</div>
           </div>
-          <!-- ━━━ AVANT : "POS" affiché → jargon banni ━━━ -->
-          <div style="font-size:12px;font-weight:1000;color:#334155">∞</div>
+          <div class="qrMark">∞</div>
         </div>
 
-        <div class="qr-canvas-wrap">
+        <div class="qrBox">
           <canvas id="qrCanvas" width="320" height="320"></canvas>
         </div>
 
-        <div class="qr-title" id="cardTitle">MON COMMERCE</div>
-        <div class="qr-slug" id="cardSlug">—</div>
-        <div class="qr-note" id="cardNote">
-          Scanner pour ouvrir l'accès boutique DIGIY.
+        <div class="qrTitle" id="qrTitle">MON COMMERCE</div>
+        <div class="qrInfo" id="qrInfo">Scanner pour ouvrir l’accès boutique.</div>
+        <div class="qrNote" id="qrNote">
+          Paiement direct · 0% commission · Le commerçant garde la main.
         </div>
-      </div>
-
-      <div class="status">
-        Conseil terrain : garde le QR principal sur <strong>Mon code d'accès</strong>.
-        Ton commerçant ouvre son espace proprement sans laisser tout ouvert devant la boutique.
       </div>
     </aside>
   </div>
 
-  <script>
-    (() => {
-      "use strict";
+  <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+    <div class="bottomInner">
+      <a class="navItem" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
+      <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
+      <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
+      <a class="navItem active" href="./qr.html"><span class="ico">🔳</span><span>QR</span></a>
+    </div>
+  </nav>
 
-      const PRO_BASE    = "https://commerce-pro.digiylyfe.com";
-      const PUBLIC_BASE = "https://mon-commerce.digiylyfe.com";
-      const MODULE      = "POS"; // code interne, jamais affiché
+<script>
+(function(){
+  "use strict";
 
-      const $ = (id) => document.getElementById(id);
+  const PUBLIC_BASE = "https://mon-commerce.digiylyfe.com";
+  const SLUG_KEYS = ["digiy_pos_slug","digiy_pos_last_slug"];
+  const PHONE_KEYS = ["digiy_pos_phone","digiy_pos_last_phone"];
+  const PROFILE_KEYS = ["DIGIY_POS_PROFILE_DRAFT","caisse_shop"];
 
-      const slugEl       = $("slug");
-      const publicNameEl = $("publicName");
-      const shopNameEl   = $("shopName");
-      const targetModeEl = $("targetMode");
-      const statusEl     = $("status");
-      const pinUrlEl     = $("pinUrl");
-      const dashUrlEl    = $("dashUrl");
-      const publicUrlEl  = $("publicUrl");
-      const qrTargetTextEl = $("qrTargetText");
-      const cardTitleEl  = $("cardTitle");
-      const cardSlugEl   = $("cardSlug");
-      const cardNoteEl   = $("cardNote");
-      const qrCanvas     = $("qrCanvas");
+  const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
+  const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
 
-      function setStatus(text, ok = true){
-        statusEl.innerHTML = `Statut : <span class="${ok ? "ok" : "bad"}">${escapeHtml(text)}</span>`;
+  const $ = (id)=>document.getElementById(id);
+
+  function normPhone(v){
+    return String(v || "").replace(/[^\d]/g,"").slice(0,15);
+  }
+
+  function normSlug(v){
+    return String(v || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g,"-")
+      .replace(/[^a-z0-9-]/g,"")
+      .replace(/-+/g,"-")
+      .replace(/^-|-$/g,"");
+  }
+
+  function isPosSlug(v){
+    const s = normSlug(v);
+    if(!s) return false;
+    if(FORBIDDEN_SLUG_PREFIXES.some(p => s.startsWith(p))) return false;
+    return ALLOWED_SLUG_PREFIXES.some(p => s.startsWith(p));
+  }
+
+  function safe(v){
+    return String(v || "").trim();
+  }
+
+  function storageGet(key){
+    try{
+      return sessionStorage.getItem(key) || localStorage.getItem(key) || "";
+    }catch(_){
+      return "";
+    }
+  }
+
+  function storageSet(key,value,localToo){
+    const v = String(value || "").trim();
+    if(!v) return;
+    try{ sessionStorage.setItem(key,v); }catch(_){}
+    if(localToo !== false){
+      try{ localStorage.setItem(key,v); }catch(_){}
+    }
+  }
+
+  function setStatus(msg,type){
+    const box = $("statusBox");
+    box.className = "notice " + (type || "");
+    box.textContent = msg || "";
+  }
+
+  function basePath(){
+    const parts = location.pathname.split("/").filter(Boolean);
+    const isGh = /\.github\.io$/i.test(location.hostname);
+    if(isGh && parts.length > 0) return "/" + parts[0] + "/";
+    return "/";
+  }
+
+  function localUrl(path){
+    const clean = String(path || "").replace(/^\/+/,"");
+    return location.origin + basePath() + clean;
+  }
+
+  function readUrlThenClean(){
+    try{
+      const u = new URL(location.href);
+
+      const slug = normSlug(
+        u.searchParams.get("slug") ||
+        u.searchParams.get("pos_slug") ||
+        u.searchParams.get("commerce") ||
+        ""
+      );
+
+      const phone = normPhone(
+        u.searchParams.get("phone") ||
+        u.searchParams.get("tel") ||
+        u.searchParams.get("owner_phone") ||
+        u.searchParams.get("p_phone") ||
+        ""
+      );
+
+      const name = safe(
+        u.searchParams.get("name") ||
+        u.searchParams.get("shop") ||
+        ""
+      );
+
+      if(slug && isPosSlug(slug)){
+        $("slug").value = slug;
+        SLUG_KEYS.forEach(k => storageSet(k,slug,true));
       }
 
-      function escapeHtml(str){
-        return String(str ?? "")
-          .replaceAll("&","&amp;").replaceAll("<","&lt;")
-          .replaceAll(">","&gt;").replaceAll('"',"&quot;");
+      if(phone){
+        PHONE_KEYS.forEach(k => storageSet(k,phone,false));
       }
 
-      function qs(name){ return new URLSearchParams(location.search).get(name) || ""; }
-
-      function slugify(str){
-        return String(str || "").toLowerCase()
-          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").trim();
+      if(name){
+        $("shopName").value = name;
       }
 
-      function getCleanSlug(){
-        return String(slugEl.value || "").trim() || "pos-000000000";
-      }
+      let changed = false;
 
-      function buildUrls(){
-        const slug = getCleanSlug();
-        const pin  = `${PRO_BASE}/pin.html?slug=${encodeURIComponent(slug)}`;
-        const dash = `${PRO_BASE}/dashboard-pro.html?slug=${encodeURIComponent(slug)}`;
-        const pub  = `${PUBLIC_BASE}/?slug=${encodeURIComponent(slug)}`;
-        return { slug, pin, dash, pub };
-      }
-
-      function getQrTarget(){
-        const { pin, dash, pub } = buildUrls();
-        const mode = targetModeEl.value;
-        if(mode === "dashboard") return dash;
-        if(mode === "public")    return pub;
-        return pin;
-      }
-
-      async function generateQr(){
-        const slug       = getCleanSlug();
-        const publicName = String(publicNameEl.value || "").trim() || "MON COMMERCE";
-        /* ━━━ AVANT : shopName default "DIGIY CAISSE PRO" → banni ━━━ */
-        const shopName   = String(shopNameEl.value || "").trim() || "Ma boutique";
-        const urls = buildUrls();
-        const target = getQrTarget();
-
-        pinUrlEl.textContent       = "Prêt";
-        dashUrlEl.textContent      = "Prêt";
-        publicUrlEl.textContent    = "Prêt";
-        qrTargetTextEl.textContent =
-          targetModeEl.value === "public"
-            ? "Ma vitrine publique"
-            : targetModeEl.value === "dashboard"
-              ? "Mon espace de travail"
-              : "Mon code d'accès";
-
-        cardTitleEl.textContent = publicName;
-        /* ━━━ AVANT : "slug: ..." → "identifiant: ..." ━━━ */
-        cardSlugEl.textContent  = `identifiant: ${slug}`;
-        cardNoteEl.textContent  =
-          targetModeEl.value === "public"
-            ? `${shopName} · ouverture vitrine publique`
-            : targetModeEl.value === "dashboard"
-              ? `${shopName} · ouverture espace de travail`
-              : `${shopName} · ouverture accès sécurisé`;
-
-        if(!window.QRCode || typeof window.QRCode.toCanvas !== "function"){
-          setStatus("Librairie QR absente", false);
-          return;
+      [
+        "slug","pos_slug","commerce","phone","tel","owner_phone","p_phone",
+        "pin","pin4","token","session_token","module","access","name","shop"
+      ].forEach(k=>{
+        if(u.searchParams.has(k)){
+          u.searchParams.delete(k);
+          changed = true;
         }
-
-        try{
-          await window.QRCode.toCanvas(qrCanvas, target, {
-            width: 320, margin: 2, errorCorrectionLevel: "H",
-            color: { dark: "#0f172a", light: "#ffffff" }
-          });
-          setStatus(`QR généré pour ${slug}`, true);
-        }catch(err){
-          console.error(err);
-          setStatus("Erreur génération QR", false);
-        }
-      }
-
-      async function copyTarget(){
-        try{
-          await navigator.clipboard.writeText(getQrTarget());
-          setStatus("Lien copié", true);
-        }catch(err){
-          console.error(err);
-          setStatus("Copie impossible", false);
-        }
-      }
-
-      function openTarget()  { window.open(getQrTarget(), "_blank", "noopener"); }
-      function openDash()    { window.open(buildUrls().dash, "_blank", "noopener"); }
-      function openPublic()  { window.open(buildUrls().pub,  "_blank", "noopener"); }
-
-      function downloadPng(){
-        try{
-          const slug       = getCleanSlug();
-          const publicName = String(publicNameEl.value || "").trim() || "MON COMMERCE";
-          /* ━━━ AVANT : "DIGIY CAISSE PRO" × 2 dans le PNG → bannis ━━━ */
-          const shopName   = String(shopNameEl.value || "").trim() || "Ma boutique";
-
-          const out = document.createElement("canvas");
-          out.width = 1400; out.height = 1800;
-          const ctx = out.getContext("2d");
-
-          const grad = ctx.createLinearGradient(0, 0, 0, out.height);
-          grad.addColorStop(0, "#ffffff"); grad.addColorStop(1, "#f8fafc");
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, 0, out.width, out.height);
-
-          /* ━━━ AVANT : "DIGIY CAISSE PRO" → "MON COMMERCE" ━━━ */
-          ctx.fillStyle = "#0f172a";
-          ctx.font = "900 56px Outfit, Arial, sans-serif";
-          ctx.textAlign = "center";
-          ctx.fillText("MON COMMERCE", out.width / 2, 120);
-
-          ctx.fillStyle = "#334155";
-          ctx.font = "800 30px Outfit, Arial, sans-serif";
-          /* ━━━ AVANT : "MON COMMERCE • QR D'ACCÈS" → déjà OK ━━━ */
-          ctx.fillText("DIGIYLYFE • QR D'ACCÈS BOUTIQUE", out.width / 2, 175);
-
-          ctx.fillStyle = "#facc15";
-          roundRect(ctx, 500, 210, 400, 56, 28, true);
-          ctx.fillStyle = "#0f172a";
-          ctx.font = "900 24px Outfit, Arial, sans-serif";
-          /* ━━━ AVANT : "MODULE POS" → banni ━━━ */
-          ctx.fillText("MON COMMERCE", out.width / 2, 247);
-
-          ctx.fillStyle = "#ffffff";
-          roundRect(ctx, 250, 310, 900, 900, 40, true);
-          ctx.drawImage(qrCanvas, 350, 410, 700, 700);
-
-          ctx.fillStyle = "#0f172a";
-          ctx.font = "1000 72px Outfit, Arial, sans-serif";
-          ctx.fillText(publicName, out.width / 2, 1325);
-
-          ctx.fillStyle = "#334155";
-          ctx.font = "900 34px Outfit, Arial, sans-serif";
-          ctx.fillText(shopName, out.width / 2, 1390);
-
-          ctx.fillStyle = "#475569";
-          ctx.font = "800 26px Outfit, Arial, sans-serif";
-          /* ━━━ AVANT : "slug: ..." → "identifiant: ..." ━━━ */
-          ctx.fillText(`identifiant: ${slug}`, out.width / 2, 1450);
-
-          ctx.fillStyle = "#64748b";
-          ctx.font = "800 24px Outfit, Arial, sans-serif";
-          ctx.fillText("Scanner pour ouvrir l'accès boutique DIGIY", out.width / 2, 1520);
-
-          ctx.fillStyle = "#94a3b8";
-          ctx.font = "700 20px Outfit, Arial, sans-serif";
-          wrapCenterText(ctx, getQrTarget(), out.width / 2, 1600, 1000, 30);
-
-          const a = document.createElement("a");
-          a.href = out.toDataURL("image/png");
-          a.download = `${slug}-qr-moncommerce.png`;
-          a.click();
-
-          setStatus("PNG téléchargé", true);
-        }catch(err){
-          console.error(err);
-          setStatus("Téléchargement PNG impossible", false);
-        }
-      }
-
-      function roundRect(ctx, x, y, w, h, r, fill){
-        ctx.beginPath();
-        ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
-        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-        ctx.lineTo(x + w, y + h - r);
-        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-        ctx.lineTo(x + r, y + h);
-        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-        ctx.lineTo(x, y + r);
-        ctx.quadraticCurveTo(x, y, x + r, y);
-        ctx.closePath();
-        if(fill) ctx.fill();
-      }
-
-      function wrapCenterText(ctx, text, centerX, startY, maxWidth, lineHeight){
-        const words = String(text || "").split(" ");
-        let line = "", y = startY;
-        for(let i = 0; i < words.length; i++){
-          const testLine = line ? `${line} ${words[i]}` : words[i];
-          if(ctx.measureText(testLine).width > maxWidth && line){
-            ctx.fillText(line, centerX, y);
-            line = words[i]; y += lineHeight;
-          } else { line = testLine; }
-        }
-        if(line) ctx.fillText(line, centerX, y);
-      }
-
-      function hydrateFromQuery(){
-        const qSlug = String(qs("slug") || "").trim();
-        const qName = String(qs("name") || "").trim();
-        const qShop = String(qs("shop") || "").trim();
-        const qMode = String(qs("mode") || "").trim();
-
-        /* ━━━ AVANT : defaults "pos-221771342889" + "DIGIY CAISSE PRO" → bannis ━━━ */
-        slugEl.value       = qSlug || "";
-        publicNameEl.value = qName || "MON COMMERCE";
-        shopNameEl.value   = qShop || "";
-
-        if(["pin","dashboard","public"].includes(qMode)){
-          targetModeEl.value = qMode;
-        } else {
-          targetModeEl.value = "pin";
-        }
-      }
-
-      $("btnGenerate").addEventListener("click", generateQr);
-      $("btnCopy").addEventListener("click", copyTarget);
-      $("btnOpenTarget").addEventListener("click", openTarget);
-      $("btnOpenDash").addEventListener("click", openDash);
-      $("btnOpenPublic").addEventListener("click", openPublic);
-      $("btnDownload").addEventListener("click", downloadPng);
-
-      slugEl.addEventListener("input", () => {
-        const clean = slugify(slugEl.value) || slugEl.value.trim();
-        if(clean) slugEl.value = clean;
       });
 
-      publicNameEl.addEventListener("input", generateQr);
-      shopNameEl.addEventListener("input", generateQr);
-      targetModeEl.addEventListener("change", generateQr);
+      if(changed){
+        history.replaceState({},document.title,u.pathname + u.search + u.hash);
+      }
+    }catch(_){}
+  }
 
-      hydrateFromQuery();
-      generateQr();
-    })();
-  </script>
+  function readStorage(){
+    if(!$("slug").value){
+      for(const k of SLUG_KEYS){
+        const v = normSlug(storageGet(k));
+        if(v && isPosSlug(v)){
+          $("slug").value = v;
+          break;
+        }
+      }
+    }
+
+    if(!$("shopName").value){
+      try{
+        const shop = storageGet("caisse_shop");
+        if(shop) $("shopName").value = shop;
+      }catch(_){}
+    }
+
+    if(!$("shopName").value){
+      $("shopName").value = "MON COMMERCE";
+    }
+  }
+
+  function currentSlug(){
+    const s = normSlug($("slug").value);
+    return isPosSlug(s) ? s : "";
+  }
+
+  function currentName(){
+    return safe($("shopName").value) || "MON COMMERCE";
+  }
+
+  function buildTarget(){
+    const slug = currentSlug();
+    const mode = $("target").value;
+
+    if(mode === "public"){
+      const u = new URL(PUBLIC_BASE + "/");
+      if(slug) u.searchParams.set("commerce",slug);
+      return u.toString();
+    }
+
+    if(mode === "counter"){
+      const u = new URL(localUrl("index.html"));
+      if(slug) u.searchParams.set("commerce",slug);
+      return u.toString();
+    }
+
+    const u = new URL(localUrl("pin.html"));
+    if(slug) u.searchParams.set("commerce",slug);
+    return u.toString();
+  }
+
+  function targetLabel(){
+    const mode = $("target").value;
+    if(mode === "public") return "fiche côté client";
+    if(mode === "counter") return "comptoir";
+    return "code d’accès";
+  }
+
+  async function generate(){
+    const slug = currentSlug();
+    const name = currentName();
+    const target = buildTarget();
+
+    $("qrTitle").textContent = name;
+    $("qrInfo").textContent = "Scanner pour ouvrir " + targetLabel() + ".";
+    $("qrNote").textContent = slug
+      ? "Identifiant boutique sécurisé · Paiement direct · 0% commission."
+      : "Ajoute l’identifiant boutique pour un QR complet.";
+
+    $("urlBox").textContent = "Lien : " + target;
+
+    if(!window.QRCode || typeof window.QRCode.toCanvas !== "function"){
+      setStatus("Générateur QR indisponible.", "err");
+      return;
+    }
+
+    try{
+      await window.QRCode.toCanvas($("qrCanvas"), target, {
+        width: 320,
+        margin: 2,
+        errorCorrectionLevel: "H",
+        color: { dark:"#0f172a", light:"#ffffff" }
+      });
+
+      if(slug){
+        setStatus("QR prêt. Aucun téléphone affiché.", "ok");
+      }else{
+        setStatus("QR prêt, mais identifiant boutique manquant.", "");
+      }
+    }catch(err){
+      console.error(err);
+      setStatus("Impossible de générer le QR.", "err");
+    }
+  }
+
+  async function copyLink(){
+    try{
+      await navigator.clipboard.writeText(buildTarget());
+      setStatus("Lien copié ✅", "ok");
+    }catch(_){
+      setStatus("Copie impossible sur ce navigateur.", "err");
+    }
+  }
+
+  function openTarget(){
+    window.open(buildTarget(),"_blank","noopener,noreferrer");
+  }
+
+  function downloadPng(){
+    try{
+      const qr = $("qrCanvas");
+      const name = currentName();
+      const slug = currentSlug() || "mon-commerce";
+
+      const out = document.createElement("canvas");
+      out.width = 1400;
+      out.height = 1800;
+      const ctx = out.getContext("2d");
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0,0,out.width,out.height);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.textAlign = "center";
+
+      ctx.font = "900 58px Outfit, Arial, sans-serif";
+      ctx.fillText("MON COMMERCE", out.width / 2, 125);
+
+      ctx.fillStyle = "#334155";
+      ctx.font = "800 30px Outfit, Arial, sans-serif";
+      ctx.fillText("DIGIYLYFE · QR BOUTIQUE", out.width / 2, 180);
+
+      ctx.fillStyle = "#facc15";
+      round(ctx, 500, 218, 400, 62, 31);
+      ctx.fill();
+
+      ctx.fillStyle = "#06140f";
+      ctx.font = "900 26px Outfit, Arial, sans-serif";
+      ctx.fillText("LE TERRAIN GARDE LA MAIN", out.width / 2, 258);
+
+      ctx.fillStyle = "#ffffff";
+      round(ctx, 250, 330, 900, 900, 44);
+      ctx.fill();
+
+      ctx.drawImage(qr, 350, 430, 700, 700);
+
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "1000 74px Outfit, Arial, sans-serif";
+      ctx.fillText(name, out.width / 2, 1325);
+
+      ctx.fillStyle = "#334155";
+      ctx.font = "900 34px Outfit, Arial, sans-serif";
+      ctx.fillText("Scanner pour ouvrir " + targetLabel(), out.width / 2, 1390);
+
+      ctx.fillStyle = "#64748b";
+      ctx.font = "800 26px Outfit, Arial, sans-serif";
+      ctx.fillText("Paiement direct · 0% commission", out.width / 2, 1450);
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.font = "700 22px Outfit, Arial, sans-serif";
+      wrap(ctx, buildTarget(), out.width / 2, 1530, 1040, 32);
+
+      const a = document.createElement("a");
+      a.href = out.toDataURL("image/png");
+      a.download = slug + "-qr-mon-commerce.png";
+      a.click();
+
+      setStatus("PNG téléchargé ✅", "ok");
+    }catch(err){
+      console.error(err);
+      setStatus("Téléchargement impossible.", "err");
+    }
+  }
+
+  function round(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.lineTo(x+w-r,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+    ctx.lineTo(x+w,y+h-r);
+    ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    ctx.lineTo(x+r,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+    ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);
+    ctx.closePath();
+  }
+
+  function wrap(ctx,text,cx,y,maxWidth,lineHeight){
+    const words = String(text || "").split(" ");
+    let line = "";
+
+    words.forEach(word=>{
+      const test = line ? line + " " + word : word;
+      if(ctx.measureText(test).width > maxWidth && line){
+        ctx.fillText(line,cx,y);
+        line = word;
+        y += lineHeight;
+      }else{
+        line = test;
+      }
+    });
+
+    if(line) ctx.fillText(line,cx,y);
+  }
+
+  function bind(){
+    $("btnGenerate").addEventListener("click",generate);
+    $("btnCopy").addEventListener("click",copyLink);
+    $("btnOpen").addEventListener("click",openTarget);
+    $("btnPrint").addEventListener("click",()=>window.print());
+    $("btnDownload").addEventListener("click",downloadPng);
+
+    ["shopName","slug","target"].forEach(id=>{
+      $(id).addEventListener(id === "target" ? "change" : "input",generate);
+    });
+
+    $("slug").addEventListener("input",()=>{
+      const clean = normSlug($("slug").value);
+      $("slug").value = clean;
+    });
+  }
+
+  function boot(){
+    readUrlThenClean();
+    readStorage();
+    bind();
+    generate();
+  }
+
+  boot();
+})();
+</script>
 </body>
 </html>
