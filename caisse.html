@@ -4,8 +4,11 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Caisse complète</title>
-<meta name="description" content="MON COMMERCE by DIGIY — caisse complète locale : encaisser, paiement, reçu, statistiques, historique et notes."/>
+<title>MON COMMERCE — Caisse</title>
+<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain : encaisser vite, addition, paiement, reçu, notes et stats locales."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg:#eefaf2;
@@ -20,8 +23,8 @@
   --text:#102318;
   --muted:#5f7468;
   --shadow:0 8px 24px rgba(16,35,24,.08);
-  --radius:14px;
-  --font:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  --radius:16px;
+  --font:Outfit,'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
@@ -256,6 +259,62 @@ a{text-decoration:none;color:inherit}
 }
 .toast.show{transform:translateX(-50%) translateY(0)}
 
+
+/* DIGIY — comptoir pur : gros, clair, sans bruit */
+.shop-title{font-size:18px;font-weight:950;max-width:230px}
+.shop-sub{font-size:12px;font-weight:900}
+.clock{font-size:14px;font-weight:950}
+.nav-chip{font-size:14px;font-weight:950;padding:11px 15px}
+.pcard{min-height:122px;padding:14px 12px;border-radius:18px}
+.pcard-emoji{font-size:34px}
+.pcard-name{font-size:15px;font-weight:950}
+.pcard-price{font-size:18px;font-weight:950}
+.stk-badge{font-size:11px;padding:5px 8px;border-radius:999px}
+.search-wrap input{font-size:17px;font-weight:850;padding:15px 14px 15px 42px;border-radius:16px}
+.cat-pill{font-size:14px;font-weight:950;padding:9px 16px}
+.panier-count-lbl{font-size:14px;font-weight:850}
+.panier-total-lbl{font-size:24px;font-weight:950}
+.btn-main,.btn-gold,.btn-outline,.btn-danger{font-size:16px;font-weight:950;border-radius:18px}
+.amount-value{font-size:48px}
+.amount-note,.pay-help-text,.cart-name,.cart-price,.field-input,.field-select,.field-textarea{font-size:16px;font-weight:850}
+.section-title{font-size:13px}
+.recu-shopname{font-size:22px}
+.recu-total-line{font-size:24px}
+.recu-line{font-size:16px}
+
+.audio-notice-btn{
+  min-width:42px;
+  height:36px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff8e8;
+  color:var(--gold);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:15px;
+  font-weight:950;
+  padding:0 10px;
+  box-shadow:0 4px 14px rgba(16,35,24,.04);
+}
+
+.home-strip.comptoir{
+  padding:10px 12px;
+}
+
+.home-strip.comptoir .optional{
+  display:none!important;
+}
+
+@media(max-width:680px){
+  .shop-title{font-size:17px;max-width:170px}
+  .shop-sub{font-size:11px}
+  .topbar{padding:10px 12px}
+  .prods{grid-template-columns:repeat(auto-fill,minmax(142px,1fr));padding-bottom:126px}
+  .pcard{min-height:130px}
+  .panier-bar,.fixed-bar{padding:14px 14px;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+}
+
 @media(max-width:680px){
   .stats-grid,.note-grid{grid-template-columns:1fr}
   .shop-title{max-width:150px}
@@ -280,31 +339,32 @@ a{text-decoration:none;color:inherit}
       <div class="logo-badge">🛒</div>
       <div>
         <div class="shop-title" id="shopTitle">Ma Boutique</div>
-        <div class="shop-sub">Caisse complète · téléphone</div>
+        <div class="shop-sub">Comptoir · vente rapide</div>
       </div>
     </div>
     <div class="topbar-right">
       <div class="clock" id="clockEl">--:--</div>
-      <button class="ico-btn" onclick="showPage('page-stats')">📊</button>
+      <button class="audio-notice-btn" id="btnCaisseNotice" type="button" title="Notice rapide">🎧</button>
+      <button class="ico-btn" onclick="showPage('page-stats')" title="Stats">📊</button>
     </div>
   </div>
 
-  <div class="home-strip">
-    <a class="nav-chip" href="./dashboard-pro.html">🏠 Accueil</a>
-    <a class="nav-chip gold" href="./profile.html">🏪 Ma fiche commerce</a>
-    <a class="nav-chip" href="https://mon-commerce.digiylyfe.com/">🌍 Voir côté client</a>
-    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
+  <div class="home-strip comptoir">
     <button class="nav-chip active" onclick="showPage('page-caisse')">💰 Encaisser</button>
+    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
     <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
-    <a class="nav-chip" href="./admin.html">⚙️ Plus</a>
-    <a class="nav-chip gold" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
+    <a class="nav-chip" href="./index.html">🏠 Accueil</a>
+    <a class="nav-chip optional" href="./profile.html">🏪 Ma fiche commerce</a>
+    <a class="nav-chip optional" href="https://mon-commerce.digiylyfe.com/">🌍 Voir côté client</a>
+    <a class="nav-chip optional" href="./admin.html">⚙️ Admin</a>
+    <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
   </div>
 
   <div id="articles"></div>
   <div class="search-wrap">
     <span class="search-ico">🔍</span>
-    <input type="text" id="searchInput" placeholder="Rechercher un article…" oninput="renderProds()">
+    <input type="text" id="searchInput" placeholder="Chercher un article…" oninput="renderProds()">
   </div>
   <div class="cats-bar" id="catsBar"></div>
   <div class="prods" id="prodsGrid"></div>
@@ -323,7 +383,7 @@ a{text-decoration:none;color:inherit}
     <div class="sheet-head">
       <div>
         <div class="sheet-title">Addition</div>
-        <div class="sheet-sub">Vérifie, ajuste, puis confirme avant paiement.</div>
+        <div class="sheet-sub">Vérifie l’addition, puis confirme.</div>
       </div>
       <button class="close-btn" onclick="closeAddition()">×</button>
     </div>
@@ -374,7 +434,7 @@ a{text-decoration:none;color:inherit}
     <div class="amount-card">
       <div class="amount-label">Montant à encaisser</div>
       <div class="amount-value" id="payAmountBig">0 F</div>
-      <div class="amount-note">La commande est confirmée. Cette page sert seulement à choisir et valider le paiement.</div>
+      <div class="amount-note">Choisis le mode de paiement, puis valide la vente.</div>
     </div>
     <div class="section-card">
       <div class="section-title">Mode de paiement</div>
@@ -427,14 +487,11 @@ a{text-decoration:none;color:inherit}
     <div style="font-size:14px;font-weight:950">Stats & historique</div>
     <a class="link-btn" href="./admin.html#articleList">📦 <span class="txt">Articles</span></a>
   </div>
-  <div class="home-strip">
-    <a class="nav-chip gold" href="./profile.html">🏪 Ma fiche commerce</a>
-    <a class="nav-chip" href="https://mon-commerce.digiylyfe.com/">🌍 Voir côté client</a>
+  <div class="home-strip comptoir">
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
     <button class="nav-chip active" onclick="showPage('page-stats')">📊 Stats</button>
-    <a class="nav-chip" href="./admin.html">⚙️ Plus</a>
-    <a class="nav-chip gold" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
+    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
   </div>
   <div class="content">
     <div class="stats-grid">
@@ -458,20 +515,20 @@ a{text-decoration:none;color:inherit}
 <div class="page" id="page-notes">
   <div class="topbar">
     <div class="topbar-left"><button class="back-btn" onclick="showPage('page-caisse')">← Caisse</button></div>
-    <div style="font-size:14px;font-weight:950">Notes rapides</div>
+    <div style="font-size:14px;font-weight:950">Notes du comptoir</div>
     <a class="link-btn" href="./dashboard-pro.html">🏠 <span class="txt">Accueil</span></a>
       <a class="link-btn" href="./profile.html">🏪 <span class="txt">Fiche</span></a>
   </div>
   <div id="notes"></div>
-  <div class="home-strip">
+  <div class="home-strip comptoir">
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
     <button class="nav-chip active" onclick="showPage('page-notes')">✍️ Notes</button>
     <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
-    <a class="nav-chip" href="./admin.html">⚙️ Plus</a>
+    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
   </div>
   <div class="content">
     <div class="section-card">
-      <div class="section-title">Écrire une note</div>
+      <div class="section-title">Noter vite</div>
       <div class="field-group">
         <select class="field-select" id="noteType">
           <option value="vente">Vente</option>
@@ -486,7 +543,7 @@ a{text-decoration:none;color:inherit}
       </div>
     </div>
     <div class="section-card">
-      <div class="section-title">Mes notes</div>
+      <div class="section-title">Notes gardées sur ce téléphone</div>
       <div style="padding:12px 14px">
         <button class="btn-danger" onclick="clearNotes()">🧹 Effacer toutes les notes</button>
       </div>
@@ -525,6 +582,18 @@ const DEFAULT_PRODUCTS = [
   {id:20,name:"Cacahuètes",cat:"Snacks",emoji:"🥜",price:300,stock:50}
 ];
 
+
+function cleanVisibleUrl(){
+  try{
+    const u=new URL(location.href);
+    let dirty=false;
+    ["phone","tel","owner_phone","p_phone","pin","pin4","token","session_token"].forEach(k=>{
+      if(u.searchParams.has(k)){u.searchParams.delete(k);dirty=true}
+    });
+    if(dirty)history.replaceState({},document.title,u.pathname+u.search+u.hash);
+  }catch(e){}
+}
+
 function readJSON(key,fallback){try{const d=localStorage.getItem(key);return d?JSON.parse(d):fallback}catch(e){return fallback}}
 function saveJSON(key,val){localStorage.setItem(key,JSON.stringify(val))}
 function getProds(){
@@ -552,14 +621,60 @@ function saveNotes(n){saveJSON("caisse_notes",n)}
 function getShopName(){return localStorage.getItem("caisse_shop")||"Ma Boutique"}
 function setShopName(n){localStorage.setItem("caisse_shop",n);document.querySelectorAll("#shopTitle,#recuShopName").forEach(el=>el.textContent=n)}
 
+
+function setupCaisseNotice(){
+  const btn=document.getElementById("btnCaisseNotice");
+  if(!btn || !("speechSynthesis" in window)) return;
+
+  const TEXT=[
+    "Caisse MON COMMERCE.",
+    "Touche un article pour l’ajouter au panier.",
+    "Le total apparaît en bas.",
+    "Touche Addition pour vérifier.",
+    "Tu peux ajuster la quantité ou mettre une remise.",
+    "Puis confirme.",
+    "Choisis le paiement.",
+    "Quand l’argent est reçu, touche Encaisser.",
+    "Le reçu sort ensuite.",
+    "Pour les prix et le stock, va dans Articles."
+  ].join(" ");
+
+  let speaking=false;
+
+  function stop(){
+    try{speechSynthesis.cancel()}catch(e){}
+    speaking=false;
+    btn.textContent="🎧";
+  }
+
+  function speak(){
+    stop();
+    const u=new SpeechSynthesisUtterance(TEXT);
+    u.lang="fr-FR";
+    u.rate=.86;
+    u.pitch=1;
+    const voices=speechSynthesis.getVoices()||[];
+    const fr=voices.find(v=>/^fr/i.test(v.lang));
+    if(fr)u.voice=fr;
+    u.onstart=function(){speaking=true;btn.textContent="⏹"};
+    u.onend=stop;
+    u.onerror=stop;
+    setTimeout(function(){try{speechSynthesis.speak(u)}catch(e){stop()}},80);
+  }
+
+  btn.addEventListener("click",function(){speaking?stop():speak()});
+  window.addEventListener("beforeunload",stop);
+}
+
 function init(){
+  cleanVisibleUrl();
   setShopName(getShopName());
   buildCats();
   renderProds();
   renderStats();
   renderNotes();
   updatePanierBar();
-  tickClock();setInterval(tickClock,1000);
+  tickClock();setInterval(tickClock,1000);setupCaisseNotice();
   if(location.hash==="#notes") showPage("page-notes");
   if(location.hash==="#stats") showPage("page-stats");
 }
