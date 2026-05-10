@@ -3,1613 +3,299 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <meta name="theme-color" content="#07140f"/>
+  <meta name="theme-color" content="#06140f"/>
   <title>MON COMMERCE — Accueil</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — accueil simple : encaisser, voir l’argent, écrire une note, gérer plus loin."/>
+  <meta name="description" content="MON COMMERCE by DIGIY — redirection propre vers le comptoir numérique."/>
 
   <script>
-    window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
-    window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
-    window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
     window.DIGIY_MODULE = "POS";
     window.DIGIY_LOGIN_URL = "./pin.html";
-    document.documentElement.style.visibility = "hidden";
-
-    function digiyBasePath(){
-      const parts = location.pathname.split("/").filter(Boolean);
-      const isGh = /\.github\.io$/i.test(location.hostname);
-      if(isGh && parts.length > 0) return "/" + parts[0] + "/";
-      return "/";
-    }
-
-    function digiyLocal(path){
-      path = String(path || "").replace(/^\/+/, "");
-      return digiyBasePath() + path;
-    }
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./guard.js"></script>
-  <script src="./claw-tools-pos.js"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
 
   <style>
     :root{
       --bg:#04110d;
-      --card:rgba(8,24,18,.84);
       --text:#f7fbf8;
-      --muted:#bfd3c8;
-      --line:rgba(255,255,255,.11);
-      --line2:rgba(255,255,255,.16);
+      --muted:#b8cfc4;
       --gold:#facc15;
       --gold2:#f59e0b;
-      --ok:#22c55e;
-      --danger:#ef4444;
-      --warn:#f59e0b;
-      --blue:#60a5fa;
-      --shadow:0 22px 56px rgba(0,0,0,.28);
-      --radius:26px;
-      --font:"Outfit",system-ui,-apple-system,sans-serif;
+      --green:#22c55e;
+      --line:rgba(255,255,255,.12);
+      --shadow:0 22px 62px rgba(0,0,0,.38);
+      --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      --bottom:88px;
     }
 
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0}
-    html{scroll-behavior:smooth}
+    html,body{margin:0;padding:0;min-height:100%}
 
     body{
-      min-height:100vh;
+      min-height:100dvh;
       font-family:var(--font);
       color:var(--text);
       background:
-        radial-gradient(circle at top left, rgba(250,204,21,.10), transparent 30%),
-        radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 24%),
-        linear-gradient(180deg,#07140f 0%,#04110d 48%,#020906 100%);
-    }
-
-    a{text-decoration:none;color:inherit}
-    button{font:inherit;cursor:pointer}
-
-    .app{display:none}
-    html.app-ready .app{display:block}
-
-    .wrap{
-      width:min(100%,1120px);
-      margin:0 auto;
-      padding:14px 12px calc(104px + env(safe-area-inset-bottom,0px));
-    }
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:70;
-      margin-bottom:12px;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:22px;
-      background:rgba(4,17,13,.82);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      box-shadow:0 14px 34px rgba(0,0,0,.22);
-    }
-
-    .topbarInner{
-      padding:12px;
+        radial-gradient(850px 520px at 0% -10%, rgba(250,204,21,.13), transparent 58%),
+        radial-gradient(800px 480px at 100% 0%, rgba(34,197,94,.13), transparent 58%),
+        linear-gradient(180deg,#06140f,var(--bg));
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-
-    .brandBadge{
-      width:46px;
-      height:46px;
-      border-radius:17px;
-      display:grid;
-      place-items:center;
-      background:linear-gradient(135deg,rgba(250,204,21,.17),rgba(245,158,11,.08));
-      border:1px solid rgba(250,204,21,.18);
-      font-size:23px;
-      flex:0 0 auto;
-    }
-
-    .brandKicker{
-      color:var(--gold);
-      font-size:11px;
-      font-weight:950;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-    }
-
-    .brandTitle{
-      font-size:19px;
-      line-height:1.08;
-      font-weight:1000;
-      letter-spacing:-.02em;
-    }
-
-    .brandSub{
-      color:var(--muted);
-      font-size:12px;
-      font-weight:800;
-      margin-top:2px;
-    }
-
-    .topActions{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .pill{
-      min-height:40px;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:9px 12px;
-      border-radius:999px;
-      background:rgba(255,255,255,.045);
-      border:1px solid var(--line);
-      color:var(--muted);
-      font-size:12px;
-      font-weight:900;
-    }
-
-    .pill b{color:var(--text)}
-
-    .dot{
-      width:9px;
-      height:9px;
-      border-radius:999px;
-      background:var(--warn);
-      box-shadow:0 0 0 4px rgba(255,255,255,.03);
-    }
-
-    .dot.ok{background:var(--ok)}
-    .dot.bad{background:var(--danger)}
-
-    .btn,.btnOutline,.btnGhost,.smallBtn{
-      appearance:none;
-      border:none;
-      min-height:46px;
-      padding:12px 15px;
-      border-radius:999px;
-      display:inline-flex;
       align-items:center;
       justify-content:center;
-      gap:8px;
-      font-weight:950;
-      font-size:13px;
-      transition:transform .12s ease, opacity .12s ease, border-color .12s ease;
+      padding:14px 12px calc(var(--bottom) + env(safe-area-inset-bottom,0px) + 16px);
     }
 
-    .btn:hover,.btnOutline:hover,.btnGhost:hover,.smallBtn:hover{transform:translateY(-1px)}
-    .btn:disabled,.btnOutline:disabled,.btnGhost:disabled,.smallBtn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-
-    .btn{
-      color:#07110d;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      box-shadow:0 14px 30px rgba(250,204,21,.17);
-    }
-
-    .btnOutline{
-      color:var(--text);
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--line2);
-    }
-
-    .btnGhost{
-      color:var(--muted);
-      background:transparent;
-      border:1px solid var(--line2);
-    }
-
-    .smallBtn{
-      min-height:36px;
-      padding:8px 11px;
-      border-radius:12px;
-      color:var(--text);
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--line2);
-      font-size:12px;
-    }
-
-    .navRow{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-bottom:12px;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:1.05fr .95fr;
-      gap:12px;
-      align-items:start;
-    }
+    a{color:inherit;text-decoration:none}
+    button{font:inherit;cursor:pointer}
 
     .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.025)),var(--card);
+      width:min(100%,560px);
       border:1px solid var(--line);
-      border-radius:var(--radius);
+      border-radius:30px;
+      background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.035));
       box-shadow:var(--shadow);
-      padding:16px;
-      overflow:hidden;
+      padding:22px;
+      text-align:center;
     }
 
-    .heroBadge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 12px;
-      border-radius:999px;
-      background:rgba(250,204,21,.10);
-      border:1px solid rgba(250,204,21,.18);
-      color:var(--gold);
-      font-size:12px;
-      font-weight:950;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      margin-bottom:12px;
+    .logo{
+      width:66px;
+      height:66px;
+      border-radius:24px;
+      display:grid;
+      place-items:center;
+      margin:0 auto 14px;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      color:#06140f;
+      font-size:31px;
+      font-weight:1000;
+      box-shadow:0 16px 34px rgba(250,204,21,.20);
     }
 
     h1{
       margin:0;
-      font-size:clamp(34px,8vw,58px);
-      line-height:.94;
-      letter-spacing:-.055em;
+      font-size:clamp(2rem,7vw,3rem);
+      line-height:.96;
+      letter-spacing:-.05em;
       font-weight:1000;
     }
 
-    h1 .accent{color:var(--gold)}
-
-    h2{
-      margin:0 0 10px;
-      font-size:19px;
-      font-weight:1000;
-    }
-
-    .lead{
-      margin-top:10px;
+    p{
+      margin:12px auto 0;
+      max-width:440px;
       color:var(--muted);
-      line-height:1.65;
-      font-size:15px;
-      font-weight:750;
+      line-height:1.5;
+      font-size:1rem;
+      font-weight:850;
     }
 
-    .heroActions{
+    .actions{
       display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:9px;
-      margin-top:14px;
-    }
-
-    .heroAction{
-      min-height:76px;
-      padding:12px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.045);
-      display:grid;
-      place-items:center;
-      align-content:center;
-      gap:4px;
-      text-align:center;
-      font-weight:1000;
-    }
-
-    .heroAction.primary{
-      color:#07110d;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      border-color:rgba(250,204,21,.55);
-    }
-
-    .heroAction span{
-      display:block;
-      color:inherit;
-      font-size:20px;
-      line-height:1;
-    }
-
-    .heroAction small{
-      color:inherit;
-      opacity:.78;
-      font-size:11px;
-      font-weight:900;
-    }
-
-    .miniStats{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:9px;
-      margin-top:14px;
-    }
-
-    .mini{
-      padding:12px;
-      border-radius:17px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-      min-width:0;
-    }
-
-    .mini .k{
-      color:var(--muted);
-      font-size:10px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      font-weight:950;
-    }
-
-    .mini .v{
-      margin-top:5px;
-      font-size:18px;
-      font-weight:1000;
-      letter-spacing:-.025em;
-      word-break:break-word;
-    }
-
-    .bigMoney{
-      font-size:clamp(34px,7vw,58px);
-      line-height:.95;
-      font-weight:1000;
-      letter-spacing:-.055em;
-      margin:10px 0 6px;
-      color:#fff7c2;
-    }
-
-    .muted{
-      color:var(--muted);
-      line-height:1.6;
-      font-weight:750;
-    }
-
-    .notice{
-      padding:13px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.035);
-      margin-top:12px;
-      line-height:1.6;
-      font-size:13px;
-      font-weight:750;
-      color:var(--muted);
-    }
-
-    .notice.ok{border-color:rgba(34,197,94,.24);background:rgba(34,197,94,.09);color:#dcffe6}
-    .notice.warn{border-color:rgba(245,158,11,.24);background:rgba(245,158,11,.09);color:#ffe8bd}
-    .notice.info{border-color:rgba(96,165,250,.24);background:rgba(96,165,250,.08)}
-
-    .row{
-      display:flex;
-      gap:9px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-
-    .actionRow{
-      display:flex;
-      gap:9px;
-      flex-wrap:wrap;
-      margin-top:13px;
-    }
-
-    .actionRow .btn,
-    .actionRow .btnOutline,
-    .actionRow .btnGhost{
-      flex:1;
-      min-width:150px;
-    }
-
-    .hr{
-      height:1px;
-      background:var(--line);
-      margin:14px 0;
-    }
-
-    .notifList{
-      display:grid;
-      gap:8px;
-      margin-top:10px;
-    }
-
-    .notif{
-      padding:12px;
-      border-radius:17px;
-      border:1px solid rgba(255,255,255,.09);
-      background:rgba(255,255,255,.04);
-      display:flex;
-      justify-content:space-between;
       gap:10px;
-      align-items:flex-start;
+      margin-top:18px;
     }
 
-    .tag{
-      display:inline-flex;
-      width:max-content;
-      max-width:100%;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.05);
-      color:var(--muted);
-      font-size:11px;
-      font-weight:950;
-      white-space:nowrap;
-    }
-
-    .tag.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#d7ffe1}
-    .tag.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#ffe3b8}
-    .tag.info{background:rgba(96,165,250,.10);border-color:rgba(96,165,250,.28);color:#d8ecff}
-
-    .boostBox{
-      padding:14px;
-      border-radius:20px;
-      border:1px solid rgba(96,165,250,.22);
-      background:rgba(96,165,250,.08);
-      margin-top:12px;
-      display:flex;
-      gap:12px;
-      justify-content:space-between;
-      align-items:flex-start;
-      flex-wrap:wrap;
-    }
-
-    .blockedShell{
-      display:none;
-      min-height:360px;
-      place-items:center;
-      text-align:center;
-      padding:22px;
-    }
-
-    .blockedInner{
-      max-width:660px;
-      padding:22px;
+    .btn{
+      min-height:60px;
       border-radius:22px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.04);
-      box-shadow:0 14px 34px rgba(0,0,0,.22);
-    }
-
-    .blockedTitle{
-      font-size:26px;
+      border:1px solid rgba(255,255,255,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:14px;
+      font-size:1.04rem;
       font-weight:1000;
-      margin-bottom:8px;
+      text-align:center;
     }
 
-    .blockedText{
+    .btn.primary{
+      border:none;
+      color:#06140f;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      box-shadow:0 16px 36px rgba(250,204,21,.18);
+    }
+
+    .btn.green{
+      border:none;
+      color:#06140f;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+    }
+
+    .btn.ghost{
       color:var(--muted);
-      line-height:1.75;
-      font-weight:750;
+      background:rgba(255,255,255,.04);
+    }
+
+    .note{
+      margin-top:14px;
+      color:rgba(184,207,196,.75);
+      font-size:.86rem;
+      line-height:1.45;
+      font-weight:800;
     }
 
     .bottomNav{
       position:fixed;
-      left:0;
-      right:0;
-      bottom:0;
-      z-index:96;
-      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
-      background:rgba(4,17,13,.95);
+      left:0;right:0;bottom:0;
+      z-index:80;
+      padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));
+      background:rgba(3,18,13,.94);
       border-top:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
+      backdrop-filter:blur(14px);
     }
 
-    .bottomNavInner{
-      width:min(100%,760px);
+    .bottomInner{
+      max-width:760px;
       margin:0 auto;
       display:grid;
-      grid-template-columns:repeat(5,1fr);
+      grid-template-columns:repeat(4,minmax(0,1fr));
       gap:6px;
     }
 
-    .bottomNav a{
+    .navItem{
       min-height:58px;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      align-content:center;
+      border-radius:17px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
       gap:3px;
-      color:rgba(247,251,248,.70);
-      font-size:11px;
-      font-weight:950;
+      color:rgba(247,251,248,.72);
+      font-size:.72rem;
+      font-weight:1000;
+      border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.035);
       text-align:center;
-      border:1px solid transparent;
-      text-decoration:none;
     }
 
-    .bottomNav .ico{font-size:18px;line-height:1}
-
-    .bottomNav a.active{
-      color:#07110d;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      border-color:rgba(250,204,21,.28);
-      box-shadow:0 10px 24px rgba(250,204,21,.16);
-    }
-
-    #digiy-audio-btn{
-      position:fixed;
-      right:14px;
-      bottom:calc(86px + env(safe-area-inset-bottom,0px));
-      z-index:94;
-      min-height:42px;
-      padding:10px 13px;
-      border-radius:999px;
-      border:1px solid rgba(250,204,21,.25);
-      background:rgba(250,204,21,.12);
-      color:#fff7c2;
-      font-weight:950;
-      box-shadow:0 14px 34px rgba(0,0,0,.22);
-    }
-
-    @media(max-width:900px){
-      .grid{grid-template-columns:1fr}
-      .heroActions{grid-template-columns:1fr 1fr}
-    }
-
-    @media(max-width:720px){
-      .wrap{padding:10px 10px calc(96px + env(safe-area-inset-bottom,0px))}
-      .topActions .btnOutline,.navRow{display:none}
-      .brandSub{display:none}
-      .miniStats{grid-template-columns:1fr}
-      .card{padding:14px;border-radius:22px}
-      .heroAction{min-height:70px}
-    }
-
-    @media(print){
-      body{background:#fff;color:#07140f}
-      .topbar,.navRow,.bottomNav,#digiy-audio-btn,.btn,.btnOutline,.btnGhost{display:none!important}
-      .wrap{padding:0;max-width:none}
-      .card{box-shadow:none;border:none;border-radius:0;background:#fff;color:#07140f}
-      .notice{border:1px solid #e2e8f0;background:#fff;color:#07140f}
+    .navItem .ico{font-size:1.25rem;line-height:1}
+    .navItem.active{
+      color:#06140f;
+      background:linear-gradient(135deg,var(--gold),var(--green));
+      border-color:rgba(255,255,255,.18);
     }
   </style>
 </head>
 
 <body>
-  <div class="app">
-    <div class="wrap">
-      <header class="topbar">
-        <div class="topbarInner">
-          <div class="brand">
-            <div class="brandBadge">🏪</div>
-            <div>
-              <div class="brandKicker">DIGIYLYFE</div>
-              <div class="brandTitle">MON COMMERCE</div>
-              <div class="brandSub" id="brandSub">Accueil · caisse · notes · argent</div>
-            </div>
-          </div>
+  <main class="card">
+    <div class="logo">🛒</div>
+    <h1>Comptoir déplacé</h1>
+    <p>
+      L’accueil MON COMMERCE est maintenant le comptoir simple.
+      Tu vas être ramené vers la bonne porte.
+    </p>
 
-          <div class="topActions">
-            <div class="pill"><span class="dot" id="dotAccess"></span><span id="pillStatus">Accès…</span></div>
-            <a class="btnOutline" id="btnPinTop" href="./pin.html">🔐 Mon code</a>
-            <a class="btnOutline" id="btnPublicTop" href="https://mon-commerce.digiylyfe.com/">🌍 Voir côté client</a>
-            <a class="btnOutline" id="btnSettings" href="./admin.html">⚙️ Plus</a>
-          </div>
-        </div>
-      </header>
-
-      <div class="navRow">
-        <a class="btnGhost" id="btnHall" href="./profile.html">🏪 Ma fiche commerce</a>
-        <a class="btnGhost" id="btnClientView" href="https://mon-commerce.digiylyfe.com/">🌍 Voir côté client</a>
-        <a class="btnGhost" id="btnCaisse" href="./caisse.html">💰 Encaisser</a>
-        <a class="btnGhost" id="btnArticles" href="./admin.html#articleList">📦 Articles</a>
-        <a class="btnGhost" id="btnNotes" href="./caisse.html#notes">✍️ Notes</a>
-        <a class="btnGhost" id="btnAdmin" href="./admin.html">⚙️ Plus</a>
-      </div>
-
-      <section id="blockedShell" class="blockedShell">
-        <div class="blockedInner">
-          <div class="blockedTitle" id="blockedTitle">Accès requis</div>
-          <div class="blockedText" id="blockedText">Entre avec ton code d’accès pour ouvrir ton espace.</div>
-          <div class="actionRow" style="justify-content:center">
-            <a class="btn" id="btnBlockedPin" href="./pin.html">🔐 Entrer avec mon code</a>
-            <a class="btnOutline" id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon accès</a>
-          </div>
-        </div>
-      </section>
-
-      <main id="dashboardContent" style="display:none">
-        <div class="grid">
-          <section class="card">
-            <div class="heroBadge">Aujourd’hui</div>
-            <h1><span class="accent">Encaisser</span><br>sans pression</h1>
-            <div class="lead">
-              Le commerçant ne gère pas un backend sur téléphone. Il encaisse, note, regarde l’essentiel. DIGIY range le reste.
-            </div>
-
-            <div class="heroActions">
-              <a class="heroAction primary" id="btnHeroCash" href="./caisse.html">
-                <span>💰</span>Encaisser<small>montant · paiement</small>
-              </a>
-              <a class="heroAction" id="btnHeroArticles" href="./admin.html#articleList">
-                <span>📦</span>Articles<small>ajouter · modifier</small>
-              </a>
-              <a class="heroAction" id="btnHeroProfile" href="./profile.html">
-                <span>🏪</span>Ma fiche commerce<small>modifier la fiche</small>
-              </a>
-              <a class="heroAction" id="btnHeroClient" href="https://mon-commerce.digiylyfe.com/">
-                <span>🌍</span>Voir côté client<small>vitrine publique</small>
-              </a>
-              <a class="heroAction" id="btnHeroNotes" href="./caisse.html#notes">
-                <span>✍️</span>Notes<small>dépense · client doit</small>
-              </a>
-              <a class="heroAction" id="btnHeroPlus" href="./admin.html">
-                <span>⚙️</span>Plus<small>gestion complète</small>
-              </a>
-            </div>
-
-            <div class="miniStats">
-              <div class="mini">
-                <div class="k">Boutique</div>
-                <div class="v" id="storeNameBox">—</div>
-              </div>
-              <div class="mini">
-                <div class="k">Accès</div>
-                <div class="v" id="accessBox">…</div>
-              </div>
-              <div class="mini">
-                <div class="k">Service</div>
-                <div class="v">Commerce</div>
-              </div>
-            </div>
-
-            <div class="notice info" id="statusNotice">
-              Vérification de ton espace…
-            </div>
-          </section>
-
-          <section class="card">
-            <h2>💵 Argent rentré</h2>
-            <div class="bigMoney" id="moneyMonth">—</div>
-            <div class="muted">
-              <span id="txCount">— transactions</span> · <span id="todayHint">Aujourd’hui</span>
-            </div>
-
-            <div class="hr"></div>
-
-            <h2>🔎 À surveiller</h2>
-            <div class="notifList" id="notifList">
-              <div class="notif">
-                <div>
-                  <b>Chargement…</b>
-                  <div class="muted" style="font-size:13px;margin-top:3px">On prépare l’essentiel.</div>
-                </div>
-                <div class="tag info">INFO</div>
-              </div>
-            </div>
-          </section>
-
-          <section class="card">
-            <div class="heroBadge">Notes rapides</div>
-            <h2>Écrire vite ce qui se passe</h2>
-            <div class="muted">
-              Vente cash, achat fournisseur, client qui doit, sachets, livraison. Le moins d’écriture possible.
-            </div>
-            <div class="actionRow">
-              <a class="btn" id="btnNoteFast" href="./caisse.html#notes">✍️ Écrire une note</a>
-              <a class="btnOutline" id="btnOpenPay" href="https://pro-pay.digiylyfe.com/admin.html">💰 Mon argent</a>
-            </div>
-          </section>
-
-          <section class="card">
-            <div class="heroBadge">Visibilité</div>
-            <h2>BOOST commerce</h2>
-            <div class="muted" id="boostText">+50% d’apparition · 7 jours · 5 000 FCFA · 9 €</div>
-            <div class="boostBox">
-              <div>
-                <b id="boostStatus">Statut boost : —</b>
-                <div class="muted" style="font-size:13px;margin-top:4px">
-                  À utiliser seulement quand tu veux pousser ta boutique.
-                </div>
-              </div>
-              <div class="row">
-                <button class="btn" id="btnBoost" type="button">Activer</button>
-                <button class="btnOutline" id="btnBoostInfo" type="button">Détails</button>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
+    <div class="actions">
+      <a class="btn primary" id="goIndex" href="./index.html">🏠 Ouvrir le comptoir</a>
+      <a class="btn green" id="goCaisse" href="./caisse.html">💰 Encaisser</a>
+      <a class="btn ghost" id="goArticles" href="./admin.html#articleList">📦 Articles</a>
     </div>
-  </div>
 
-  <button id="digiy-audio-btn" type="button">🔊 Écouter</button>
+    <div class="note">
+      Ancien lien gardé pour compatibilité. Pas de double accueil, pas de bruit.
+    </div>
+  </main>
 
   <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
-    <div class="bottomNavInner">
-      <a class="active" id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
-      <a id="navArticles" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
-      <a id="navCash" href="./caisse.html"><span class="ico">💰</span><span>Encaisser</span></a>
-      <a id="navNotes" href="./caisse.html#notes"><span class="ico">✍️</span><span>Notes</span></a>
-      <a id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Plus</span></a>
+    <div class="bottomInner">
+      <a class="navItem active" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
+      <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
+      <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
+      <a class="navItem" href="./profile.html"><span class="ico">🏪</span><span>Fiche</span></a>
     </div>
   </nav>
 
-  <script>
-    (() => {
-      "use strict";
+<script>
+(function(){
+  "use strict";
 
-      const MODULE_CODE = "POS";
-      const MODULE_LABEL = "MON COMMERCE";
-      const SUPPORT_PHONE = "221771342889";
+  const SENSITIVE = [
+    "phone","tel","owner_phone","p_phone","subscription_phone","checkout_phone",
+    "pin","pin4","token","session_token","module"
+  ];
 
-      const ALLOWED_MODULES = ["POS","pos","POS_PRO","COMMERCE","CAISSE","MON_COMMERCE"];
-      const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
-      const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
+  const SLUG_KEYS = ["digiy_pos_slug","digiy_pos_last_slug"];
+  const PHONE_KEYS = ["digiy_pos_phone","digiy_pos_last_phone"];
+  const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
+  const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
 
-      const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
-      const SUPABASE_ANON = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
+  function normPhone(v){
+    return String(v || "").replace(/[^\d]/g,"").slice(0,15);
+  }
 
-      const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
-      const PROFILE_URL = digiyLocal("profile.html");
-      const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
-      const PAY_URL = "https://pro-pay.digiylyfe.com/admin.html";
+  function normSlug(v){
+    return String(v || "").trim().toLowerCase()
+      .replace(/\s+/g,"-")
+      .replace(/[^a-z0-9-]/g,"")
+      .replace(/-+/g,"-")
+      .replace(/^-|-$/g,"");
+  }
 
-      const CAISSE_URL = digiyLocal("caisse.html");
-      const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
-      const ADMIN_URL = digiyLocal("admin.html");
-      const PIN_URL = digiyLocal("pin.html");
+  function isPosSlug(v){
+    const s = normSlug(v);
+    if(!s) return false;
+    if(FORBIDDEN_SLUG_PREFIXES.some(p => s.startsWith(p))) return false;
+    return ALLOWED_SLUG_PREFIXES.some(p => s.startsWith(p));
+  }
 
-      const BOOST = {
-        module:"BOOST",
-        plan:"boost_7d",
-        price_xof:5000,
-        price_eur:9
-      };
+  function rememberThenClean(){
+    try{
+      const u = new URL(location.href);
+      const slug = normSlug(u.searchParams.get("slug") || "");
+      const phone = normPhone(
+        u.searchParams.get("phone") ||
+        u.searchParams.get("tel") ||
+        u.searchParams.get("owner_phone") ||
+        u.searchParams.get("p_phone") ||
+        ""
+      );
 
-      const $ = (id) => document.getElementById(id);
-
-      let sb = null;
-
-      const state = {
-        slug:"",
-        phone:"",
-        access:false,
-        storeName:MODULE_LABEL,
-        plan:"",
-        workCurrency:"XOF"
-      };
-
-      function reveal(){
-        document.documentElement.classList.add("app-ready");
-        document.documentElement.style.visibility = "";
-      }
-
-      setTimeout(reveal, 2000);
-
-      function cleanDigits(v){
-        return String(v || "").replace(/[^\d]/g,"");
-      }
-
-      function normSlug(v){
-        return String(v || "")
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g,"-")
-          .replace(/[^a-z0-9-]/g,"")
-          .replace(/-+/g,"-")
-          .replace(/^-|-$/g,"");
-      }
-
-      function upper(v){
-        return String(v || "").trim().toUpperCase();
-      }
-
-      function isAllowedModule(v){
-        const raw = String(v || "").trim();
-        if(!raw) return false;
-        return ALLOWED_MODULES.some((m) => upper(m) === upper(raw));
-      }
-
-      function isForbiddenSlug(slug){
-        const s = normSlug(slug);
-        if(!s) return false;
-        return FORBIDDEN_SLUG_PREFIXES.some((prefix) => s.startsWith(prefix));
-      }
-
-      function isPosSlug(slug){
-        const s = normSlug(slug);
-        if(!s) return false;
-        if(isForbiddenSlug(s)) return false;
-        return ALLOWED_SLUG_PREFIXES.some((prefix) => s.startsWith(prefix));
-      }
-
-      function purgeBadLocalRail(){
-        const slugKeys = ["digiy_pos_slug","digiy_pos_last_slug"];
-        slugKeys.forEach((key) => {
+      if(slug && isPosSlug(slug)){
+        SLUG_KEYS.forEach(k => {
           try{
-            const local = normSlug(localStorage.getItem(key) || "");
-            const session = normSlug(sessionStorage.getItem(key) || "");
-            if(local && !isPosSlug(local)) localStorage.removeItem(key);
-            if(session && !isPosSlug(session)) sessionStorage.removeItem(key);
-          }catch(_){}
-        });
-
-        const sessionKeys = [
-          "DIGIY_POS_PIN_SESSION",
-          "DIGIY_PIN_SESSION",
-          "DIGIY_ACCESS",
-          "DIGIY_SESSION_POS",
-          "digiy_pos_session",
-          "DIGIY_POS_SESSION"
-        ];
-
-        sessionKeys.forEach((key) => {
-          try{
-            const raw = localStorage.getItem(key);
-            const parsed = raw ? JSON.parse(raw) : null;
-            const slug = normSlug(parsed?.slug || "");
-            const module = parsed?.module || parsed?.module_code || "";
-            if(parsed && ((module && !isAllowedModule(module)) || (slug && !isPosSlug(slug)))){
-              localStorage.removeItem(key);
-            }
-          }catch(_){}
-
-          try{
-            const raw = sessionStorage.getItem(key);
-            const parsed = raw ? JSON.parse(raw) : null;
-            const slug = normSlug(parsed?.slug || "");
-            const module = parsed?.module || parsed?.module_code || "";
-            if(parsed && ((module && !isAllowedModule(module)) || (slug && !isPosSlug(slug)))){
-              sessionStorage.removeItem(key);
-            }
+            sessionStorage.setItem(k,slug);
+            localStorage.setItem(k,slug);
           }catch(_){}
         });
       }
 
-      function fmtDateFR(iso){
-        if(!iso) return "—";
-        const d = new Date(iso);
-        if(Number.isNaN(d.getTime())) return "—";
-        return d.toLocaleDateString("fr-FR",{ year:"numeric", month:"long", day:"numeric" });
-      }
-
-      function normalizeWorkCurrency(value){
-        const c = String(value || "").trim().toUpperCase();
-        if(["EUR","EURO","EUROS","€"].includes(c)) return "EUR";
-        return "XOF";
-      }
-
-      function formatMoney(amount,currency){
-        const n = Number(amount || 0);
-        const safe = Number.isFinite(n) ? n : 0;
-        return safe.toLocaleString("fr-FR") + " " + (normalizeWorkCurrency(currency) === "EUR" ? "€" : "FCFA");
-      }
-
-      function getParam(name){
-        return new URL(location.href).searchParams.get(name) || "";
-      }
-
-      function cleanVisibleUrl(){
-        try{
-          const url = new URL(location.href);
-          const sensitive = ["slug","phone","tel","module","owner_phone","subscription_phone","checkout_phone","p_phone","return","from"];
-          let dirty = false;
-
-          sensitive.forEach((key) => {
-            if(url.searchParams.has(key)){
-              url.searchParams.delete(key);
-              dirty = true;
-            }
-          });
-
-          if(dirty){
-            history.replaceState({},document.title,url.pathname + url.search + url.hash);
-          }
-        }catch(_){}
-      }
-
-      function cleanPath(path){
-        const u = new URL(path || "./dashboard-pro.html", location.href);
-        u.search = "";
-        return u.pathname + u.hash;
-      }
-
-      function buildUrl(base,params){
-        try{
-          const u = new URL(base, location.href);
-          Object.entries(params || {}).forEach(([k,v]) => {
-            if(v !== null && v !== undefined && String(v) !== "") u.searchParams.set(k,String(v));
-          });
-          return u.toString();
-        }catch(_){
-          return base;
-        }
-      }
-
-      function buildSupportUrl(){
-        const text = "Bonjour, j’ai besoin d’aide pour MON COMMERCE by DIGIY.";
-        return "https://wa.me/" + SUPPORT_PHONE + "?text=" + encodeURIComponent(text);
-      }
-
-      function buildAbosParams(moduleCode = MODULE_CODE){
-        return { base_module:MODULE_CODE, module:moduleCode };
-      }
-
-      function getGuardSession(){
-        if(typeof window.DIGIY_GUARD?.getSession === "function"){
-          try{return window.DIGIY_GUARD.getSession() || {};}catch(_){}
-        }
-        return window.DIGIY_GUARD?.state || {};
-      }
-
-      function getSlug(){
-        purgeBadLocalRail();
-        const gs = getGuardSession();
-        const candidate = normSlug(
-          getParam("slug") ||
-          gs.slug ||
-          sessionStorage.getItem("digiy_pos_last_slug") ||
-          localStorage.getItem("digiy_pos_last_slug") ||
-          sessionStorage.getItem("digiy_pos_slug") ||
-          localStorage.getItem("digiy_pos_slug") ||
-          ""
-        );
-
-        if(candidate && !isPosSlug(candidate)){
-          purgeBadLocalRail();
-          return "";
-        }
-
-        return candidate;
-      }
-
-      function getPhone(){
-        const gs = getGuardSession();
-        return cleanDigits(
-          getParam("phone") ||
-          getParam("tel") ||
-          gs.phone ||
-          sessionStorage.getItem("digiy_pos_last_phone") ||
-          localStorage.getItem("digiy_pos_last_phone") ||
-          sessionStorage.getItem("digiy_pos_phone") ||
-          localStorage.getItem("digiy_pos_phone") ||
-          ""
-        );
-      }
-
-      function saveIdentityOnly(slug,phone){
-        try{
-          if(slug && isPosSlug(slug)){
-            localStorage.setItem("digiy_pos_last_slug",slug);
-            sessionStorage.setItem("digiy_pos_last_slug",slug);
-            localStorage.setItem("digiy_pos_slug",slug);
-            sessionStorage.setItem("digiy_pos_slug",slug);
-          }
-
-          if(phone){
-            localStorage.setItem("digiy_pos_last_phone",phone);
-            sessionStorage.setItem("digiy_pos_last_phone",phone);
-            localStorage.setItem("digiy_pos_phone",phone);
-            sessionStorage.setItem("digiy_pos_phone",phone);
-          }
-        }catch(_){}
-      }
-
-      function saveAccessSession(slug,phone){
-        if(!slug || !isPosSlug(slug) || !phone) return;
-
-        try{
-          const payload = {
-            slug,
-            phone,
-            module:MODULE_CODE,
-            access:true,
-            access_ok:true,
-            ok:true,
-            verified:true,
-            verified_at:Date.now(),
-            validated_at:new Date().toISOString(),
-            ts:Date.now()
-          };
-
-          localStorage.setItem("DIGIY_POS_SESSION",JSON.stringify(payload));
-          sessionStorage.setItem("DIGIY_POS_SESSION",JSON.stringify(payload));
-          localStorage.setItem("DIGIY_ACCESS",JSON.stringify(payload));
-          sessionStorage.setItem("DIGIY_ACCESS",JSON.stringify(payload));
-        }catch(_){}
-      }
-
-      async function awaitGuardReady(){
-        try{
-          if(typeof window.DIGIY_GUARD?.ready === "function") await window.DIGIY_GUARD.ready();
-          else if(window.DIGIY_GUARD?.ready?.then) await window.DIGIY_GUARD.ready;
-        }catch(err){
-          console.warn("[POS DASHBOARD] guard ready",err);
-        }
-      }
-
-      async function bootGuard(){
-        if(typeof window.DIGIY_GUARD?.boot !== "function") return true;
-
-        try{
-          const res = await window.DIGIY_GUARD.boot({
-            module:MODULE_CODE,
-            dashboard:DASHBOARD_URL,
-            login:PIN_URL,
-            pay:ABOS_URL,
-            requireSlug:true,
-            checkSubscription:false
-          });
-
-          if(res && res.ok === false) return false;
-        }catch(err){
-          console.warn("[POS DASHBOARD] guard boot",err);
-        }
-
-        return true;
-      }
-
-      function makeFallbackSb(){
-        if(window.supabase?.createClient && SUPABASE_URL && SUPABASE_ANON){
-          return window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON,{
-            auth:{
-              persistSession:false,
-              autoRefreshToken:false,
-              detectSessionInUrl:false
-            }
-          });
-        }
-        return null;
-      }
-
-      async function getSb(){
-        if(sb) return sb;
-
-        if(typeof window.DIGIY_GUARD?.getSb === "function"){
-          try{
-            sb = window.DIGIY_GUARD.getSb();
-            if(sb) return sb;
-          }catch(_){}
-        }
-
-        sb = makeFallbackSb();
-        return sb;
-      }
-
-      async function rpcFirstSuccess(name,payloads){
-        const client = await getSb();
-        if(!client) throw new Error("supabase_not_ready");
-
-        let lastError = null;
-
-        for(const payload of payloads){
-          try{
-            const { data,error } = await client.rpc(name,payload);
-            if(error){
-              lastError = error;
-              continue;
-            }
-            return data;
-          }catch(err){
-            lastError = err;
-          }
-        }
-
-        throw lastError || new Error("rpc_failed_" + name);
-      }
-
-      async function resolvePhoneFromSlug(slug){
-        const client = await getSb();
-        const s = normSlug(slug);
-        if(!client || !s || !isPosSlug(s)) return "";
-
-        for(const moduleName of ALLOWED_MODULES){
-          const { data,error } = await client
-            .from("digiy_subscriptions_public")
-            .select("phone,module,slug")
-            .eq("slug",s)
-            .eq("module",moduleName)
-            .limit(1)
-            .maybeSingle();
-
-          if(error) continue;
-
-          if(data?.phone && isAllowedModule(data.module) && isPosSlug(data.slug)){
-            return cleanDigits(data.phone);
-          }
-        }
-
-        return "";
-      }
-
-      async function digiyHasAccess(phone,module){
-        const tries = [];
-
-        for(const moduleName of ALLOWED_MODULES){
-          tries.push({ p_phone:phone, p_module:moduleName });
-          tries.push({ phone, module:moduleName });
-        }
-
-        const res = await rpcFirstSuccess("digiy_has_access",tries);
-
-        if(typeof res === "boolean") return res;
-        if(res && typeof res.ok === "boolean") return res.ok;
-        if(res && typeof res.has_access === "boolean") return res.has_access;
-        if(res && typeof res.allowed === "boolean") return res.allowed;
-        if(res && typeof res.access === "boolean") return res.access;
-
-        return !!res;
-      }
-
-      async function digiyGetSubscriptionFull(phone,module){
-        for(const moduleName of ALLOWED_MODULES){
-          try{
-            const data = await rpcFirstSuccess("digiy_get_subscription_status",[
-              { p_phone:phone, p_module:moduleName },
-              { phone, module:moduleName }
-            ]);
-            if(data) return data;
-          }catch(_){}
-        }
-        return null;
-      }
-
-      async function digiyGetDashboardStats(phone,module){
-        for(const moduleName of ALLOWED_MODULES){
-          try{
-            const data = await rpcFirstSuccess("digiy_get_dashboard_stats",[
-              { p_phone:phone, p_module:moduleName },
-              { phone, module:moduleName }
-            ]);
-            if(data) return data;
-          }catch(_){}
-        }
-
-        return { month_xof:null, tx_count:null, today_hint:"Aujourd’hui" };
-      }
-
-      async function digiyGetBoostStatus(phone){
-        try{
-          return await rpcFirstSuccess("digiy_get_boost_status",[
-            { p_phone:phone },
-            { phone }
-          ]);
-        }catch(_){
-          return null;
-        }
-      }
-
-      async function digiyBuildPayUrl(module,phone,plan){
-        return await rpcFirstSuccess("digiy_build_pay_url",[
-          { p_module:module, p_phone:phone, p_plan:plan },
-          { module,phone,plan }
-        ]);
-      }
-
-      async function getStoreContext(slug){
-        if(!slug || !isPosSlug(slug)) return null;
-
-        try{
-          return await rpcFirstSuccess("digiy_pos_get_store_context_by_slug",[
-            { p_slug:slug },
-            { slug }
-          ]);
-        }catch(_){}
-
-        try{
-          return await rpcFirstSuccess("pos_get_store_context_by_slug",[
-            { p_slug:slug },
-            { slug }
-          ]);
-        }catch(_){
-          return null;
-        }
-      }
-
-      function extractWorkCurrency(payload){
-        const candidates = [
-          payload?.work_currency,
-          payload?.currency,
-          payload?.store?.work_currency,
-          payload?.store?.currency,
-          payload?.profile?.work_currency,
-          payload?.profile?.currency
-        ];
-
-        for(const item of candidates){
-          if(item) return normalizeWorkCurrency(item);
-        }
-
-        return "";
-      }
-
-      async function resolveWorkCurrency(phone,slug,storeCtx){
-        const fromCtx = extractWorkCurrency(storeCtx);
-        if(fromCtx) return fromCtx;
-
-        const client = await getSb();
-        if(!client) return "XOF";
-
-        try{
-          const { data,error } = await client
-            .from("pos_stores")
-            .select("work_currency")
-            .eq("owner_phone",cleanDigits(phone))
-            .ilike("store_id","pos-%")
-            .limit(1)
-            .maybeSingle();
-
-          if(!error && data?.work_currency) return normalizeWorkCurrency(data.work_currency);
-        }catch(_){}
-
-        return "XOF";
-      }
-
-      function daysBetween(aIso,bIso){
-        const a = new Date(aIso).getTime();
-        const b = new Date(bIso).getTime();
-
-        if(Number.isNaN(a) || Number.isNaN(b)) return null;
-
-        return Math.ceil((b - a) / (1000 * 60 * 60 * 24));
-      }
-
-      function pickMonthAmount(stats,currency){
-        const c = normalizeWorkCurrency(currency);
-
-        if(c === "EUR"){
-          return stats?.month_eur ??
-            stats?.month_amount_eur ??
-            stats?.amount_eur ??
-            stats?.month_amount ??
-            stats?.month_xof ??
-            null;
-        }
-
-        return stats?.month_xof ??
-          stats?.month_amount_xof ??
-          stats?.amount_xof ??
-          stats?.month_amount ??
-          null;
-      }
-
-      function setNotifs(items){
-        const box = $("notifList");
-        if(!box) return;
-
-        box.innerHTML = "";
-
-        if(!items.length){
-          box.innerHTML = `
-            <div class="notif">
-              <div>
-                <b>Rien à signaler</b>
-                <div class="muted" style="font-size:13px;margin-top:3px">Tout roule.</div>
-              </div>
-              <div class="tag ok">OK</div>
-            </div>
-          `;
-          return;
-        }
-
-        for(const it of items){
-          const tagClass = it.level === "warn" ? "warn" : it.level === "ok" ? "ok" : "info";
-          const div = document.createElement("div");
-          div.className = "notif";
-          div.innerHTML = `
-            <div>
-              <b>${escapeHtml(it.title)}</b>
-              <div class="muted" style="font-size:13px;margin-top:3px">${escapeHtml(it.text)}</div>
-            </div>
-            <div class="tag ${tagClass}">${escapeHtml(it.tag)}</div>
-          `;
-          box.appendChild(div);
-        }
-      }
-
-      function escapeHtml(value){
-        return String(value ?? "")
-          .replace(/&/g,"&amp;")
-          .replace(/</g,"&lt;")
-          .replace(/>/g,"&gt;")
-          .replace(/"/g,"&quot;")
-          .replace(/'/g,"&#039;");
-      }
-
-      function wireNav(){
-        const links = {
-          btnHall:PROFILE_URL,
-          btnClientView:PUBLIC_URL,
-          btnPublicTop:PUBLIC_URL,
-          btnHeroProfile:PROFILE_URL,
-          btnHeroClient:PUBLIC_URL,
-          btnCaisse:CAISSE_URL,
-          btnArticles:ADMIN_URL + "#articleList",
-          btnNotes:CAISSE_URL + "#notes",
-          btnAdmin:ADMIN_URL,
-          btnSettings:ADMIN_URL,
-          btnPinTop:PIN_URL,
-          btnBlockedPin:PIN_URL,
-          btnHeroCash:CAISSE_URL,
-          btnHeroArticles:ADMIN_URL + "#articleList",
-          btnHeroNotes:CAISSE_URL + "#notes",
-          btnHeroPlus:ADMIN_URL,
-          btnNoteFast:CAISSE_URL + "#notes",
-          btnOpenPay:PAY_URL,
-          navHome:DASHBOARD_URL,
-          navArticles:ADMIN_URL + "#articleList",
-          navCash:CAISSE_URL,
-          navNotes:CAISSE_URL + "#notes",
-          navMore:ADMIN_URL
-        };
-
-        Object.entries(links).forEach(([id,url]) => {
-          const el = $(id);
-          if(!el) return;
-          el.href = /^https?:\/\//i.test(url) ? url : cleanPath(url);
+      if(phone){
+        PHONE_KEYS.forEach(k => {
+          try{ sessionStorage.setItem(k,phone); }catch(_){}
         });
-
-        const abos = $("btnBlockedAbos");
-        if(abos) abos.href = buildUrl(ABOS_URL,buildAbosParams());
-
-        const audioBtn = $("digiy-audio-btn");
-        if(audioBtn) audioBtn.title = "Écouter l’accueil";
       }
 
-      function showBlocked(title,text,pill){
-        $("dashboardContent").style.display = "none";
-        $("blockedShell").style.display = "grid";
-        $("blockedTitle").textContent = title;
-        $("blockedText").innerHTML = text;
-        $("pillStatus").textContent = pill || "Accès requis";
-        $("dotAccess").classList.remove("ok");
-        $("dotAccess").classList.add("bad");
-      }
+      let changed = false;
 
-      function showDashboard(){
-        $("blockedShell").style.display = "none";
-        $("dashboardContent").style.display = "block";
-      }
-
-      async function init(){
-        reveal();
-        cleanVisibleUrl();
-        wireNav();
-        purgeBadLocalRail();
-
-        await awaitGuardReady();
-        await bootGuard();
-
-        let slug = getSlug();
-        let phone = getPhone();
-
-        state.slug = slug;
-        state.phone = phone;
-
-        if(!slug || !isPosSlug(slug)){
-          showBlocked(
-            "Identifiant manquant",
-            "Entre avec ton code d’accès ou passe par ton lien MON COMMERCE pour ouvrir ton espace.",
-            "Accès requis"
-          );
-          return;
+      SENSITIVE.concat(["slug"]).forEach(k => {
+        if(u.searchParams.has(k)){
+          u.searchParams.delete(k);
+          changed = true;
         }
-
-        if(!phone){
-          try{
-            phone = await resolvePhoneFromSlug(slug);
-          }catch(_){}
-        }
-
-        state.slug = slug;
-        state.phone = phone || "";
-
-        saveIdentityOnly(slug,state.phone);
-
-        if(!state.phone){
-          showBlocked(
-            "Boutique introuvable",
-            "Le lien n’a pas permis d’identifier ta boutique. Entre avec ton code pour reconstruire ta session.",
-            "En attente"
-          );
-          return;
-        }
-
-        let access = false;
-
-        try{
-          access = await digiyHasAccess(state.phone,MODULE_CODE);
-        }catch(_){}
-
-        state.access = !!access;
-
-        if(!state.access){
-          showBlocked(
-            "Abonnement requis",
-            "Ta boutique est reconnue, mais ton accès MON COMMERCE n’est pas encore actif. Active ton abonnement ou entre par ton code.",
-            "À activer"
-          );
-          return;
-        }
-
-        saveAccessSession(state.slug,state.phone);
-        showDashboard();
-
-        const storeCtx = await getStoreContext(slug);
-        state.storeName = String(
-          storeCtx?.shop_name ||
-          storeCtx?.display_name ||
-          storeCtx?.store?.name ||
-          storeCtx?.profile?.display_name ||
-          MODULE_LABEL
-        ).trim() || MODULE_LABEL;
-
-        state.workCurrency = await resolveWorkCurrency(state.phone,slug,storeCtx);
-
-        $("storeNameBox").textContent = state.storeName;
-        $("accessBox").textContent = "Ouvert";
-        $("brandSub").textContent = state.storeName + " · accueil simple";
-        $("pillStatus").textContent = "Ouvert";
-        $("dotAccess").classList.remove("bad");
-        $("dotAccess").classList.add("ok");
-
-        const status = await digiyGetSubscriptionFull(state.phone,MODULE_CODE);
-        const expiresAt = status?.expires_at || status?.current_period_end || null;
-        const plan = status?.plan || status?.plan_code || "";
-
-        const stats = await digiyGetDashboardStats(state.phone,MODULE_CODE);
-        const month = pickMonthAmount(stats,state.workCurrency);
-        const tx = stats?.tx_count ?? null;
-
-        $("moneyMonth").textContent = month !== null ? formatMoney(month,state.workCurrency) : formatMoney(0,state.workCurrency);
-        $("txCount").textContent = tx !== null ? tx + " transactions" : "— transactions";
-        $("todayHint").textContent = stats?.today_hint || "Aujourd’hui";
-
-        $("statusNotice").className = "notice ok";
-        $("statusNotice").innerHTML = expiresAt
-          ? "Accès actif jusqu’au <b>" + fmtDateFR(expiresAt) + "</b>."
-          : "Accès actif. Tu peux encaisser, noter, puis laisser DIGIY ranger.";
-
-        const notifs = [];
-
-        if(expiresAt){
-          const d = daysBetween(new Date().toISOString(),expiresAt);
-          if(d !== null && d <= 3){
-            notifs.push({
-              level:"warn",
-              tag:"J-" + d,
-              title:"Abonnement bientôt expiré",
-              text:"Renouvelle pour éviter la coupure."
-            });
-          }else{
-            notifs.push({
-              level:"ok",
-              tag:"OK",
-              title:"Abonnement actif",
-              text:plan ? "Plan : " + plan : "Ton accès est ouvert."
-            });
-          }
-        }else{
-          notifs.push({
-            level:"ok",
-            tag:"OK",
-            title:"Accès ouvert",
-            text:"Tu peux travailler sans repasser par les réglages."
-          });
-        }
-
-        const boost = await digiyGetBoostStatus(state.phone);
-
-        if(boost?.active){
-          $("boostStatus").textContent = "Boost actif jusqu’au " + fmtDateFR(boost.expires_at);
-          $("btnBoost").textContent = "Actif";
-          $("btnBoost").disabled = true;
-          notifs.push({
-            level:"info",
-            tag:"BOOST",
-            title:"Boost actif",
-            text:"Ta visibilité est augmentée."
-          });
-        }else{
-          $("boostStatus").textContent = "Statut boost : inactif";
-          notifs.push({
-            level:"info",
-            tag:"OPTION",
-            title:"Boost disponible",
-            text:"Active-le seulement quand tu veux pousser ta boutique."
-          });
-        }
-
-        if(month === null || tx === null){
-          notifs.push({
-            level:"info",
-            tag:"DATA",
-            title:"Stats à compléter",
-            text:"Les chiffres exacts arrivent quand les mouvements sont bien branchés."
-          });
-        }
-
-        setNotifs(notifs);
-
-        $("btnBoostInfo").onclick = () => {
-          alert("BOOST : +50% d’apparition pendant 7 jours. Paiement direct. À utiliser quand tu veux pousser la visibilité.");
-        };
-
-        $("btnBoost").onclick = async () => {
-          try{
-            $("btnBoost").disabled = true;
-            $("btnBoost").textContent = "…";
-
-            const payload = await digiyBuildPayUrl(BOOST.module,state.phone,BOOST.plan);
-            const url = typeof payload === "string" ? payload : (payload?.url || payload?.pay_url || null);
-
-            if(!url) throw new Error("URL paiement BOOST manquante");
-
-            location.href = url;
-          }catch(err){
-            console.error(err);
-            alert("Impossible d’activer le BOOST pour le moment. Réessaie ou contacte le support.");
-            $("btnBoost").disabled = false;
-            $("btnBoost").textContent = "Activer";
-          }
-        };
-      }
-
-      function initAudio(){
-        const btn = $("digiy-audio-btn");
-        if(!btn) return;
-
-        const synth = window.speechSynthesis;
-        let playing = false;
-
-        function text(){
-          return "Bienvenue dans Mon Commerce. Sur téléphone, va à l’essentiel. Encaisse, écris une note, regarde ton argent. Le reste est dans Plus.";
-        }
-
-        btn.onclick = () => {
-          if(!synth) return;
-
-          if(playing){
-            synth.cancel();
-            playing = false;
-            btn.textContent = "🔊 Écouter";
-            return;
-          }
-
-          const u = new SpeechSynthesisUtterance(text());
-          u.lang = "fr-FR";
-          u.rate = .88;
-          u.pitch = 1.02;
-
-          u.onend = () => {
-            playing = false;
-            btn.textContent = "🔊 Écouter";
-          };
-
-          synth.cancel();
-          synth.speak(u);
-          playing = true;
-          btn.textContent = "⏹ Stop";
-        };
-      }
-
-      initAudio();
-
-      init().catch((err) => {
-        console.error(err);
-        reveal();
-        showBlocked(
-          "Problème technique",
-          "Ton espace n’a pas pu finir de charger. Entre avec ton code ou contacte le support.",
-          "Erreur"
-        );
       });
-    })();
-  </script>
+
+      if(changed){
+        history.replaceState({},document.title,u.pathname + u.search + u.hash);
+      }
+    }catch(_){}
+  }
+
+  function go(){
+    const target = "./index.html";
+    setTimeout(function(){
+      try{ location.replace(target); }
+      catch(_){ location.href = target; }
+    }, 900);
+  }
+
+  rememberThenClean();
+  go();
+})();
+</script>
 </body>
 </html>
+
