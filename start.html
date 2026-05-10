@@ -1,245 +1,367 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#061b14" />
-  <title>MON COMMERCE by DIGIY — Entrée</title>
-  <meta name="description" content="Entrée MON COMMERCE by DIGIY : essai 15 jours ou accès sécurisé." />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#06140f"/>
+  <title>MON COMMERCE — Départ</title>
+  <meta name="description" content="MON COMMERCE by DIGIY — entrée simple vers le comptoir, le code d’accès et l’activation."/>
+
+  <script>
+    window.DIGIY_MODULE = "POS";
+    window.DIGIY_LOGIN_URL = "./pin.html";
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
 
   <style>
     :root{
-      --bg:#061b14; --card:#0b2a1f; --line:rgba(255,255,255,.14);
-      --text:#eafff1; --muted:rgba(234,255,241,.72);
-      --gold:#facc15; --ok:#22c55e; --bad:#fb7185; --cyan:#22d3ee;
-      --shadow:0 18px 55px rgba(0,0,0,.45);
+      --bg:#04110d;
+      --text:#f7fbf8;
+      --muted:#b8cfc4;
+      --gold:#facc15;
+      --gold2:#f59e0b;
+      --green:#22c55e;
+      --blue:#38bdf8;
+      --line:rgba(255,255,255,.12);
+      --shadow:0 22px 62px rgba(0,0,0,.38);
+      --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
+
     *{box-sizing:border-box}
+    html,body{margin:0;padding:0;min-height:100%}
+
     body{
-      margin:0; min-height:100vh; display:grid; place-items:center;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto;
-      background:
-        radial-gradient(circle at top, rgba(250,204,21,.10), transparent 55%),
-        linear-gradient(135deg,#04160f,#0a2b1f);
+      min-height:100dvh;
+      font-family:var(--font);
       color:var(--text);
-      padding:18px;
-    }
-    .card{
-      width:min(640px,94vw);
-      background:linear-gradient(145deg,rgba(11,42,31,.96),rgba(6,35,25,.96));
-      border:1px solid var(--line);
-      border-radius:24px;
-      box-shadow:var(--shadow);
-      padding:18px;
-    }
-    .top{
-      display:flex;justify-content:space-between;align-items:center;gap:12px
-    }
-    .brand{
-      display:flex;align-items:center;gap:10px
-    }
-    .ico{
-      width:50px;height:50px;border-radius:16px;
-      display:grid;place-items:center;
-      background:radial-gradient(circle at 30% 0,var(--gold),transparent 60%);
-      border:1px solid rgba(250,204,21,.35);
-      font-weight:1000;
-    }
-    .t{
-      font-weight:1000;letter-spacing:.10em;font-size:12px
-    }
-    .sub{
-      font-size:12px;color:var(--muted);margin-top:4px
-    }
-    .pill{
-      border:1px solid var(--line);
-      background:rgba(250,204,21,.10);
-      padding:7px 10px;border-radius:999px;
-      font-size:12px;font-weight:900;
-      white-space:nowrap;
-    }
-    .sep{height:1px;background:var(--line);margin:14px 0}
-    .hero{
-      padding:6px 0 10px;
-      line-height:1.35;
-    }
-    .hero h1{
-      margin:0;
-      font-size:20px;
-      font-weight:1000;
-      letter-spacing:.02em;
-    }
-    .hero p{
-      margin:8px 0 0;
-      color:var(--muted);
-      font-weight:700;
-      font-size:13px;
-    }
-    .grid{
-      display:grid;
-      gap:12px;
-      margin-top:14px;
-    }
-    @media(min-width:560px){
-      .grid{grid-template-columns:1fr 1fr}
-    }
-    .btn{
-      width:100%;
-      padding:14px 14px;
-      border-radius:16px;
-      border:none;
-      cursor:pointer;
-      font-weight:1000;
-      font-size:14px;
+      background:
+        radial-gradient(850px 520px at 0% -10%, rgba(250,204,21,.13), transparent 58%),
+        radial-gradient(800px 480px at 100% 0%, rgba(34,197,94,.13), transparent 58%),
+        linear-gradient(180deg,#06140f,var(--bg));
       display:flex;
       align-items:center;
-      justify-content:space-between;
+      justify-content:center;
+      padding:14px;
+    }
+
+    a{color:inherit;text-decoration:none}
+    button{font:inherit;cursor:pointer}
+
+    .card{
+      width:min(100%,620px);
+      border:1px solid var(--line);
+      border-radius:30px;
+      background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.035));
+      box-shadow:var(--shadow);
+      padding:22px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:13px;
+    }
+
+    .logo{
+      width:62px;
+      height:62px;
+      border-radius:23px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      color:#06140f;
+      font-size:30px;
+      font-weight:1000;
+      box-shadow:0 16px 34px rgba(250,204,21,.20);
+      flex:0 0 auto;
+    }
+
+    .kicker{
+      color:var(--gold);
+      font-size:.78rem;
+      font-weight:1000;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    h1{
+      margin:4px 0 0;
+      font-size:clamp(2rem,7vw,3.05rem);
+      line-height:.96;
+      letter-spacing:-.05em;
+      font-weight:1000;
+    }
+
+    .lead{
+      margin:16px 0 0;
+      color:var(--muted);
+      line-height:1.55;
+      font-size:1.02rem;
+      font-weight:850;
+    }
+
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
       gap:10px;
+      margin-top:18px;
     }
-    .btn span{
-      font-size:18px;
-    }
-    .btn.trial{
-      background:linear-gradient(90deg,var(--cyan),#60a5fa);
-      color:#04160f;
-    }
-    .btn.pin{
-      background:linear-gradient(90deg,var(--ok),var(--gold));
-      color:#062015;
-    }
-    .btn.pay{
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.16);
+
+    .btn{
+      min-height:72px;
+      border-radius:22px;
+      border:1px solid rgba(255,255,255,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:4px;
+      padding:14px;
+      font-size:1.05rem;
+      font-weight:1000;
+      text-align:center;
+      background:rgba(255,255,255,.05);
       color:var(--text);
     }
-    .note{
-      margin-top:12px;
-      padding:12px 12px;
-      border-radius:16px;
-      border:1px solid rgba(34,197,94,.22);
-      background:rgba(34,197,94,.08);
-      color:#bbf7d0;
+
+    .btn small{
+      color:rgba(247,251,248,.70);
+      font-size:.78rem;
+      line-height:1.25;
       font-weight:850;
-      font-size:12px;
-      white-space:pre-wrap;
     }
+
+    .btn.primary{
+      border:none;
+      color:#06140f;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      box-shadow:0 16px 36px rgba(250,204,21,.18);
+    }
+
+    .btn.primary small{color:rgba(6,20,15,.72)}
+
+    .btn.green{
+      border:none;
+      color:#06140f;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+    }
+
+    .btn.green small{color:rgba(6,20,15,.72)}
+
+    .btn.blue{
+      color:#bae6fd;
+      background:rgba(56,189,248,.12);
+      border-color:rgba(56,189,248,.25);
+    }
+
+    .wide{grid-column:1/-1}
+
+    .notice{
+      margin-top:16px;
+      border:1px solid rgba(250,204,21,.25);
+      background:rgba(250,204,21,.08);
+      color:#fde68a;
+      border-radius:20px;
+      padding:13px;
+      line-height:1.5;
+      font-size:.92rem;
+      font-weight:850;
+    }
+
+    .foot{
+      margin-top:14px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+
     .mini{
-      margin-top:10px;
-      text-align:center;
+      min-height:40px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
       color:var(--muted);
-      font-size:12px;
-      font-weight:750;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:9px 12px;
+      font-size:.83rem;
+      font-weight:1000;
     }
-    a.link{color:#fde68a;text-decoration:none;font-weight:900}
+
+    @media(max-width:560px){
+      .card{padding:18px;border-radius:26px}
+      .actions{grid-template-columns:1fr}
+      .wide{grid-column:auto}
+      .btn{min-height:66px}
+    }
   </style>
 </head>
 
 <body>
-  <div class="card">
-    <div class="top">
-      <div class="brand">
-        <div class="ico">🧾</div>
-        <div>
-          <div class="t">MON COMMERCE by DIGIY</div>
-          <div class="sub">Entrée directe — essai ou accès sécurisé</div>
-        </div>
+  <main class="card">
+    <div class="brand">
+      <div class="logo">🛒</div>
+      <div>
+        <div class="kicker">MON COMMERCE by DIGIY</div>
+        <h1>Départ commerce</h1>
       </div>
-      <div class="pill">ROYAL START</div>
     </div>
 
-    <div class="sep"></div>
-
-    <div class="hero">
-      <h1>Bienvenue frérot 👑</h1>
-      <p>
-        Ici, tu ouvres ton activité sans détour.<br>
-        Deux chemins simples :
-        <b>Essai 15 jours</b> ou <b>Accès sécurisé</b>.
-      </p>
+    <div class="lead">
+      Ici, on va droit au travail.  
+      Ouvre le comptoir, entre avec ton code, ou active ton accès.
     </div>
 
-    <div class="grid">
+    <div class="actions">
+      <a class="btn primary" id="goCounter" href="./index.html">
+        🏠 Ouvrir le comptoir
+        <small>accueil simple</small>
+      </a>
 
-      <!-- ✅ ESSAI -->
-      <button class="btn trial" id="btnTrial" type="button">
-        <div>
-          🎁 <b>Essai 15 jours</b><br>
-          <small style="opacity:.9;font-weight:850">Inscription gratuite — tu testes direct</small>
-        </div>
-        <span>→</span>
-      </button>
+      <a class="btn green" id="goPin" href="./pin.html">
+        🔐 J’ai mon code
+        <small>accès sécurisé</small>
+      </a>
 
-      <!-- ✅ ACCÈS PIN -->
-      <button class="btn pin" id="btnPin" type="button">
-        <div>
-          🔑 <b>J'ai déjà mon accès</b><br>
-          <small style="opacity:.9;font-weight:850">Identifiant + code (via QR boutique)</small>
-        </div>
-        <span>→</span>
-      </button>
+      <a class="btn" id="goCash" href="./caisse.html">
+        💰 Encaisser
+        <small>vente rapide</small>
+      </a>
 
-      <!-- ✅ PAIEMENT -->
-      <button class="btn pay" id="btnPay" type="button" style="grid-column:1/-1">
-        <div>
-          🧾 <b>Activer une licence</b><br>
-          <small style="opacity:.9;font-weight:850">Après essai ou pour passer à l'étape suivante</small>
-        </div>
-        <span>→</span>
-      </button>
+      <a class="btn" id="goArticles" href="./admin.html#articleList">
+        📦 Articles
+        <small>stock · prix</small>
+      </a>
 
+      <a class="btn blue wide" id="goPay" href="https://commencer-a-payer.digiylyfe.com/">
+        💳 Activer / renouveler
+        <small>abonnement MON COMMERCE</small>
+      </a>
     </div>
 
-    <div class="note">
-✅ Usage terrain : on entre toujours depuis son QR boutique ou son lien d'accès.
-
-La vitrine, elle, reste simple pour tout le monde.
+    <div class="notice">
+      Les anciens liens restent acceptés, mais l’espace propre commence ici :
+      comptoir, code, caisse, articles.
     </div>
 
-    <div class="mini">
-      Retour HUB : <a class="link" href="https://beauville.github.io/DIGIY/">DIGIY HUB</a> •
-      Support WhatsApp : <a class="link" href="https://wa.me/221771342889">+221 77 134 28 89</a>
+    <div class="foot">
+      <a class="mini" href="https://digiy-hub.digiylyfe.com/">🧭 HUB</a>
+      <a class="mini" href="https://tarifs.digiylyfe.com/">📦 Tarifs</a>
+      <a class="mini" href="https://wa.me/221771342889" target="_blank" rel="noopener">💬 Support WhatsApp</a>
     </div>
-  </div>
+  </main>
 
 <script>
-(() => {
-  const MODULE = "caisse_pro";
+(function(){
+  "use strict";
 
-  const INSCRIPTION_URL = "https://beauville.github.io/inscription-digiy/?module=" + MODULE;
-  const PAY_URL         = "https://beauville.github.io/commencer-a-payer/?module=" + MODULE;
+  const SLUG_KEYS = ["digiy_pos_slug","digiy_pos_last_slug"];
+  const PHONE_KEYS = ["digiy_pos_phone","digiy_pos_last_phone"];
 
-  // Récupération du slug depuis l'URL si présent (ex: ?slug=chez-astou-saly)
-  const url = new URL(location.href);
-  const slug = (url.searchParams.get("slug") || "").trim();
+  const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
+  const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
 
-  // ✅ FIX : URL PIN correcte avec module + return + slug si disponible
-  function buildPinUrl() {
-    const base = "https://beauville.github.io/digiy-qr-pro/pin.html";
-    const u = new URL(base);
-    u.searchParams.set("module", "POS");
-    u.searchParams.set("return", "https://pro-caisse.digiylyfe.com/");
-    if (slug) u.searchParams.set("slug", slug);
-    return u.toString();
+  function normPhone(v){
+    return String(v || "").replace(/[^\d]/g,"").slice(0,15);
   }
 
-  function withSlug(base) {
-    if (!slug) return base;
-    const u = new URL(base, location.href);
-    u.searchParams.set("slug", slug);
-    return u.toString();
+  function normSlug(v){
+    return String(v || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g,"-")
+      .replace(/[^a-z0-9-]/g,"")
+      .replace(/-+/g,"-")
+      .replace(/^-|-$/g,"");
   }
 
-  document.getElementById("btnTrial").addEventListener("click", () => {
-    location.href = withSlug(INSCRIPTION_URL);
-  });
+  function isPosSlug(v){
+    const s = normSlug(v);
+    if(!s) return false;
+    if(FORBIDDEN_SLUG_PREFIXES.some(p => s.startsWith(p))) return false;
+    return ALLOWED_SLUG_PREFIXES.some(p => s.startsWith(p));
+  }
 
-  document.getElementById("btnPin").addEventListener("click", () => {
-    location.href = buildPinUrl();
-  });
+  function setBoth(key,value,localToo){
+    const v = String(value || "").trim();
+    if(!v) return;
 
-  document.getElementById("btnPay").addEventListener("click", () => {
-    window.open(withSlug(PAY_URL), "_blank", "noopener");
-  });
+    try{ sessionStorage.setItem(key,v); }catch(_){}
+    if(localToo !== false){
+      try{ localStorage.setItem(key,v); }catch(_){}
+    }
+  }
+
+  function rememberThenClean(){
+    try{
+      const u = new URL(location.href);
+
+      const slug = normSlug(
+        u.searchParams.get("slug") ||
+        u.searchParams.get("pos_slug") ||
+        u.searchParams.get("commerce") ||
+        ""
+      );
+
+      const phone = normPhone(
+        u.searchParams.get("phone") ||
+        u.searchParams.get("tel") ||
+        u.searchParams.get("owner_phone") ||
+        u.searchParams.get("p_phone") ||
+        ""
+      );
+
+      if(slug && isPosSlug(slug)){
+        SLUG_KEYS.forEach(k => setBoth(k,slug,true));
+      }
+
+      if(phone){
+        PHONE_KEYS.forEach(k => setBoth(k,phone,false));
+      }
+
+      let changed = false;
+
+      [
+        "slug","pos_slug","commerce","phone","tel","owner_phone","p_phone",
+        "pin","pin4","token","session_token","module","access"
+      ].forEach(k => {
+        if(u.searchParams.has(k)){
+          u.searchParams.delete(k);
+          changed = true;
+        }
+      });
+
+      if(changed){
+        history.replaceState({},document.title,u.pathname + u.search + u.hash);
+      }
+    }catch(_){}
+  }
+
+  function withModule(url){
+    try{
+      const u = new URL(url, location.href);
+      if(u.hostname.includes("commencer-a-payer")){
+        u.searchParams.set("module","POS");
+      }
+      return u.toString();
+    }catch(_){
+      return url;
+    }
+  }
+
+  function boot(){
+    rememberThenClean();
+
+    const pay = document.getElementById("goPay");
+    if(pay) pay.href = withModule(pay.href);
+  }
+
+  boot();
 })();
 </script>
 </body>
