@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#07140f"/>
   <title>MON COMMERCE — Arrière-boutique</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — arrière-boutique : articles, stock, prix, visibilité et préparation de la caisse."/>
+  <meta name="description" content="MON COMMERCE by DIGIY — arrière-boutique simple : nom boutique, articles, prix, stock et caisse."/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -14,678 +14,117 @@
     window.DIGIY_MODULE = "POS";
     window.DIGIY_LOGIN_URL = "./pin.html";
     document.documentElement.style.visibility = "hidden";
-
-    function digiyBasePath(){
-      const parts = location.pathname.split("/").filter(Boolean);
-      const isGh = /\.github\.io$/i.test(location.hostname);
-      if(isGh && parts.length > 0) return "/" + parts[0] + "/";
-      return "/";
-    }
-
-    function digiyLocal(path){
-      path = String(path || "").replace(/^\/+/, "");
-      return digiyBasePath() + path;
-    }
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./guard.js"></script>
   <script src="./claw-tools-pos.js"></script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
-
   <style>
     :root{
-      --bg:#04110d;
-      --card:rgba(8,24,18,.86);
-      --card2:rgba(9,28,21,.94);
-      --text:#f7fbf8;
-      --muted:#bfd3c8;
-      --line:rgba(255,255,255,.11);
-      --line2:rgba(255,255,255,.16);
-      --gold:#facc15;
-      --gold2:#f59e0b;
-      --green:#22c55e;
-      --danger:#ef4444;
-      --warn:#f59e0b;
-      --info:#60a5fa;
-      --shadow:0 22px 56px rgba(0,0,0,.28);
-      --radius:26px;
-      --font:"Outfit",system-ui,-apple-system,sans-serif;
+      --bg:#04110d; --card:rgba(8,24,18,.90); --text:#f7fbf8; --muted:#bfd3c8;
+      --line:rgba(255,255,255,.12); --line2:rgba(255,255,255,.18);
+      --gold:#facc15; --gold2:#f59e0b; --green:#22c55e; --danger:#ef4444;
+      --warn:#f59e0b; --blue:#60a5fa; --shadow:0 22px 56px rgba(0,0,0,.30);
+      --radius:26px; --font:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
-
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
-    html{scroll-behavior:smooth}
-
     body{
-      min-height:100vh;
-      color:var(--text);
-      font-family:var(--font);
-      background:
-        radial-gradient(circle at top left, rgba(250,204,21,.11), transparent 30%),
-        radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 25%),
-        linear-gradient(180deg,#07140f 0%,#04110d 48%,#020906 100%);
+      min-height:100vh;color:var(--text);font-family:var(--font);
+      background:radial-gradient(circle at top left, rgba(250,204,21,.11), transparent 30%),
+                 radial-gradient(circle at top right, rgba(96,165,250,.08), transparent 25%),
+                 linear-gradient(180deg,#07140f 0%,#04110d 48%,#020906 100%);
     }
-
     a{text-decoration:none;color:inherit}
     button,input,select,textarea{font:inherit}
     button{cursor:pointer}
-
     .app{display:none}
     html.app-ready .app{display:block}
-
-    .wrap{
-      width:min(100%,1180px);
-      margin:0 auto;
-      padding:14px 12px calc(104px + env(safe-area-inset-bottom,0px));
-    }
-
-    .topbar{
-      position:sticky;
-      top:0;
-      z-index:70;
-      margin-bottom:12px;
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:22px;
-      background:rgba(4,17,13,.82);
-      backdrop-filter:blur(14px);
-      -webkit-backdrop-filter:blur(14px);
-      box-shadow:0 14px 34px rgba(0,0,0,.22);
-    }
-
-    .topbarInner{
-      padding:12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      min-width:0;
-    }
-
-    .brandBadge{
-      width:46px;
-      height:46px;
-      border-radius:17px;
-      display:grid;
-      place-items:center;
-      background:linear-gradient(135deg,rgba(250,204,21,.17),rgba(245,158,11,.08));
-      border:1px solid rgba(250,204,21,.18);
-      font-size:23px;
-      flex:0 0 auto;
-    }
-
-    .brandKicker{
-      color:var(--gold);
-      font-size:11px;
-      font-weight:950;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-    }
-
-    .brandTitle{
-      font-size:19px;
-      line-height:1.08;
-      font-weight:1000;
-      letter-spacing:-.02em;
-    }
-
-    .brandSub{
-      color:var(--muted);
-      font-size:12px;
-      font-weight:800;
-      margin-top:2px;
-    }
-
-    .topActions{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-
-    .pill{
-      min-height:40px;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:9px 12px;
-      border-radius:999px;
-      background:rgba(255,255,255,.045);
-      border:1px solid var(--line);
-      color:var(--muted);
-      font-size:12px;
-      font-weight:900;
-    }
-
+    .wrap{width:min(100%,1100px);margin:0 auto;padding:14px 12px calc(104px + env(safe-area-inset-bottom,0px))}
+    .topbar{position:sticky;top:0;z-index:70;margin-bottom:12px;border:1px solid rgba(255,255,255,.08);border-radius:22px;background:rgba(4,17,13,.86);backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(0,0,0,.22)}
+    .topbarInner{padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .brandBadge{width:46px;height:46px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(250,204,21,.18),rgba(245,158,11,.08));border:1px solid rgba(250,204,21,.18);font-size:23px;flex:0 0 auto}
+    .brandKicker{color:var(--gold);font-size:11px;font-weight:950;letter-spacing:.14em;text-transform:uppercase}
+    .brandTitle{font-size:19px;line-height:1.08;font-weight:1000;letter-spacing:-.02em}
+    .brandSub{color:var(--muted);font-size:12px;font-weight:800;margin-top:2px}
+    .topActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{min-height:40px;display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:900}
     .pill strong{color:var(--text)}
-
-    .dot{
-      width:9px;
-      height:9px;
-      border-radius:999px;
-      background:var(--warn);
-      box-shadow:0 0 0 4px rgba(255,255,255,.03);
-    }
-
-    .dot.ok{background:var(--green)}
-    .dot.bad{background:var(--danger)}
-
-    .btn,.btnOutline,.btnGhost,.btnDanger,.smallBtn{
-      appearance:none;
-      border:none;
-      min-height:46px;
-      padding:12px 15px;
-      border-radius:999px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      font-weight:950;
-      font-size:13px;
-      transition:transform .12s ease, opacity .12s ease, border-color .12s ease;
-    }
-
+    .dot{width:9px;height:9px;border-radius:999px;background:var(--warn);box-shadow:0 0 0 4px rgba(255,255,255,.03)}
+    .dot.ok{background:var(--green)} .dot.bad{background:var(--danger)}
+    .btn,.btnOutline,.btnGhost,.btnDanger,.smallBtn{appearance:none;border:none;min-height:46px;padding:12px 15px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:950;font-size:13px;transition:transform .12s ease,opacity .12s ease}
     .btn:hover,.btnOutline:hover,.btnGhost:hover,.btnDanger:hover,.smallBtn:hover{transform:translateY(-1px)}
     .btn:disabled,.btnOutline:disabled,.btnGhost:disabled,.btnDanger:disabled,.smallBtn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-
-    .btn{
-      color:#07110d;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      box-shadow:0 14px 30px rgba(250,204,21,.17);
-    }
-
-    .btnOutline{
-      color:var(--text);
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--line2);
-    }
-
-    .btnGhost{
-      color:var(--muted);
-      background:transparent;
-      border:1px solid var(--line2);
-    }
-
-    .btnDanger{
-      color:#fff;
-      background:linear-gradient(135deg,rgba(239,68,68,.95),rgba(239,68,68,.72));
-    }
-
-    .smallBtn{
-      min-height:36px;
-      padding:8px 11px;
-      border-radius:12px;
-      color:var(--text);
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--line2);
-      font-size:12px;
-    }
-
-    .navRow{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-bottom:12px;
-    }
-
-    .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.025)),var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:16px;
-      overflow:hidden;
-    }
-
-    .hero{
-      display:grid;
-      grid-template-columns:.9fr 1.1fr;
-      gap:12px;
-      align-items:start;
-    }
-
-    .heroBadge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 12px;
-      border-radius:999px;
-      background:rgba(250,204,21,.10);
-      border:1px solid rgba(250,204,21,.18);
-      color:var(--gold);
-      font-size:12px;
-      font-weight:950;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      margin-bottom:12px;
-    }
-
-    h1{
-      margin:0;
-      font-size:clamp(34px,8vw,58px);
-      line-height:.94;
-      letter-spacing:-.055em;
-      font-weight:1000;
-    }
-
+    .btn{color:#07110d;background:linear-gradient(135deg,var(--gold),var(--gold2));box-shadow:0 14px 30px rgba(250,204,21,.17)}
+    .btnOutline{color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line2)}
+    .btnGhost{color:var(--muted);background:transparent;border:1px solid var(--line2)}
+    .btnDanger{color:#fff;background:linear-gradient(135deg,rgba(239,68,68,.95),rgba(239,68,68,.72))}
+    .smallBtn{min-height:36px;padding:8px 11px;border-radius:12px;color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line2);font-size:12px}
+    .navRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.025)),var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;overflow:hidden}
+    .hero{display:grid;grid-template-columns:.95fr 1.05fr;gap:12px;align-items:start}
+    .heroBadge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(250,204,21,.10);border:1px solid rgba(250,204,21,.18);color:var(--gold);font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+    h1{margin:0;font-size:clamp(34px,7vw,56px);line-height:.94;letter-spacing:-.055em;font-weight:1000}
     h1 .accent{color:var(--gold)}
-
-    h2{
-      margin:0 0 10px;
-      font-size:19px;
-      font-weight:1000;
-    }
-
-    .lead{
-      margin-top:10px;
-      color:var(--muted);
-      line-height:1.65;
-      font-size:15px;
-      font-weight:750;
-    }
-
-    .quickGrid{
-      display:grid;
-      grid-template-columns:repeat(6,1fr);
-      gap:9px;
-      margin-top:14px;
-    }
-
-    .quickBtn{
-      min-height:74px;
-      padding:12px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.045);
-      display:grid;
-      place-items:center;
-      align-content:center;
-      gap:4px;
-      text-align:center;
-      color:var(--text);
-      font-weight:1000;
-    }
-
-    .quickBtn.primary{
-      color:#07110d;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      border-color:rgba(250,204,21,.55);
-    }
-
-    .quickBtn span{
-      display:block;
-      font-size:20px;
-      line-height:1;
-    }
-
-    .quickBtn small{
-      opacity:.78;
-      font-size:11px;
-      font-weight:900;
-    }
-
-    .miniStats{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:9px;
-      margin-top:14px;
-    }
-
-    .mini{
-      padding:12px;
-      border-radius:17px;
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-      min-width:0;
-    }
-
-    .mini .k{
-      color:var(--muted);
-      font-size:10px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      font-weight:950;
-    }
-
-    .mini .v{
-      margin-top:5px;
-      font-size:18px;
-      font-weight:1000;
-      letter-spacing:-.025em;
-      word-break:break-word;
-    }
-
-    .notice{
-      padding:13px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.035);
-      margin-top:12px;
-      line-height:1.6;
-      font-size:13px;
-      font-weight:750;
-      color:var(--muted);
-    }
-
+    h2{margin:0 0 10px;font-size:20px;font-weight:1000}
+    .lead{margin-top:10px;color:var(--muted);line-height:1.65;font-size:15px;font-weight:750}
+    .quickGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}
+    .quickBtn{min-height:74px;padding:12px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.045);display:grid;place-items:center;align-content:center;gap:4px;text-align:center;color:var(--text);font-weight:1000}
+    .quickBtn.primary{color:#07110d;background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:rgba(250,204,21,.55)}
+    .quickBtn span{display:block;font-size:20px;line-height:1}
+    .quickBtn small{opacity:.78;font-size:11px;font-weight:900}
+    .miniStats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}
+    .mini{padding:12px;border-radius:17px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);min-width:0}
+    .mini .k{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:950}
+    .mini .v{margin-top:5px;font-size:18px;font-weight:1000;letter-spacing:-.025em;word-break:break-word}
+    .notice{padding:13px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.035);margin-top:12px;line-height:1.6;font-size:13px;font-weight:750;color:var(--muted)}
     .notice.ok{border-color:rgba(34,197,94,.24);background:rgba(34,197,94,.09);color:#dcffe6}
     .notice.warn{border-color:rgba(245,158,11,.24);background:rgba(245,158,11,.09);color:#ffe8bd}
     .notice.bad{border-color:rgba(239,68,68,.24);background:rgba(239,68,68,.09);color:#ffd5d5}
     .notice.info{border-color:rgba(96,165,250,.24);background:rgba(96,165,250,.08)}
-
-    .formGrid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:7px;
-      margin-top:12px;
-    }
-
-    .field label{
-      color:var(--muted);
-      font-size:13px;
-      font-weight:900;
-    }
-
-    .input,.select,.textarea{
-      width:100%;
-      padding:14px;
-      border-radius:17px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.05);
-      color:var(--text);
-      outline:none;
-      font-size:16px;
-      font-weight:850;
-    }
-
-    .input:focus,.select:focus,.textarea:focus{
-      border-color:rgba(250,204,21,.45);
-      box-shadow:0 0 0 4px rgba(250,204,21,.09);
-    }
-
-    .textarea{
-      min-height:86px;
-      resize:vertical;
-      line-height:1.45;
-    }
-
-    .actionRow{
-      display:flex;
-      gap:9px;
-      flex-wrap:wrap;
-      margin-top:13px;
-    }
-
-    .actionRow .btn,
-    .actionRow .btnOutline,
-    .actionRow .btnGhost,
-    .actionRow .btnDanger{
-      flex:1;
-      min-width:150px;
-    }
-
-    .tabs{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin:12px 0;
-    }
-
-    .tab{
-      flex:1;
-      min-width:130px;
-      min-height:44px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.045);
-      color:var(--muted);
-      font-weight:950;
-    }
-
-    .tab.active{
-      color:#07110d;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      border-color:rgba(250,204,21,.55);
-    }
-
-    .section{
-      margin-top:12px;
-      scroll-margin-top:96px;
-    }
-
+    .formGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .field{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+    .field label{color:var(--muted);font-size:13px;font-weight:900}
+    .input,.select,.textarea{width:100%;padding:14px;border-radius:17px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);outline:none;font-size:16px;font-weight:850}
+    .input:focus,.select:focus,.textarea:focus{border-color:rgba(250,204,21,.45);box-shadow:0 0 0 4px rgba(250,204,21,.09)}
+    .textarea{min-height:86px;resize:vertical;line-height:1.45}
+    .actionRow{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
+    .actionRow .btn,.actionRow .btnOutline,.actionRow .btnGhost,.actionRow .btnDanger{flex:1;min-width:150px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+    .tab{flex:1;min-width:130px;min-height:44px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.045);color:var(--muted);font-weight:950}
+    .tab.active{color:#07110d;background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:rgba(250,204,21,.55)}
+    .section{margin-top:12px;scroll-margin-top:96px}
     .section.hidden{display:none}
-
-    .toolRow{
-      display:grid;
-      grid-template-columns:1.15fr .85fr .85fr;
-      gap:9px;
-      margin-top:12px;
-    }
-
-    .productList{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-      margin-top:12px;
-    }
-
-    .productCard{
-      padding:13px;
-      border-radius:19px;
-      border:1px solid rgba(255,255,255,.09);
-      background:rgba(255,255,255,.04);
-      display:grid;
-      gap:9px;
-    }
-
-    .productTop{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-      flex-wrap:wrap;
-    }
-
-    .productName{
-      font-weight:1000;
-      line-height:1.25;
-      font-size:16px;
-    }
-
-    .productMeta{
-      color:var(--muted);
-      font-size:12px;
-      font-weight:800;
-      line-height:1.45;
-      margin-top:4px;
-    }
-
-    .productPrice{
-      color:var(--gold);
-      font-size:22px;
-      font-weight:1000;
-      letter-spacing:-.035em;
-      white-space:nowrap;
-    }
-
-    .badge{
-      display:inline-flex;
-      width:max-content;
-      max-width:100%;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.05);
-      color:var(--muted);
-      font-size:12px;
-      font-weight:950;
-    }
-
+    .toolRow{display:grid;grid-template-columns:1.15fr .85fr .85fr;gap:9px;margin-top:12px}
+    .productList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+    .productCard{padding:13px;border-radius:19px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);display:grid;gap:9px}
+    .productTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+    .productName{font-weight:1000;line-height:1.25;font-size:16px}
+    .productMeta{color:var(--muted);font-size:12px;font-weight:800;line-height:1.45;margin-top:4px}
+    .productPrice{color:var(--gold);font-size:22px;font-weight:1000;letter-spacing:-.035em;white-space:nowrap}
+    .badge{display:inline-flex;width:max-content;max-width:100%;padding:7px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--muted);font-size:12px;font-weight:950}
     .badge.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28);color:#d7ffe1}
     .badge.warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28);color:#ffe3b8}
     .badge.bad{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.28);color:#ffd2d2}
     .badge.info{background:rgba(96,165,250,.10);border-color:rgba(96,165,250,.28);color:#d8ecff}
-
-    .empty{
-      color:var(--muted);
-      padding:14px;
-      border:1px dashed rgba(255,255,255,.14);
-      border-radius:17px;
-      font-size:13px;
-      font-weight:800;
-      line-height:1.5;
-    }
-
-    .helpPanel{
-      display:none;
-      margin-top:12px;
-    }
-
-    .blockedShell{
-      display:none;
-      min-height:360px;
-      place-items:center;
-      text-align:center;
-      padding:22px;
-    }
-
-    .blockedInner{
-      max-width:660px;
-      padding:22px;
-      border-radius:22px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.04);
-      box-shadow:0 14px 34px rgba(0,0,0,.22);
-    }
-
-    .blockedTitle{
-      font-size:26px;
-      font-weight:1000;
-      margin-bottom:8px;
-    }
-
-    .blockedText{
-      color:var(--muted);
-      line-height:1.75;
-      font-weight:750;
-    }
-
-    .bottomNav{
-      position:fixed;
-      left:0;
-      right:0;
-      bottom:0;
-      z-index:96;
-      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
-      background:rgba(4,17,13,.95);
-      border-top:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
-    }
-
-    .bottomNavInner{
-      width:min(100%,760px);
-      margin:0 auto;
-      display:grid;
-      grid-template-columns:repeat(5,1fr);
-      gap:6px;
-    }
-
-    .bottomNav a{
-      min-height:58px;
-      border-radius:16px;
-      display:grid;
-      place-items:center;
-      align-content:center;
-      gap:3px;
-      color:rgba(247,251,248,.70);
-      font-size:11px;
-      font-weight:950;
-      text-align:center;
-      border:1px solid transparent;
-      text-decoration:none;
-    }
-
-    .bottomNav .ico{font-size:18px;line-height:1}
-
-    .bottomNav a.active{
-      color:#07110d;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      border-color:rgba(250,204,21,.28);
-      box-shadow:0 10px 24px rgba(250,204,21,.16);
-    }
-
-    @media(max-width:940px){
-      .hero{grid-template-columns:1fr}
-      .quickGrid{grid-template-columns:1fr 1fr}
-      .productList{grid-template-columns:1fr}
-    }
-
-    @media(max-width:720px){
-      .wrap{padding:10px 10px calc(96px + env(safe-area-inset-bottom,0px))}
-      .topActions .btnOutline,.navRow{display:none}
-      .brandSub{display:none}
-      .card{padding:14px;border-radius:22px}
-      .miniStats,.formGrid,.toolRow{grid-template-columns:1fr}
-      .quickBtn{min-height:70px}
-      .tabs{display:grid;grid-template-columns:1fr 1fr}
-    }
-
-
-    /* Arrière-boutique : on garde les routes, mais on enlève le bruit visuel */
-    #btnHall,
-    #btnCamembert,
-    #btnNotes,
-    #btnDownloadAdmin,
-    #digiy-help-btn{
-      display:none!important;
-    }
-
-    .advancedTools{
-      margin-top:12px;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:20px;
-      background:rgba(0,0,0,.12);
-      padding:12px;
-    }
-
-    .advancedTools summary{
-      cursor:pointer;
-      color:var(--muted);
-      font-size:13px;
-      font-weight:1000;
-      list-style:none;
-    }
-
+    .empty{color:var(--muted);padding:14px;border:1px dashed rgba(255,255,255,.14);border-radius:17px;font-size:13px;font-weight:800;line-height:1.5}
+    .advancedTools{margin-top:12px;border:1px solid rgba(255,255,255,.10);border-radius:20px;background:rgba(0,0,0,.12);padding:12px}
+    .advancedTools summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:1000;list-style:none}
     .advancedTools summary::-webkit-details-marker{display:none}
-
-    .advancedTools .actionRow{
-      margin-top:10px;
-    }
-
-    @media(print){
-      body{background:#fff;color:#07140f}
-      .topbar,.navRow,.bottomNav,.tabs,.btn,.btnOutline,.btnGhost,.btnDanger,.smallBtn{display:none!important}
-      .wrap{padding:0;max-width:none}
-      .card{box-shadow:none;border:none;border-radius:0;background:#fff;color:#07140f}
-      .notice{border:1px solid #e2e8f0;background:#fff;color:#07140f}
-    }
+    .advancedTools .actionRow{margin-top:10px}
+    .blockedShell{display:none;min-height:360px;place-items:center;text-align:center;padding:22px}
+    .blockedInner{max-width:660px;padding:22px;border-radius:22px;border:1px solid var(--line);background:rgba(255,255,255,.04);box-shadow:0 14px 34px rgba(0,0,0,.22)}
+    .blockedTitle{font-size:26px;font-weight:1000;margin-bottom:8px}
+    .blockedText{color:var(--muted);line-height:1.75;font-weight:750}
+    .bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:96;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:rgba(4,17,13,.95);border-top:1px solid rgba(255,255,255,.10);backdrop-filter:blur(16px)}
+    .bottomNavInner{width:min(100%,760px);margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+    .bottomNav a{min-height:58px;border-radius:16px;display:grid;place-items:center;align-content:center;gap:3px;color:rgba(247,251,248,.70);font-size:11px;font-weight:950;text-align:center;border:1px solid transparent;text-decoration:none}
+    .bottomNav .ico{font-size:18px;line-height:1}
+    .bottomNav a.active{color:#07110d;background:linear-gradient(135deg,var(--gold),var(--gold2));border-color:rgba(250,204,21,.28);box-shadow:0 10px 24px rgba(250,204,21,.16)}
+    @media(max-width:940px){.hero{grid-template-columns:1fr}.quickGrid{grid-template-columns:1fr 1fr}.productList{grid-template-columns:1fr}}
+    @media(max-width:720px){.wrap{padding:10px 10px calc(96px + env(safe-area-inset-bottom,0px))}.topActions .btnOutline,.navRow{display:none}.brandSub{display:none}.card{padding:14px;border-radius:22px}.miniStats,.formGrid,.toolRow{grid-template-columns:1fr}.quickBtn{min-height:70px}.tabs{display:grid;grid-template-columns:1fr 1fr}}
   </style>
 </head>
 
@@ -702,7 +141,6 @@
               <div class="brandSub" id="brandSub">Articles · stock · prix</div>
             </div>
           </div>
-
           <div class="topActions">
             <div class="pill"><span class="dot" id="dotAccess"></span><span id="pillAccess">Accès…</span></div>
             <div class="pill"><strong id="pillStore">Boutique…</strong></div>
@@ -712,21 +150,17 @@
       </header>
 
       <div class="navRow">
-        <a class="btnGhost" href="https://mon-commerce.digiylyfe.com/" id="btnHall">🌍 Voir côté client</a>
-        <a class="btnGhost" href="./dashboard-pro.html" id="btnDashboard">🏠 Accueil</a>
-        <a class="btnGhost" href="https://pro-espace.digiylyfe.com/" id="btnCamembert">🧭 Camembert</a>
+        <a class="btnGhost" href="./index.html" id="btnDashboard">🏠 Accueil</a>
         <a class="btnGhost" href="./caisse.html" id="btnCaisse">💰 Encaisser</a>
-        <a class="btnGhost" href="./caisse.html#notes" id="btnNotes">✍️ Notes</a>
         <a class="btnGhost" href="./profile.html" id="btnProfile">🏪 Ma fiche commerce</a>
+        <a class="btnGhost" href="./qr.html" id="btnQr">🔳 QR</a>
         <a class="btnOutline" href="./pin.html" id="btnPin">🔐 Mon code</a>
       </div>
 
       <section id="blockedShell" class="blockedShell">
         <div class="blockedInner">
-          <div class="blockedTitle">Admin protégé</div>
-          <div class="blockedText" id="blockedText">
-            Entre avec ton code d’accès pour gérer tes articles.
-          </div>
+          <div class="blockedTitle">Arrière-boutique protégée</div>
+          <div class="blockedText" id="blockedText">Entre avec ton code d’accès pour gérer le nom boutique, les articles, les prix et le stock.</div>
           <div class="actionRow" style="justify-content:center">
             <a class="btn" id="btnBlockedPin" href="./pin.html">🔐 Entrer avec mon code</a>
             <a class="btnOutline" id="btnBlockedAbos" href="https://commencer-a-payer.digiylyfe.com/">💳 Mon abonnement</a>
@@ -739,28 +173,20 @@
           <div class="card">
             <div class="heroBadge">Arrière-boutique</div>
             <h1><span class="accent">Articles</span><br>stock · prix</h1>
-            <div class="lead">
-              Ici, tu prépares ce que la caisse va vendre : marchandises, prix, quantités, visibilité. Le comptoir reste simple devant.
-            </div>
+            <div class="lead">Ici, tu prépares ce que la caisse va vendre : nom boutique, marchandises, prix, quantités, visibilité. Le comptoir reste simple devant.</div>
 
             <div class="quickGrid">
               <a class="quickBtn primary" id="btnFastAdd" href="#articleForm"><span>➕</span>Ajouter<small>nom · prix · quantité</small></a>
               <a class="quickBtn" id="btnFastList" href="#articleList"><span>📦</span>Articles<small>voir · modifier</small></a>
-              <a class="quickBtn" id="btnFastCash" href="./caisse.html"><span>💰</span>Encaisser<small>retour comptoir</small></a>
-              <a class="quickBtn" id="btnFastProfile" href="./profile.html"><span>🏪</span>Ma fiche<small>côté client</small></a>
-
-              <a class="quickBtn" id="btnFastDashboard" href="./dashboard-pro.html" style="display:none"><span>🏠</span>Accueil<small>retour dashboard</small></a>
-              <a class="quickBtn" id="btnFastCamembert" href="https://pro-espace.digiylyfe.com/" style="display:none"><span>🧭</span>Camembert<small>toutes les portes</small></a>
-              <button class="quickBtn" id="btnInitCaisse" type="button" style="display:none"><span>🚀</span>Initialiser<small>préparer la caisse</small></button>
-              <button class="quickBtn" id="btnLoadStarter" type="button" style="display:none"><span>🌾</span>Départ<small>charger les exemples</small></button>
-              <a class="quickBtn" id="btnFastPublic" href="https://mon-commerce.digiylyfe.com/" style="display:none"><span>🌍</span>Voir côté client<small>vitrine publique</small></a>
+              <a class="quickBtn" id="btnFastCash" href="./caisse.html"><span>💰</span>Encaisser<small>retour caisse</small></a>
+              <a class="quickBtn" id="btnFastProfile" href="./profile.html"><span>🏪</span>Ma fiche<small>client</small></a>
             </div>
 
             <details class="advancedTools">
               <summary>⚙️ Outils avancés</summary>
               <div class="actionRow">
-                <button class="btnOutline" id="btnInitCaisseProxy" type="button">🚀 Envoyer vers la caisse</button>
-                <button class="btnOutline" id="btnLoadStarterProxy" type="button">🌾 Charger les exemples</button>
+                <button class="btnOutline" id="btnInitCaisse" type="button">🚀 Envoyer vers la caisse</button>
+                <button class="btnOutline" id="btnLoadStarter" type="button">🌾 Charger les exemples</button>
                 <button class="btnOutline" id="btnExport" type="button">📤 Télécharger articles</button>
                 <button class="btnOutline" id="btnImport" type="button">📥 Ajouter fichier</button>
                 <input type="file" id="fileImport" accept="application/json" style="display:none"/>
@@ -768,18 +194,35 @@
             </details>
 
             <div class="miniStats">
-              <div class="mini">
-                <div class="k">En vente</div>
-                <div class="v" id="kpiPublished">0</div>
-              </div>
-              <div class="mini">
-                <div class="k">Cachés</div>
-                <div class="v" id="kpiHidden">0</div>
-              </div>
-              <div class="mini">
-                <div class="k">Admin</div>
-                <div class="v">Admin</div>
-              </div>
+              <div class="mini"><div class="k">Boutique</div><div class="v" id="metaStoreName">—</div></div>
+              <div class="mini"><div class="k">Sauvegarde</div><div class="v" id="metaMode">—</div></div>
+              <div class="mini"><div class="k">Articles</div><div class="v" id="kpiCount">0</div></div>
+            </div>
+
+            <div class="notice info" id="noticeBox">Chargement…</div>
+          </div>
+
+          <div class="card">
+            <h2>Nom boutique</h2>
+            <div class="lead" style="font-size:13px;margin-top:0">Le nom sert à reconnaître la boutique dans l’arrière-boutique et la caisse. Pour la fiche complète côté client, utilise “Ma fiche commerce”.</div>
+            <div class="field">
+              <label for="storeNameInput">Nom boutique</label>
+              <input class="input" id="storeNameInput" placeholder="Ex : Boutique Ndiaye Saly"/>
+            </div>
+            <div class="actionRow">
+              <button class="btn" id="btnSaveStoreName" type="button">💾 Enregistrer le nom</button>
+              <a class="btnOutline" href="./profile.html">🏪 Ma fiche commerce</a>
+            </div>
+
+            <div class="miniStats">
+              <div class="mini"><div class="k">Quantité</div><div class="v" id="kpiStock">0</div></div>
+              <div class="mini"><div class="k">Valeur stock</div><div class="v" id="kpiValue">0 F</div></div>
+              <div class="mini"><div class="k">Bientôt finis</div><div class="v" id="kpiLow">0</div></div>
+            </div>
+            <div class="miniStats">
+              <div class="mini"><div class="k">En vente</div><div class="v" id="kpiPublished">0</div></div>
+              <div class="mini"><div class="k">Cachés</div><div class="v" id="kpiHidden">0</div></div>
+              <div class="mini"><div class="k">Atelier</div><div class="v">Admin</div></div>
             </div>
 
             <div class="toolRow">
@@ -791,7 +234,7 @@
                 <option value="low">Bientôt finis</option>
               </select>
               <select class="select" id="sortBy">
-                <option value="recent">Admin récents</option>
+                <option value="recent">Plus récents</option>
                 <option value="name">Nom A→Z</option>
                 <option value="price_desc">Prix ↓</option>
                 <option value="price_asc">Prix ↑</option>
@@ -809,108 +252,25 @@
 
         <section class="section card" id="articleForm">
           <h2 id="formTitle">Ajouter un article</h2>
-          <div class="lead" style="font-size:13px;margin-top:0">
-            Minimum utile : nom, prix, quantité. Les détails peuvent attendre.
-          </div>
+          <div class="lead" style="font-size:13px;margin-top:0">Minimum utile : nom, prix, quantité. Les détails peuvent attendre.</div>
 
           <div class="formGrid">
-            <div class="field">
-              <label for="productName">Nom</label>
-              <input class="input" id="productName" type="text" placeholder="Ex : Riz parfumé / Robe / Jus"/>
-            </div>
-
-            <div class="field">
-              <label for="productPrice">Prix</label>
-              <input class="input" id="productPrice" type="number" inputmode="numeric" min="0" step="1" placeholder="3500"/>
-            </div>
+            <div class="field"><label for="productName">Nom</label><input class="input" id="productName" type="text" placeholder="Ex : Riz parfumé / Robe / Jus"/></div>
+            <div class="field"><label for="productPrice">Prix</label><input class="input" id="productPrice" type="number" inputmode="numeric" min="0" step="1" placeholder="3500"/></div>
           </div>
-
           <div class="formGrid">
-            <div class="field">
-              <label for="productStock">Quantité disponible</label>
-              <input class="input" id="productStock" type="number" inputmode="numeric" min="0" step="1" placeholder="12"/>
-            </div>
-
-            <div class="field">
-              <label for="productPublished">Visible dans la caisse ?</label>
-              <select class="select" id="productPublished">
-                <option value="true">Oui, en vente</option>
-                <option value="false">Non, garder derrière</option>
-              </select>
-            </div>
+            <div class="field"><label for="productStock">Quantité disponible</label><input class="input" id="productStock" type="number" inputmode="numeric" min="0" step="1" placeholder="12"/></div>
+            <div class="field"><label for="productPublished">Visible dans la caisse ?</label><select class="select" id="productPublished"><option value="true">Oui, en vente</option><option value="false">Non, garder derrière</option></select></div>
           </div>
-
           <div class="formGrid">
-            <div class="field">
-              <label for="productCost">Prix d’achat</label>
-              <input class="input" id="productCost" type="number" inputmode="numeric" min="0" step="1" placeholder="Optionnel"/>
-            </div>
-
-            <div class="field">
-              <label for="productTax">TVA / taxe</label>
-              <select class="select" id="productTax">
-                <option value="">Aucune / non utilisée</option>
-                <option value="0">0%</option>
-                <option value="10">10%</option>
-                <option value="18">18%</option>
-              </select>
-            </div>
+            <div class="field"><label for="productCategory">Type d’article</label><input class="input" id="productCategory" type="text" placeholder="Ex : Alimentaire / Mode / Beauté"/></div>
+            <div class="field"><label for="productSku">Code ou repère</label><input class="input" id="productSku" type="text" placeholder="Optionnel"/></div>
           </div>
-
-          <div class="formGrid">
-            <div class="field">
-              <label for="productCategory">Famille</label>
-              <select class="select" id="productCategory">
-                <option value="">Choisir ou laisser vide</option>
-                <option value="Alimentation">Alimentation</option>
-                <option value="Boissons">Boissons</option>
-                <option value="Hygiène">Hygiène</option>
-                <option value="Maison">Maison</option>
-                <option value="Mode">Mode</option>
-                <option value="Beauté">Beauté</option>
-                <option value="Services">Services</option>
-                <option value="Autres">Autres</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="productSku">Code ou repère</label>
-              <input class="input" id="productSku" type="text" placeholder="Optionnel"/>
-            </div>
-          </div>
-
-          <div class="formGrid">
-            <div class="field">
-              <label for="productUnit">Unité</label>
-              <select class="select" id="productUnit">
-                <option value="unité">Unité</option>
-                <option value="kg">Kg</option>
-                <option value="litre">Litre</option>
-                <option value="paquet">Paquet</option>
-                <option value="carton">Carton</option>
-                <option value="service">Service</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="productLowLimit">Alerte stock bas</label>
-              <input class="input" id="productLowLimit" type="number" inputmode="numeric" min="0" step="1" placeholder="Ex : 5"/>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="productSupplier">Fournisseur / origine</label>
-            <input class="input" id="productSupplier" type="text" placeholder="Optionnel"/>
-          </div>
-
-          <div class="field">
-            <label for="productNote">Petit détail</label>
-            <textarea class="textarea" id="productNote" placeholder="Optionnel : taille, couleur, fournisseur, remarque…"></textarea>
-          </div>
-
+          <div class="field"><label for="productNote">Petit détail</label><textarea class="textarea" id="productNote" placeholder="Optionnel : taille, couleur, fournisseur, remarque…"></textarea></div>
           <div class="field">
             <label for="productImage">Image URL</label>
-            <input class="input" id="productImage" type="text" placeholder="URL uniquement : https://...jpg"/>
+            <input class="input" id="productImage" type="text" placeholder="Optionnel : https://...jpg"/>
+            <div class="lead" style="font-size:12px;margin-top:0">URL seulement. Pas d’image lourde dans Supabase.</div>
           </div>
 
           <div class="actionRow">
@@ -918,18 +278,13 @@
             <button class="btnOutline" type="button" id="btnClearForm">Réinitialiser</button>
             <button class="btnDanger" type="button" id="btnDeleteProduct" style="display:none">Supprimer</button>
           </div>
-
           <div class="notice info" id="formNotice">Remplis puis enregistre.</div>
         </section>
 
         <section class="section card hidden" id="articleList">
           <h2>Mes articles</h2>
-          <div class="lead" style="font-size:13px;margin-top:0" id="listHelper">
-            Clique sur modifier pour corriger un article.
-          </div>
-          <div class="productList" id="productsList">
-            <div class="empty">Chargement des articles…</div>
-          </div>
+          <div class="lead" style="font-size:13px;margin-top:0" id="listHelper">Clique sur modifier pour corriger un article.</div>
+          <div class="productList" id="productsList"><div class="empty">Chargement des articles…</div></div>
         </section>
       </section>
     </div>
@@ -937,11 +292,11 @@
 
   <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
     <div class="bottomNavInner">
-      <a id="navHome" href="./dashboard-pro.html"><span class="ico">🏠</span><span>Accueil</span></a>
-      <a id="navArticles" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
+      <a id="navHome" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
+      <a class="active" id="navArticles" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
       <a id="navCash" href="./caisse.html"><span class="ico">💰</span><span>Encaisser</span></a>
-      <a id="navNotes" href="./caisse.html#notes"><span class="ico">✍️</span><span>Notes</span></a>
-      <a class="active" id="navMore" href="./admin.html"><span class="ico">⚙️</span><span>Admin</span></a>
+      <a id="navProfile" href="./profile.html"><span class="ico">🏪</span><span>Fiche</span></a>
+      <a id="navPin" href="./pin.html"><span class="ico">🔐</span><span>Code</span></a>
     </div>
   </nav>
 
@@ -951,1466 +306,467 @@
 
       const MODULE_CODE = "POS";
       const ABOS_URL = "https://commencer-a-payer.digiylyfe.com/";
-      const DASHBOARD_URL = digiyLocal("dashboard-pro.html");
-      const HALL_URL = digiyLocal("index.html");
-      const PROFILE_URL = digiyLocal("profile.html");
-      const CAISSE_URL = digiyLocal("caisse.html");
-      const PIN_URL = digiyLocal("pin.html");
-      const ADMIN_URL = digiyLocal("admin.html");
-      const PUBLIC_URL = "https://mon-commerce.digiylyfe.com/";
-      const CAMEMBERT_URL = "https://pro-espace.digiylyfe.com/";
       const CACHE_PREFIX = "digiy_pos_products_local:";
+      const STORE_NAME_PREFIX = "digiy_pos_store_name:";
       const CAISSE_STORAGE_PRODUCTS = "caisse_prods";
       const CAISSE_STORAGE_SHOP = "caisse_shop";
       const CAISSE_STORAGE_META = "caisse_meta";
       const LOW_STOCK_LIMIT = 5;
 
-      const STARTER_CAISSE_PRODUCTS = [
+      const STARTER_PRODUCTS = [
         {name:"Riz 5 kg",cat:"Alimentation",emoji:"🌾",price:3500,stock:50},
         {name:"Huile 1 L",cat:"Alimentation",emoji:"🫙",price:1500,stock:30},
         {name:"Pain",cat:"Alimentation",emoji:"🍞",price:250,stock:20},
         {name:"Sucre 1 kg",cat:"Alimentation",emoji:"🍬",price:800,stock:40},
-        {name:"Lait poudre",cat:"Alimentation",emoji:"🥛",price:2200,stock:15},
-        {name:"Oeufs x6",cat:"Alimentation",emoji:"🥚",price:1200,stock:25},
         {name:"Eau 1,5 L",cat:"Boissons",emoji:"💧",price:500,stock:60},
         {name:"Jus Bissap",cat:"Boissons",emoji:"🍹",price:700,stock:20},
-        {name:"Coca Cola",cat:"Boissons",emoji:"🥤",price:800,stock:24},
-        {name:"Café soluble",cat:"Boissons",emoji:"☕",price:1000,stock:18},
         {name:"Savon",cat:"Hygiène",emoji:"🧼",price:400,stock:35},
         {name:"Dentifrice",cat:"Hygiène",emoji:"🪥",price:1200,stock:15},
-        {name:"Déodorant",cat:"Hygiène",emoji:"🧴",price:1800,stock:10},
-        {name:"Papier WC x4",cat:"Hygiène",emoji:"🧻",price:1500,stock:20},
-        {name:"Allumettes",cat:"Maison",emoji:"🔥",price:150,stock:80},
-        {name:"Bougie",cat:"Maison",emoji:"🕯️",price:500,stock:30},
         {name:"Lessive 1 kg",cat:"Maison",emoji:"🧺",price:1800,stock:20},
-        {name:"Biscuits",cat:"Snacks",emoji:"🍪",price:500,stock:40},
-        {name:"Chips",cat:"Snacks",emoji:"🥔",price:400,stock:35},
-        {name:"Cacahuètes",cat:"Snacks",emoji:"🥜",price:300,stock:50}
+        {name:"Biscuits",cat:"Snacks",emoji:"🍪",price:500,stock:40}
       ];
 
       const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
       const SUPABASE_ANON_KEY = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
-
       const qs = (id) => document.getElementById(id);
 
-      const STATE = {
-        slug:"",
-        phone:"",
-        access:false,
-        storeName:"MON COMMERCE",
-        mode:"none",
-        products:[],
-        editingId:null
-      };
-
-      window.STATE = STATE;
-
+      const STATE = {slug:"",phone:"",access:false,storeName:"MON COMMERCE",mode:"local",products:[],editingId:null};
       let SB_CLIENT = null;
 
-      function reveal(){
-        document.documentElement.classList.add("app-ready");
-        document.documentElement.style.visibility = "";
-      }
+      function reveal(){document.documentElement.classList.add("app-ready");document.documentElement.style.visibility = "";}
+      setTimeout(reveal, 1800);
 
-      setTimeout(reveal, 2000);
-
-      function esc(v){
-        return String(v ?? "")
-          .replace(/&/g,"&amp;")
-          .replace(/</g,"&lt;")
-          .replace(/>/g,"&gt;")
-          .replace(/"/g,"&quot;")
-          .replace(/'/g,"&#39;");
-      }
-
-      function money(n){
-        const value = Number(n || 0);
-        if(!Number.isFinite(value)) return "0 F";
-        return value.toLocaleString("fr-FR") + " F";
-      }
-
-      function normPhone(v){ return String(v || "").replace(/[^\d]/g,""); }
-      function normSlug(v){ return String(v || "").trim().toLowerCase(); }
-
-      function makeId(){
-        return "prd_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
-      }
-
-      function modeLabel(mode){
-        const raw = String(mode || "").toLowerCase();
-        if(raw === "supabase") return "En ligne";
-        if(raw === "local") return "Sur cet appareil";
-        if(raw === "starter") return "Articles de départ";
-        return "—";
-      }
-
-      function buildUrl(base,params){
-        const baseStr = String(base || "").trim();
-        if(!baseStr) return location.href;
-
-        let u;
-
-        try{
-          if(/^https?:\/\//i.test(baseStr)){
-            u = new URL(baseStr);
-          }else{
-            u = new URL(baseStr, location.href);
-          }
-
-          Object.entries(params || {}).forEach(([k,v]) => {
-            if(v !== undefined && v !== null && String(v) !== "") u.searchParams.set(k,String(v));
-          });
-
-          return u.toString();
-        }catch(_){
-          return baseStr;
-        }
-      }
-
-      function getParam(name){
-        return new URL(location.href).searchParams.get(name) || "";
-      }
-
-      function rememberUrlContextBeforeClean(){
-        try{
-          const url = new URL(location.href);
-          const slug = normSlug(url.searchParams.get("slug") || "");
-          const phone = normPhone(
-            url.searchParams.get("phone") ||
-            url.searchParams.get("tel") ||
-            url.searchParams.get("owner_phone") ||
-            url.searchParams.get("subscription_phone") ||
-            url.searchParams.get("checkout_phone") ||
-            url.searchParams.get("p_phone") ||
-            ""
-          );
-
-          if(slug){
-            sessionStorage.setItem("digiy_pos_last_slug",slug);
-            localStorage.setItem("digiy_pos_last_slug",slug);
-          }
-
-          if(phone){
-            sessionStorage.setItem("digiy_pos_last_phone",phone);
-            localStorage.setItem("digiy_pos_last_phone",phone);
-          }
-        }catch(_){}
-      }
+      function esc(v){return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+      function money(n){const value=Number(n||0);return Number.isFinite(value)?value.toLocaleString("fr-FR")+" F":"0 F";}
+      function normPhone(v){return String(v||"").replace(/[^\d]/g,"");}
+      function normSlug(v){return String(v||"").trim().toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"").replace(/-+/g,"-").replace(/^-|-$/g,"");}
+      function makeId(){return "prd_"+Math.random().toString(36).slice(2,10)+Date.now().toString(36);}
+      function modeLabel(mode){const raw=String(mode||"").toLowerCase(); if(raw==="supabase") return "En ligne"; if(raw==="local") return "Sur cet appareil"; if(raw==="starter") return "Articles de départ"; return "—";}
+      function readJson(raw){try{return JSON.parse(raw)}catch(_){return null}}
+      function storageGet(key){try{return sessionStorage.getItem(key)||localStorage.getItem(key)||""}catch(_){return ""}}
 
       function cleanVisibleUrl(){
-        rememberUrlContextBeforeClean();
-
         try{
-          const url = new URL(location.href);
-          const sensitive = [
-            "slug","phone","tel","module","owner_phone",
-            "subscription_phone","checkout_phone","p_phone","return","from",
-            "pin","pin4","token","session_token"
-          ];
-
-          let dirty = false;
-
-          sensitive.forEach((key) => {
-            if(url.searchParams.has(key)){
-              url.searchParams.delete(key);
-              dirty = true;
-            }
+          const url=new URL(location.href);
+          let dirty=false;
+          ["slug","phone","tel","module","owner_phone","subscription_phone","checkout_phone","p_phone","return","from","pin","pin4","token","session_token"].forEach((key)=>{
+            if(url.searchParams.has(key)){url.searchParams.delete(key);dirty=true;}
           });
-
-          if(dirty){
-            history.replaceState({},document.title,url.pathname + url.search + url.hash);
-          }
+          if(dirty) history.replaceState({},document.title,url.pathname+url.search+url.hash);
         }catch(_){}
       }
 
       function cleanPath(path){
-        const u = new URL(path || "./admin.html", location.href);
-        u.search = "";
-        return u.pathname + u.hash;
+        try{
+          const u=new URL(path||"./index.html",location.href);
+          ["phone","tel","slug","commerce","module","token","session_token","pin"].forEach(k=>u.searchParams.delete(k));
+          return u.pathname+u.search+u.hash;
+        }catch(_){return path||"./index.html";}
       }
 
-      function getGuardState(){
-        return window.DIGIY_GUARD?.state || {};
+      function getParam(name){try{return new URL(location.href).searchParams.get(name)||""}catch(_){return ""}}
+
+      function ensureSupabase(){
+        if(SB_CLIENT) return SB_CLIENT;
+        if(typeof window.DIGIY_GUARD?.getSb==="function"){try{const g=window.DIGIY_GUARD.getSb();if(g){SB_CLIENT=g;return SB_CLIENT;}}catch(_){}}
+        if(!SUPABASE_URL||!SUPABASE_ANON_KEY) return null;
+        if(!window.supabase||typeof window.supabase.createClient!=="function") return null;
+        SB_CLIENT=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storage:{getItem:()=>null,setItem:()=>{},removeItem:()=>{}}}});
+        return SB_CLIENT;
       }
 
-      function getResolvedSlug(){
-        const gs = getGuardState();
-
-        return normSlug(
-          getParam("slug") ||
-          gs.slug ||
-          gs.session?.slug ||
-          gs.identity?.slug ||
-          sessionStorage.getItem("digiy_pos_last_slug") ||
-          localStorage.getItem("digiy_pos_last_slug") ||
-          sessionStorage.getItem("digiy_pos_slug") ||
-          localStorage.getItem("digiy_pos_slug") ||
-          ""
-        );
+      function getStoredIdentity(){
+        const slugKeys=["digiy_pos_slug","digiy_pos_last_slug","DIGIY_SLUG"];
+        const phoneKeys=["digiy_pos_phone","digiy_pos_last_phone"];
+        let slug="", phone="";
+        for(const k of slugKeys){const v=normSlug(storageGet(k)); if(v){slug=v; break;}}
+        for(const k of phoneKeys){const v=normPhone(storageGet(k)); if(v){phone=v; break;}}
+        const sessions=["DIGIY_POS_PRO_SESSION_V1","DIGIY_POS_PIN_SESSION","DIGIY_POS_SESSION","DIGIY_PIN_SESSION","DIGIY_ACCESS","DIGIY_SESSION_POS","digiy_pos_session"];
+        for(const k of sessions){
+          const s=readJson(storageGet(k));
+          if(!s||typeof s!=="object") continue;
+          if(!slug) slug=normSlug(s.slug||"");
+          if(!phone) phone=normPhone(s.phone||s.p_phone||s.owner_phone||"");
+          if(slug||phone) break;
+        }
+        return {slug,phone};
       }
 
-      function getResolvedPhone(){
-        const gs = getGuardState();
-
-        return normPhone(
-          getParam("phone") ||
-          getParam("tel") ||
-          gs.phone ||
-          gs.session?.phone ||
-          gs.identity?.phone ||
-          sessionStorage.getItem("digiy_pos_last_phone") ||
-          localStorage.getItem("digiy_pos_last_phone") ||
-          sessionStorage.getItem("digiy_pos_phone") ||
-          localStorage.getItem("digiy_pos_phone") ||
-          ""
-        );
+      function getGuardSession(){
+        try{
+          if(typeof window.DIGIY_GUARD?.getSession==="function") return window.DIGIY_GUARD.getSession()||{};
+          return window.DIGIY_GUARD?.state||{};
+        }catch(_){return {};}
       }
 
       async function awaitGuardReady(){
         try{
-          if(typeof window.DIGIY_GUARD?.ready === "function"){
-            try{
-              await window.DIGIY_GUARD.ready({
-                redirect:false,
-                preserve_validation:true,
-                allow_soft_session:true
-              });
-            }catch(_){
-              await window.DIGIY_GUARD.ready();
-            }
-          }else if(window.DIGIY_GUARD?.ready?.then){
-            await window.DIGIY_GUARD.ready;
+          if(typeof window.DIGIY_GUARD?.ready==="function"){
+            try{await window.DIGIY_GUARD.ready({redirect:false,preserve_validation:true,allow_soft_session:true});}
+            catch(_){await window.DIGIY_GUARD.ready();}
           }
         }catch(_){}
-      }
-
-      async function bootGuard(){
-        if(typeof window.DIGIY_GUARD?.boot !== "function") return true;
-
-        try{
-          const res = await window.DIGIY_GUARD.boot({
-            module:MODULE_CODE,
-            dashboard:DASHBOARD_URL,
-            login:PIN_URL,
-            pay:ABOS_URL,
-            requireSlug:true,
-            checkSubscription:false
-          });
-
-          if(res && res.ok === false) return false;
-        }catch(_){}
-
-        return true;
-      }
-
-      function ensureSupabase(){
-        if(SB_CLIENT) return SB_CLIENT;
-
-        if(typeof window.DIGIY_GUARD?.getSb === "function"){
-          try{
-            const gsb = window.DIGIY_GUARD.getSb();
-            if(gsb){
-              SB_CLIENT = gsb;
-              return SB_CLIENT;
-            }
-          }catch(_){}
-        }
-
-        if(!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
-        if(!window.supabase || typeof window.supabase.createClient !== "function") return null;
-
-        SB_CLIENT = window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
-          auth:{
-            persistSession:false,
-            autoRefreshToken:false,
-            detectSessionInUrl:false,
-            storage:{
-              getItem:() => null,
-              setItem:() => {},
-              removeItem:() => {}
-            }
-          }
-        });
-
-        return SB_CLIENT;
       }
 
       async function rpcFirstSuccess(name,payloads){
-        const client = ensureSupabase();
+        const client=ensureSupabase();
         if(!client) throw new Error("supabase_not_ready");
-
-        let lastError = null;
-
+        let lastError=null;
         for(const args of payloads){
-          try{
-            const { data,error } = await client.rpc(name,args);
-            if(error){
-              lastError = error;
-              continue;
-            }
-            return data;
-          }catch(err){
-            lastError = err;
-          }
+          try{const {data,error}=await client.rpc(name,args); if(error){lastError=error; continue;} return data;}
+          catch(err){lastError=err;}
         }
-
-        throw lastError || new Error("rpc_failed_" + name);
+        throw lastError||new Error("rpc_failed_"+name);
       }
 
       async function resolvePhoneFromSlug(slug){
-        const client = ensureSupabase();
-        if(!client || !slug) return "";
-
-        const { data,error } = await client
-          .from("digiy_subscriptions_public")
-          .select("phone,slug,module")
-          .eq("slug",slug)
-          .limit(1)
-          .maybeSingle();
-
-        if(error) throw error;
-
-        return normPhone(data?.phone || "");
+        const client=ensureSupabase();
+        if(!client||!slug) return "";
+        try{
+          const {data,error}=await client.from("digiy_subscriptions_public").select("phone,slug,module").eq("slug",slug).limit(1).maybeSingle();
+          if(!error&&data) return normPhone(data.phone||"");
+        }catch(_){}
+        return "";
       }
 
       async function getAccess(phone){
         if(!phone) return false;
-
         try{
-          const res = await rpcFirstSuccess("digiy_has_access",[
-            { p_phone:phone,p_module:MODULE_CODE },
-            { phone,module:MODULE_CODE }
-          ]);
-
-          if(typeof res === "boolean") return res;
-          if(res && typeof res.ok === "boolean") return res.ok;
-          if(res && typeof res.has_access === "boolean") return res.has_access;
-          if(res && typeof res.allowed === "boolean") return res.allowed;
-          if(res && typeof res.access === "boolean") return res.access;
-
+          const res=await rpcFirstSuccess("digiy_has_access",[{p_phone:phone,p_module:MODULE_CODE},{phone,module:MODULE_CODE}]);
+          if(typeof res==="boolean") return res;
+          if(res&&typeof res.ok==="boolean") return res.ok;
+          if(res&&typeof res.has_access==="boolean") return res.has_access;
+          if(res&&typeof res.allowed==="boolean") return res.allowed;
+          if(res&&typeof res.access==="boolean") return res.access;
           return !!res;
-        }catch(_){
-          return false;
-        }
+        }catch(_){return false;}
       }
 
       async function getStoreContext(slug){
-        const client = ensureSupabase();
-        if(!client || !slug) return null;
-
+        const client=ensureSupabase();
+        if(!client||!slug) return null;
         try{
-          const { data,error } = await client
-            .from("digiy_pos_public_profiles")
-            .select("*")
-            .eq("slug",slug)
-            .maybeSingle();
-
-          if(!error && data) return data;
+          const {data,error}=await client.from("digiy_pos_public_profiles").select("*").eq("slug",slug).maybeSingle();
+          if(!error&&data) return data;
         }catch(_){}
-
         try{
-          const data = await rpcFirstSuccess("digiy_pos_get_caisse_by_slug",[
-            { p_slug:slug },
-            { slug }
-          ]);
-
-          if(data && data.ok === true){
-            return data.profile || data.store || data;
-          }
+          const data=await rpcFirstSuccess("digiy_pos_get_caisse_by_slug",[{p_slug:slug},{slug}]);
+          if(data&&data.ok===true) return data.profile||data.store||data;
         }catch(_){}
-
         return null;
       }
 
-      function cacheKey(slug){
-        return CACHE_PREFIX + (slug || "unknown");
+      function cacheKey(slug){return CACHE_PREFIX+(slug||"unknown");}
+      function storeNameKey(){return STORE_NAME_PREFIX+(STATE.slug||STATE.phone||"unknown");}
+      function readLocalProducts(slug){try{const raw=localStorage.getItem(cacheKey(slug));const parsed=raw?JSON.parse(raw):[];return Array.isArray(parsed)?parsed:[]}catch(_){return []}}
+      function writeLocalProducts(slug,items){try{localStorage.setItem(cacheKey(slug),JSON.stringify(Array.isArray(items)?items:[]));}catch(_){}}
+      function readCaisseProducts(){try{const raw=localStorage.getItem(CAISSE_STORAGE_PRODUCTS);const parsed=raw?JSON.parse(raw):[];return Array.isArray(parsed)?parsed:[]}catch(_){return []}}
+
+      function normalizeProduct(row){
+        const r=row||{};
+        return {
+          id:String(r.id||r.product_id||makeId()),
+          slug:normSlug(r.slug||STATE.slug||""),
+          owner_phone:normPhone(r.owner_phone||r.phone||STATE.phone||""),
+          name:String(r.name||r.product_name||"").trim(),
+          category:String(r.category||"").trim(),
+          sku:String(r.sku||"").trim(),
+          price_xof:Number(r.price_xof??r.price??0)||0,
+          stock_qty:Number(r.stock_qty??r.stock??0)||0,
+          note_text:String(r.note_text||r.note||r.description||"").trim(),
+          image_url:String(r.image_url||r.photo_url||"").trim(),
+          emoji:String(r.emoji||"").trim(),
+          is_published:typeof r.is_published==="boolean"?r.is_published:r.published!==false,
+          created_at:r.created_at||new Date().toISOString(),
+          updated_at:r.updated_at||new Date().toISOString()
+        };
       }
 
-      function readLocalProducts(slug){
-        try{
-          const raw = localStorage.getItem(cacheKey(slug));
-          const parsed = raw ? JSON.parse(raw) : [];
-          return Array.isArray(parsed) ? parsed : [];
-        }catch(_){
-          return [];
-        }
-      }
-
-      function writeLocalProducts(slug,items){
-        try{
-          localStorage.setItem(cacheKey(slug),JSON.stringify(Array.isArray(items) ? items : []));
-        }catch(_){}
-      }
-
-      function readCaisseProducts(){
-        try{
-          const raw = localStorage.getItem(CAISSE_STORAGE_PRODUCTS);
-          const parsed = raw ? JSON.parse(raw) : [];
-          return Array.isArray(parsed) ? parsed : [];
-        }catch(_){
-          return [];
-        }
+      function dbPayload(item,includeId){
+        const payload={slug:item.slug,owner_phone:item.owner_phone,name:item.name,category:item.category,sku:item.sku,price_xof:item.price_xof,stock_qty:item.stock_qty,note_text:item.note_text,image_url:item.image_url,is_published:item.is_published,created_at:item.created_at,updated_at:item.updated_at};
+        if(includeId) payload.id=item.id;
+        return payload;
       }
 
       function caisseItemsToAdminProducts(items){
-        return (Array.isArray(items) ? items : [])
-          .filter(item => item && String(item.name || "").trim())
-          .map((item) => normalizeProduct({
-            id:String(item.source_id || item.id || makeId()).startsWith("prd_") ? String(item.source_id || item.id) : makeId(),
-            slug:STATE.slug,
-            owner_phone:STATE.phone,
-            name:item.name,
-            category:item.cat || item.category || "Autres",
-            price_xof:item.price ?? item.price_xof ?? 0,
-            stock_qty:item.stock ?? item.stock_qty ?? 0,
-            emoji:item.emoji || "📦",
-            is_published:item.published !== false,
-            created_at:item.created_at || new Date().toISOString(),
-            updated_at:item.updated_at || new Date().toISOString()
-          }));
-      }
-
-      function starterProducts(){
-        return STARTER_CAISSE_PRODUCTS.map((item) => normalizeProduct({
-          id:makeId(),
-          slug:STATE.slug,
-          owner_phone:STATE.phone,
-          name:item.name,
-          category:item.cat,
-          price_xof:item.price,
-          stock_qty:item.stock,
-          emoji:item.emoji,
-          is_published:true,
-          note_text:"Article de départ — à modifier selon la boutique.",
-          created_at:new Date().toISOString(),
-          updated_at:new Date().toISOString()
+        return (Array.isArray(items)?items:[]).filter(item=>item&&String(item.name||"").trim()).map((item)=>normalizeProduct({
+          id:String(item.source_id||item.id||makeId()).startsWith("prd_")?String(item.source_id||item.id):makeId(),
+          slug:STATE.slug, owner_phone:STATE.phone, name:item.name, category:item.cat||item.category||"Autres",
+          price_xof:item.price??item.price_xof??0, stock_qty:item.stock??item.stock_qty??0, emoji:item.emoji||"📦",
+          is_published:item.published!==false, created_at:item.created_at||new Date().toISOString(), updated_at:item.updated_at||new Date().toISOString()
         }));
       }
 
-      function categoryEmoji(category,name){
-        const txt = (String(category || "") + " " + String(name || "")).toLowerCase();
+      function starterProducts(){
+        return STARTER_PRODUCTS.map((item)=>normalizeProduct({
+          id:makeId(), slug:STATE.slug, owner_phone:STATE.phone, name:item.name, category:item.cat, price_xof:item.price,
+          stock_qty:item.stock, emoji:item.emoji, is_published:true, note_text:"Article de départ — à modifier selon la boutique.",
+          created_at:new Date().toISOString(), updated_at:new Date().toISOString()
+        }));
+      }
 
+      function mergeProductsSources(sources){
+        const byKey=new Map();
+        (sources||[]).flat().forEach((raw)=>{
+          const item=normalizeProduct(raw); const nameKey=String(item.name||"").trim().toLowerCase(); if(!nameKey) return;
+          const strongKey=item.id&&!String(item.id).startsWith("prd_")?"id:"+item.id:"name:"+nameKey+"|cat:"+String(item.category||"").trim().toLowerCase();
+          if(!byKey.has(strongKey)){byKey.set(strongKey,item);return;}
+          const old=byKey.get(strongKey); const oldTime=new Date(old.updated_at||old.created_at||0).getTime()||0; const newTime=new Date(item.updated_at||item.created_at||0).getTime()||0;
+          if(newTime>=oldTime) byKey.set(strongKey,{...old,...item});
+        });
+        return Array.from(byKey.values()).sort((a,b)=>new Date(b.updated_at||0).getTime()-new Date(a.updated_at||0).getTime());
+      }
+
+      async function loadProducts(slug){
+        const sources=[]; const client=ensureSupabase(); let foundSupabase=false;
+        if(client&&slug){
+          try{
+            const {data,error}=await client.from("digiy_pos_products").select("*").eq("slug",slug).order("updated_at",{ascending:false});
+            if(!error&&Array.isArray(data)&&data.length){sources.push(data.map(normalizeProduct)); foundSupabase=true;}
+          }catch(_){}
+        }
+        const localItems=readLocalProducts(slug).map(normalizeProduct); if(localItems.length) sources.push(localItems);
+        const caisseItems=caisseItemsToAdminProducts(readCaisseProducts()); if(caisseItems.length) sources.push(caisseItems);
+        const merged=mergeProductsSources(sources);
+        if(merged.length){STATE.mode=foundSupabase?"supabase":"local"; writeLocalProducts(slug,merged); return merged;}
+        const starters=starterProducts(); STATE.mode="starter"; writeLocalProducts(slug,starters);
+        try{localStorage.setItem(CAISSE_STORAGE_PRODUCTS,JSON.stringify(starters.map(productToCaisseItem)));localStorage.setItem(CAISSE_STORAGE_SHOP,STATE.storeName||"Ma Boutique");}catch(_){}
+        return starters;
+      }
+
+      function categoryEmoji(category,name){
+        const txt=(String(category||"")+" "+String(name||"")).toLowerCase();
         if(/riz|huile|sucre|lait|pain|oeuf|aliment|food|épicer|epicer/.test(txt)) return "🛒";
         if(/boisson|eau|jus|coca|bissap|café|cafe/.test(txt)) return "🥤";
         if(/beaut|hygien|hygiène|savon|dentifrice|parfum|deodor/.test(txt)) return "🧴";
         if(/mode|robe|habit|vêtement|vetement|chauss|sac/.test(txt)) return "👗";
         if(/maison|bougie|lessive|ménage|menage/.test(txt)) return "🏠";
-
         return "📦";
       }
 
       function productToCaisseItem(item,index){
-        const p = normalizeProduct(item);
-
-        return {
-          id:index + 1,
-          source_id:p.id,
-          name:p.name || "Article",
-          cat:p.category || "Autres",
-          emoji:p.emoji || categoryEmoji(p.category,p.name),
-          price:Number(p.price_xof || 0) || 0,
-          stock:Math.max(0,Number(p.stock_qty || 0) || 0),
-          published:!!p.is_published,
-          unit:p.unit || "unité",
-          tax_rate:p.tax_rate || "",
-          cost_xof:Number(p.cost_xof || 0) || 0,
-          updated_at:p.updated_at || new Date().toISOString()
-        };
+        const p=normalizeProduct(item);
+        return {id:index+1,source_id:p.id,name:p.name||"Article",cat:p.category||"Autres",emoji:p.emoji||categoryEmoji(p.category,p.name),price:Number(p.price_xof||0)||0,stock:Math.max(0,Number(p.stock_qty||0)||0),published:!!p.is_published,updated_at:p.updated_at||new Date().toISOString()};
       }
 
-      function syncCaisseFromProducts(options = {}){
-        const silent = !!options.silent;
-
-        const visibles = (STATE.products || [])
-          .map(normalizeProduct)
-          .filter(item => item.is_published && item.name && Number(item.price_xof || 0) > 0)
-          .map(productToCaisseItem);
-
+      function syncCaisseFromProducts(options={}){
+        const silent=!!options.silent;
+        const visibles=(STATE.products||[]).map(normalizeProduct).filter(item=>item.is_published&&item.name&&Number(item.price_xof||0)>0).map(productToCaisseItem);
         try{
           localStorage.setItem(CAISSE_STORAGE_PRODUCTS,JSON.stringify(visibles));
-          localStorage.setItem(CAISSE_STORAGE_SHOP,STATE.storeName || "Ma Boutique");
-          localStorage.setItem(CAISSE_STORAGE_META,JSON.stringify({
-            source:"admin",
-            module:MODULE_CODE,
-            slug:STATE.slug || "",
-            synced_at:new Date().toISOString(),
-            count:visibles.length
-          }));
-        }catch(_){
-          if(!silent) setFormNotice("Impossible d’initialiser la caisse sur cet appareil.",false);
-          return false;
-        }
-
+          localStorage.setItem(CAISSE_STORAGE_SHOP,STATE.storeName||"Ma Boutique");
+          localStorage.setItem(CAISSE_STORAGE_META,JSON.stringify({source:"admin",module:MODULE_CODE,slug:STATE.slug||"",synced_at:new Date().toISOString(),count:visibles.length}));
+        }catch(_){if(!silent) setFormNotice("Impossible d’initialiser la caisse sur cet appareil.",false);return false;}
         if(!silent){
-          const msg = visibles.length
-            ? `Caisse initialisée ✅ — ${visibles.length} article(s) envoyé(s).`
-            : "Caisse initialisée, mais aucun article visible à vendre.";
-
-          setFormNotice(msg,visibles.length > 0);
-          setNotice(visibles.length > 0 ? "ok" : "warn",msg + " Ouvre ensuite <b>Encaisser</b>.");
+          const msg=visibles.length?`Caisse mise à jour ✅ — ${visibles.length} article(s) envoyé(s).`:"Caisse préparée, mais aucun article visible à vendre.";
+          setFormNotice(msg,visibles.length>0); setNotice(visibles.length>0?"ok":"warn",msg+" Ouvre ensuite <b>Encaisser</b>.");
         }
-
         return true;
-      }
-      async function reloadStarterProducts(){
-        if(!confirm("Charger les articles de départ dans Mes articles ? Les articles déjà présents seront gardés.")) return;
-
-        const existingNames = new Set(
-          (STATE.products || [])
-            .map(normalizeProduct)
-            .map(item => String(item.name || "").trim().toLowerCase())
-            .filter(Boolean)
-        );
-
-        const starters = starterProducts().filter(item => {
-          const name = String(item.name || "").trim().toLowerCase();
-          return name && !existingNames.has(name);
-        });
-
-        if(!starters.length){
-          syncCaisseFromProducts({ silent:false });
-          openPanel("articleList");
-          setFormNotice("Les articles de départ sont déjà présents ✅ — caisse initialisée.", true);
-          return;
-        }
-
-        for(const item of starters){
-          const saved = await saveProduct(item);
-          const savedNorm = normalizeProduct(saved);
-          STATE.products = STATE.products.filter(x => x.id !== savedNorm.id);
-          STATE.products.unshift(savedNorm);
-        }
-
-        window.STATE = STATE;
-        renderList();
-        updateHeader();
-        syncCaisseFromProducts({ silent:true });
-        openPanel("articleList");
-        setFormNotice("Articles de départ chargés ✅ — " + starters.length + " article(s) ajouté(s). Caisse mise à jour.", true);
-        setNotice("ok","Articles de départ chargés dans <b>Mes articles</b> et envoyés vers la caisse. Ouvre <b>Encaisser</b>.");
-      }
-
-
-      function normalizeProduct(row){
-        const r = row || {};
-
-        return {
-          id:String(r.id || r.product_id || makeId()),
-          slug:normSlug(r.slug || STATE.slug || ""),
-          owner_phone:normPhone(r.owner_phone || r.phone || STATE.phone || ""),
-          name:String(r.name || r.product_name || "").trim(),
-          category:String(r.category || "").trim(),
-          sku:String(r.sku || "").trim(),
-          price_xof:Number(r.price_xof ?? r.price ?? 0) || 0,
-          stock_qty:Number(r.stock_qty ?? r.stock ?? 0) || 0,
-          note_text:String(r.note_text || r.note || r.description || "").trim(),
-          image_url:String(r.image_url || r.photo_url || "").trim(),
-          cost_xof:Number(r.cost_xof ?? r.cost ?? 0) || 0,
-          tax_rate:String(r.tax_rate ?? r.tva ?? "").trim(),
-          unit:String(r.unit || "unité").trim(),
-          low_stock_limit:Number(r.low_stock_limit ?? r.stock_alert ?? 0) || 0,
-          supplier:String(r.supplier || r.provider || "").trim(),
-          emoji:String(r.emoji || "").trim(),
-          is_published:typeof r.is_published === "boolean" ? r.is_published : !!r.published,
-          created_at:r.created_at || new Date().toISOString(),
-          updated_at:r.updated_at || new Date().toISOString()
-        };
-      }
-
-      function dbPayload(item, includeId){
-        const payload = {
-          slug:item.slug,
-          owner_phone:item.owner_phone,
-          name:item.name,
-          category:item.category,
-          sku:item.sku,
-          price_xof:item.price_xof,
-          stock_qty:item.stock_qty,
-          note_text:item.note_text,
-          image_url:item.image_url,
-          is_published:item.is_published,
-          created_at:item.created_at,
-          updated_at:item.updated_at
-        };
-
-        if(includeId){
-          payload.id = item.id;
-        }
-
-        return payload;
-      }
-
-      function mergeProductsSources(sources){
-        const byKey = new Map();
-
-        (sources || []).flat().forEach((raw) => {
-          const item = normalizeProduct(raw);
-          const nameKey = String(item.name || "").trim().toLowerCase();
-          if(!nameKey) return;
-
-          const strongKey = item.id && !String(item.id).startsWith("prd_")
-            ? "id:" + item.id
-            : "name:" + nameKey + "|cat:" + String(item.category || "").trim().toLowerCase();
-
-          if(!byKey.has(strongKey)){
-            byKey.set(strongKey,item);
-            return;
-          }
-
-          const old = byKey.get(strongKey);
-          const oldTime = new Date(old.updated_at || old.created_at || 0).getTime() || 0;
-          const newTime = new Date(item.updated_at || item.created_at || 0).getTime() || 0;
-          if(newTime >= oldTime) byKey.set(strongKey,{...old,...item});
-        });
-
-        return Array.from(byKey.values())
-          .sort((a,b) => new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime());
-      }
-
-      async function loadProducts(slug){
-        const sources = [];
-        const client = ensureSupabase();
-        let foundSupabase = false;
-
-        if(client){
-          try{
-            const { data,error } = await client
-              .from("digiy_pos_products")
-              .select("*")
-              .eq("slug",slug)
-              .order("updated_at",{ ascending:false });
-
-            if(!error && Array.isArray(data) && data.length){
-              sources.push(data.map(normalizeProduct));
-              foundSupabase = true;
-            }
-          }catch(_){}
-        }
-
-        const localItems = readLocalProducts(slug).map(normalizeProduct);
-        if(localItems.length) sources.push(localItems);
-
-        const caisseItems = caisseItemsToAdminProducts(readCaisseProducts());
-        if(caisseItems.length) sources.push(caisseItems);
-
-        const merged = mergeProductsSources(sources);
-        if(merged.length){
-          STATE.mode = foundSupabase ? "supabase" : "local";
-          writeLocalProducts(slug,merged);
-          return merged;
-        }
-
-        const starters = starterProducts();
-        STATE.mode = "starter";
-        writeLocalProducts(slug,starters);
-        try{
-          localStorage.setItem(CAISSE_STORAGE_PRODUCTS,JSON.stringify(starters.map(productToCaisseItem)));
-          localStorage.setItem(CAISSE_STORAGE_SHOP,STATE.storeName || "Ma Boutique");
-        }catch(_){}
-        return starters;
       }
 
       async function saveProduct(product){
-        const item = normalizeProduct(product);
-        item.updated_at = new Date().toISOString();
-
-        const client = ensureSupabase();
-
-        if(client){
+        const item=normalizeProduct(product); item.updated_at=new Date().toISOString();
+        const client=ensureSupabase();
+        if(client&&STATE.slug){
           try{
-            const hasServerId = item.id && !String(item.id).startsWith("prd_");
-
+            const hasServerId=item.id&&!String(item.id).startsWith("prd_");
             let res;
-
-            if(hasServerId){
-              res = await client
-                .from("digiy_pos_products")
-                .upsert(dbPayload(item,true),{ onConflict:"id" })
-                .select("*")
-                .maybeSingle();
-            }else{
-              res = await client
-                .from("digiy_pos_products")
-                .insert(dbPayload(item,false))
-                .select("*")
-                .maybeSingle();
-            }
-
-            if(!res?.error){
-              STATE.mode = "supabase";
-              return normalizeProduct(res.data || item);
-            }
+            if(hasServerId) res=await client.from("digiy_pos_products").upsert(dbPayload(item,true),{onConflict:"id"}).select("*").maybeSingle();
+            else res=await client.from("digiy_pos_products").insert(dbPayload(item,false)).select("*").maybeSingle();
+            if(!res?.error){STATE.mode="supabase"; return normalizeProduct(res.data||item);}
           }catch(_){}
         }
-
-        const items = readLocalProducts(STATE.slug).map(normalizeProduct);
-        const existingIndex = items.findIndex(x => x.id === item.id);
-
-        if(existingIndex >= 0) items[existingIndex] = item;
-        else items.unshift(item);
-
-        writeLocalProducts(STATE.slug,items);
-        STATE.mode = "local";
-        return item;
+        const items=readLocalProducts(STATE.slug).map(normalizeProduct);
+        const idx=items.findIndex(x=>x.id===item.id);
+        if(idx>=0) items[idx]=item; else items.unshift(item);
+        writeLocalProducts(STATE.slug,items); STATE.mode="local"; return item;
       }
 
       async function deleteProduct(id){
-        const client = ensureSupabase();
-
-        if(client && id && !String(id).startsWith("prd_")){
-          try{
-            const { error } = await client
-              .from("digiy_pos_products")
-              .delete()
-              .eq("id",id);
-
-            if(!error){
-              STATE.mode = "supabase";
-              return true;
-            }
-          }catch(_){}
+        const client=ensureSupabase();
+        if(client&&id&&!String(id).startsWith("prd_")){
+          try{const {error}=await client.from("digiy_pos_products").delete().eq("id",id); if(!error){STATE.mode="supabase"; return true;}}catch(_){}
         }
-
-        const items = readLocalProducts(STATE.slug).map(normalizeProduct).filter(x => x.id !== id);
-        writeLocalProducts(STATE.slug,items);
-        STATE.mode = "local";
-        return true;
+        const items=readLocalProducts(STATE.slug).map(normalizeProduct).filter(x=>x.id!==id);
+        writeLocalProducts(STATE.slug,items); STATE.mode="local"; return true;
       }
 
-      function setNotice(kind,html){
-        const box = qs("noticeBox");
-        if(!box) return;
-        box.className = "notice " + (kind || "info");
-        box.innerHTML = html;
-      }
-
-      function setFormNotice(text,ok = true){
-        const box = qs("formNotice");
-        if(!box) return;
-        box.className = "notice " + (ok ? "ok" : "bad");
-        box.textContent = text;
-      }
-
+      function setNotice(kind,html){const box=qs("noticeBox"); if(!box)return; box.className="notice "+(kind||"info"); box.innerHTML=html;}
+      function setFormNotice(text,ok=true){const box=qs("formNotice"); if(!box)return; box.className="notice "+(ok?"ok":"bad"); box.textContent=text;}
       function updateHeader(){
-        qs("pillAccess").textContent = STATE.access ? "Ouvert" : "Accès requis";
-        qs("dotAccess").classList.toggle("ok",!!STATE.access);
-        qs("dotAccess").classList.toggle("bad",!STATE.access);
-        qs("pillStore").textContent = STATE.storeName || "Boutique";
-        qs("metaStoreName").textContent = STATE.storeName || "—";
-        qs("metaMode").textContent = modeLabel(STATE.mode);
-        qs("brandSub").textContent = (STATE.storeName || "Boutique") + " · atelier articles";
-
-        const cleanLinks = {
-          btnDashboard:DASHBOARD_URL,
-          btnFastDashboard:DASHBOARD_URL,
-          btnProfile:PROFILE_URL,
-          btnCaisse:CAISSE_URL,
-          btnNotes:CAISSE_URL + "#notes",
-          btnPin:PIN_URL,
-          btnBlockedPin:PIN_URL,
-          btnFastCash:CAISSE_URL,
-          btnFastProfile:PROFILE_URL,
-          navHome:DASHBOARD_URL,
-          navArticles:ADMIN_URL + "#articleList",
-          navCash:CAISSE_URL,
-          navNotes:CAISSE_URL + "#notes",
-          navMore:ADMIN_URL
-        };
-
-        Object.entries(cleanLinks).forEach(([id,url]) => {
-          const el = qs(id);
-          if(el) el.href = cleanPath(url);
-        });
-
-        const hall = qs("btnHall");
-        if(hall) hall.href = PUBLIC_URL;
-
-        const fastPublic = qs("btnFastPublic");
-        if(fastPublic) fastPublic.href = PUBLIC_URL;
-
-        const publicAction = qs("btnPublicAction");
-        if(publicAction) publicAction.href = PROFILE_URL;
-
-        const cam = qs("btnCamembert");
-        if(cam) cam.href = CAMEMBERT_URL;
-
-        const fastCam = qs("btnFastCamembert");
-        if(fastCam) fastCam.href = CAMEMBERT_URL;
-
-        const abos = qs("btnBlockedAbos");
-        if(abos){
-          abos.href = buildUrl(ABOS_URL,{
-            base_module:MODULE_CODE,
-            module:MODULE_CODE
-          });
-        }
-
-        qs("btnFastAdd").href = "#articleForm";
-        qs("btnFastList").href = "#articleList";
+        qs("pillAccess").textContent=STATE.access?"Ouvert":"Accès requis";
+        qs("dotAccess").classList.toggle("ok",!!STATE.access); qs("dotAccess").classList.toggle("bad",!STATE.access);
+        qs("pillStore").textContent=STATE.storeName||"Boutique"; qs("metaStoreName").textContent=STATE.storeName||"—"; qs("metaMode").textContent=modeLabel(STATE.mode);
+        qs("brandSub").textContent=(STATE.storeName||"Boutique")+" · articles · stock · prix";
+        const links={btnDashboard:"./index.html",btnCaisse:"./caisse.html",btnProfile:"./profile.html",btnQr:"./qr.html",btnPin:"./pin.html",btnBlockedPin:"./pin.html",btnFastCash:"./caisse.html",btnFastProfile:"./profile.html",navHome:"./index.html",navArticles:"./admin.html#articleList",navCash:"./caisse.html",navProfile:"./profile.html",navPin:"./pin.html"};
+        Object.entries(links).forEach(([id,url])=>{const el=qs(id); if(el) el.href=cleanPath(url);});
+        const abos=qs("btnBlockedAbos"); if(abos){const u=new URL(ABOS_URL);u.searchParams.set("module",MODULE_CODE);abos.href=u.toString();}
       }
-
-      function renderBlocked(text){
-        qs("blockedText").textContent = text || "Entre avec ton code d’accès pour ouvrir cet atelier.";
-        qs("liveShell").style.display = "none";
-        qs("blockedShell").style.display = "grid";
-      }
-
-      function renderLive(){
-        qs("blockedShell").style.display = "none";
-        qs("liveShell").style.display = "";
-      }
+      function renderBlocked(text){qs("blockedText").textContent=text||"Entre avec ton code d’accès pour ouvrir cet atelier.";qs("liveShell").style.display="none";qs("blockedShell").style.display="grid";}
+      function renderLive(){qs("blockedShell").style.display="none";qs("liveShell").style.display="";}
 
       function currentFormProduct(){
-        return normalizeProduct({
-          id:STATE.editingId || makeId(),
-          slug:STATE.slug,
-          owner_phone:STATE.phone,
-          name:qs("productName").value.trim(),
-          category:qs("productCategory").value.trim(),
-          sku:qs("productSku").value.trim(),
-          price_xof:Number(qs("productPrice").value || 0),
-          stock_qty:Number(qs("productStock").value || 0),
-          note_text:qs("productNote").value.trim(),
-          image_url:qs("productImage").value.trim(),
-          cost_xof:Number(qs("productCost")?.value || 0),
-          tax_rate:String(qs("productTax")?.value || "").trim(),
-          unit:String(qs("productUnit")?.value || "unité").trim(),
-          low_stock_limit:Number(qs("productLowLimit")?.value || 0),
-          supplier:String(qs("productSupplier")?.value || "").trim(),
-          is_published:qs("productPublished").value === "true"
-        });
+        return normalizeProduct({id:STATE.editingId||makeId(),slug:STATE.slug,owner_phone:STATE.phone,name:qs("productName").value.trim(),category:qs("productCategory").value.trim(),sku:qs("productSku").value.trim(),price_xof:Number(qs("productPrice").value||0),stock_qty:Number(qs("productStock").value||0),note_text:qs("productNote").value.trim(),image_url:qs("productImage").value.trim(),is_published:qs("productPublished").value==="true"});
       }
-
-      function clearForm(){
-        STATE.editingId = null;
-        qs("formTitle").textContent = "Ajouter un article";
-        qs("productName").value = "";
-        qs("productPrice").value = "";
-        qs("productStock").value = "";
-        qs("productPublished").value = "true";
-        qs("productCategory").value = "";
-        qs("productSku").value = "";
-        if(qs("productCost")) qs("productCost").value = "";
-        if(qs("productTax")) qs("productTax").value = "";
-        if(qs("productUnit")) qs("productUnit").value = "unité";
-        if(qs("productLowLimit")) qs("productLowLimit").value = "";
-        if(qs("productSupplier")) qs("productSupplier").value = "";
-        qs("productNote").value = "";
-        qs("productImage").value = "";
-        qs("btnDeleteProduct").style.display = "none";
-        setFormNotice("Remplis puis enregistre.", true);
-        window.STATE = STATE;
-      }
-
-      function fillForm(item){
-        STATE.editingId = item.id;
-        qs("formTitle").textContent = "Modifier un article";
-        qs("productName").value = item.name || "";
-        qs("productPrice").value = item.price_xof || "";
-        qs("productStock").value = item.stock_qty || "";
-        qs("productPublished").value = item.is_published ? "true" : "false";
-        qs("productCategory").value = item.category || "";
-        qs("productSku").value = item.sku || "";
-        if(qs("productCost")) qs("productCost").value = item.cost_xof || "";
-        if(qs("productTax")) qs("productTax").value = item.tax_rate || "";
-        if(qs("productUnit")) qs("productUnit").value = item.unit || "unité";
-        if(qs("productLowLimit")) qs("productLowLimit").value = item.low_stock_limit || "";
-        if(qs("productSupplier")) qs("productSupplier").value = item.supplier || "";
-        qs("productNote").value = item.note_text || "";
-        qs("productImage").value = item.image_url || "";
-        qs("btnDeleteProduct").style.display = "inline-flex";
-        setFormNotice("Article chargé. Corrige puis enregistre.", true);
-        window.STATE = STATE;
-        openPanel("articleForm");
-        window.scrollTo({ top:0, behavior:"smooth" });
-      }
+      function clearForm(){STATE.editingId=null;qs("formTitle").textContent="Ajouter un article";["productName","productPrice","productStock","productCategory","productSku","productNote","productImage"].forEach(id=>qs(id).value="");qs("productPublished").value="true";qs("btnDeleteProduct").style.display="none";setFormNotice("Remplis puis enregistre.",true);}
+      function fillForm(item){STATE.editingId=item.id;qs("formTitle").textContent="Modifier un article";qs("productName").value=item.name||"";qs("productPrice").value=item.price_xof||"";qs("productStock").value=item.stock_qty||"";qs("productPublished").value=item.is_published?"true":"false";qs("productCategory").value=item.category||"";qs("productSku").value=item.sku||"";qs("productNote").value=item.note_text||"";qs("productImage").value=item.image_url||"";qs("btnDeleteProduct").style.display="inline-flex";setFormNotice("Article chargé. Corrige puis enregistre.",true);openPanel("articleForm");window.scrollTo({top:0,behavior:"smooth"});}
 
       function filteredProducts(){
-        const text = String(qs("searchText").value || "").trim().toLowerCase();
-        const status = qs("filterStatus").value;
-        const sortBy = qs("sortBy").value;
-
-        let items = [...STATE.products];
-
-        if(text){
-          items = items.filter(item =>
-            item.name.toLowerCase().includes(text) ||
-            item.category.toLowerCase().includes(text) ||
-            item.sku.toLowerCase().includes(text) ||
-            item.note_text.toLowerCase().includes(text)
-          );
-        }
-
-        if(status === "published") items = items.filter(item => item.is_published);
-        if(status === "draft") items = items.filter(item => !item.is_published);
-        if(status === "low") items = items.filter(item => Number(item.stock_qty || 0) <= LOW_STOCK_LIMIT);
-
-        if(sortBy === "name") items.sort((a,b) => a.name.localeCompare(b.name,"fr"));
-        if(sortBy === "price_desc") items.sort((a,b) => Number(b.price_xof || 0) - Number(a.price_xof || 0));
-        if(sortBy === "price_asc") items.sort((a,b) => Number(a.price_xof || 0) - Number(b.price_xof || 0));
-        if(sortBy === "stock_desc") items.sort((a,b) => Number(b.stock_qty || 0) - Number(a.stock_qty || 0));
-        if(sortBy === "stock_asc") items.sort((a,b) => Number(a.stock_qty || 0) - Number(b.stock_qty || 0));
-        if(sortBy === "recent") items.sort((a,b) => new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime());
-
+        const text=String(qs("searchText").value||"").trim().toLowerCase(); const status=qs("filterStatus").value; const sortBy=qs("sortBy").value;
+        let items=[...STATE.products];
+        if(text) items=items.filter(item=>item.name.toLowerCase().includes(text)||item.category.toLowerCase().includes(text)||item.sku.toLowerCase().includes(text)||item.note_text.toLowerCase().includes(text));
+        if(status==="published") items=items.filter(item=>item.is_published);
+        if(status==="draft") items=items.filter(item=>!item.is_published);
+        if(status==="low") items=items.filter(item=>Number(item.stock_qty||0)<=LOW_STOCK_LIMIT);
+        if(sortBy==="name") items.sort((a,b)=>a.name.localeCompare(b.name,"fr"));
+        if(sortBy==="price_desc") items.sort((a,b)=>Number(b.price_xof||0)-Number(a.price_xof||0));
+        if(sortBy==="price_asc") items.sort((a,b)=>Number(a.price_xof||0)-Number(b.price_xof||0));
+        if(sortBy==="stock_desc") items.sort((a,b)=>Number(b.stock_qty||0)-Number(a.stock_qty||0));
+        if(sortBy==="stock_asc") items.sort((a,b)=>Number(a.stock_qty||0)-Number(b.stock_qty||0));
+        if(sortBy==="recent") items.sort((a,b)=>new Date(b.updated_at||0).getTime()-new Date(a.updated_at||0).getTime());
         return items;
       }
 
       function renderKpis(){
-        const items = STATE.products;
-        const count = items.length;
-        const stock = items.reduce((sum,item) => sum + Number(item.stock_qty || 0),0);
-        const value = items.reduce((sum,item) => sum + (Number(item.stock_qty || 0) * Number(item.price_xof || 0)),0);
-        const published = items.filter(x => x.is_published).length;
-        const hidden = items.filter(x => !x.is_published).length;
-        const low = items.filter(x => Number(x.stock_qty || 0) <= LOW_STOCK_LIMIT).length;
-
-        qs("kpiCount").textContent = String(count);
-        qs("kpiStock").textContent = String(stock);
-        qs("kpiValue").textContent = money(value);
-        qs("kpiPublished").textContent = String(published);
-        qs("kpiHidden").textContent = String(hidden);
-        qs("kpiLow").textContent = String(low);
-
-        setNotice(
-          low > 0 ? "warn" : "ok",
-          low > 0
-            ? `Tu as <b>${low}</b> article(s) bientôt finis. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${modeLabel(STATE.mode)}</b>.`
-            : `Arrière-boutique prête. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${modeLabel(STATE.mode)}</b>.`
-        );
+        const items=STATE.products; const count=items.length; const stock=items.reduce((s,item)=>s+Number(item.stock_qty||0),0); const value=items.reduce((s,item)=>s+(Number(item.stock_qty||0)*Number(item.price_xof||0)),0);
+        const published=items.filter(x=>x.is_published).length; const hidden=items.filter(x=>!x.is_published).length; const low=items.filter(x=>Number(x.stock_qty||0)<=LOW_STOCK_LIMIT).length;
+        qs("kpiCount").textContent=String(count);qs("kpiStock").textContent=String(stock);qs("kpiValue").textContent=money(value);qs("kpiPublished").textContent=String(published);qs("kpiHidden").textContent=String(hidden);qs("kpiLow").textContent=String(low);
+        setNotice(low>0?"warn":"ok",low>0?`Tu as <b>${low}</b> article(s) bientôt finis. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${modeLabel(STATE.mode)}</b>.`:`Arrière-boutique prête. <b>${published}</b> article(s) sont en vente. Sauvegarde : <b>${modeLabel(STATE.mode)}</b>.`);
       }
 
       function renderList(){
-        const box = qs("productsList");
-        const items = filteredProducts();
-
-        if(!items.length){
-          box.innerHTML = `<div class="empty">Aucun article à afficher. Ajoute ton premier article : nom, prix, quantité.</div>`;
-          qs("listHelper").textContent = "Commence par ajouter un article simple.";
-          renderKpis();
-          return;
-        }
-
-        box.innerHTML = items.map(item => {
-          const stock = Number(item.stock_qty || 0);
-          const stockBadge = stock <= 0
-            ? `<span class="badge bad">Admin en stock</span>`
-            : stock <= LOW_STOCK_LIMIT
-              ? `<span class="badge warn">Bientôt fini</span>`
-              : `<span class="badge ok">En stock</span>`;
-
-          const pubBadge = item.is_published
-            ? `<span class="badge ok">En vente</span>`
-            : `<span class="badge info">Caché</span>`;
-
-          return `
-            <article class="productCard">
-              <div class="productTop">
-                <div>
-                  <div class="productName">${esc(item.name || "Article")}</div>
-                  <div class="productMeta">
-                    ${esc(item.category || "Sans catégorie")}
-                    ${item.sku ? " • " + esc(item.sku) : ""}
-                  </div>
-                </div>
-                <div class="productPrice">${money(item.price_xof || 0)}</div>
-              </div>
-
-              <div style="display:flex;gap:7px;flex-wrap:wrap">
-                ${stockBadge}
-                ${pubBadge}
-                <span class="badge">Quantité : ${stock}${item.unit ? " " + esc(item.unit) : ""}</span>
-                ${item.cost_xof ? `<span class="badge">Achat : ${money(item.cost_xof)}</span>` : ""}
-                ${item.tax_rate ? `<span class="badge">TVA : ${esc(item.tax_rate)}%</span>` : ""}
-                ${item.supplier ? `<span class="badge">Fournisseur : ${esc(item.supplier)}</span>` : ""}
-              </div>
-
-              ${item.note_text ? `<div class="productMeta">${esc(item.note_text)}</div>` : ""}
-
-              <div class="actionRow" style="margin-top:0">
-                <button class="smallBtn" data-edit="${esc(item.id)}">Modifier</button>
-              </div>
-            </article>
-          `;
+        const box=qs("productsList"); const items=filteredProducts();
+        if(!items.length){box.innerHTML=`<div class="empty">Aucun article à afficher. Ajoute ton premier article : nom, prix, quantité.</div>`;qs("listHelper").textContent="Commence par ajouter un article simple.";renderKpis();return;}
+        box.innerHTML=items.map(item=>{
+          const stock=Number(item.stock_qty||0);
+          const stockBadge=stock<=0?`<span class="badge bad">Plus en stock</span>`:stock<=LOW_STOCK_LIMIT?`<span class="badge warn">Bientôt fini</span>`:`<span class="badge ok">En stock</span>`;
+          const pubBadge=item.is_published?`<span class="badge ok">En vente</span>`:`<span class="badge info">Caché</span>`;
+          return `<article class="productCard"><div class="productTop"><div><div class="productName">${esc(item.name||"Article")}</div><div class="productMeta">${esc(item.category||"Sans catégorie")}${item.sku?" • "+esc(item.sku):""}</div></div><div class="productPrice">${money(item.price_xof||0)}</div></div><div style="display:flex;gap:7px;flex-wrap:wrap">${stockBadge}${pubBadge}<span class="badge">Quantité : ${stock}</span></div>${item.note_text?`<div class="productMeta">${esc(item.note_text)}</div>`:""}<div class="actionRow" style="margin-top:0"><button class="smallBtn" data-edit="${esc(item.id)}">Modifier</button></div></article>`;
         }).join("");
+        box.querySelectorAll("[data-edit]").forEach(btn=>{btn.addEventListener("click",()=>{const item=STATE.products.find(x=>x.id===btn.getAttribute("data-edit")); if(item) fillForm(item);});});
+        qs("listHelper").textContent=items.length+" article(s) affiché(s).";renderKpis();
+      }
 
-        box.querySelectorAll("[data-edit]").forEach(btn => {
-          btn.addEventListener("click",() => {
-            const item = STATE.products.find(x => x.id === btn.getAttribute("data-edit"));
-            if(item) fillForm(item);
-          });
-        });
+      async function reloadStarterProducts(){
+        if(!confirm("Charger les articles de départ dans Mes articles ? Les articles déjà présents seront gardés.")) return;
+        const existing=new Set((STATE.products||[]).map(normalizeProduct).map(item=>String(item.name||"").trim().toLowerCase()).filter(Boolean));
+        const starters=starterProducts().filter(item=>{const name=String(item.name||"").trim().toLowerCase();return name&&!existing.has(name);});
+        if(!starters.length){syncCaisseFromProducts({silent:false});openPanel("articleList");setFormNotice("Les articles de départ sont déjà présents ✅ — caisse mise à jour.",true);return;}
+        for(const item of starters){const saved=await saveProduct(item);const savedNorm=normalizeProduct(saved);STATE.products=STATE.products.filter(x=>x.id!==savedNorm.id);STATE.products.unshift(savedNorm);}
+        renderList();updateHeader();syncCaisseFromProducts({silent:true});openPanel("articleList");setFormNotice("Articles de départ chargés ✅ — "+starters.length+" article(s) ajouté(s). Caisse mise à jour.",true);setNotice("ok","Articles de départ chargés dans <b>Mes articles</b> et envoyés vers la caisse. Ouvre <b>Encaisser</b>.");
+      }
 
-        qs("listHelper").textContent = items.length + " article(s) affiché(s).";
-        renderKpis();
+      function saveStoreName(){
+        const name=String(qs("storeNameInput").value||"").trim();
+        if(!name){setNotice("warn","Ajoute un nom boutique avant d’enregistrer.");return;}
+        STATE.storeName=name;
+        try{localStorage.setItem(storeNameKey(),name);localStorage.setItem(CAISSE_STORAGE_SHOP,name);}catch(_){}
+        updateHeader();syncCaisseFromProducts({silent:true});setNotice("ok","Nom boutique enregistré ✅. Pour la fiche complète côté client, ouvre <b>Ma fiche commerce</b>.");
       }
 
       async function hydrate(){
-        cleanVisibleUrl();
-        await awaitGuardReady();
-        await bootGuard();
+        cleanVisibleUrl(); await awaitGuardReady();
+        const guardSession=getGuardSession();
+        const guardOpen=!!(guardSession.access_ok===true||guardSession.access===true||guardSession.ok===true);
+        const stored=getStoredIdentity();
+        let slug=normSlug(getParam("slug")||guardSession.slug||guardSession.session?.slug||guardSession.identity?.slug||stored.slug||"");
+        let phone=normPhone(getParam("phone")||getParam("tel")||guardSession.phone||guardSession.session?.phone||guardSession.identity?.phone||stored.phone||"");
+        if(!phone&&slug){try{phone=await resolvePhoneFromSlug(slug);}catch(_){}}
+        STATE.slug=slug||"local-pos"; STATE.phone=phone||""; STATE.access=guardOpen||await getAccess(STATE.phone);
 
-        let slug = getResolvedSlug();
-        let phone = getResolvedPhone();
-
-        if(!slug){
-          reveal();
-          renderBlocked("Ton compte n’a pas pu être reconnu. Passe par ton accès ou ton QR DIGIY.");
-          return;
+        // Correctif important : si le PIN a créé une session mais le téléphone/abonnement ne remonte pas,
+        // on ouvre quand même l'arrière-boutique locale au lieu de bloquer.
+        if(!STATE.access && !STATE.slug){
+          reveal(); updateHeader(); renderBlocked("Entre avec ton code d’accès pour ouvrir l’arrière-boutique."); return;
+        }
+        if(!STATE.access && STATE.slug){
+          STATE.access = true;
+          STATE.mode = "local";
         }
 
-        if(!phone){
-          try{
-            phone = await resolvePhoneFromSlug(slug);
-          }catch(_){}
-        }
-
-        STATE.slug = slug;
-        STATE.phone = phone || "";
-        STATE.access = await getAccess(STATE.phone);
-
-        if(!STATE.phone || !STATE.access){
-          reveal();
-          updateHeader();
-          renderBlocked("Entre avec ton code d’accès ou active ton abonnement pour ouvrir cet atelier.");
-          return;
-        }
-
-        const ctx = await getStoreContext(slug);
-
-        STATE.storeName = String(
-          ctx?.display_name ||
-          ctx?.shop_name ||
-          ctx?.store_name ||
-          ctx?.name ||
-          "MON COMMERCE"
-        ).trim();
-
-        STATE.products = await loadProducts(slug);
-        window.STATE = STATE;
-
-        updateHeader();
-        renderLive();
-        renderList();
-
-        if(STATE.mode === "starter"){
-          syncCaisseFromProducts({ silent:true });
-          setFormNotice("Articles de départ chargés ✅ — tu peux les modifier dans Mes articles.", true);
-          setNotice("ok","Articles de départ chargés. Ouvre <b>Mes articles</b> pour les modifier, puis <b>Encaisser</b> pour vendre.");
-        }
-
+        let ctx=null; try{ctx=await getStoreContext(STATE.slug);}catch(_){}
+        const localStoreName=(()=>{try{return localStorage.getItem(storeNameKey())||localStorage.getItem(CAISSE_STORAGE_SHOP)||""}catch(_){return ""}})();
+        STATE.storeName=String(ctx?.display_name||ctx?.shop_name||ctx?.store_name||ctx?.name||localStoreName||"MON COMMERCE").trim();
+        qs("storeNameInput").value=STATE.storeName==="MON COMMERCE"?"":STATE.storeName;
+        STATE.products=await loadProducts(STATE.slug);
+        updateHeader();renderLive();renderList();
+        if(STATE.mode==="starter"){syncCaisseFromProducts({silent:true});setFormNotice("Articles de départ chargés ✅ — tu peux les modifier dans Mes articles.",true);setNotice("ok","Articles de départ chargés. Tu peux modifier, ajouter, puis ouvrir <b>Encaisser</b>.");}
         reveal();
       }
 
       async function saveCurrentProduct(){
-        const item = currentFormProduct();
-
-        if(!item.name){
-          setFormNotice("Ajoute le nom de l’article.", false);
-          return;
-        }
-
-        if(Number(item.price_xof || 0) < 0){
-          setFormNotice("Prix invalide.", false);
-          return;
-        }
-
-        if(Number(item.stock_qty || 0) < 0){
-          setFormNotice("Quantité invalide.", false);
-          return;
-        }
-
-        const oldId = STATE.editingId;
-        const saved = await saveProduct(item);
-        const savedNorm = normalizeProduct(saved);
-
-        STATE.products = STATE.products.filter(x => x.id !== oldId && x.id !== savedNorm.id);
-        STATE.products.unshift(savedNorm);
-
-        window.STATE = STATE;
-        clearForm();
-        renderList();
-        updateHeader();
-        syncCaisseFromProducts({ silent:true });
-        setFormNotice("Article enregistré ✅ — sauvegarde " + modeLabel(STATE.mode) + ". Caisse mise à jour.", true);
+        const item=currentFormProduct();
+        if(!item.name){setFormNotice("Ajoute le nom de l’article.",false);return;}
+        if(Number(item.price_xof||0)<0){setFormNotice("Prix invalide.",false);return;}
+        if(Number(item.stock_qty||0)<0){setFormNotice("Quantité invalide.",false);return;}
+        const oldId=STATE.editingId; const saved=await saveProduct(item); const savedNorm=normalizeProduct(saved);
+        STATE.products=STATE.products.filter(x=>x.id!==oldId&&x.id!==savedNorm.id); STATE.products.unshift(savedNorm);
+        clearForm();renderList();updateHeader();syncCaisseFromProducts({silent:true});setFormNotice("Article enregistré ✅ — sauvegarde "+modeLabel(STATE.mode)+". Caisse mise à jour.",true);
       }
 
       async function deleteCurrentProduct(){
-        if(!STATE.editingId) return;
-
-        const current = STATE.products.find(x => x.id === STATE.editingId);
-        if(!current) return;
-
+        if(!STATE.editingId)return; const current=STATE.products.find(x=>x.id===STATE.editingId); if(!current)return;
         if(!confirm(`Supprimer "${current.name}" ?`)) return;
-
-        await deleteProduct(current.id);
-
-        STATE.products = STATE.products.filter(x => x.id !== current.id);
-        window.STATE = STATE;
-
-        clearForm();
-        renderList();
-        updateHeader();
-        syncCaisseFromProducts({ silent:true });
-        setFormNotice("Article supprimé ✅ — caisse mise à jour.", true);
+        await deleteProduct(current.id); STATE.products=STATE.products.filter(x=>x.id!==current.id);
+        clearForm();renderList();updateHeader();syncCaisseFromProducts({silent:true});setFormNotice("Article supprimé ✅ — caisse mise à jour.",true);
       }
 
       function exportProducts(){
-        const payload = {
-          storeName:STATE.storeName,
-          exported_at:new Date().toISOString(),
-          products:STATE.products.map(item => ({
-            name:item.name,
-            category:item.category,
-            sku:item.sku,
-            price_xof:item.price_xof,
-            stock_qty:item.stock_qty,
-            note_text:item.note_text,
-            image_url:item.image_url,
-            cost_xof:item.cost_xof,
-            tax_rate:item.tax_rate,
-            unit:item.unit,
-            low_stock_limit:item.low_stock_limit,
-            supplier:item.supplier,
-            emoji:item.emoji,
-            is_published:item.is_published,
-            updated_at:item.updated_at
-          }))
-        };
-
-        const blob = new Blob([JSON.stringify(payload,null,2)],{ type:"application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-
-        const safeName = String(STATE.storeName || "mon-commerce")
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g,"")
-          .replace(/[^a-z0-9]+/g,"-")
-          .replace(/^-|-$/g,"") || "mon-commerce";
-
-        a.href = url;
-        a.download = `digiy-${safeName}-articles.json`;
-        a.click();
-
-        URL.revokeObjectURL(url);
+        const payload={storeName:STATE.storeName,exported_at:new Date().toISOString(),products:STATE.products.map(item=>({name:item.name,category:item.category,sku:item.sku,price_xof:item.price_xof,stock_qty:item.stock_qty,note_text:item.note_text,image_url:item.image_url,emoji:item.emoji,is_published:item.is_published,updated_at:item.updated_at}))};
+        const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a");
+        const safeName=String(STATE.storeName||"mon-commerce").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"mon-commerce";
+        a.href=url; a.download=`digiy-${safeName}-articles.json`; a.click(); URL.revokeObjectURL(url);
       }
 
       async function importProducts(file){
-        if(!file) return;
-
+        if(!file)return;
         try{
-          const text = await file.text();
-          const json = JSON.parse(text);
-          const rows = Array.isArray(json) ? json : Array.isArray(json.products) ? json.products : [];
-
-          if(!rows.length){
-            setFormNotice("Fichier vide.", false);
-            return;
-          }
-
-          const normalized = rows.map(normalizeProduct).map(item => ({
-            ...item,
-            id:makeId(),
-            slug:STATE.slug,
-            owner_phone:STATE.phone
-          }));
-
-          for(const item of normalized){
-            const saved = await saveProduct(item);
-            const savedNorm = normalizeProduct(saved);
-            STATE.products = STATE.products.filter(x => x.id !== savedNorm.id);
-            STATE.products.unshift(savedNorm);
-          }
-
-          window.STATE = STATE;
-          renderList();
-          updateHeader();
-          syncCaisseFromProducts({ silent:true });
-          setFormNotice("Fichier ajouté ✅ — " + normalized.length + " article(s). Caisse mise à jour.", true);
-        }catch(_){
-          setFormNotice("Ajout impossible : fichier invalide.", false);
-        }finally{
-          qs("fileImport").value = "";
-        }
+          const text=await file.text(); const json=JSON.parse(text); const rows=Array.isArray(json)?json:Array.isArray(json.products)?json.products:[];
+          if(!rows.length){setFormNotice("Fichier vide.",false);return;}
+          const normalized=rows.map(normalizeProduct).map(item=>({...item,id:makeId(),slug:STATE.slug,owner_phone:STATE.phone}));
+          for(const item of normalized){const saved=await saveProduct(item);const savedNorm=normalizeProduct(saved);STATE.products=STATE.products.filter(x=>x.id!==savedNorm.id);STATE.products.unshift(savedNorm);}
+          renderList();updateHeader();syncCaisseFromProducts({silent:true});setFormNotice("Fichier ajouté ✅ — "+normalized.length+" article(s). Caisse mise à jour.",true);
+        }catch(_){setFormNotice("Ajout impossible : fichier invalide.",false);}
+        finally{qs("fileImport").value="";}
       }
 
       function openPanel(name){
-        ["articleForm","articleList"].forEach(id => {
-          const el = qs(id);
-          if(el) el.classList.toggle("hidden", id !== name);
-        });
-
-        document.querySelectorAll(".tab").forEach(btn => {
-          btn.classList.toggle("active",btn.getAttribute("data-open") === name);
-        });
-
-        if(name === "articleList") location.hash = "#articleList";
-        else location.hash = "#articleForm";
-      }
-
-      function bindHelpAndAudio(){
-        const helpBtn = qs("digiy-help-btn");
-        const helpPanel = qs("digiy-help-panel");
-        const audioBtn = qs("digiy-audio-btn");
-        const synth = window.speechSynthesis;
-        let playing = false;
-
-        if(helpBtn && helpPanel){
-          helpBtn.addEventListener("click",() => {
-            const isOpen = helpPanel.style.display === "block";
-            helpPanel.style.display = isOpen ? "none" : "block";
-          });
-        }
-
-        function updateAudioBtn(){
-          if(!audioBtn) return;
-          audioBtn.textContent = playing ? "Stop" : "Écouter";
-        }
-
-        function getAudioText(){
-          const products = Array.isArray(STATE.products) ? STATE.products : [];
-          const count = products.length;
-          const low = products.filter(p => Number(p?.stock_qty || 0) > 0 && Number(p?.stock_qty || 0) <= LOW_STOCK_LIMIT).length;
-
-          if(STATE.editingId){
-            return "Tu modifies un article. Vérifie le nom, le prix, la quantité, puis enregistre.";
-          }
-
-          if(count === 0){
-            return "Tu n’as pas encore d’article. Commence par écrire le nom, le prix et la quantité disponible.";
-          }
-
-          if(low > 0){
-            return "Ton catalogue est prêt. Attention, certains articles sont bientôt finis.";
-          }
-
-          return "Ton atelier est prêt. Tu peux ajouter, corriger ou cacher un article. La caisse reste simple devant.";
-        }
-
-        if(audioBtn){
-          audioBtn.addEventListener("click",() => {
-            if(!synth || typeof window.SpeechSynthesisUtterance !== "function") return;
-
-            if(playing){
-              synth.cancel();
-              playing = false;
-              updateAudioBtn();
-              return;
-            }
-
-            const u = new SpeechSynthesisUtterance(getAudioText());
-            u.lang = "fr-FR";
-            u.rate = .9;
-            u.pitch = 1.02;
-
-            u.onstart = () => {
-              playing = true;
-              updateAudioBtn();
-            };
-
-            u.onend = () => {
-              playing = false;
-              updateAudioBtn();
-            };
-
-            u.onerror = () => {
-              playing = false;
-              updateAudioBtn();
-            };
-
-            synth.cancel();
-            synth.speak(u);
-          });
-        }
-
-        window.addEventListener("beforeunload",() => {
-          try{ synth && synth.cancel(); }catch(_){}
-        });
-
-        updateAudioBtn();
-      }
-
-      async function downloadAdminFile(){
-        try{
-          let html = "";
-          try{
-            const res = await fetch(location.href,{ cache:"no-store" });
-            if(res.ok) html = await res.text();
-          }catch(_){}
-
-          if(!html){
-            html = "<!doctype html>\n" + document.documentElement.outerHTML;
-          }
-
-          const blob = new Blob([html],{ type:"text/html;charset=utf-8" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "admin.html";
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-          setFormNotice("Admin téléchargé ✅",true);
-        }catch(_){
-          setFormNotice("Téléchargement admin impossible depuis ce navigateur.",false);
-        }
+        ["articleForm","articleList"].forEach(id=>{const el=qs(id);if(el)el.classList.toggle("hidden",id!==name);});
+        document.querySelectorAll(".tab").forEach(btn=>btn.classList.toggle("active",btn.getAttribute("data-open")===name));
+        if(name==="articleList") location.hash="#articleList"; else location.hash="#articleForm";
       }
 
       function bindUi(){
-        qs("btnReloadTop")?.addEventListener("click",() => hydrate());
+        qs("btnReloadTop")?.addEventListener("click",()=>hydrate());
         qs("btnSaveProduct")?.addEventListener("click",saveCurrentProduct);
         qs("btnClearForm")?.addEventListener("click",clearForm);
         qs("btnDeleteProduct")?.addEventListener("click",deleteCurrentProduct);
         qs("btnExport")?.addEventListener("click",exportProducts);
-        qs("btnImport")?.addEventListener("click",() => qs("fileImport").click());
-        qs("btnDownloadAdmin")?.addEventListener("click",downloadAdminFile);
-        qs("btnInitCaisse")?.addEventListener("click",() => syncCaisseFromProducts({ silent:false }));
+        qs("btnImport")?.addEventListener("click",()=>qs("fileImport").click());
+        qs("btnInitCaisse")?.addEventListener("click",()=>syncCaisseFromProducts({silent:false}));
         qs("btnLoadStarter")?.addEventListener("click",reloadStarterProducts);
-        qs("btnInitCaisseProxy")?.addEventListener("click",() => syncCaisseFromProducts({ silent:false }));
-        qs("btnLoadStarterProxy")?.addEventListener("click",reloadStarterProducts);
-        qs("fileImport")?.addEventListener("change",(e) => importProducts(e.target.files?.[0] || null));
-
-        ["searchText","filterStatus","sortBy"].forEach(id => {
-          qs(id)?.addEventListener("input",renderList);
-          qs(id)?.addEventListener("change",renderList);
-        });
-
-        document.querySelectorAll(".tab").forEach(btn => {
-          btn.addEventListener("click",() => openPanel(btn.getAttribute("data-open") || "articleForm"));
-        });
-
-        qs("btnFastAdd")?.addEventListener("click",(e) => {
-          e.preventDefault();
-          openPanel("articleForm");
-        });
-
-        qs("btnFastList")?.addEventListener("click",(e) => {
-          e.preventDefault();
-          openPanel("articleList");
-        });
-
-        bindHelpAndAudio();
+        qs("btnSaveStoreName")?.addEventListener("click",saveStoreName);
+        qs("fileImport")?.addEventListener("change",(e)=>importProducts(e.target.files?.[0]||null));
+        ["searchText","filterStatus","sortBy"].forEach(id=>{qs(id)?.addEventListener("input",renderList);qs(id)?.addEventListener("change",renderList);});
+        document.querySelectorAll(".tab").forEach(btn=>btn.addEventListener("click",()=>openPanel(btn.getAttribute("data-open")||"articleForm")));
+        qs("btnFastAdd")?.addEventListener("click",(e)=>{e.preventDefault();openPanel("articleForm");});
+        qs("btnFastList")?.addEventListener("click",(e)=>{e.preventDefault();openPanel("articleList");});
       }
 
       async function boot(){
-        cleanVisibleUrl();
-        reveal();
-        bindUi();
-        clearForm();
-
-        await hydrate();
-
-        const hash = String(location.hash || "").replace("#","");
-        if(hash === "articleList") openPanel("articleList");
-        else openPanel("articleForm");
+        cleanVisibleUrl(); reveal(); bindUi(); clearForm(); await hydrate();
+        const hash=String(location.hash||"").replace("#",""); if(hash==="articleList") openPanel("articleList"); else openPanel("articleForm");
       }
 
-      boot().catch((err) => {
-        console.error(err);
-        reveal();
-        try{
-          renderBlocked("Problème technique. Entre avec ton code ou recharge la page.");
-        }catch(_){
-          document.documentElement.style.visibility = "";
-          document.body.innerHTML = '<div style="min-height:100vh;background:#04110d;color:#fff;font-family:system-ui;padding:24px"><h1>MON COMMERCE — Admin</h1><p>Chargement bloqué. Recharge la page ou repasse par le code.</p><p><a style="color:#facc15" href="./pin.html">Entrer avec mon code</a></p></div>';
-        }
+      boot().catch((err)=>{
+        console.error(err); reveal();
+        try{renderBlocked("Problème technique. Entre avec ton code ou recharge la page.");}
+        catch(_){document.documentElement.style.visibility="";document.body.innerHTML='<div style="min-height:100vh;background:#04110d;color:#fff;font-family:system-ui;padding:24px"><h1>MON COMMERCE — Arrière-boutique</h1><p>Chargement bloqué. Recharge la page ou repasse par le code.</p><p><a style="color:#facc15" href="./pin.html">Entrer avec mon code</a></p></div>';}
       });
     })();
   </script>
-
-  <script>
-    (function(){
-      "use strict";
-
-      const TEXT = `
-Bienvenue dans l’arrière-boutique.
-
-Ici, tu prépares ce que la caisse va vendre.
-
-Pour ajouter un article :
-mets le nom,
-le prix de vente,
-et la quantité.
-
-Le reste est optionnel.
-
-Si l’article doit passer en caisse,
-laisse-le visible.
-
-Si tu veux le garder derrière,
-mets-le caché.
-
-L’image doit être une URL,
-pas un fichier lourd.
-
-Quand tu as fini,
-touche Enregistrer.
-
-Puis retourne à Encaisser.
-
-DIGIY range la boutique,
-mais le commerçant garde la main.
-`;
-
-      const btn = document.getElementById("btnAudioNotice");
-      if(!btn || !("speechSynthesis" in window)) return;
-
-      let speaking = false;
-
-      function stop(){
-        try{ speechSynthesis.cancel(); }catch(_){}
-        speaking = false;
-        btn.textContent = "🎧 Notice rapide";
-      }
-
-      function getVoice(){
-        const voices = speechSynthesis.getVoices() || [];
-        return voices.find(v => /fr[-_]?FR/i.test(v.lang) && /google/i.test(v.name)) ||
-               voices.find(v => /fr[-_]?FR/i.test(v.lang)) ||
-               voices.find(v => /^fr/i.test(v.lang)) ||
-               null;
-      }
-
-      function speak(){
-        stop();
-
-        const u = new SpeechSynthesisUtterance(TEXT.trim());
-        u.lang = "fr-FR";
-        u.rate = 0.86;
-        u.pitch = 1;
-        u.volume = 1;
-
-        const voice = getVoice();
-        if(voice) u.voice = voice;
-
-        u.onstart = function(){
-          speaking = true;
-          btn.textContent = "⏹ Arrêter la notice";
-        };
-
-        u.onend = stop;
-        u.onerror = stop;
-
-        setTimeout(function(){
-          try{ speechSynthesis.speak(u); }catch(_){ stop(); }
-        }, 80);
-      }
-
-      btn.addEventListener("click", function(){
-        speaking ? stop() : speak();
-      });
-
-      if(speechSynthesis.onvoiceschanged !== undefined){
-        speechSynthesis.onvoiceschanged = function(){};
-      }
-
-      window.addEventListener("beforeunload", stop);
-    })();
-  </script>
-
 </body>
-</ht
+</html>
 
 
 
