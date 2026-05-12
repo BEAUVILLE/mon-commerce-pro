@@ -4,12 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#06140f"/>
-  <title>MON COMMERCE — Mon QR</title>
-
-  <script>
-    window.DIGIY_MODULE = "POS";
-    window.DIGIY_LOGIN_URL = "./pin.html";
-  </script>
+  <title>MON COMMERCE — QR Astou Boutique</title>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 
@@ -29,7 +24,6 @@
       --line:rgba(255,255,255,.12);
       --shadow:0 22px 62px rgba(0,0,0,.38);
       --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      --bottom:88px;
     }
 
     *{box-sizing:border-box}
@@ -43,74 +37,67 @@
         radial-gradient(850px 520px at 0% -10%, rgba(250,204,21,.13), transparent 58%),
         radial-gradient(800px 480px at 100% 0%, rgba(34,197,94,.13), transparent 58%),
         linear-gradient(180deg,#06140f,var(--bg));
-      padding:12px 12px calc(var(--bottom) + env(safe-area-inset-bottom,0px) + 16px);
+      padding:14px;
     }
 
     a{color:inherit;text-decoration:none}
-    button,input,select{font:inherit}
-    button{cursor:pointer}
+    button{font:inherit;cursor:pointer}
 
     .wrap{
-      max-width:980px;
+      max-width:760px;
       margin:0 auto;
       display:grid;
-      grid-template-columns:1fr 390px;
-      gap:12px;
-      align-items:start;
+      gap:14px;
     }
 
     .card{
       border:1px solid var(--line);
-      border-radius:28px;
+      border-radius:30px;
       background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.035));
       box-shadow:var(--shadow);
-      padding:16px;
-    }
-
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
+      padding:20px;
+      text-align:center;
     }
 
     .logo{
-      width:58px;
-      height:58px;
-      border-radius:22px;
+      width:72px;
+      height:72px;
+      border-radius:26px;
       display:grid;
       place-items:center;
+      margin:0 auto 14px;
       background:linear-gradient(135deg,var(--gold),var(--gold2));
       color:#06140f;
-      font-size:29px;
+      font-size:34px;
       font-weight:1000;
     }
 
     h1{
       margin:0;
-      font-size:clamp(1.8rem,6vw,2.75rem);
-      line-height:.96;
+      font-size:clamp(2rem,7vw,3.4rem);
+      line-height:.95;
       letter-spacing:-.05em;
       font-weight:1000;
     }
 
     .sub{
-      margin-top:7px;
+      margin:12px auto 0;
+      max-width:520px;
       color:var(--muted);
-      line-height:1.42;
+      line-height:1.5;
       font-size:1rem;
       font-weight:850;
     }
 
     .notice{
-      margin-top:12px;
+      margin-top:14px;
       border-radius:20px;
       padding:12px;
-      line-height:1.45;
-      font-size:.92rem;
-      font-weight:850;
       background:rgba(250,204,21,.08);
       border:1px solid rgba(250,204,21,.25);
       color:#fde68a;
+      line-height:1.45;
+      font-weight:850;
     }
 
     .notice.ok{
@@ -125,34 +112,54 @@
       color:#fecaca;
     }
 
-    .form{
+    .qrCard{
+      background:#fff;
+      color:#0f172a;
+      border-radius:30px;
+      padding:20px;
+      box-shadow:var(--shadow);
+    }
+
+    .qrBox{
+      border-radius:24px;
+      padding:14px;
+      display:grid;
+      place-items:center;
+      background:#fff;
+    }
+
+    #qrCanvas{
+      width:min(100%,320px);
+      height:auto;
+      display:block;
+    }
+
+    .qrTitle{
       margin-top:14px;
-      display:grid;
-      gap:12px;
-    }
-
-    .field{
-      display:grid;
-      gap:7px;
-    }
-
-    label{
-      font-size:.95rem;
+      font-size:1.8rem;
       font-weight:1000;
-      color:#eafff1;
+      color:#0f172a;
+      text-align:center;
     }
 
-    input,select{
-      width:100%;
-      min-height:56px;
-      border-radius:18px;
-      border:1px solid rgba(255,255,255,.13);
-      background:rgba(255,255,255,.05);
-      color:var(--text);
-      outline:none;
-      padding:12px 14px;
-      font-size:1.02rem;
+    .qrInfo{
+      margin-top:7px;
+      color:#475569;
+      font-size:.92rem;
       font-weight:900;
+      text-align:center;
+    }
+
+    .urlBox{
+      margin-top:14px;
+      border-radius:18px;
+      padding:12px;
+      background:rgba(0,0,0,.18);
+      color:var(--muted);
+      font-size:.82rem;
+      font-weight:800;
+      word-break:break-all;
+      text-align:left;
     }
 
     .actions{
@@ -198,337 +205,152 @@
 
     .wide{grid-column:1/-1}
 
-    .qrCard{
-      background:#fff;
-      color:#0f172a;
-      border-radius:28px;
-      padding:18px;
-      box-shadow:var(--shadow);
-    }
-
-    .qrBox{
-      border-radius:22px;
-      padding:14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#fff;
-    }
-
-    #qrCanvas{
-      width:min(100%,300px);
-      height:auto;
-      display:block;
-    }
-
-    .qrTitle{
-      margin-top:14px;
-      text-align:center;
-      font-size:1.75rem;
-      font-weight:1000;
-      color:#0f172a;
-    }
-
-    .qrInfo{
-      margin-top:7px;
-      text-align:center;
-      font-size:.88rem;
-      color:#475569;
-      font-weight:900;
-    }
-
-    .urlBox{
-      margin-top:12px;
-      border-radius:18px;
-      padding:12px;
-      background:rgba(0,0,0,.16);
-      color:var(--muted);
-      font-size:.80rem;
-      font-weight:800;
-      word-break:break-all;
-    }
-
-    @media(max-width:860px){
-      .wrap{grid-template-columns:1fr}
-    }
-
     @media(max-width:560px){
       .actions{grid-template-columns:1fr}
+      .card,.qrCard{border-radius:25px}
+    }
+
+    @media print{
+      body{background:#fff;padding:0}
+      .card:first-child{display:none!important}
+      .wrap{max-width:none;margin:0;padding:0}
+      .qrCard{
+        box-shadow:none;
+        border-radius:0;
+        min-height:100vh;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+      }
     }
   </style>
 </head>
 
 <body>
 
-<div class="wrap">
+<main class="wrap">
 
   <section class="card">
+    <div class="logo">🔳</div>
 
-    <div class="brand">
-      <div class="logo">🔳</div>
+    <h1>QR Astou Boutique</h1>
 
-      <div>
-        <h1>Mon QR boutique</h1>
-
-        <div class="sub">
-          QR public simple vers la fiche boutique.
-        </div>
-      </div>
+    <div class="sub">
+      Ce QR ouvre directement la fiche publique Astou Boutique.
+      Zéro détour, zéro Supabase côté client.
     </div>
 
     <div class="notice" id="statusBox">
-      Prépare ton QR.
-    </div>
-
-    <div class="form">
-
-      <div class="field">
-        <label for="shopName">Nom boutique</label>
-        <input id="shopName" placeholder="Ex : Astou Boutique"/>
-      </div>
-
-      <div class="field">
-        <label for="slug">Identifiant boutique</label>
-        <input id="slug" placeholder="commerce-xxxx"/>
-      </div>
-
+      Préparation du QR…
     </div>
 
     <div class="actions">
-
-      <button class="btn primary" id="btnGenerate">
-        ⚙️ Générer
-      </button>
-
-      <button class="btn blue" id="btnCopy">
-        📋 Copier lien
-      </button>
-
-      <button class="btn green" id="btnOpen">
-        🚪 Ouvrir
-      </button>
-
-      <button class="btn wide" id="btnPrint">
-        🖨️ Imprimer
-      </button>
-
+      <button class="btn primary" id="btnGenerate" type="button">⚙️ Générer</button>
+      <button class="btn blue" id="btnCopy" type="button">📋 Copier lien</button>
+      <button class="btn green" id="btnOpen" type="button">🚪 Ouvrir fiche</button>
+      <button class="btn wide" id="btnPrint" type="button">🖨️ Imprimer</button>
     </div>
 
-    <div class="urlBox" id="urlBox">
-      Lien : —
-    </div>
-
+    <div class="urlBox" id="urlBox">Lien : —</div>
   </section>
 
-  <aside class="qrCard">
-
+  <section class="qrCard">
     <div class="qrBox">
       <canvas id="qrCanvas" width="320" height="320"></canvas>
     </div>
 
-    <div class="qrTitle" id="qrTitle">
-      MON COMMERCE
-    </div>
+    <div class="qrTitle">Astou Boutique</div>
+    <div class="qrInfo">Scanner pour ouvrir la fiche publique.</div>
+  </section>
 
-    <div class="qrInfo">
-      Scanner pour ouvrir la fiche boutique.
-    </div>
-
-  </aside>
-
-</div>
+</main>
 
 <script>
 (function(){
-
   "use strict";
 
+  const TARGET = location.origin + location.pathname.replace(/qr\.html$/i, "fiche-astou.html");
   const $ = (id)=>document.getElementById(id);
 
-  function normSlug(v){
-    return String(v || "")
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g,"-")
-      .replace(/[^a-z0-9-]/g,"")
-      .replace(/-+/g,"-")
-      .replace(/^-|-$/g,"");
-  }
-
-  function currentSlug(){
-    return normSlug($("slug").value);
-  }
-
-  function currentName(){
-    return $("shopName").value.trim() || "MON COMMERCE";
-  }
-
-  function localUrl(path){
-    return location.origin + location.pathname.replace("qr.html", path);
-  }
-
-  function buildTarget(){
-
-    const slug = currentSlug();
-
-    const u = new URL(localUrl("fiche.html"));
-
-    if(slug){
-      u.searchParams.set("commerce", slug);
-    }
-
-    return u.toString();
-  }
-
   function setStatus(msg,type){
-
     const box = $("statusBox");
-
     box.className = "notice " + (type || "");
     box.textContent = msg;
   }
 
   async function generate(){
+    $("urlBox").textContent = "Lien : " + TARGET;
 
-    const target = buildTarget();
-    const slug = currentSlug();
+    if(window.QRCode && typeof window.QRCode.toCanvas === "function"){
+      try{
+        await window.QRCode.toCanvas(
+          $("qrCanvas"),
+          TARGET,
+          {
+            width:320,
+            margin:2,
+            errorCorrectionLevel:"H",
+            color:{
+              dark:"#0f172a",
+              light:"#ffffff"
+            }
+          }
+        );
+        setStatus("QR prêt vers fiche-astou.html ✅","ok");
+        return;
+      }catch(err){
+        console.error(err);
+      }
+    }
 
-    $("qrTitle").textContent = currentName();
-
-    $("urlBox").textContent = "Lien : " + target;
-
-    if(!window.QRCode || typeof window.QRCode.toCanvas !== "function"){
-
+    try{
       const imgUrl =
-        "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=" +
-        encodeURIComponent(target);
+        "https://quickchart.io/qr?size=320&text=" +
+        encodeURIComponent(TARGET);
 
       const ctx = $("qrCanvas").getContext("2d");
-
       const img = new Image();
 
       img.crossOrigin = "anonymous";
 
       img.onload = function(){
-
         ctx.clearRect(0,0,320,320);
-
         ctx.drawImage(img,0,0,320,320);
-
-        setStatus(
-          slug
-            ? "QR prêt vers la fiche boutique."
-            : "QR prêt, mais identifiant boutique manquant.",
-          slug ? "ok" : ""
-        );
+        setStatus("QR prêt vers fiche-astou.html ✅","ok");
       };
 
       img.onerror = function(){
-
-        setStatus(
-          "Générateur QR indisponible. Vérifie la connexion puis recharge.",
-          "err"
-        );
+        setStatus("QR indisponible. Le lien reste copiable ci-dessous.","err");
       };
 
       img.src = imgUrl;
-
-      return;
-    }
-
-    try{
-
-      await window.QRCode.toCanvas(
-        $("qrCanvas"),
-        target,
-        {
-          width:320,
-          margin:2,
-          errorCorrectionLevel:"H",
-          color:{
-            dark:"#0f172a",
-            light:"#ffffff"
-          }
-        }
-      );
-
-      setStatus(
-        slug
-          ? "QR prêt vers la fiche boutique."
-          : "QR prêt, mais identifiant boutique manquant.",
-        slug ? "ok" : ""
-      );
-
-    }catch(err){
-
-      console.error(err);
-
-      setStatus(
-        "Impossible de générer le QR.",
-        "err"
-      );
+    }catch(_){
+      setStatus("QR indisponible. Le lien reste copiable ci-dessous.","err");
     }
   }
 
   async function copyLink(){
-
     try{
-
-      await navigator.clipboard.writeText(buildTarget());
-
+      await navigator.clipboard.writeText(TARGET);
       setStatus("Lien copié ✅","ok");
-
     }catch(_){
-
-      setStatus("Copie impossible.","err");
+      setStatus("Copie impossible sur ce navigateur.","err");
     }
   }
 
   function openTarget(){
-    window.open(buildTarget(),"_blank");
+    window.open(TARGET,"_blank","noopener,noreferrer");
   }
 
   function bind(){
-
     $("btnGenerate").addEventListener("click",generate);
-
     $("btnCopy").addEventListener("click",copyLink);
-
     $("btnOpen").addEventListener("click",openTarget);
-
     $("btnPrint").addEventListener("click",()=>window.print());
-
-    $("shopName").addEventListener("input",generate);
-
-    $("slug").addEventListener("input",function(){
-
-      $("slug").value = normSlug($("slug").value);
-
-      generate();
-    });
   }
 
-  function boot(){
-
-    const slug =
-      localStorage.getItem("digiy_pos_slug") ||
-      localStorage.getItem("digiy_pos_last_slug") ||
-      "";
-
-    const name =
-      localStorage.getItem("caisse_shop") ||
-      "MON COMMERCE";
-
-    $("slug").value = slug;
-
-    $("shopName").value = name;
-
-    bind();
-
-    generate();
-  }
-
-  boot();
+  bind();
+  generate();
 
 })();
 </script>
