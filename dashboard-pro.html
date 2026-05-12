@@ -148,11 +148,11 @@
     }
 
     .bottomInner{
-      max-width:760px;
+      max-width:860px;
       margin:0 auto;
       display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:6px;
+      grid-template-columns:repeat(6,minmax(0,1fr));
+      gap:5px;
     }
 
     .navItem{
@@ -164,7 +164,7 @@
       justify-content:center;
       gap:3px;
       color:rgba(247,251,248,.72);
-      font-size:.72rem;
+      font-size:.68rem;
       font-weight:1000;
       border:1px solid rgba(255,255,255,.07);
       background:rgba(255,255,255,.035);
@@ -172,7 +172,7 @@
     }
 
     .navItem .ico{
-      font-size:1.25rem;
+      font-size:1.18rem;
       line-height:1;
     }
 
@@ -211,6 +211,14 @@
         📦 Articles
       </a>
 
+      <a class="btn ghost" id="goProfile" href="./profile.html">
+        🏪 Régler ma fiche
+      </a>
+
+      <a class="btn ghost" id="goFichePublique" href="./fiche.html">
+        🌍 Voir la fiche publique
+      </a>
+
       <a class="btn ghost" id="goQr" href="./qr.html">
         🔳 Mon QR boutique
       </a>
@@ -244,7 +252,12 @@
 
       <a class="navItem" href="./profile.html">
         <span class="ico">🏪</span>
-        <span>Fiche</span>
+        <span>Réglage</span>
+      </a>
+
+      <a class="navItem" href="./fiche.html">
+        <span class="ico">🌍</span>
+        <span>Public</span>
       </a>
 
       <a class="navItem" href="./qr.html">
@@ -410,4 +423,3 @@
 
 </body>
 </html>
-
