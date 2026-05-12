@@ -18,260 +18,92 @@
 
   <style>
     :root{
-      --bg:#04110d;
-      --text:#f7fbf8;
-      --muted:#b8cfc4;
-      --gold:#facc15;
-      --gold2:#f59e0b;
-      --green:#22c55e;
-      --line:rgba(255,255,255,.12);
-      --shadow:0 22px 62px rgba(0,0,0,.38);
-      --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      --bottom:88px;
+      --bg:#04110d;--text:#f7fbf8;--muted:#b8cfc4;--gold:#facc15;--gold2:#f59e0b;
+      --green:#22c55e;--line:rgba(255,255,255,.12);--shadow:0 22px 62px rgba(0,0,0,.38);
+      --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--bottom:88px;
     }
-
     *{box-sizing:border-box}
     html,body{margin:0;padding:0;min-height:100%}
-
     body{
-      min-height:100dvh;
-      font-family:var(--font);
-      color:var(--text);
-      background:
-        radial-gradient(850px 520px at 0% -10%, rgba(250,204,21,.13), transparent 58%),
-        radial-gradient(800px 480px at 100% 0%, rgba(34,197,94,.13), transparent 58%),
-        linear-gradient(180deg,#06140f,var(--bg));
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      min-height:100dvh;font-family:var(--font);color:var(--text);
+      background:radial-gradient(850px 520px at 0% -10%,rgba(250,204,21,.13),transparent 58%),
+      radial-gradient(800px 480px at 100% 0%,rgba(34,197,94,.13),transparent 58%),
+      linear-gradient(180deg,#06140f,var(--bg));
+      display:flex;align-items:center;justify-content:center;
       padding:14px 12px calc(var(--bottom) + env(safe-area-inset-bottom,0px) + 16px);
     }
-
     a{color:inherit;text-decoration:none}
     button{font:inherit;cursor:pointer}
-
     .card{
-      width:min(100%,560px);
-      border:1px solid var(--line);
-      border-radius:30px;
+      width:min(100%,560px);border:1px solid var(--line);border-radius:30px;
       background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.035));
-      box-shadow:var(--shadow);
-      padding:22px;
-      text-align:center;
+      box-shadow:var(--shadow);padding:22px;text-align:center;
     }
-
     .logo{
-      width:66px;
-      height:66px;
-      border-radius:24px;
-      display:grid;
-      place-items:center;
-      margin:0 auto 14px;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      color:#06140f;
-      font-size:31px;
-      font-weight:1000;
-      box-shadow:0 16px 34px rgba(250,204,21,.20);
+      width:66px;height:66px;border-radius:24px;display:grid;place-items:center;
+      margin:0 auto 14px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+      color:#06140f;font-size:31px;font-weight:1000;
     }
-
-    h1{
-      margin:0;
-      font-size:clamp(2rem,7vw,3rem);
-      line-height:.96;
-      letter-spacing:-.05em;
-      font-weight:1000;
-    }
-
-    p{
-      margin:12px auto 0;
-      max-width:440px;
-      color:var(--muted);
-      line-height:1.5;
-      font-size:1rem;
-      font-weight:850;
-    }
-
-    .actions{
-      display:grid;
-      gap:10px;
-      margin-top:18px;
-    }
-
+    h1{margin:0;font-size:clamp(2rem,7vw,3rem);line-height:.96;letter-spacing:-.05em;font-weight:1000}
+    p{margin:12px auto 0;max-width:440px;color:var(--muted);line-height:1.5;font-size:1rem;font-weight:850}
+    .actions{display:grid;gap:10px;margin-top:18px}
     .btn{
-      min-height:60px;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.12);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:14px;
-      font-size:1.04rem;
-      font-weight:1000;
-      text-align:center;
+      min-height:60px;border-radius:22px;border:1px solid rgba(255,255,255,.12);
+      display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;
+      font-size:1.04rem;font-weight:1000;text-align:center;
     }
-
-    .btn.primary{
-      border:none;
-      color:#06140f;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      box-shadow:0 16px 36px rgba(250,204,21,.18);
-    }
-
-    .btn.green{
-      border:none;
-      color:#06140f;
-      background:linear-gradient(135deg,#22c55e,#16a34a);
-    }
-
-    .btn.ghost{
-      color:var(--muted);
-      background:rgba(255,255,255,.04);
-    }
-
-    .note{
-      margin-top:14px;
-      color:rgba(184,207,196,.75);
-      font-size:.86rem;
-      line-height:1.45;
-      font-weight:800;
-    }
-
+    .btn.primary{border:none;color:#06140f;background:linear-gradient(135deg,var(--gold),var(--gold2))}
+    .btn.green{border:none;color:#06140f;background:linear-gradient(135deg,#22c55e,#16a34a)}
+    .btn.ghost{color:var(--muted);background:rgba(255,255,255,.04)}
+    .note{margin-top:14px;color:rgba(184,207,196,.75);font-size:.86rem;line-height:1.45;font-weight:800}
     .bottomNav{
-      position:fixed;
-      left:0;right:0;bottom:0;
-      z-index:80;
+      position:fixed;left:0;right:0;bottom:0;z-index:80;
       padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));
-      background:rgba(3,18,13,.94);
-      border-top:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(14px);
+      background:rgba(3,18,13,.94);border-top:1px solid rgba(255,255,255,.10);backdrop-filter:blur(14px);
     }
-
-    .bottomInner{
-      max-width:860px;
-      margin:0 auto;
-      display:grid;
-      grid-template-columns:repeat(6,minmax(0,1fr));
-      gap:5px;
-    }
-
+    .bottomInner{max-width:860px;margin:0 auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
     .navItem{
-      min-height:58px;
-      border-radius:17px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:3px;
-      color:rgba(247,251,248,.72);
-      font-size:.68rem;
-      font-weight:1000;
-      border:1px solid rgba(255,255,255,.07);
-      background:rgba(255,255,255,.035);
-      text-align:center;
+      min-height:58px;border-radius:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:3px;color:rgba(247,251,248,.72);font-size:.68rem;font-weight:1000;
+      border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);text-align:center;
     }
-
-    .navItem .ico{
-      font-size:1.18rem;
-      line-height:1;
-    }
-
-    .navItem.active{
-      color:#06140f;
-      background:linear-gradient(135deg,var(--gold),var(--green));
-      border-color:rgba(255,255,255,.18);
-    }
+    .navItem .ico{font-size:1.18rem;line-height:1}
+    .navItem.active{color:#06140f;background:linear-gradient(135deg,var(--gold),var(--green));border-color:rgba(255,255,255,.18)}
   </style>
 </head>
 
 <body>
 
-  <main class="card">
+<main class="card">
+  <div class="logo">🛒</div>
+  <h1>Comptoir déplacé</h1>
+  <p>L’accueil MON COMMERCE est maintenant le comptoir simple. Tu vas être ramené vers la bonne porte.</p>
 
-    <div class="logo">🛒</div>
+  <div class="actions">
+    <a class="btn primary" id="goIndex" href="./index.html">🏠 Ouvrir le comptoir</a>
+    <a class="btn green" id="goCaisse" href="./caisse.html">💰 Encaisser</a>
+    <a class="btn ghost" id="goArticles" href="./admin.html#articleList">📦 Articles</a>
+    <a class="btn ghost" id="goProfile" href="./profile.html">🏪 Régler ma fiche</a>
+    <a class="btn ghost" id="goAstouFiche" href="./fiche-astou.html">🛍️ Voir la fiche Astou</a>
+    <a class="btn ghost" id="goQr" href="./qr.html">🔳 Mon QR boutique</a>
+  </div>
 
-    <h1>Comptoir déplacé</h1>
+  <div class="note">Ancien lien gardé pour compatibilité. Pas de double accueil, pas de bruit.</div>
+</main>
 
-    <p>
-      L’accueil MON COMMERCE est maintenant le comptoir simple.
-      Tu vas être ramené vers la bonne porte.
-    </p>
-
-    <div class="actions">
-
-      <a class="btn primary" id="goIndex" href="./index.html">
-        🏠 Ouvrir le comptoir
-      </a>
-
-      <a class="btn green" id="goCaisse" href="./caisse.html">
-        💰 Encaisser
-      </a>
-
-      <a class="btn ghost" id="goArticles" href="./admin.html#articleList">
-        📦 Articles
-      </a>
-
-      <a class="btn ghost" id="goProfile" href="./profile.html">
-        🏪 Régler ma fiche
-      </a>
-
-      <a class="btn ghost" id="goFichePublique" href="./fiche.html">
-        🌍 Voir la fiche publique
-      </a>
-
-      <a class="btn ghost" id="goQr" href="./qr.html">
-        🔳 Mon QR boutique
-      </a>
-
-    </div>
-
-    <div class="note">
-      Ancien lien gardé pour compatibilité. Pas de double accueil, pas de bruit.
-    </div>
-
-  </main>
-
-  <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
-
-    <div class="bottomInner">
-
-      <a class="navItem active" href="./index.html">
-        <span class="ico">🏠</span>
-        <span>Accueil</span>
-      </a>
-
-      <a class="navItem" href="./caisse.html">
-        <span class="ico">💰</span>
-        <span>Caisse</span>
-      </a>
-
-      <a class="navItem" href="./admin.html#articleList">
-        <span class="ico">📦</span>
-        <span>Articles</span>
-      </a>
-
-      <a class="navItem" href="./profile.html">
-        <span class="ico">🏪</span>
-        <span>Réglage</span>
-      </a>
-
-      <a class="navItem" href="./fiche.html">
-        <span class="ico">🌍</span>
-        <span>Public</span>
-      </a>
-
-      <a class="navItem" href="./qr.html">
-        <span class="ico">🔳</span>
-        <span>QR</span>
-      </a>
-
-    </div>
-
-  </nav>
+<nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+  <div class="bottomInner">
+    <a class="navItem active" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
+    <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
+    <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
+    <a class="navItem" href="./profile.html"><span class="ico">🏪</span><span>Réglage</span></a>
+    <a class="navItem" href="./fiche-astou.html"><span class="ico">🛍️</span><span>Astou</span></a>
+    <a class="navItem" href="./qr.html"><span class="ico">🔳</span><span>QR</span></a>
+  </div>
+</nav>
 
 <script>
 (function(){
-
   "use strict";
 
   const SENSITIVE = [
@@ -279,44 +111,18 @@
     "pin","pin4","token","session_token","module"
   ];
 
-  const SLUG_KEYS = [
-    "digiy_pos_slug",
-    "digiy_pos_last_slug"
-  ];
-
-  const PHONE_KEYS = [
-    "digiy_pos_phone",
-    "digiy_pos_last_phone"
-  ];
-
-  const FORBIDDEN_SLUG_PREFIXES = [
-    "loc-",
-    "explore-",
-    "driver-",
-    "market-",
-    "build-",
-    "jobs-",
-    "resa-",
-    "pay-"
-  ];
-
-  const ALLOWED_SLUG_PREFIXES = [
-    "pos-",
-    "commerce-",
-    "mon-commerce-",
-    "caisse-"
-  ];
+  const SLUG_KEYS = ["digiy_pos_slug","digiy_pos_last_slug"];
+  const PHONE_KEYS = ["digiy_pos_phone","digiy_pos_last_phone"];
+  const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
+  const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
 
   function normPhone(v){
-    return String(v || "")
-      .replace(/[^\d]/g,"")
-      .slice(0,15);
+    return String(v || "").replace(/[^\d]/g,"").slice(0,15);
   }
 
   function normSlug(v){
     return String(v || "")
-      .trim()
-      .toLowerCase()
+      .trim().toLowerCase()
       .replace(/\s+/g,"-")
       .replace(/[^a-z0-9-]/g,"")
       .replace(/-+/g,"-")
@@ -324,28 +130,17 @@
   }
 
   function isPosSlug(v){
-
     const s = normSlug(v);
-
     if(!s) return false;
-
-    if(FORBIDDEN_SLUG_PREFIXES.some(p => s.startsWith(p))){
-      return false;
-    }
-
+    if(FORBIDDEN_SLUG_PREFIXES.some(p => s.startsWith(p))) return false;
     return ALLOWED_SLUG_PREFIXES.some(p => s.startsWith(p));
   }
 
   function rememberThenClean(){
-
     try{
-
       const u = new URL(location.href);
 
-      const slug = normSlug(
-        u.searchParams.get("slug") || ""
-      );
-
+      const slug = normSlug(u.searchParams.get("slug") || "");
       const phone = normPhone(
         u.searchParams.get("phone") ||
         u.searchParams.get("tel") ||
@@ -355,69 +150,45 @@
       );
 
       if(slug && isPosSlug(slug)){
-
         SLUG_KEYS.forEach(k => {
-
           try{
             sessionStorage.setItem(k,slug);
             localStorage.setItem(k,slug);
           }catch(_){}
-
         });
       }
 
       if(phone){
-
         PHONE_KEYS.forEach(k => {
-
-          try{
-            sessionStorage.setItem(k,phone);
-          }catch(_){}
-
+          try{ sessionStorage.setItem(k,phone); }catch(_){}
         });
       }
 
       let changed = false;
 
       SENSITIVE.concat(["slug"]).forEach(k => {
-
         if(u.searchParams.has(k)){
           u.searchParams.delete(k);
           changed = true;
         }
-
       });
 
       if(changed){
-
-        history.replaceState(
-          {},
-          document.title,
-          u.pathname + u.search + u.hash
-        );
+        history.replaceState({},document.title,u.pathname + u.search + u.hash);
       }
-
     }catch(_){}
   }
 
   function go(){
-
     const target = "./index.html";
-
     setTimeout(function(){
-
-      try{
-        location.replace(target);
-      }catch(_){
-        location.href = target;
-      }
-
+      try{ location.replace(target); }
+      catch(_){ location.href = target; }
     },900);
   }
 
   rememberThenClean();
   go();
-
 })();
 </script>
 
