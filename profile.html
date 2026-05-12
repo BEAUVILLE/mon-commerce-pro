@@ -1,41 +1,633 @@
-<!-- À coller dans profile.html après le champ bio -->
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#06140f"/>
+  <title>MON COMMERCE — Ma fiche</title>
 
-<div class="field">
-  <label>Liens utiles visibles sur la fiche publique</label>
-  <div class="hint">
-    TikTok, Google Maps, Instagram, catalogue, menu, site web… Colle seulement des liens https://
+  <script>
+    window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
+    window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
+    window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
+    window.DIGIY_MODULE = "POS";
+    window.DIGIY_LOGIN_URL = "./pin.html";
+    document.documentElement.style.visibility = "hidden";
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./guard.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --bg:#04110d;--text:#f7fbf8;--muted:#b8cfc4;--gold:#facc15;--gold2:#f59e0b;
+      --green:#22c55e;--line:rgba(255,255,255,.12);--shadow:0 22px 58px rgba(0,0,0,.34);
+      --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--bottom:88px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;min-height:100%}
+    body{
+      min-height:100dvh;font-family:var(--font);color:var(--text);
+      background:radial-gradient(900px 520px at 0% -10%,rgba(250,204,21,.12),transparent 58%),
+      radial-gradient(820px 480px at 100% 0%,rgba(34,197,94,.13),transparent 58%),
+      linear-gradient(180deg,#06140f,var(--bg));
+      padding:12px 12px calc(var(--bottom) + env(safe-area-inset-bottom,0px) + 16px);
+    }
+    a{color:inherit;text-decoration:none}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+    .app{display:none}
+    html.ready .app{display:block}
+    .wrap{max-width:900px;margin:0 auto}
+    .top,.card{
+      border:1px solid var(--line);border-radius:28px;
+      background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.035));
+      box-shadow:var(--shadow);padding:14px;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:54px;height:54px;border-radius:20px;display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));color:#06140f;font-size:27px;font-weight:1000;
+    }
+    h1{margin:0;font-size:clamp(1.75rem,6vw,2.6rem);line-height:.96;letter-spacing:-.04em;font-weight:1000}
+    h2{margin:0;font-size:1.35rem;line-height:1.1;font-weight:1000}
+    .sub,.desc,.hint{color:var(--muted);font-weight:850;line-height:1.45}
+    .sub{margin-top:7px;font-size:1rem}
+    .desc{margin:7px 0 0;font-size:.92rem}
+    .hint{font-size:.80rem}
+    .status{
+      margin-top:12px;border:1px solid rgba(255,255,255,.11);border-radius:22px;
+      background:rgba(0,0,0,.14);padding:12px;color:var(--muted);line-height:1.45;font-size:.95rem;font-weight:850;
+    }
+    .status.ok{border-color:rgba(34,197,94,.28);background:rgba(34,197,94,.10);color:#bbf7d0}
+    .status.err{border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.10);color:#fecaca}
+    .status.warn{border-color:rgba(250,204,21,.28);background:rgba(250,204,21,.10);color:#fde68a}
+    .quick{margin-top:12px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    .quick a,.quick button,.btn{
+      min-height:54px;border-radius:18px;border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.045);color:var(--text);display:flex;align-items:center;justify-content:center;
+      gap:7px;padding:10px;font-weight:1000;text-align:center;
+    }
+    .quick .primary,.btn.primary{border:none;color:#06140f;background:linear-gradient(135deg,var(--gold),var(--gold2))}
+    .btn.green{border:none;color:#06140f;background:linear-gradient(135deg,#22c55e,#16a34a)}
+    .btn.blue{color:#bae6fd;background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.25)}
+    .grid{margin-top:12px;display:grid;grid-template-columns:1fr .9fr;gap:12px;align-items:start}
+    .formGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .field{display:grid;gap:7px;margin-top:12px}
+    label{color:#eafff1;font-weight:1000;font-size:.95rem}
+    input,textarea,select{
+      width:100%;min-height:56px;border-radius:18px;border:1px solid rgba(255,255,255,.13);
+      background:rgba(255,255,255,.05);color:var(--text);outline:none;padding:12px 14px;font-size:1.02rem;font-weight:900;
+    }
+    textarea{min-height:110px;line-height:1.5;resize:vertical}
+    input::placeholder,textarea::placeholder{color:rgba(184,207,196,.64)}
+    .actions{display:grid;grid-template-columns:1.2fr .8fr;gap:10px;margin-top:14px}
+    .preview{position:sticky;top:12px;overflow:hidden}
+    .phoneCard{border-radius:28px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,#102217,#07140f);overflow:hidden;box-shadow:var(--shadow)}
+    .cover{height:235px;background:radial-gradient(500px 220px at 80% 0%,rgba(250,204,21,.22),transparent 58%),linear-gradient(135deg,#12301f,#07140f);position:relative}
+    .cover img{width:100%;height:100%;object-fit:cover;display:none}
+    .cover img.show{display:block}
+    .coverText{position:absolute;left:14px;right:14px;bottom:14px}
+    .previewName{font-size:1.65rem;line-height:1.05;font-weight:1000;color:#fff}
+    .previewMeta{margin-top:7px;display:flex;flex-wrap:wrap;gap:7px}
+    .tag{padding:6px 9px;border-radius:999px;background:rgba(0,0,0,.36);border:1px solid rgba(255,255,255,.14);font-size:.76rem;font-weight:1000}
+    .previewBody{padding:14px;display:grid;gap:10px}
+    .pbox{border:1px solid rgba(255,255,255,.10);border-radius:18px;background:rgba(255,255,255,.045);padding:12px}
+    .pkey{color:#bbf7d0;font-size:.76rem;font-weight:1000;text-transform:uppercase;letter-spacing:.08em}
+    .pval{margin-top:7px;color:#f8fafc;line-height:1.5;font-weight:850;white-space:pre-wrap;word-break:break-word}
+    .bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:80;padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));background:rgba(3,18,13,.94);border-top:1px solid rgba(255,255,255,.10);backdrop-filter:blur(14px)}
+    .bottomInner{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+    .navItem{min-height:58px;border-radius:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:rgba(247,251,248,.72);font-size:.70rem;font-weight:1000;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);text-align:center}
+    .navItem .ico{font-size:1.20rem;line-height:1}
+    .navItem.active{color:#06140f;background:linear-gradient(135deg,var(--gold),var(--green))}
+    @media(max-width:820px){.grid{grid-template-columns:1fr}.preview{position:static}}
+    @media(max-width:620px){.quick{grid-template-columns:1fr 1fr}.formGrid,.actions{grid-template-columns:1fr}.card{border-radius:24px}.cover{height:215px}}
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">🏪</div>
+        <div>
+          <h1>Ma fiche commerce</h1>
+          <div class="sub">Ce que le client voit. Simple, clair, direct.</div>
+        </div>
+      </div>
+
+      <div class="status warn" id="statusBox">Vérification de l’accès…</div>
+
+      <div class="quick">
+        <a class="primary" href="#publicCard">🏪 Réglage</a>
+        <a href="./fiche.html">🌍 Public</a>
+        <a href="./qr.html">🔳 QR</a>
+        <button id="btnNotice" type="button">🎧 Notice</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card" id="publicCard">
+        <h2>Réglage client</h2>
+        <p class="desc">Remplis seulement ce qui aide le client à comprendre et te contacter.</p>
+
+        <div class="formGrid">
+          <div class="field">
+            <label for="display_name">Nom visible</label>
+            <input id="display_name" placeholder="Ex : Boutique Ndiaye"/>
+          </div>
+          <div class="field">
+            <label for="category">Famille</label>
+            <select id="category">
+              <option value="">Choisir</option>
+              <option value="Alimentation">Alimentation</option>
+              <option value="Boutique">Boutique</option>
+              <option value="Beauté">Beauté</option>
+              <option value="Mode">Mode</option>
+              <option value="Services">Services</option>
+              <option value="Pharmacie">Pharmacie</option>
+              <option value="Maison">Maison</option>
+              <option value="Autres">Autres</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="formGrid">
+          <div class="field">
+            <label for="city">Ville / zone</label>
+            <input id="city" placeholder="Ex : Saly, Dakar, Thiès"/>
+          </div>
+          <div class="field">
+            <label for="address">Repère</label>
+            <input id="address" placeholder="Ex : près de la pharmacie, route principale…"/>
+          </div>
+        </div>
+
+        <div class="formGrid">
+          <div class="field">
+            <label for="whatsapp">WhatsApp client</label>
+            <input id="whatsapp" inputmode="numeric" placeholder="Ex : 221771342889"/>
+          </div>
+          <div class="field">
+            <label for="hours">Horaires</label>
+            <input id="hours" placeholder="Ex : 8h - 22h"/>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="photo_url">Photo vitrine URL</label>
+          <input id="photo_url" placeholder="URL uniquement : https://...jpg"/>
+          <div class="hint">Pas d’envoi lourd. On colle seulement une URL publique.</div>
+        </div>
+
+        <div class="field">
+          <label for="bio">Description courte</label>
+          <textarea id="bio" placeholder="Ex : Boutique de quartier, produits maison, paiement direct, contact WhatsApp."></textarea>
+        </div>
+
+        <div class="field">
+          <label>Liens utiles visibles sur la fiche publique</label>
+          <div class="hint">TikTok, Google Maps, Instagram, catalogue, menu, site web… Colle seulement des liens https://</div>
+        </div>
+
+        <div class="formGrid">
+          <div class="field"><label for="url1">URL 1</label><input id="url1" placeholder="https://..."/></div>
+          <div class="field"><label for="url1_label">Nom du lien 1</label><input id="url1_label" placeholder="Ex : TikTok"/></div>
+        </div>
+
+        <div class="formGrid">
+          <div class="field"><label for="url2">URL 2</label><input id="url2" placeholder="https://..."/></div>
+          <div class="field"><label for="url2_label">Nom du lien 2</label><input id="url2_label" placeholder="Ex : Google Maps"/></div>
+        </div>
+
+        <div class="formGrid">
+          <div class="field"><label for="url3">URL 3</label><input id="url3" placeholder="https://..."/></div>
+          <div class="field"><label for="url3_label">Nom du lien 3</label><input id="url3_label" placeholder="Ex : Catalogue"/></div>
+        </div>
+
+        <div class="formGrid">
+          <div class="field">
+            <label for="badge">Badge</label>
+            <input id="badge" placeholder="Ex : ✅ Commerce équipé"/>
+          </div>
+          <div class="field">
+            <label for="is_published">Visibilité</label>
+            <select id="is_published">
+              <option value="true">Visible côté client</option>
+              <option value="false">Brouillon</option>
+            </select>
+          </div>
+        </div>
+
+        <details class="field">
+          <summary style="cursor:pointer;font-weight:1000;color:#fde68a">🧾 Infos internes</summary>
+          <div class="formGrid">
+            <div class="field"><label for="manager_name">Responsable</label><input id="manager_name" placeholder="Nom du responsable"/></div>
+            <div class="field"><label for="work_currency">Devise</label><select id="work_currency"><option value="XOF">FCFA</option><option value="EUR">EUR</option></select></div>
+          </div>
+          <div class="field"><label for="invoice_note">Mention ticket</label><textarea id="invoice_note" placeholder="Merci pour votre confiance."></textarea></div>
+        </details>
+
+        <div class="actions">
+          <button class="btn primary" id="btnSave" type="button">💾 Enregistrer</button>
+          <button class="btn blue" id="btnOpenPublic" type="button">👁️ Voir côté client</button>
+        </div>
+
+        <div class="status" id="saveBox">Prêt.</div>
+      </section>
+
+      <aside class="preview">
+        <div class="phoneCard">
+          <div class="cover">
+            <img id="pvImg" alt="Photo commerce"/>
+            <div class="coverText">
+              <div class="previewName" id="pvName">Nom commerce</div>
+              <div class="previewMeta">
+                <span class="tag" id="pvCat">Famille</span>
+                <span class="tag" id="pvCity">Ville</span>
+                <span class="tag" id="pvOpen">Visible</span>
+              </div>
+            </div>
+          </div>
+          <div class="previewBody">
+            <div class="pbox"><div class="pkey">Description</div><div class="pval" id="pvBio">La description apparaîtra ici.</div></div>
+            <div class="pbox"><div class="pkey">Contact</div><div class="pval" id="pvContact">WhatsApp à renseigner</div></div>
+            <div class="pbox"><div class="pkey">Repère</div><div class="pval" id="pvAddress">Adresse / horaires</div></div>
+            <div class="pbox"><div class="pkey">Liens utiles</div><div class="pval" id="pvLinks">Aucun lien ajouté.</div></div>
+          </div>
+        </div>
+      </aside>
+    </main>
   </div>
 </div>
 
-<div class="formGrid">
-  <div class="field">
-    <label for="url1">URL 1</label>
-    <input id="url1" placeholder="https://..."/>
+<nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+  <div class="bottomInner">
+    <a class="navItem" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
+    <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
+    <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
+    <a class="navItem active" href="./profile.html"><span class="ico">🏪</span><span>Réglage</span></a>
+    <a class="navItem" href="./fiche.html"><span class="ico">🌍</span><span>Public</span></a>
   </div>
-  <div class="field">
-    <label for="url1_label">Nom du lien 1</label>
-    <input id="url1_label" placeholder="Ex : TikTok"/>
-  </div>
-</div>
+</nav>
 
-<div class="formGrid">
-  <div class="field">
-    <label for="url2">URL 2</label>
-    <input id="url2" placeholder="https://..."/>
-  </div>
-  <div class="field">
-    <label for="url2_label">Nom du lien 2</label>
-    <input id="url2_label" placeholder="Ex : Google Maps"/>
-  </div>
-</div>
+<script>
+(function(){
+  "use strict";
 
-<div class="formGrid">
-  <div class="field">
-    <label for="url3">URL 3</label>
-    <input id="url3" placeholder="https://..."/>
-  </div>
-  <div class="field">
-    <label for="url3_label">Nom du lien 3</label>
-    <input id="url3_label" placeholder="Ex : Catalogue"/>
-  </div>
-</div>
+  const $ = (id)=>document.getElementById(id);
+  const SESSION_KEYS = ["DIGIY_POS_PIN_SESSION","DIGIY_POS_SESSION","DIGIY_PIN_SESSION","DIGIY_ACCESS","DIGIY_SESSION_POS","digiy_pos_session"];
+  const SLUG_KEYS = ["digiy_pos_slug","digiy_pos_last_slug"];
+  const PHONE_KEYS = ["digiy_pos_phone","digiy_pos_last_phone"];
+  const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
+  const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
+
+  let sb = null;
+  let slug = "";
+  let phone = "";
+
+  function reveal(){
+    document.documentElement.classList.add("ready");
+    document.documentElement.style.visibility = "";
+  }
+  setTimeout(reveal,1800);
+
+  function normPhone(v){return String(v||"").replace(/[^\d]/g,"").slice(0,15)}
+  function normSlug(v){return String(v||"").trim().toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"").replace(/-+/g,"-").replace(/^-|-$/g,"")}
+  function safe(v){return String(v||"").trim()}
+  function json(raw){try{return JSON.parse(raw)}catch(_){return null}}
+  function isPosSlug(v){
+    const s = normSlug(v);
+    if(!s) return false;
+    if(FORBIDDEN_SLUG_PREFIXES.some(p=>s.startsWith(p))) return false;
+    return ALLOWED_SLUG_PREFIXES.some(p=>s.startsWith(p));
+  }
+  function setStatus(id,msg,type){
+    const el=$(id); if(!el) return;
+    el.className="status " + (type||"warn");
+    el.textContent=msg||"";
+  }
+  function validUrl(v){
+    const raw=safe(v);
+    if(!raw) return true;
+    return /^https:\/\//i.test(raw);
+  }
+  function localFicheUrl(){
+    const qs = slug ? "?commerce=" + encodeURIComponent(slug) : "";
+    return "./fiche.html" + qs;
+  }
+
+  function cleanUrl(){
+    try{
+      const u = new URL(location.href);
+      let changed = false;
+      const qsSlug = normSlug(u.searchParams.get("slug")||u.searchParams.get("commerce")||"");
+      const qsPhone = normPhone(u.searchParams.get("phone")||u.searchParams.get("tel")||u.searchParams.get("owner_phone")||u.searchParams.get("p_phone")||"");
+
+      if(qsSlug && isPosSlug(qsSlug)){
+        slug = qsSlug;
+        SLUG_KEYS.forEach(k=>{try{sessionStorage.setItem(k,qsSlug);localStorage.setItem(k,qsSlug)}catch(_){}});
+      }
+      if(qsPhone){
+        phone = qsPhone;
+        PHONE_KEYS.forEach(k=>{try{sessionStorage.setItem(k,qsPhone)}catch(_){}});
+      }
+
+      ["slug","commerce","phone","tel","owner_phone","p_phone","pin","pin4","token","session_token","module"].forEach(k=>{
+        if(u.searchParams.has(k)){u.searchParams.delete(k);changed=true}
+      });
+
+      if(changed) history.replaceState({},document.title,u.pathname+u.search+u.hash);
+    }catch(_){}
+  }
+
+  function readStorage(){
+    for(const key of SESSION_KEYS){
+      const s = json(sessionStorage.getItem(key)||localStorage.getItem(key)||"");
+      if(!s || typeof s!=="object") continue;
+      const ss = normSlug(s.slug||"");
+      const pp = normPhone(s.phone||"");
+      if(ss && isPosSlug(ss)) slug = ss;
+      if(pp) phone = pp;
+      if(slug || phone) break;
+    }
+    if(!slug){
+      for(const k of SLUG_KEYS){
+        const v = normSlug(sessionStorage.getItem(k)||localStorage.getItem(k)||"");
+        if(v && isPosSlug(v)){slug=v;break}
+      }
+    }
+    if(!phone){
+      for(const k of PHONE_KEYS){
+        const v = normPhone(sessionStorage.getItem(k)||localStorage.getItem(k)||"");
+        if(v){phone=v;break}
+      }
+    }
+  }
+
+  async function bootGuard(){
+    try{
+      if(typeof window.DIGIY_GUARD?.ready === "function"){
+        try{await window.DIGIY_GUARD.ready({redirect:false,preserve_validation:true,allow_soft_session:true})}
+        catch(_){await window.DIGIY_GUARD.ready()}
+      }
+      const st = window.DIGIY_GUARD?.state || {};
+      const gs = normSlug(st.slug||"");
+      const gp = normPhone(st.phone||"");
+      if(gs && isPosSlug(gs)) slug = gs;
+      if(gp) phone = gp;
+    }catch(_){}
+  }
+
+  function getSb(){
+    if(sb) return sb;
+    if(window.DIGIY_GUARD?.getSb){
+      try{const g = window.DIGIY_GUARD.getSb(); if(g){sb=g;return sb}}catch(_){}
+    }
+    if(!window.supabase) return null;
+    sb = window.supabase.createClient(
+      window.DIGIY_SUPABASE_URL,
+      window.DIGIY_SUPABASE_ANON || window.DIGIY_SUPABASE_ANON_KEY,
+      {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}
+    );
+    return sb;
+  }
+
+  function data(){
+    return {
+      slug,
+      owner_phone: phone,
+      display_name: safe($("display_name").value),
+      shop_name: safe($("display_name").value),
+      category: safe($("category").value),
+      city: safe($("city").value),
+      address: safe($("address").value),
+      whatsapp: normPhone($("whatsapp").value),
+      hours: safe($("hours").value),
+      photo_url: safe($("photo_url").value),
+      bio: safe($("bio").value),
+      url1: safe($("url1").value),
+      url1_label: safe($("url1_label").value),
+      url2: safe($("url2").value),
+      url2_label: safe($("url2_label").value),
+      url3: safe($("url3").value),
+      url3_label: safe($("url3_label").value),
+      badge: safe($("badge").value) || "✅ Commerce équipé",
+      is_published: $("is_published").value === "true",
+      work_currency: $("work_currency").value || "XOF",
+      manager_name: safe($("manager_name").value),
+      invoice_note: safe($("invoice_note").value),
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  function dbPayload(d){
+    const copy = Object.assign({}, d);
+    delete copy.url1; delete copy.url1_label;
+    delete copy.url2; delete copy.url2_label;
+    delete copy.url3; delete copy.url3_label;
+    return copy;
+  }
+
+  function localKey(){return "DIGIY_POS_PROFILE_DRAFT:" + (slug || phone || "unknown")}
+
+  function apply(row){
+    if(!row) return;
+    $("display_name").value = row.display_name || row.shop_name || row.name || "";
+    $("category").value = row.category || "";
+    $("city").value = row.city || "";
+    $("address").value = row.address || row.address_label || "";
+    $("whatsapp").value = row.whatsapp || row.phone || row.owner_phone || "";
+    $("hours").value = row.hours || row.opening_hours || "";
+    $("photo_url").value = row.photo_url || row.image_url || "";
+    $("bio").value = row.bio || row.description || "";
+    $("url1").value = row.url1 || localStorage.getItem("digiy_pos_url_1") || "";
+    $("url1_label").value = row.url1_label || localStorage.getItem("digiy_pos_url_1_label") || "";
+    $("url2").value = row.url2 || localStorage.getItem("digiy_pos_url_2") || "";
+    $("url2_label").value = row.url2_label || localStorage.getItem("digiy_pos_url_2_label") || "";
+    $("url3").value = row.url3 || localStorage.getItem("digiy_pos_url_3") || "";
+    $("url3_label").value = row.url3_label || localStorage.getItem("digiy_pos_url_3_label") || "";
+    $("badge").value = row.badge || "✅ Commerce équipé";
+    $("is_published").value = row.is_published === false ? "false" : "true";
+    $("work_currency").value = row.work_currency || row.currency || "XOF";
+    $("manager_name").value = row.manager_name || "";
+    $("invoice_note").value = row.invoice_note || "";
+    render();
+  }
+
+  async function loadProfile(){
+    const S = getSb();
+    try{
+      const raw = localStorage.getItem(localKey());
+      if(raw) apply(JSON.parse(raw));
+    }catch(_){}
+
+    if(!S || !slug) return;
+
+    try{
+      const {data,error} = await S.from("digiy_pos_public_profiles").select("*").eq("slug",slug).maybeSingle();
+      if(!error && data){
+        apply(data);
+        setStatus("statusBox","Fiche chargée. Tu peux corriger puis enregistrer.","ok");
+      }
+    }catch(_){}
+  }
+
+  function saveLocalLinks(d){
+    try{
+      localStorage.setItem("digiy_pos_url_1", d.url1 || "");
+      localStorage.setItem("digiy_pos_url_1_label", d.url1_label || "");
+      localStorage.setItem("digiy_pos_link_1", d.url1 || "");
+      localStorage.setItem("digiy_pos_link_1_label", d.url1_label || "");
+
+      localStorage.setItem("digiy_pos_url_2", d.url2 || "");
+      localStorage.setItem("digiy_pos_url_2_label", d.url2_label || "");
+      localStorage.setItem("digiy_pos_link_2", d.url2 || "");
+      localStorage.setItem("digiy_pos_link_2_label", d.url2_label || "");
+
+      localStorage.setItem("digiy_pos_url_3", d.url3 || "");
+      localStorage.setItem("digiy_pos_url_3_label", d.url3_label || "");
+      localStorage.setItem("digiy_pos_link_3", d.url3 || "");
+      localStorage.setItem("digiy_pos_link_3_label", d.url3_label || "");
+
+      localStorage.setItem("digiy_pos_shop_name", d.display_name || "");
+      localStorage.setItem("digiy_pos_activity", d.category || "");
+      localStorage.setItem("digiy_pos_address", d.address || "");
+      localStorage.setItem("digiy_pos_hours", d.hours || "");
+      localStorage.setItem("digiy_pos_description", d.bio || "");
+      localStorage.setItem("digiy_pos_phone", d.whatsapp || phone || "");
+      localStorage.setItem("caisse_shop", d.display_name || "");
+    }catch(_){}
+  }
+
+  async function save(){
+    const d = data();
+
+    if(!d.display_name){setStatus("saveBox","Ajoute le nom visible du commerce.","err");$("display_name").focus();return}
+    if(!d.whatsapp){setStatus("saveBox","Ajoute le WhatsApp client.","err");$("whatsapp").focus();return}
+    if(d.photo_url && !validUrl(d.photo_url)){setStatus("saveBox","La photo doit être une URL publique https://","err");$("photo_url").focus();return}
+    if(!validUrl(d.url1) || !validUrl(d.url2) || !validUrl(d.url3)){setStatus("saveBox","Les liens utiles doivent commencer par https://","err");return}
+
+    try{localStorage.setItem(localKey(),JSON.stringify(d))}catch(_){}
+    saveLocalLinks(d);
+
+    const S = getSb();
+    if(S && slug){
+      try{
+        const {error} = await S.from("digiy_pos_public_profiles").upsert(dbPayload(d),{onConflict:"slug"});
+        if(!error){
+          setStatus("saveBox","Fiche enregistrée ✅ Liens gardés sur l’appareil.","ok");
+          return;
+        }
+      }catch(_){}
+    }
+
+    setStatus("saveBox","Fiche gardée sur cet appareil ✅","ok");
+  }
+
+  function render(){
+    const name = safe($("display_name").value) || "Nom commerce";
+    const cat = safe($("category").value) || "Famille";
+    const city = safe($("city").value) || "Ville";
+    const whatsapp = normPhone($("whatsapp").value);
+    const address = safe($("address").value);
+    const hours = safe($("hours").value);
+    const bio = safe($("bio").value) || "La description apparaîtra ici.";
+    const published = $("is_published").value === "true";
+    const links = [
+      safe($("url1_label").value) || safe($("url1").value),
+      safe($("url2_label").value) || safe($("url2").value),
+      safe($("url3_label").value) || safe($("url3").value)
+    ].filter(Boolean);
+
+    $("pvName").textContent = name;
+    $("pvCat").textContent = cat;
+    $("pvCity").textContent = city;
+    $("pvOpen").textContent = published ? "Visible" : "Brouillon";
+    $("pvBio").textContent = bio;
+    $("pvContact").textContent = whatsapp ? "WhatsApp direct : compte reconnu" : "WhatsApp à renseigner";
+    $("pvAddress").textContent = [address,hours].filter(Boolean).join("\n") || "Adresse / horaires";
+    $("pvLinks").textContent = links.length ? links.join("\n") : "Aucun lien ajouté.";
+
+    const url = safe($("photo_url").value);
+    const img = $("pvImg");
+    if(url && /^https:\/\//i.test(url)){
+      img.onload = ()=>img.classList.add("show");
+      img.onerror = ()=>img.classList.remove("show");
+      img.src = url;
+    }else{
+      img.classList.remove("show");
+      img.removeAttribute("src");
+    }
+  }
+
+  function openPublic(){
+    window.open(localFicheUrl(),"_blank","noopener,noreferrer");
+  }
+
+  function setupNotice(){
+    const btn = $("btnNotice");
+    if(!btn || !("speechSynthesis" in window)) return;
+    const TEXT = "Ma fiche commerce. Remplis le nom visible, WhatsApp, adresse, horaires, description et liens utiles. Puis enregistre. Le client doit comprendre vite et contacter directement.";
+    let speaking = false;
+    function stop(){try{speechSynthesis.cancel()}catch(_){} speaking=false; btn.textContent="🎧 Notice"}
+    function speak(){
+      stop();
+      const u = new SpeechSynthesisUtterance(TEXT);
+      u.lang="fr-FR";u.rate=.86;u.pitch=1;
+      const fr=(speechSynthesis.getVoices()||[]).find(v=>/^fr/i.test(v.lang));
+      if(fr) u.voice=fr;
+      u.onstart=()=>{speaking=true;btn.textContent="⏹ Stop"};
+      u.onend=stop;u.onerror=stop;
+      setTimeout(()=>{try{speechSynthesis.speak(u)}catch(_){stop()}},80);
+    }
+    btn.addEventListener("click",()=>speaking?stop():speak());
+    window.addEventListener("beforeunload",stop);
+  }
+
+  function bind(){
+    [
+      "display_name","category","city","address","whatsapp","hours","photo_url","bio",
+      "url1","url1_label","url2","url2_label","url3","url3_label",
+      "badge","is_published","work_currency","manager_name","invoice_note"
+    ].forEach(id=>{
+      const el=$(id);
+      if(!el) return;
+      const evt = el.tagName === "SELECT" ? "change" : "input";
+      el.addEventListener(evt,render);
+    });
+
+    $("btnSave").addEventListener("click",save);
+    $("btnOpenPublic").addEventListener("click",openPublic);
+    setupNotice();
+  }
+
+  async function init(){
+    cleanUrl();
+    bind();
+    await bootGuard();
+    readStorage();
+
+    if(!slug && !phone){
+      setStatus("statusBox","Compte non reconnu. Passe par ton code d’accès.","err");
+      setTimeout(()=>{ location.href="./pin.html"; },900);
+      reveal();
+      return;
+    }
+
+    setStatus("statusBox","Compte reconnu. Les identifiants restent cachés.","ok");
+    await loadProfile();
+    render();
+    reveal();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
