@@ -407,7 +407,7 @@
 
       <div class="quick">
         <a class="primary" href="#publicCard">🏪 Réglage</a>
-        <a href="./fiche-astou.html">🛍️ Astou</a>
+        <a href="https://mon-commerce.digiylyfe.com/fiche-astou.html" target="_blank" rel="noopener">🛍️ Astou</a>
         <a href="./qr.html">🔳 QR</a>
         <button id="btnNotice" type="button">🎧 Notice</button>
       </div>
@@ -495,32 +495,32 @@
         <div class="formGrid">
           <div class="field">
             <label for="url2">URL 2</label>
-            <input id="url2" placeholder="https://..."/>
+            <input id="url2" placeholder="https://astou-boutique.digiylyfe.com/"/>
           </div>
 
           <div class="field">
             <label for="url2_label">Nom du lien 2</label>
-            <input id="url2_label" placeholder="Ex : Google Maps"/>
+            <input id="url2_label" placeholder="Ex : Vitrine Net"/>
           </div>
         </div>
 
         <div class="formGrid">
           <div class="field">
             <label for="url3">URL 3</label>
-            <input id="url3" placeholder="https://..."/>
+            <input id="url3" placeholder="https://market.digiylyfe.com/?commerce=astou-boutique"/>
           </div>
 
           <div class="field">
             <label for="url3_label">Nom du lien 3</label>
-            <input id="url3_label" placeholder="Ex : Catalogue"/>
+            <input id="url3_label" placeholder="Ex : Entrée Boutique"/>
           </div>
         </div>
 
         <div class="field">
           <label>QR visible sur la fiche Astou</label>
           <div class="hint">
-            Le QR doit ouvrir la fiche publique, pas le domaine PRO.
-            Cible correcte : <strong>mon-commerce.digiylyfe.com</strong>.
+            Le QR doit ouvrir la fiche publique, jamais le domaine PRO.
+            Le code force automatiquement <strong>mon-commerce.digiylyfe.com</strong>.
           </div>
         </div>
 
@@ -638,7 +638,7 @@
     <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
     <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
     <a class="navItem active" href="./profile.html"><span class="ico">🏪</span><span>Réglage</span></a>
-    <a class="navItem" href="./fiche-astou.html"><span class="ico">🛍️</span><span>Astou</span></a>
+    <a class="navItem" href="https://mon-commerce.digiylyfe.com/fiche-astou.html" target="_blank" rel="noopener"><span class="ico">🛍️</span><span>Astou</span></a>
   </div>
 </nav>
 
@@ -705,6 +705,39 @@
     catch(_){return ""}
   }
 
+  function forcePublicUrl(v){
+    const raw = safe(v);
+    if(!raw) return ASTOU_PUBLIC;
+
+    return raw
+      .replace(/https?:\/\/mon-commerce-pro\.digiylyfe\.com\/fiche-astou\.html/gi, ASTOU_PUBLIC)
+      .replace(/mon-commerce-pro\.digiylyfe\.com/gi, "mon-commerce.digiylyfe.com");
+  }
+
+  function forceQrImage(v){
+    const raw = safe(v);
+    if(!raw) return ASTOU_QR_IMAGE;
+
+    return raw
+      .replace(/mon-commerce-pro\.digiylyfe\.com/gi, "mon-commerce.digiylyfe.com")
+      .replace(/mon-commerce-pro\.digiylyfe\.com/gi, "mon-commerce.digiylyfe.com");
+  }
+
+  function cleanOldStorage(){
+    try{
+      const oldTarget = storageGet("digiy_pos_qr_target_url");
+      const oldImage = storageGet("digiy_pos_qr_image_url");
+
+      if(oldTarget && /mon-commerce-pro\.digiylyfe\.com/i.test(oldTarget)){
+        localStorage.setItem("digiy_pos_qr_target_url",forcePublicUrl(oldTarget));
+      }
+
+      if(oldImage && /mon-commerce-pro\.digiylyfe\.com/i.test(oldImage)){
+        localStorage.setItem("digiy_pos_qr_image_url",forceQrImage(oldImage));
+      }
+    }catch(_){}
+  }
+
   function isPosSlug(v){
     const s = normSlug(v);
     if(!s) return false;
@@ -732,8 +765,9 @@
   }
 
   function localFicheUrl(){
-  return "https://mon-commerce.digiylyfe.com/fiche-astou.html";
-}
+    return ASTOU_PUBLIC;
+  }
+
   function cleanUrl(){
     try{
       const u = new URL(location.href);
@@ -888,8 +922,8 @@
       url3: safe($("url3").value),
       url3_label: safe($("url3_label").value),
 
-      qr_target_url: safe($("qr_target_url").value) || ASTOU_PUBLIC,
-      qr_image_url: safe($("qr_image_url").value) || ASTOU_QR_IMAGE,
+      qr_target_url: forcePublicUrl($("qr_target_url").value),
+      qr_image_url: forceQrImage($("qr_image_url").value),
 
       badge: safe($("badge").value) || "✅ Commerce équipé",
       is_published: $("is_published").value === "true",
@@ -938,15 +972,17 @@
     $("url3").value = row.url3 || storageGet("digiy_pos_url_3") || "";
     $("url3_label").value = row.url3_label || storageGet("digiy_pos_url_3_label") || "";
 
-    $("qr_target_url").value =
+    $("qr_target_url").value = forcePublicUrl(
       row.qr_target_url ||
       storageGet("digiy_pos_qr_target_url") ||
-      ASTOU_PUBLIC;
+      ASTOU_PUBLIC
+    );
 
-    $("qr_image_url").value =
+    $("qr_image_url").value = forceQrImage(
       row.qr_image_url ||
       storageGet("digiy_pos_qr_image_url") ||
-      ASTOU_QR_IMAGE;
+      ASTOU_QR_IMAGE
+    );
 
     $("badge").value = row.badge || "✅ Commerce équipé";
     $("is_published").value = row.is_published === false ? "false" : "true";
@@ -1002,8 +1038,8 @@
       localStorage.setItem("digiy_pos_link_3", d.url3 || "");
       localStorage.setItem("digiy_pos_link_3_label", d.url3_label || "");
 
-      localStorage.setItem("digiy_pos_qr_target_url", d.qr_target_url || ASTOU_PUBLIC);
-      localStorage.setItem("digiy_pos_qr_image_url", d.qr_image_url || ASTOU_QR_IMAGE);
+      localStorage.setItem("digiy_pos_qr_target_url", forcePublicUrl(d.qr_target_url));
+      localStorage.setItem("digiy_pos_qr_image_url", forceQrImage(d.qr_image_url));
 
       localStorage.setItem("digiy_pos_shop_name", d.display_name || "");
       localStorage.setItem("digiy_pos_activity", d.category || "");
@@ -1017,6 +1053,9 @@
 
   async function save(){
     const d = data();
+
+    $("qr_target_url").value = d.qr_target_url;
+    $("qr_image_url").value = d.qr_image_url;
 
     if(!d.display_name){
       setStatus("saveBox","Ajoute le nom visible du commerce.","err");
@@ -1095,8 +1134,8 @@
       safe($("url3_label").value) || safe($("url3").value)
     ].filter(Boolean);
 
-    const qrTarget = safe($("qr_target_url").value) || ASTOU_PUBLIC;
-    const qrImage = safe($("qr_image_url").value) || ASTOU_QR_IMAGE;
+    const qrTarget = forcePublicUrl($("qr_target_url").value);
+    const qrImage = forceQrImage($("qr_image_url").value);
 
     $("pvName").textContent = name;
     $("pvCat").textContent = cat;
@@ -1202,6 +1241,7 @@
   }
 
   async function init(){
+    cleanOldStorage();
     cleanUrl();
     bind();
 
@@ -1221,13 +1261,8 @@
 
     await loadProfile();
 
-    if(!$("qr_target_url").value){
-      $("qr_target_url").value = ASTOU_PUBLIC;
-    }
-
-    if(!$("qr_image_url").value){
-      $("qr_image_url").value = ASTOU_QR_IMAGE;
-    }
+    $("qr_target_url").value = forcePublicUrl($("qr_target_url").value || ASTOU_PUBLIC);
+    $("qr_image_url").value = forceQrImage($("qr_image_url").value || ASTOU_QR_IMAGE);
 
     render();
     reveal();
