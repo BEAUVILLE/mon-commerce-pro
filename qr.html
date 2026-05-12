@@ -269,7 +269,7 @@
 (function(){
   "use strict";
 
- const TARGET = location.origin + location.pathname.replace(/qr\.html$/i, "fiche-astou.html");
+  const TARGET = "https://mon-commerce.digiylyfe.com/fiche-astou.html";
   const $ = (id)=>document.getElementById(id);
 
   function setStatus(msg,type){
@@ -296,7 +296,8 @@
             }
           }
         );
-        setStatus("QR prêt vers fiche-astou.html ✅","ok");
+
+        setStatus("QR prêt vers la fiche publique Astou ✅","ok");
         return;
       }catch(err){
         console.error(err);
@@ -316,7 +317,7 @@
       img.onload = function(){
         ctx.clearRect(0,0,320,320);
         ctx.drawImage(img,0,0,320,320);
-        setStatus("QR prêt vers fiche-astou.html ✅","ok");
+        setStatus("QR prêt vers la fiche publique Astou ✅","ok");
       };
 
       img.onerror = function(){
