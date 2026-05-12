@@ -519,20 +519,20 @@
         <div class="field">
           <label>QR visible sur la fiche Astou</label>
           <div class="hint">
-            Pour éviter les blocages externes, le plus solide est de poser une image locale dans le dépôt :
-            <strong>qr-astou.png</strong>.
+            Le QR doit ouvrir la fiche publique, pas le domaine PRO.
+            Cible correcte : <strong>mon-commerce.digiylyfe.com</strong>.
           </div>
         </div>
 
         <div class="formGrid">
           <div class="field">
             <label for="qr_target_url">Lien ouvert par le QR</label>
-            <input id="qr_target_url" placeholder="https://mon-commerce-pro.digiylyfe.com/fiche-astou.html"/>
+            <input id="qr_target_url" placeholder="https://mon-commerce.digiylyfe.com/fiche-astou.html"/>
           </div>
 
           <div class="field">
             <label for="qr_image_url">Image QR URL</label>
-            <input id="qr_image_url" placeholder="./qr-astou.png"/>
+            <input id="qr_image_url" placeholder="https://quickchart.io/qr?size=280&text=https%3A%2F%2Fmon-commerce.digiylyfe.com%2Ffiche-astou.html"/>
           </div>
         </div>
 
@@ -663,8 +663,8 @@
   const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
   const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
 
-  const ASTOU_PUBLIC = "https://mon-commerce-pro.digiylyfe.com/fiche-astou.html";
-  const ASTOU_QR_IMAGE = "./qr-astou.png";
+  const ASTOU_PUBLIC = "https://mon-commerce.digiylyfe.com/fiche-astou.html";
+  const ASTOU_QR_IMAGE = "https://quickchart.io/qr?size=280&text=https%3A%2F%2Fmon-commerce.digiylyfe.com%2Ffiche-astou.html";
 
   let sb = null;
   let slug = "";
@@ -1049,7 +1049,7 @@
     }
 
     if(d.qr_image_url && !validImagePath(d.qr_image_url)){
-      setStatus("saveBox","L’image QR doit être ./qr-astou.png ou une URL https://","err");
+      setStatus("saveBox","L’image QR doit être une URL https://, ./qr-astou.png ou /qr-astou.png","err");
       $("qr_image_url").focus();
       return;
     }
@@ -1069,14 +1069,14 @@
           .upsert(dbPayload(d),{onConflict:"slug"});
 
         if(!error){
-          setStatus("saveBox","Fiche enregistrée ✅ QR gardé sur l’appareil.","ok");
+          setStatus("saveBox","Fiche enregistrée ✅ QR public gardé sur l’appareil.","ok");
           render();
           return;
         }
       }catch(_){}
     }
 
-    setStatus("saveBox","Fiche gardée sur cet appareil ✅ QR instruit.","ok");
+    setStatus("saveBox","Fiche gardée sur cet appareil ✅ QR public instruit.","ok");
     render();
   }
 
@@ -1143,7 +1143,7 @@
 
     if(!btn || !("speechSynthesis" in window)) return;
 
-    const TEXT = "Ma fiche commerce. Remplis le nom visible, WhatsApp, adresse, horaires, description, liens utiles et QR. Puis enregistre. La fiche Astou reste publique, légère, et le client contacte directement.";
+    const TEXT = "Ma fiche commerce. Remplis le nom visible, WhatsApp, adresse, horaires, description, liens utiles et QR public. Puis enregistre. La fiche Astou reste publique, légère, et le client contacte directement.";
 
     let speaking = false;
 
