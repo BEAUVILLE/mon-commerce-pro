@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#06140f"/>
   <title>MON COMMERCE — Mon QR</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — QR boutique pour ouvrir le comptoir, le code d’accès ou la fiche côté client."/>
 
   <script>
     window.DIGIY_MODULE = "POS";
@@ -27,7 +26,6 @@
       --gold2:#f59e0b;
       --green:#22c55e;
       --blue:#38bdf8;
-      --red:#ef4444;
       --line:rgba(255,255,255,.12);
       --shadow:0 22px 62px rgba(0,0,0,.38);
       --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -67,7 +65,6 @@
       background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.035));
       box-shadow:var(--shadow);
       padding:16px;
-      overflow:hidden;
     }
 
     .brand{
@@ -86,8 +83,6 @@
       color:#06140f;
       font-size:29px;
       font-weight:1000;
-      box-shadow:0 16px 34px rgba(250,204,21,.20);
-      flex:0 0 auto;
     }
 
     h1{
@@ -108,25 +103,25 @@
 
     .notice{
       margin-top:12px;
-      border:1px solid rgba(250,204,21,.25);
-      background:rgba(250,204,21,.08);
-      color:#fde68a;
       border-radius:20px;
       padding:12px;
       line-height:1.45;
       font-size:.92rem;
       font-weight:850;
+      background:rgba(250,204,21,.08);
+      border:1px solid rgba(250,204,21,.25);
+      color:#fde68a;
     }
 
     .notice.ok{
-      border-color:rgba(34,197,94,.28);
       background:rgba(34,197,94,.10);
+      border-color:rgba(34,197,94,.28);
       color:#bbf7d0;
     }
 
     .notice.err{
-      border-color:rgba(239,68,68,.28);
       background:rgba(239,68,68,.10);
+      border-color:rgba(239,68,68,.28);
       color:#fecaca;
     }
 
@@ -160,20 +155,6 @@
       font-weight:900;
     }
 
-    input::placeholder{color:rgba(184,207,196,.64)}
-
-    input:focus,select:focus{
-      border-color:rgba(250,204,21,.55);
-      box-shadow:0 0 0 4px rgba(250,204,21,.11);
-    }
-
-    .hint{
-      color:rgba(184,207,196,.76);
-      font-size:.80rem;
-      line-height:1.45;
-      font-weight:800;
-    }
-
     .actions{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -201,7 +182,6 @@
       border:none;
       color:#06140f;
       background:linear-gradient(135deg,var(--gold),var(--gold2));
-      box-shadow:0 14px 30px rgba(250,204,21,.17);
     }
 
     .btn.green{
@@ -226,42 +206,7 @@
       box-shadow:var(--shadow);
     }
 
-    .qrHead{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-      margin-bottom:14px;
-    }
-
-    .qrBrand{
-      font-size:.82rem;
-      font-weight:1000;
-      text-transform:uppercase;
-      letter-spacing:.10em;
-      color:#0f172a;
-    }
-
-    .qrSub{
-      margin-top:4px;
-      color:#475569;
-      font-size:.78rem;
-      font-weight:900;
-    }
-
-    .qrMark{
-      width:38px;
-      height:38px;
-      border-radius:14px;
-      display:grid;
-      place-items:center;
-      background:linear-gradient(135deg,#facc15,#22c55e);
-      color:#06140f;
-      font-weight:1000;
-    }
-
     .qrBox{
-      border:1px solid rgba(15,23,42,.10);
       border-radius:22px;
       padding:14px;
       display:flex;
@@ -280,8 +225,6 @@
       margin-top:14px;
       text-align:center;
       font-size:1.75rem;
-      line-height:1.05;
-      letter-spacing:-.04em;
       font-weight:1000;
       color:#0f172a;
     }
@@ -290,76 +233,19 @@
       margin-top:7px;
       text-align:center;
       font-size:.88rem;
-      line-height:1.4;
       color:#475569;
       font-weight:900;
     }
 
-    .qrNote{
-      margin-top:12px;
-      border:1px solid rgba(15,23,42,.08);
-      background:#f8fafc;
-      border-radius:18px;
-      padding:12px;
-      color:#334155;
-      text-align:center;
-      line-height:1.45;
-      font-size:.86rem;
-      font-weight:850;
-    }
-
     .urlBox{
       margin-top:12px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(0,0,0,.16);
       border-radius:18px;
       padding:12px;
+      background:rgba(0,0,0,.16);
       color:var(--muted);
-      line-height:1.45;
       font-size:.80rem;
       font-weight:800;
       word-break:break-all;
-    }
-
-    .bottomNav{
-      position:fixed;
-      left:0;right:0;bottom:0;
-      z-index:80;
-      padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));
-      background:rgba(3,18,13,.94);
-      border-top:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(14px);
-    }
-
-    .bottomInner{
-      max-width:760px;
-      margin:0 auto;
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:6px;
-    }
-
-    .navItem{
-      min-height:58px;
-      border-radius:17px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:3px;
-      color:rgba(247,251,248,.72);
-      font-size:.72rem;
-      font-weight:1000;
-      border:1px solid rgba(255,255,255,.07);
-      background:rgba(255,255,255,.035);
-      text-align:center;
-    }
-
-    .navItem .ico{font-size:1.25rem;line-height:1}
-    .navItem.active{
-      color:#06140f;
-      background:linear-gradient(135deg,var(--gold),var(--green));
-      border-color:rgba(255,255,255,.18);
     }
 
     @media(max-width:860px){
@@ -368,120 +254,96 @@
 
     @media(max-width:560px){
       .actions{grid-template-columns:1fr}
-      .wide{grid-column:auto}
-      .card{border-radius:24px}
-    }
-
-    @media print{
-      body{background:#fff;padding:0}
-      .card:first-child,.bottomNav,.urlBox{display:none!important}
-      .wrap{display:block;max-width:none;margin:0;padding:0}
-      .qrCard{box-shadow:none;border-radius:0;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <section class="card">
-      <div class="brand">
-        <div class="logo">🔳</div>
-        <div>
-          <h1>Mon QR boutique</h1>
-          <div class="sub">
-            Un QR pour ouvrir le comptoir, le code d’accès ou la fiche côté client.
-          </div>
+
+<div class="wrap">
+
+  <section class="card">
+
+    <div class="brand">
+      <div class="logo">🔳</div>
+
+      <div>
+        <h1>Mon QR boutique</h1>
+
+        <div class="sub">
+          QR public simple vers la fiche boutique.
         </div>
       </div>
-
-      <div class="notice" id="statusBox">
-        Prépare ton QR. Aucun téléphone n’est affiché.
-      </div>
-
-      <div class="form">
-        <div class="field">
-          <label for="shopName">Nom sur le QR</label>
-          <input id="shopName" placeholder="Ex : Boutique Ndiaye"/>
-          <div class="hint">Nom visible sur l’affiche QR.</div>
-        </div>
-
-        <div class="field">
-          <label for="slug">Identifiant boutique</label>
-          <input id="slug" placeholder="Reconnu automatiquement si possible"/>
-          <div class="hint">Ne mets pas le téléphone ici. Utilise l’identifiant boutique.</div>
-        </div>
-
-        <div class="field">
-          <label for="target">Destination</label>
-          <select id="target">
-            <option value="pin">Code d’accès</option>
-            <option value="counter">Comptoir</option>
-            <option value="public">Fiche côté client</option>
-          </select>
-          <div class="hint">Pour un commerçant, garde souvent “Code d’accès”.</div>
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn primary" id="btnGenerate" type="button">⚙️ Générer</button>
-        <button class="btn blue" id="btnCopy" type="button">📋 Copier lien</button>
-        <button class="btn green" id="btnOpen" type="button">🚪 Ouvrir</button>
-        <button class="btn" id="btnPrint" type="button">🖨️ Imprimer</button>
-        <button class="btn wide" id="btnDownload" type="button">🖼️ Télécharger PNG</button>
-      </div>
-
-      <div class="urlBox" id="urlBox">Lien : —</div>
-    </section>
-
-    <aside>
-      <div class="qrCard" id="qrCard">
-        <div class="qrHead">
-          <div>
-            <div class="qrBrand">MON COMMERCE</div>
-            <div class="qrSub">DIGIYLYFE · accès boutique</div>
-          </div>
-          <div class="qrMark">∞</div>
-        </div>
-
-        <div class="qrBox">
-          <canvas id="qrCanvas" width="320" height="320"></canvas>
-        </div>
-
-        <div class="qrTitle" id="qrTitle">MON COMMERCE</div>
-        <div class="qrInfo" id="qrInfo">Scanner pour ouvrir l’accès boutique.</div>
-        <div class="qrNote" id="qrNote">
-          Paiement direct · 0% commission · Le commerçant garde la main.
-        </div>
-      </div>
-    </aside>
-  </div>
-
-  <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
-    <div class="bottomInner">
-      <a class="navItem" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
-      <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
-      <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
-      <a class="navItem active" href="./qr.html"><span class="ico">🔳</span><span>QR</span></a>
     </div>
-  </nav>
+
+    <div class="notice" id="statusBox">
+      Prépare ton QR.
+    </div>
+
+    <div class="form">
+
+      <div class="field">
+        <label for="shopName">Nom boutique</label>
+        <input id="shopName" placeholder="Ex : Astou Boutique"/>
+      </div>
+
+      <div class="field">
+        <label for="slug">Identifiant boutique</label>
+        <input id="slug" placeholder="commerce-xxxx"/>
+      </div>
+
+    </div>
+
+    <div class="actions">
+
+      <button class="btn primary" id="btnGenerate">
+        ⚙️ Générer
+      </button>
+
+      <button class="btn blue" id="btnCopy">
+        📋 Copier lien
+      </button>
+
+      <button class="btn green" id="btnOpen">
+        🚪 Ouvrir
+      </button>
+
+      <button class="btn wide" id="btnPrint">
+        🖨️ Imprimer
+      </button>
+
+    </div>
+
+    <div class="urlBox" id="urlBox">
+      Lien : —
+    </div>
+
+  </section>
+
+  <aside class="qrCard">
+
+    <div class="qrBox">
+      <canvas id="qrCanvas" width="320" height="320"></canvas>
+    </div>
+
+    <div class="qrTitle" id="qrTitle">
+      MON COMMERCE
+    </div>
+
+    <div class="qrInfo">
+      Scanner pour ouvrir la fiche boutique.
+    </div>
+
+  </aside>
+
+</div>
 
 <script>
 (function(){
+
   "use strict";
 
-  const PUBLIC_BASE = "https://mon-commerce.digiylyfe.com";
-  const SLUG_KEYS = ["digiy_pos_slug","digiy_pos_last_slug"];
-  const PHONE_KEYS = ["digiy_pos_phone","digiy_pos_last_phone"];
-  const PROFILE_KEYS = ["DIGIY_POS_PROFILE_DRAFT","caisse_shop"];
-
-  const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
-  const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
-
   const $ = (id)=>document.getElementById(id);
-
-  function normPhone(v){
-    return String(v || "").replace(/[^\d]/g,"").slice(0,15);
-  }
 
   function normSlug(v){
     return String(v || "")
@@ -493,342 +355,183 @@
       .replace(/^-|-$/g,"");
   }
 
-  function isPosSlug(v){
-    const s = normSlug(v);
-    if(!s) return false;
-    if(FORBIDDEN_SLUG_PREFIXES.some(p => s.startsWith(p))) return false;
-    return ALLOWED_SLUG_PREFIXES.some(p => s.startsWith(p));
-  }
-
-  function safe(v){
-    return String(v || "").trim();
-  }
-
-  function storageGet(key){
-    try{
-      return sessionStorage.getItem(key) || localStorage.getItem(key) || "";
-    }catch(_){
-      return "";
-    }
-  }
-
-  function storageSet(key,value,localToo){
-    const v = String(value || "").trim();
-    if(!v) return;
-    try{ sessionStorage.setItem(key,v); }catch(_){}
-    if(localToo !== false){
-      try{ localStorage.setItem(key,v); }catch(_){}
-    }
-  }
-
-  function setStatus(msg,type){
-    const box = $("statusBox");
-    box.className = "notice " + (type || "");
-    box.textContent = msg || "";
-  }
-
-  function basePath(){
-    const parts = location.pathname.split("/").filter(Boolean);
-    const isGh = /\.github\.io$/i.test(location.hostname);
-    if(isGh && parts.length > 0) return "/" + parts[0] + "/";
-    return "/";
-  }
-
-  function localUrl(path){
-    const clean = String(path || "").replace(/^\/+/,"");
-    return location.origin + basePath() + clean;
-  }
-
-  function readUrlThenClean(){
-    try{
-      const u = new URL(location.href);
-
-      const slug = normSlug(
-        u.searchParams.get("slug") ||
-        u.searchParams.get("pos_slug") ||
-        u.searchParams.get("commerce") ||
-        ""
-      );
-
-      const phone = normPhone(
-        u.searchParams.get("phone") ||
-        u.searchParams.get("tel") ||
-        u.searchParams.get("owner_phone") ||
-        u.searchParams.get("p_phone") ||
-        ""
-      );
-
-      const name = safe(
-        u.searchParams.get("name") ||
-        u.searchParams.get("shop") ||
-        ""
-      );
-
-      if(slug && isPosSlug(slug)){
-        $("slug").value = slug;
-        SLUG_KEYS.forEach(k => storageSet(k,slug,true));
-      }
-
-      if(phone){
-        PHONE_KEYS.forEach(k => storageSet(k,phone,false));
-      }
-
-      if(name){
-        $("shopName").value = name;
-      }
-
-      let changed = false;
-
-      [
-        "slug","pos_slug","commerce","phone","tel","owner_phone","p_phone",
-        "pin","pin4","token","session_token","module","access","name","shop"
-      ].forEach(k=>{
-        if(u.searchParams.has(k)){
-          u.searchParams.delete(k);
-          changed = true;
-        }
-      });
-
-      if(changed){
-        history.replaceState({},document.title,u.pathname + u.search + u.hash);
-      }
-    }catch(_){}
-  }
-
-  function readStorage(){
-    if(!$("slug").value){
-      for(const k of SLUG_KEYS){
-        const v = normSlug(storageGet(k));
-        if(v && isPosSlug(v)){
-          $("slug").value = v;
-          break;
-        }
-      }
-    }
-
-    if(!$("shopName").value){
-      try{
-        const shop = storageGet("caisse_shop");
-        if(shop) $("shopName").value = shop;
-      }catch(_){}
-    }
-
-    if(!$("shopName").value){
-      $("shopName").value = "MON COMMERCE";
-    }
-  }
-
   function currentSlug(){
-    const s = normSlug($("slug").value);
-    return isPosSlug(s) ? s : "";
+    return normSlug($("slug").value);
   }
 
   function currentName(){
-    return safe($("shopName").value) || "MON COMMERCE";
+    return $("shopName").value.trim() || "MON COMMERCE";
+  }
+
+  function localUrl(path){
+    return location.origin + location.pathname.replace("qr.html", path);
   }
 
   function buildTarget(){
+
     const slug = currentSlug();
-    const mode = $("target").value;
 
-    if(mode === "public"){
-      const u = new URL(PUBLIC_BASE + "/");
-      if(slug) u.searchParams.set("commerce",slug);
-      return u.toString();
+    const u = new URL(localUrl("fiche.html"));
+
+    if(slug){
+      u.searchParams.set("commerce", slug);
     }
 
-    if(mode === "counter"){
-      const u = new URL(localUrl("index.html"));
-      if(slug) u.searchParams.set("commerce",slug);
-      return u.toString();
-    }
-
-    const u = new URL(localUrl("pin.html"));
-    if(slug) u.searchParams.set("commerce",slug);
     return u.toString();
   }
 
-  function targetLabel(){
-    const mode = $("target").value;
-    if(mode === "public") return "fiche côté client";
-    if(mode === "counter") return "comptoir";
-    return "code d’accès";
+  function setStatus(msg,type){
+
+    const box = $("statusBox");
+
+    box.className = "notice " + (type || "");
+    box.textContent = msg;
   }
 
   async function generate(){
-    const slug = currentSlug();
-    const name = currentName();
-    const target = buildTarget();
 
-    $("qrTitle").textContent = name;
-    $("qrInfo").textContent = "Scanner pour ouvrir " + targetLabel() + ".";
-    $("qrNote").textContent = slug
-      ? "Identifiant boutique sécurisé · Paiement direct · 0% commission."
-      : "Ajoute l’identifiant boutique pour un QR complet.";
+    const target = buildTarget();
+    const slug = currentSlug();
+
+    $("qrTitle").textContent = currentName();
 
     $("urlBox").textContent = "Lien : " + target;
 
     if(!window.QRCode || typeof window.QRCode.toCanvas !== "function"){
-      setStatus("Générateur QR indisponible.", "err");
+
+      const imgUrl =
+        "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=" +
+        encodeURIComponent(target);
+
+      const ctx = $("qrCanvas").getContext("2d");
+
+      const img = new Image();
+
+      img.crossOrigin = "anonymous";
+
+      img.onload = function(){
+
+        ctx.clearRect(0,0,320,320);
+
+        ctx.drawImage(img,0,0,320,320);
+
+        setStatus(
+          slug
+            ? "QR prêt vers la fiche boutique."
+            : "QR prêt, mais identifiant boutique manquant.",
+          slug ? "ok" : ""
+        );
+      };
+
+      img.onerror = function(){
+
+        setStatus(
+          "Générateur QR indisponible. Vérifie la connexion puis recharge.",
+          "err"
+        );
+      };
+
+      img.src = imgUrl;
+
       return;
     }
 
     try{
-      await window.QRCode.toCanvas($("qrCanvas"), target, {
-        width: 320,
-        margin: 2,
-        errorCorrectionLevel: "H",
-        color: { dark:"#0f172a", light:"#ffffff" }
-      });
 
-      if(slug){
-        setStatus("QR prêt. Aucun téléphone affiché.", "ok");
-      }else{
-        setStatus("QR prêt, mais identifiant boutique manquant.", "");
-      }
+      await window.QRCode.toCanvas(
+        $("qrCanvas"),
+        target,
+        {
+          width:320,
+          margin:2,
+          errorCorrectionLevel:"H",
+          color:{
+            dark:"#0f172a",
+            light:"#ffffff"
+          }
+        }
+      );
+
+      setStatus(
+        slug
+          ? "QR prêt vers la fiche boutique."
+          : "QR prêt, mais identifiant boutique manquant.",
+        slug ? "ok" : ""
+      );
+
     }catch(err){
+
       console.error(err);
-      setStatus("Impossible de générer le QR.", "err");
+
+      setStatus(
+        "Impossible de générer le QR.",
+        "err"
+      );
     }
   }
 
   async function copyLink(){
+
     try{
+
       await navigator.clipboard.writeText(buildTarget());
-      setStatus("Lien copié ✅", "ok");
+
+      setStatus("Lien copié ✅","ok");
+
     }catch(_){
-      setStatus("Copie impossible sur ce navigateur.", "err");
+
+      setStatus("Copie impossible.","err");
     }
   }
 
   function openTarget(){
-    window.open(buildTarget(),"_blank","noopener,noreferrer");
-  }
-
-  function downloadPng(){
-    try{
-      const qr = $("qrCanvas");
-      const name = currentName();
-      const slug = currentSlug() || "mon-commerce";
-
-      const out = document.createElement("canvas");
-      out.width = 1400;
-      out.height = 1800;
-      const ctx = out.getContext("2d");
-
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0,0,out.width,out.height);
-
-      ctx.fillStyle = "#0f172a";
-      ctx.textAlign = "center";
-
-      ctx.font = "900 58px Outfit, Arial, sans-serif";
-      ctx.fillText("MON COMMERCE", out.width / 2, 125);
-
-      ctx.fillStyle = "#334155";
-      ctx.font = "800 30px Outfit, Arial, sans-serif";
-      ctx.fillText("DIGIYLYFE · QR BOUTIQUE", out.width / 2, 180);
-
-      ctx.fillStyle = "#facc15";
-      round(ctx, 500, 218, 400, 62, 31);
-      ctx.fill();
-
-      ctx.fillStyle = "#06140f";
-      ctx.font = "900 26px Outfit, Arial, sans-serif";
-      ctx.fillText("LE TERRAIN GARDE LA MAIN", out.width / 2, 258);
-
-      ctx.fillStyle = "#ffffff";
-      round(ctx, 250, 330, 900, 900, 44);
-      ctx.fill();
-
-      ctx.drawImage(qr, 350, 430, 700, 700);
-
-      ctx.fillStyle = "#0f172a";
-      ctx.font = "1000 74px Outfit, Arial, sans-serif";
-      ctx.fillText(name, out.width / 2, 1325);
-
-      ctx.fillStyle = "#334155";
-      ctx.font = "900 34px Outfit, Arial, sans-serif";
-      ctx.fillText("Scanner pour ouvrir " + targetLabel(), out.width / 2, 1390);
-
-      ctx.fillStyle = "#64748b";
-      ctx.font = "800 26px Outfit, Arial, sans-serif";
-      ctx.fillText("Paiement direct · 0% commission", out.width / 2, 1450);
-
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = "700 22px Outfit, Arial, sans-serif";
-      wrap(ctx, buildTarget(), out.width / 2, 1530, 1040, 32);
-
-      const a = document.createElement("a");
-      a.href = out.toDataURL("image/png");
-      a.download = slug + "-qr-mon-commerce.png";
-      a.click();
-
-      setStatus("PNG téléchargé ✅", "ok");
-    }catch(err){
-      console.error(err);
-      setStatus("Téléchargement impossible.", "err");
-    }
-  }
-
-  function round(ctx,x,y,w,h,r){
-    ctx.beginPath();
-    ctx.moveTo(x+r,y);
-    ctx.lineTo(x+w-r,y);
-    ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-    ctx.lineTo(x+w,y+h-r);
-    ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-    ctx.lineTo(x+r,y+h);
-    ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-    ctx.lineTo(x,y+r);
-    ctx.quadraticCurveTo(x,y,x+r,y);
-    ctx.closePath();
-  }
-
-  function wrap(ctx,text,cx,y,maxWidth,lineHeight){
-    const words = String(text || "").split(" ");
-    let line = "";
-
-    words.forEach(word=>{
-      const test = line ? line + " " + word : word;
-      if(ctx.measureText(test).width > maxWidth && line){
-        ctx.fillText(line,cx,y);
-        line = word;
-        y += lineHeight;
-      }else{
-        line = test;
-      }
-    });
-
-    if(line) ctx.fillText(line,cx,y);
+    window.open(buildTarget(),"_blank");
   }
 
   function bind(){
+
     $("btnGenerate").addEventListener("click",generate);
+
     $("btnCopy").addEventListener("click",copyLink);
+
     $("btnOpen").addEventListener("click",openTarget);
+
     $("btnPrint").addEventListener("click",()=>window.print());
-    $("btnDownload").addEventListener("click",downloadPng);
 
-    ["shopName","slug","target"].forEach(id=>{
-      $(id).addEventListener(id === "target" ? "change" : "input",generate);
-    });
+    $("shopName").addEventListener("input",generate);
 
-    $("slug").addEventListener("input",()=>{
-      const clean = normSlug($("slug").value);
-      $("slug").value = clean;
+    $("slug").addEventListener("input",function(){
+
+      $("slug").value = normSlug($("slug").value);
+
+      generate();
     });
   }
 
   function boot(){
-    readUrlThenClean();
-    readStorage();
+
+    const slug =
+      localStorage.getItem("digiy_pos_slug") ||
+      localStorage.getItem("digiy_pos_last_slug") ||
+      "";
+
+    const name =
+      localStorage.getItem("caisse_shop") ||
+      "MON COMMERCE";
+
+    $("slug").value = slug;
+
+    $("shopName").value = name;
+
     bind();
+
     generate();
   }
 
   boot();
+
 })();
 </script>
+
 </body>
 </html>
