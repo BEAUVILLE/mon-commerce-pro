@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#06140f"/>
   <title>MON COMMERCE — Fiche boutique</title>
-  <meta name="description" content="Fiche publique MON COMMERCE by DIGIYLYFE — contact direct, QR, WhatsApp, boutique locale."/>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -93,6 +92,13 @@
       font-weight:1000;
     }
 
+    h2{
+      margin:0 0 10px;
+      font-size:1.35rem;
+      letter-spacing:-.03em;
+      font-weight:1000;
+    }
+
     .sub{
       margin-top:12px;
       color:var(--muted);
@@ -101,7 +107,7 @@
       font-weight:800;
     }
 
-    .actions{
+    .actions,.links{
       display:grid;
       gap:10px;
       margin-top:18px;
@@ -134,17 +140,16 @@
       background:linear-gradient(135deg,#22c55e,#16a34a);
     }
 
+    .btn.link{
+      justify-content:flex-start;
+      color:#f7fbf8;
+      background:rgba(255,255,255,.055);
+    }
+
     .grid{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:10px;
-    }
-
-    h2{
-      margin:0 0 10px;
-      font-size:1.35rem;
-      letter-spacing:-.03em;
-      font-weight:1000;
     }
 
     .info{
@@ -180,6 +185,8 @@
       padding:8px 4px 18px;
     }
 
+    .hidden{display:none!important}
+
     @media(max-width:560px){
       .grid{grid-template-columns:1fr}
       .hero,.card{border-radius:25px;padding:17px}
@@ -200,7 +207,6 @@
 
       <div class="sub" id="shopDesc">
         Fiche publique simple : voir, comprendre, contacter directement.
-        Ici, le commerçant garde son client, son lien et sa dignité.
       </div>
 
       <div class="actions">
@@ -240,6 +246,11 @@
       </div>
     </section>
 
+    <section class="card" id="linksCard">
+      <h2>Liens utiles</h2>
+      <div class="links" id="linksList"></div>
+    </section>
+
     <section class="card">
       <h2>Actions rapides</h2>
 
@@ -266,9 +277,7 @@
     desc: "Fiche publique simple : voir, comprendre, contacter directement.",
     activity: "Commerce local · Produits & services",
     address: "Adresse à préciser",
-    hours: "Ouvert selon disponibilité",
-    phone: "",
-    whatsapp: ""
+    hours: "Ouvert selon disponibilité"
   };
 
   function clean(v){
@@ -303,6 +312,97 @@
     }catch(_){
       return "";
     }
+  }
+
+  function safeUrl(v){
+    const raw = clean(v);
+    if(!raw) return "";
+
+    try{
+      const u = new URL(raw);
+      if(u.protocol === "http:" || u.protocol === "https:"){
+        return u.toString();
+      }
+    }catch(_){}
+
+    return "";
+  }
+
+  function iconForUrl(url){
+    const u = url.toLowerCase();
+
+    if(u.includes("tiktok.com")) return "🎵";
+    if(u.includes("instagram.com")) return "📸";
+    if(u.includes("facebook.com")) return "📘";
+    if(u.includes("youtube.com") || u.includes("youtu.be")) return "▶️";
+    if(u.includes("maps.google") || u.includes("google.com/maps")) return "📍";
+    if(u.includes("wa.me") || u.includes("whatsapp")) return "💬";
+    if(u.includes("menu")) return "🍽️";
+    if(u.includes("catalog")) return "📒";
+
+    return "🔗";
+  }
+
+  function labelForUrl(url,index){
+    const custom =
+      clean(param("url" + index + "_label")) ||
+      clean(param("label" + index)) ||
+      "";
+
+    if(custom) return custom;
+
+    const u = url.toLowerCase();
+
+    if(u.includes("tiktok.com")) return "Voir TikTok";
+    if(u.includes("instagram.com")) return "Voir Instagram";
+    if(u.includes("facebook.com")) return "Voir Facebook";
+    if(u.includes("youtube.com") || u.includes("youtu.be")) return "Voir YouTube";
+    if(u.includes("maps.google") || u.includes("google.com/maps")) return "Voir sur Google Maps";
+    if(u.includes("wa.me") || u.includes("whatsapp")) return "Ouvrir WhatsApp";
+    if(u.includes("menu")) return "Voir le menu";
+    if(u.includes("catalog")) return "Voir le catalogue";
+
+    return "Lien utile " + index;
+  }
+
+  function readLinks(){
+    const links = [];
+
+    for(let i = 1; i <= 6; i++){
+      const url = safeUrl(
+        param("url" + i) ||
+        param("link" + i) ||
+        storageGet("digiy_pos_url_" + i) ||
+        storageGet("digiy_pos_link_" + i) ||
+        ""
+      );
+
+      if(url){
+        links.push({
+          url,
+          label: labelForUrl(url,i),
+          icon: iconForUrl(url)
+        });
+      }
+    }
+
+    const single = safeUrl(
+      param("url") ||
+      param("link") ||
+      storageGet("digiy_pos_public_url") ||
+      storageGet("digiy_pos_url") ||
+      ""
+    );
+
+    if(single && !links.some(x => x.url === single)){
+      links.unshift({
+        url: single,
+        label: labelForUrl(single,1),
+        icon: iconForUrl(single)
+      });
+    }
+
+    return links;
   }
 
   function readData(){
@@ -354,7 +454,17 @@
       ""
     );
 
-    return {slug,name,desc,activity,address,hours,phone,whatsapp};
+    return {
+      slug,
+      name,
+      desc,
+      activity,
+      address,
+      hours,
+      phone,
+      whatsapp,
+      links: readLinks()
+    };
   }
 
   function buildWhatsApp(phone,name,slug){
@@ -386,6 +496,28 @@
     }catch(_){}
   }
 
+  function renderLinks(links){
+    const box = $("linksList");
+    box.innerHTML = "";
+
+    if(!links.length){
+      $("linksCard").classList.add("hidden");
+      return;
+    }
+
+    $("linksCard").classList.remove("hidden");
+
+    links.forEach(item=>{
+      const a = document.createElement("a");
+      a.className = "btn link";
+      a.href = item.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = item.icon + " " + item.label;
+      box.appendChild(a);
+    });
+  }
+
   function render(){
     const d = readData();
 
@@ -406,6 +538,8 @@
     if(!d.phone){
       $("callBtn").textContent = "📞 Téléphone à renseigner";
     }
+
+    renderLinks(d.links);
 
     const qs = d.slug ? "?commerce=" + encodeURIComponent(d.slug) : "";
 
