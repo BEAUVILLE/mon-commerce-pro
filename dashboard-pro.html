@@ -151,7 +151,7 @@
       max-width:760px;
       margin:0 auto;
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-columns:repeat(5,minmax(0,1fr));
       gap:6px;
     }
 
@@ -171,7 +171,11 @@
       text-align:center;
     }
 
-    .navItem .ico{font-size:1.25rem;line-height:1}
+    .navItem .ico{
+      font-size:1.25rem;
+      line-height:1;
+    }
+
     .navItem.active{
       color:#06140f;
       background:linear-gradient(135deg,var(--gold),var(--green));
@@ -181,36 +185,80 @@
 </head>
 
 <body>
+
   <main class="card">
+
     <div class="logo">🛒</div>
+
     <h1>Comptoir déplacé</h1>
+
     <p>
       L’accueil MON COMMERCE est maintenant le comptoir simple.
       Tu vas être ramené vers la bonne porte.
     </p>
 
     <div class="actions">
-      <a class="btn primary" id="goIndex" href="./index.html">🏠 Ouvrir le comptoir</a>
-      <a class="btn green" id="goCaisse" href="./caisse.html">💰 Encaisser</a>
-      <a class="btn ghost" id="goArticles" href="./admin.html#articleList">📦 Articles</a>
+
+      <a class="btn primary" id="goIndex" href="./index.html">
+        🏠 Ouvrir le comptoir
+      </a>
+
+      <a class="btn green" id="goCaisse" href="./caisse.html">
+        💰 Encaisser
+      </a>
+
+      <a class="btn ghost" id="goArticles" href="./admin.html#articleList">
+        📦 Articles
+      </a>
+
+      <a class="btn ghost" id="goQr" href="./qr.html">
+        🔳 Mon QR boutique
+      </a>
+
     </div>
 
     <div class="note">
       Ancien lien gardé pour compatibilité. Pas de double accueil, pas de bruit.
     </div>
+
   </main>
 
   <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+
     <div class="bottomInner">
-      <a class="navItem active" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
-      <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
-      <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
-      <a class="navItem" href="./profile.html"><span class="ico">🏪</span><span>Fiche</span></a>
+
+      <a class="navItem active" href="./index.html">
+        <span class="ico">🏠</span>
+        <span>Accueil</span>
+      </a>
+
+      <a class="navItem" href="./caisse.html">
+        <span class="ico">💰</span>
+        <span>Caisse</span>
+      </a>
+
+      <a class="navItem" href="./admin.html#articleList">
+        <span class="ico">📦</span>
+        <span>Articles</span>
+      </a>
+
+      <a class="navItem" href="./profile.html">
+        <span class="ico">🏪</span>
+        <span>Fiche</span>
+      </a>
+
+      <a class="navItem" href="./qr.html">
+        <span class="ico">🔳</span>
+        <span>QR</span>
+      </a>
+
     </div>
+
   </nav>
 
 <script>
 (function(){
+
   "use strict";
 
   const SENSITIVE = [
@@ -218,17 +266,44 @@
     "pin","pin4","token","session_token","module"
   ];
 
-  const SLUG_KEYS = ["digiy_pos_slug","digiy_pos_last_slug"];
-  const PHONE_KEYS = ["digiy_pos_phone","digiy_pos_last_phone"];
-  const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
-  const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
+  const SLUG_KEYS = [
+    "digiy_pos_slug",
+    "digiy_pos_last_slug"
+  ];
+
+  const PHONE_KEYS = [
+    "digiy_pos_phone",
+    "digiy_pos_last_phone"
+  ];
+
+  const FORBIDDEN_SLUG_PREFIXES = [
+    "loc-",
+    "explore-",
+    "driver-",
+    "market-",
+    "build-",
+    "jobs-",
+    "resa-",
+    "pay-"
+  ];
+
+  const ALLOWED_SLUG_PREFIXES = [
+    "pos-",
+    "commerce-",
+    "mon-commerce-",
+    "caisse-"
+  ];
 
   function normPhone(v){
-    return String(v || "").replace(/[^\d]/g,"").slice(0,15);
+    return String(v || "")
+      .replace(/[^\d]/g,"")
+      .slice(0,15);
   }
 
   function normSlug(v){
-    return String(v || "").trim().toLowerCase()
+    return String(v || "")
+      .trim()
+      .toLowerCase()
       .replace(/\s+/g,"-")
       .replace(/[^a-z0-9-]/g,"")
       .replace(/-+/g,"-")
@@ -236,16 +311,28 @@
   }
 
   function isPosSlug(v){
+
     const s = normSlug(v);
+
     if(!s) return false;
-    if(FORBIDDEN_SLUG_PREFIXES.some(p => s.startsWith(p))) return false;
+
+    if(FORBIDDEN_SLUG_PREFIXES.some(p => s.startsWith(p))){
+      return false;
+    }
+
     return ALLOWED_SLUG_PREFIXES.some(p => s.startsWith(p));
   }
 
   function rememberThenClean(){
+
     try{
+
       const u = new URL(location.href);
-      const slug = normSlug(u.searchParams.get("slug") || "");
+
+      const slug = normSlug(
+        u.searchParams.get("slug") || ""
+      );
+
       const phone = normPhone(
         u.searchParams.get("phone") ||
         u.searchParams.get("tel") ||
@@ -255,47 +342,72 @@
       );
 
       if(slug && isPosSlug(slug)){
+
         SLUG_KEYS.forEach(k => {
+
           try{
             sessionStorage.setItem(k,slug);
             localStorage.setItem(k,slug);
           }catch(_){}
+
         });
       }
 
       if(phone){
+
         PHONE_KEYS.forEach(k => {
-          try{ sessionStorage.setItem(k,phone); }catch(_){}
+
+          try{
+            sessionStorage.setItem(k,phone);
+          }catch(_){}
+
         });
       }
 
       let changed = false;
 
       SENSITIVE.concat(["slug"]).forEach(k => {
+
         if(u.searchParams.has(k)){
           u.searchParams.delete(k);
           changed = true;
         }
+
       });
 
       if(changed){
-        history.replaceState({},document.title,u.pathname + u.search + u.hash);
+
+        history.replaceState(
+          {},
+          document.title,
+          u.pathname + u.search + u.hash
+        );
       }
+
     }catch(_){}
   }
 
   function go(){
+
     const target = "./index.html";
+
     setTimeout(function(){
-      try{ location.replace(target); }
-      catch(_){ location.href = target; }
-    }, 900);
+
+      try{
+        location.replace(target);
+      }catch(_){
+        location.href = target;
+      }
+
+    },900);
   }
 
   rememberThenClean();
   go();
+
 })();
 </script>
+
 </body>
 </html>
 
