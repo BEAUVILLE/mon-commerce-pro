@@ -3,358 +3,899 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <meta name="theme-color" content="#06140f"/>
+  <meta name="theme-color" content="#06130f"/>
+  <meta
+    name="description"
+    content="MON COMMERCE — QR public Astou Boutique, sans envoyer le client vers le cockpit ni le PIN."
+  />
   <title>MON COMMERCE — QR Astou Boutique</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script>
+    window.DIGIY_MODULE = "COMMERCE";
+    window.DIGIY_LOGIN_URL = "./pin.html";
+  </script>
+  <script defer src="./guard.js?v=commerce-qr-astou-no-lib-v1"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
 
   <style>
     :root{
-      --bg:#04110d;
-      --text:#f7fbf8;
-      --muted:#b8cfc4;
-      --gold:#facc15;
-      --gold2:#f59e0b;
+      --bg:#06130f;
+      --card:rgba(255,255,255,.045);
+      --line:rgba(255,255,255,.14);
+      --text:#f8fafc;
+      --muted:rgba(248,250,252,.76);
+      --gold:#d4af37;
+      --gold2:#f3d46b;
       --green:#22c55e;
       --blue:#38bdf8;
-      --line:rgba(255,255,255,.12);
-      --shadow:0 22px 62px rgba(0,0,0,.38);
+      --bad:#ef4444;
+      --shadow:0 20px 56px rgba(0,0,0,.38);
+      --bottom:88px;
       --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
 
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;min-height:100%}
+    html,body{margin:0;padding:0}
 
     body{
-      min-height:100dvh;
+      min-height:100vh;
       font-family:var(--font);
       color:var(--text);
       background:
-        radial-gradient(850px 520px at 0% -10%, rgba(250,204,21,.13), transparent 58%),
-        radial-gradient(800px 480px at 100% 0%, rgba(34,197,94,.13), transparent 58%),
-        linear-gradient(180deg,#06140f,var(--bg));
-      padding:14px;
+        radial-gradient(850px 520px at 8% -10%,rgba(212,175,55,.15),transparent 58%),
+        radial-gradient(850px 520px at 94% 0%,rgba(56,189,248,.11),transparent 55%),
+        radial-gradient(850px 520px at 100% 100%,rgba(34,197,94,.12),transparent 58%),
+        linear-gradient(180deg,#03120d,var(--bg));
+      padding:14px 14px calc(var(--bottom) + env(safe-area-inset-bottom,0px) + 18px);
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
     }
 
     a{color:inherit;text-decoration:none}
-    button{font:inherit;cursor:pointer}
+    button,input{font:inherit}
 
-    .wrap{
-      max-width:760px;
-      margin:0 auto;
-      display:grid;
-      gap:14px;
+    .wrap{max-width:940px;margin:0 auto}
+
+    .hero,.card{
+      border:1px solid var(--line);
+      border-radius:28px;
+      background:var(--card);
+      box-shadow:var(--shadow);
+      padding:18px;
     }
 
-    .card{
-      border:1px solid var(--line);
-      border-radius:30px;
-      background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.035));
-      box-shadow:var(--shadow);
-      padding:20px;
-      text-align:center;
+    .card{margin-top:14px}
+
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      min-width:0;
     }
 
     .logo{
-      width:72px;
-      height:72px;
-      border-radius:26px;
+      width:62px;
+      height:62px;
+      border-radius:22px;
       display:grid;
       place-items:center;
-      margin:0 auto 14px;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      color:#06140f;
-      font-size:34px;
-      font-weight:1000;
+      background:linear-gradient(135deg,rgba(212,175,55,.34),rgba(34,197,94,.18),rgba(56,189,248,.16));
+      border:1px solid rgba(212,175,55,.34);
+      font-size:30px;
+      flex:0 0 auto;
     }
 
     h1{
       margin:0;
-      font-size:clamp(2rem,7vw,3.4rem);
-      line-height:.95;
-      letter-spacing:-.05em;
+      font-size:clamp(34px,7vw,54px);
+      line-height:1.02;
       font-weight:1000;
+      letter-spacing:-.05em;
+      color:#fff7cc;
     }
 
     .sub{
-      margin:12px auto 0;
-      max-width:520px;
+      margin-top:8px;
       color:var(--muted);
+      font-size:19px;
       line-height:1.5;
-      font-size:1rem;
-      font-weight:850;
+      font-weight:900;
+      max-width:64ch;
     }
 
-    .notice{
+    .pillRow{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
       margin-top:14px;
-      border-radius:20px;
-      padding:12px;
-      background:rgba(250,204,21,.08);
-      border:1px solid rgba(250,204,21,.25);
-      color:#fde68a;
-      line-height:1.45;
-      font-weight:850;
     }
 
-    .notice.ok{
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      min-height:44px;
+      padding:9px 13px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.26);
+      background:rgba(255,255,255,.04);
+      color:var(--muted);
+      font-size:16px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .pill.ok{
+      border-color:rgba(34,197,94,.35);
       background:rgba(34,197,94,.10);
-      border-color:rgba(34,197,94,.28);
       color:#bbf7d0;
     }
 
-    .notice.err{
+    .pill.warn{
+      border-color:rgba(212,175,55,.38);
+      background:rgba(212,175,55,.10);
+      color:#fde68a;
+    }
+
+    .pill.bad{
+      border-color:rgba(239,68,68,.35);
       background:rgba(239,68,68,.10);
-      border-color:rgba(239,68,68,.28);
       color:#fecaca;
-    }
-
-    .qrCard{
-      background:#fff;
-      color:#0f172a;
-      border-radius:30px;
-      padding:20px;
-      box-shadow:var(--shadow);
-    }
-
-    .qrBox{
-      border-radius:24px;
-      padding:14px;
-      display:grid;
-      place-items:center;
-      background:#fff;
-    }
-
-    #qrCanvas{
-      width:min(100%,320px);
-      height:auto;
-      display:block;
-    }
-
-    .qrTitle{
-      margin-top:14px;
-      font-size:1.8rem;
-      font-weight:1000;
-      color:#0f172a;
-      text-align:center;
-    }
-
-    .qrInfo{
-      margin-top:7px;
-      color:#475569;
-      font-size:.92rem;
-      font-weight:900;
-      text-align:center;
-    }
-
-    .urlBox{
-      margin-top:14px;
-      border-radius:18px;
-      padding:12px;
-      background:rgba(0,0,0,.18);
-      color:var(--muted);
-      font-size:.82rem;
-      font-weight:800;
-      word-break:break-all;
-      text-align:left;
     }
 
     .actions{
       display:grid;
-      grid-template-columns:1fr 1fr;
+      grid-template-columns:repeat(2,minmax(0,1fr));
       gap:10px;
-      margin-top:14px;
+      margin-top:16px;
     }
 
     .btn{
-      min-height:58px;
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.05);
+      appearance:none;
+      border:1px solid rgba(148,163,184,.24);
+      border-radius:18px;
+      min-height:62px;
+      padding:16px 18px;
+      background:rgba(255,255,255,.045);
       color:var(--text);
-      display:flex;
+      font-size:18px;
+      font-weight:1100;
+      cursor:pointer;
+      display:inline-flex;
       align-items:center;
       justify-content:center;
-      gap:8px;
-      padding:12px;
-      font-size:.98rem;
-      font-weight:1000;
+      gap:10px;
       text-align:center;
+      touch-action:manipulation;
     }
 
-    .btn.primary{
-      border:none;
-      color:#06140f;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
+    .btn:active{transform:translateY(1px) scale(.99)}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+
+    .btn.gold{
+      background:rgba(212,175,55,.15);
+      border-color:rgba(212,175,55,.40);
+      color:#fde68a;
     }
 
     .btn.green{
-      border:none;
-      color:#06140f;
-      background:linear-gradient(135deg,#22c55e,#16a34a);
+      background:rgba(34,197,94,.12);
+      border-color:rgba(34,197,94,.36);
+      color:#bbf7d0;
     }
 
     .btn.blue{
-      color:#bae6fd;
       background:rgba(56,189,248,.12);
-      border-color:rgba(56,189,248,.25);
+      border-color:rgba(56,189,248,.34);
+      color:#bae6fd;
     }
 
-    .wide{grid-column:1/-1}
+    .qrBox{
+      margin-top:14px;
+      min-height:340px;
+      border-radius:24px;
+      border:1px dashed rgba(212,175,55,.42);
+      background:rgba(0,0,0,.14);
+      display:grid;
+      place-items:center;
+      padding:18px;
+    }
 
-    @media(max-width:560px){
+    .qrShell{
+      width:min(420px,100%);
+      border-radius:28px;
+      border:1px solid rgba(212,175,55,.32);
+      background:
+        radial-gradient(420px 200px at 50% 0%,rgba(212,175,55,.16),transparent 62%),
+        linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.035));
+      padding:18px;
+      display:grid;
+      gap:12px;
+      text-align:center;
+      box-shadow:0 18px 48px rgba(0,0,0,.34);
+    }
+
+    .qrImg{
+      width:min(320px,100%);
+      height:auto;
+      border-radius:22px;
+      background:#fff;
+      padding:12px;
+      border:1px solid rgba(212,175,55,.45);
+      display:block;
+      margin:0 auto;
+    }
+
+    .qrTitle{
+      color:var(--gold2);
+      font-size:26px;
+      font-weight:1000;
+      line-height:1.12;
+    }
+
+    .qrText{
+      color:var(--muted);
+      font-size:17px;
+      line-height:1.45;
+      font-weight:900;
+    }
+
+    .sectionTitle{
+      font-size:28px;
+      font-weight:1100;
+      color:#fde68a;
+      margin:0 0 8px;
+      letter-spacing:-.03em;
+    }
+
+    .safeText{
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.55;
+      font-weight:900;
+    }
+
+    .linkEditor{
+      margin-top:14px;
+      padding:14px;
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.22);
+      background:rgba(0,0,0,.16);
+    }
+
+    .linkLabel{
+      color:#fde68a;
+      font-weight:1100;
+      font-size:17px;
+      margin-bottom:8px;
+    }
+
+    .urlInput{
+      width:100%;
+      min-height:58px;
+      border-radius:16px;
+      border:1px solid rgba(148,163,184,.26);
+      background:rgba(2,6,23,.50);
+      color:#eafff1;
+      padding:0 14px;
+      font-size:16px;
+      font-weight:900;
+    }
+
+    .urlInput:focus{
+      border-color:rgba(212,175,55,.55);
+      box-shadow:0 0 0 4px rgba(212,175,55,.10);
+      outline:none;
+    }
+
+    .linkValue{
+      margin-top:10px;
+      color:#dbeafe;
+      font-size:16px;
+      line-height:1.45;
+      font-weight:900;
+      word-break:break-all;
+    }
+
+    .doctrine{
+      margin-top:14px;
+      border:1px solid rgba(34,197,94,.28);
+      border-radius:22px;
+      background:rgba(34,197,94,.08);
+      padding:14px;
+      color:#bbf7d0;
+      font-size:18px;
+      line-height:1.55;
+      font-weight:950;
+    }
+
+    .note{
+      display:none;
+      margin-top:12px;
+      padding:13px 14px;
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.25);
+      background:rgba(255,255,255,.035);
+      color:var(--muted);
+      font-size:17px;
+      line-height:1.45;
+      font-weight:950;
+      white-space:pre-wrap;
+    }
+
+    .note.ok{
+      display:block;
+      border-color:rgba(34,197,94,.35);
+      background:rgba(34,197,94,.09);
+      color:#bbf7d0;
+    }
+
+    .note.warn{
+      display:block;
+      border-color:rgba(212,175,55,.35);
+      background:rgba(212,175,55,.09);
+      color:#fde68a;
+    }
+
+    .note.bad{
+      display:block;
+      border-color:rgba(239,68,68,.35);
+      background:rgba(239,68,68,.09);
+      color:#fecaca;
+    }
+
+    .bottomNav{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      z-index:70;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+      background:linear-gradient(180deg,rgba(6,19,15,0),rgba(6,19,15,.96) 28%);
+    }
+
+    .bottomInner{
+      max-width:980px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:6px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(6,19,15,.94);
+      backdrop-filter:blur(10px);
+      border-radius:22px;
+      padding:7px;
+      box-shadow:0 16px 44px rgba(0,0,0,.38);
+    }
+
+    .navItem{
+      min-height:60px;
+      border-radius:16px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+      color:rgba(248,250,252,.76);
+      font-size:13px;
+      font-weight:1000;
+      border:1px solid transparent;
+      text-align:center;
+    }
+
+    .navItem strong{
+      font-size:21px;
+      line-height:1;
+    }
+
+    .navItem.active{
+      color:#13200d;
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      border-color:rgba(212,175,55,.24);
+    }
+
+    @media(max-width:620px){
+      body{padding-left:10px;padding-right:10px}
+      .hero,.card{padding:15px;border-radius:22px}
       .actions{grid-template-columns:1fr}
-      .card,.qrCard{border-radius:25px}
-    }
-
-    @media print{
-      body{background:#fff;padding:0}
-      .card:first-child{display:none!important}
-      .wrap{max-width:none;margin:0;padding:0}
-      .qrCard{
-        box-shadow:none;
-        border-radius:0;
-        min-height:100vh;
-        display:flex;
-        flex-direction:column;
-        justify-content:center;
-      }
+      .sub{font-size:18px}
+      .btn{font-size:18px;min-height:62px}
+      .qrBox{min-height:300px}
+      .navItem{font-size:12px}
     }
   </style>
 </head>
 
 <body>
+<div class="wrap">
+  <section class="hero">
+    <div class="top">
+      <div class="brand">
+        <div class="logo">🔳</div>
+        <div>
+          <h1>QR Astou Boutique</h1>
+          <div class="sub">
+            Un QR propre pour partager Astou Boutique côté public.
+            Il ouvre la fiche MON COMMERCE, jamais le cockpit, jamais le PIN.
+          </div>
+        </div>
+      </div>
 
-<main class="wrap">
-
-  <section class="card">
-    <div class="logo">🔳</div>
-
-    <h1>QR Astou Boutique</h1>
-
-    <div class="sub">
-      Ce QR ouvre directement la fiche publique Astou Boutique.
-      Zéro détour, zéro Supabase côté client.
+      <div>
+        <div class="pill" id="pillSpace">Espace boutique sécurisé</div>
+        <div class="pill warn" id="pillState" style="margin-top:8px">préparation…</div>
+      </div>
     </div>
 
-    <div class="notice" id="statusBox">
-      Préparation du QR…
+    <div class="pillRow">
+      <span class="pill ok">Boutique publique</span>
+      <span class="pill">Contact direct</span>
+      <span class="pill">QR boutique</span>
+      <span class="pill">Sans PIN client</span>
     </div>
 
     <div class="actions">
-      <button class="btn primary" id="btnGenerate" type="button">⚙️ Générer</button>
-      <button class="btn blue" id="btnCopy" type="button">📋 Copier lien</button>
-      <button class="btn green" id="btnOpen" type="button">🚪 Ouvrir fiche</button>
-      <button class="btn wide" id="btnPrint" type="button">🖨️ Imprimer</button>
+      <button class="btn green" id="btnOpen" type="button">↗️ Ouvrir la fiche</button>
+      <button class="btn gold" id="btnCopy" type="button">📋 Copier le lien</button>
+      <a class="btn blue" id="btnDownload" href="#" target="_blank" rel="noopener">⬇️ Ouvrir QR</a>
+      <a class="btn" id="btnSticker" href="#" target="_blank" rel="noopener">🟩 QR XL</a>
+      <button class="btn" id="btnWhatsapp" type="button">📲 Partager WhatsApp</button>
+      <button class="btn" id="btnReset" type="button">♻️ Retour galerie Commerce</button>
     </div>
 
-    <div class="urlBox" id="urlBox">Lien : —</div>
+    <div class="note" id="note"></div>
   </section>
 
-  <section class="qrCard">
+  <section class="card">
+    <h2 class="sectionTitle">QR Astou prêt à partager</h2>
+
+    <div class="safeText">
+      Teste le QR avec un téléphone avant impression.
+      Le client doit arriver sur la fiche publique Astou Boutique.
+      Il ne doit jamais tomber sur le cockpit, le dashboard, le PIN, ni une page PRO.
+    </div>
+
     <div class="qrBox">
-      <canvas id="qrCanvas" width="320" height="320"></canvas>
+      <a id="qrAnchor" href="#" target="_blank" rel="noopener" aria-label="Ouvrir la fiche publique EXPLORE">
+        <div class="qrShell">
+          <img id="qrImg" class="qrImg" alt="QR DIGIY EXPLORE"/>
+          <div class="qrTitle">Scanne pour découvrir Astou Boutique</div>
+          <div class="qrText">Produits, textile, beauté, Google Maps, TikTok et WhatsApp direct.</div>
+        </div>
+      </a>
     </div>
 
-    <div class="qrTitle">Astou Boutique</div>
-    <div class="qrInfo">Scanner pour ouvrir la fiche publique.</div>
-  </section>
+    <div class="linkEditor">
+      <div class="linkLabel">Lien public ouvert par le QR</div>
+      <input
+        class="urlInput"
+        id="targetInput"
+        inputmode="url"
+        placeholder="https://mon-commerce.digiylyfe.com/fiche-astou.html"
+        autocomplete="off"
+      />
+      <div class="linkValue" id="linkValue">Préparation…</div>
 
-</main>
+      <div class="actions">
+        <button class="btn gold" id="btnSaveTarget" type="button">💾 Enregistrer ce lien</button>
+        <button class="btn" id="btnUseSlug" type="button">⚙️ Revenir fiche Astou</button>
+      </div>
+    </div>
+
+    <div class="doctrine">
+      Doctrine DIGIY MON COMMERCE : le QR ouvre la fiche publique de la boutique.
+      L’espace PRO reste protégé par PIN. Le client regarde, comprend, contacte et partage.
+    </div>
+  </section>
+</div>
+
+<nav class="bottomNav" aria-label="Navigation MON COMMERCE">
+  <div class="bottomInner">
+    <a class="navItem" id="navHome" href="./index.html"><strong>🏠</strong><span>Accueil</span></a>
+    <a class="navItem" id="navPlaces" href="./galerie.html"><strong>🛍️</strong><span>Boutiques</span></a>
+    <a class="navItem" id="navAdd" href="./index.html"><strong>➕</strong><span>Ajouter</span></a>
+    <a class="navItem active" id="navQr" href="./qr.html"><strong>🔳</strong><span>QR</span></a>
+    <a class="navItem" id="navPin" href="./pin.html"><strong>🔐</strong><span>PIN</span></a>
+  </div>
+</nav>
 
 <script>
 (function(){
   "use strict";
 
-  const TARGET = "https://mon-commerce.digiylyfe.com/fiche-astou.html";
+  const EXPLORE_PUBLIC_HOME = "https://mon-commerce.digiylyfe.com/";
+  const EXPLORE_PUBLIC_FICHE = "https://mon-commerce.digiylyfe.com/fiche-astou.html";
+  const TARGET_STORAGE_KEY = "DIGIY_COMMERCE_QR_PUBLIC_TARGET";
+  const QR_API = "https://api.qrserver.com/v1/create-qr-code/";
+
+  const CLEAN_KEYS = [
+    "phone","tel","owner_phone","p_phone","whatsapp","client_phone",
+    "token","session_token","pin","pin4","owner_id","business_code",
+    "keybox_code","keybox_location","access_note","return","from","module"
+  ];
+
   const $ = (id)=>document.getElementById(id);
 
-  function setStatus(msg,type){
-    const box = $("statusBox");
-    box.className = "notice " + (type || "");
-    box.textContent = msg;
+  const State = {
+    slug:"",
+    targetUrl:"",
+    qrUrl:"",
+    qrXLUrl:""
+  };
+
+  function storageGet(k){
+    try{
+      const s = sessionStorage.getItem(k);
+      if(s) return s;
+    }catch(_){}
+
+    try{
+      const l = localStorage.getItem(k);
+      if(l) return l;
+    }catch(_){}
+
+    return "";
   }
 
-  async function generate(){
-    $("urlBox").textContent = "Lien : " + TARGET;
+  function storageSet(k,v){
+    try{ localStorage.setItem(k, String(v || "")); }catch(_){}
+  }
 
-    if(window.QRCode && typeof window.QRCode.toCanvas === "function"){
-      try{
-        await window.QRCode.toCanvas(
-          $("qrCanvas"),
-          TARGET,
-          {
-            width:320,
-            margin:2,
-            errorCorrectionLevel:"H",
-            color:{
-              dark:"#0f172a",
-              light:"#ffffff"
-            }
-          }
-        );
+  function readParam(name){
+    try{
+      return String(new URL(location.href).searchParams.get(name) || "").trim();
+    }catch(_){
+      return "";
+    }
+  }
 
-        setStatus("QR prêt vers la fiche publique Astou ✅","ok");
-        return;
-      }catch(err){
-        console.error(err);
+  function cleanSlug(v){
+    return String(v || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^a-z0-9\-_]/g,"")
+      .replace(/-+/g,"-")
+      .replace(/^[-_]+|[-_]+$/g,"");
+  }
+
+  function isSensitiveSlug(slug){
+    return /\d{7,}/.test(String(slug || ""));
+  }
+
+  function canExposeSlug(slug){
+    const s = cleanSlug(slug);
+    return !!s && !isSensitiveSlug(s);
+  }
+
+  function safeSpaceLabel(slug){
+    const s = cleanSlug(slug);
+
+    if(!s || isSensitiveSlug(s)){
+      return "Espace boutique sécurisé";
+    }
+
+    if(/^explore-/i.test(s)){
+      return "Lieu " + s.slice(-6).toUpperCase();
+    }
+
+    return "Lieu EXPLORE";
+  }
+
+  function cleanVisibleUrl(){
+    try{
+      const u = new URL(location.href);
+      let changed = false;
+
+      CLEAN_KEYS.forEach(k=>{
+        if(u.searchParams.has(k)){
+          u.searchParams.delete(k);
+          changed = true;
+        }
+      });
+
+      const slug = cleanSlug(u.searchParams.get("slug") || "");
+      if(slug && isSensitiveSlug(slug)){
+        u.searchParams.delete("slug");
+        changed = true;
       }
-    }
 
+      if(changed){
+        history.replaceState({}, "", u.pathname + u.search + u.hash);
+      }
+    }catch(_){}
+  }
+
+  function isBadTarget(url){
     try{
-      const imgUrl =
-        "https://quickchart.io/qr?size=320&text=" +
-        encodeURIComponent(TARGET);
+      const u = new URL(url);
+      const host = u.hostname.toLowerCase();
+      const path = u.pathname.toLowerCase();
 
-      const ctx = $("qrCanvas").getContext("2d");
-      const img = new Image();
+      if(host.startsWith("pro-")) return true;
+      if(host.includes("pro-commerce") || host.includes("commerce-pro")) return true;
 
-      img.crossOrigin = "anonymous";
-
-      img.onload = function(){
-        ctx.clearRect(0,0,320,320);
-        ctx.drawImage(img,0,0,320,320);
-        setStatus("QR prêt vers la fiche publique Astou ✅","ok");
-      };
-
-      img.onerror = function(){
-        setStatus("QR indisponible. Le lien reste copiable ci-dessous.","err");
-      };
-
-      img.src = imgUrl;
+      return [
+        "pin.html","go-pin.html","cockpit.html","dashboard-pro.html",
+        "guard.js","submit.html","produits.html","galerie.html","qr.html"
+      ].some(x => path.includes(x));
     }catch(_){
-      setStatus("QR indisponible. Le lien reste copiable ci-dessous.","err");
+      return true;
     }
   }
 
-  async function copyLink(){
+  function cleanPublicUrl(raw){
+    const value = String(raw || "").trim();
+    if(!value) return "";
+
     try{
-      await navigator.clipboard.writeText(TARGET);
-      setStatus("Lien copié ✅","ok");
+      const u = new URL(value, location.href);
+      CLEAN_KEYS.forEach(k=>u.searchParams.delete(k));
+
+      const slug = cleanSlug(u.searchParams.get("slug") || "");
+      if(slug && isSensitiveSlug(slug)){
+        u.searchParams.delete("slug");
+      }
+
+      if(isBadTarget(u.toString())) return "";
+
+      return u.toString();
     }catch(_){
-      setStatus("Copie impossible sur ce navigateur.","err");
+      return "";
     }
   }
 
-  function openTarget(){
-    window.open(TARGET,"_blank","noopener,noreferrer");
+  function getSlug(){
+    return cleanSlug(
+      readParam("slug") ||
+      readParam("place") ||
+      readParam("lieu") ||
+      storageGet("digiy_explore_selected_place_slug") ||
+      storageGet("digiy_explore_slug") ||
+      storageGet("digiy_explore_last_slug") ||
+      storageGet("DIGIY_EXPLORE_SLUG") ||
+      storageGet("DIGIY_EXPLORE_LAST_SLUG") ||
+      storageGet("digiy_last_slug") ||
+      storageGet("DIGIY_SLUG")
+    );
+  }
+
+  function readSavedTarget(){
+    return cleanPublicUrl(
+      readParam("target") ||
+      readParam("url") ||
+      storageGet(TARGET_STORAGE_KEY) ||
+      storageGet("DIGIY_EXPLORE_PUBLIC_URL") ||
+      storageGet("digiy_explore_public_url")
+    );
+  }
+
+  function buildTargetFromSlug(slug){
+    return "https://mon-commerce.digiylyfe.com/fiche-astou.html";
+  }
+
+  function buildTargetUrl(){
+    const saved = readSavedTarget();
+    if(saved) return saved;
+    return buildTargetFromSlug(State.slug);
+  }
+
+  function qrImageUrl(text,size){
+    const s = Math.max(220, Number(size) || 620);
+    return QR_API + "?size=" + s + "x" + s + "&margin=16&data=" + encodeURIComponent(text);
+  }
+
+  function note(msg, cls="warn"){
+    const el = $("note");
+    el.className = "note " + cls;
+    el.textContent = msg || "";
+    el.style.display = msg ? "block" : "none";
+  }
+
+  function syncUi(){
+    $("pillSpace").textContent = safeSpaceLabel(State.slug);
+
+    const pill = $("pillState");
+
+    if(State.targetUrl){
+      if(isBadTarget(State.targetUrl)){
+        pill.textContent = "lien refusé";
+        pill.className = "pill bad";
+      }else if(State.targetUrl === EXPLORE_PUBLIC_HOME){
+        pill.textContent = "vitrine publique";
+        pill.className = "pill warn";
+      }else{
+        pill.textContent = "QR public prêt";
+        pill.className = "pill ok";
+      }
+    }else{
+      pill.textContent = "à préparer";
+      pill.className = "pill warn";
+    }
+
+    $("linkValue").textContent = State.targetUrl || "Préparation…";
+    $("qrAnchor").href = State.targetUrl || "#";
+
+    if(document.activeElement !== $("targetInput")){
+      $("targetInput").value = State.targetUrl || "";
+    }
+  }
+
+  async function copyText(text){
+    const value = String(text || "").trim();
+    if(!value) throw new Error("copy_empty");
+
+    if(navigator.clipboard?.writeText){
+      return navigator.clipboard.writeText(value);
+    }
+
+    const ta = document.createElement("textarea");
+    ta.value = value;
+    ta.setAttribute("readonly","");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+
+    document.body.appendChild(ta);
+    ta.select();
+
+    const ok = document.execCommand("copy");
+    ta.remove();
+
+    if(!ok){
+      throw new Error("copy_failed");
+    }
+  }
+
+  function renderQr(){
+    if(!State.targetUrl || isBadTarget(State.targetUrl)){
+      note("❌ Lien refusé : le QR ne doit jamais ouvrir une page PRO, PIN, cockpit ou gestion.", "bad");
+      syncUi();
+      return;
+    }
+
+    State.qrUrl = qrImageUrl(State.targetUrl, 720);
+    State.qrXLUrl = qrImageUrl(State.targetUrl, 1200);
+
+    $("qrImg").src = State.qrUrl;
+    $("btnDownload").href = State.qrUrl;
+    $("btnSticker").href = State.qrXLUrl;
+
+    $("qrImg").onerror = function(){
+      note("⚠️ Le service image QR ne répond pas dans ce navigateur. Le lien public reste copiable et ouvrable.", "warn");
+    };
+
+    if(State.targetUrl === EXPLORE_PUBLIC_HOME){
+      note("⚠️ QR prêt vers la vitrine EXPLORE. Pour un lieu précis, ajoute un slug ou colle le lien de fiche publique.", "warn");
+    }else{
+      note("✅ QR prêt. Il ouvre une page publique EXPLORE, pas l’espace PRO.", "ok");
+    }
+
+    syncUi();
+  }
+
+  function shareWhatsapp(){
+    const text = "Découvre ce lieu sur DIGIY EXPLORE : " + State.targetUrl;
+    const wa = "https://wa.me/?text=" + encodeURIComponent(text);
+    window.open(wa, "_blank", "noopener");
+  }
+
+  async function bootGuardSoft(){
+    try{
+      if(window.DIGIY_GUARD?.ready){
+        return await window.DIGIY_GUARD.ready({
+          redirect:false,
+          preserve_validation:true,
+          allow_soft:true
+        });
+      }
+    }catch(e){
+      console.warn("[DIGIY EXPLORE QR] Guard soft warning", e);
+    }
+    return null;
   }
 
   function bind(){
-    $("btnGenerate").addEventListener("click",generate);
-    $("btnCopy").addEventListener("click",copyLink);
-    $("btnOpen").addEventListener("click",openTarget);
-    $("btnPrint").addEventListener("click",()=>window.print());
+    $("btnOpen").addEventListener("click", function(){
+      if(!State.targetUrl || isBadTarget(State.targetUrl)){
+        note("Lien public absent ou refusé.", "bad");
+        return;
+      }
+      window.open(State.targetUrl, "_blank", "noopener");
+    });
+
+    $("btnCopy").addEventListener("click", async function(){
+      try{
+        await copyText(State.targetUrl);
+        note("✅ Lien public copié.", "ok");
+      }catch(e){
+        console.error(e);
+        note("⚠️ Copie bloquée. Tu peux copier le lien affiché sous le QR.", "warn");
+      }
+    });
+
+    $("btnWhatsapp").addEventListener("click", function(){
+      if(!State.targetUrl || isBadTarget(State.targetUrl)){
+        note("Lien public absent ou refusé.", "bad");
+        return;
+      }
+      shareWhatsapp();
+    });
+
+    $("btnReset").addEventListener("click", function(){
+      State.targetUrl = EXPLORE_PUBLIC_HOME;
+      storageSet(TARGET_STORAGE_KEY, State.targetUrl);
+      renderQr();
+    });
+
+    $("btnSaveTarget").addEventListener("click", function(){
+      const cleaned = cleanPublicUrl($("targetInput").value);
+
+      if(!cleaned){
+        note("❌ Lien refusé. Colle une fiche publique EXPLORE, pas une page PRO.", "bad");
+        return;
+      }
+
+      State.targetUrl = cleaned;
+      storageSet(TARGET_STORAGE_KEY, State.targetUrl);
+      renderQr();
+    });
+
+    $("btnUseSlug").addEventListener("click", function(){
+      const slug = getSlug();
+
+      if(!canExposeSlug(slug)){
+        State.targetUrl = EXPLORE_PUBLIC_HOME;
+        note("⚠️ Aucun slug public propre trouvé. QR préparé vers la vitrine EXPLORE.", "warn");
+      }else{
+        State.slug = slug;
+        State.targetUrl = buildTargetFromSlug(slug);
+        storageSet(TARGET_STORAGE_KEY, State.targetUrl);
+      }
+
+      renderQr();
+    });
+
+    $("targetInput").addEventListener("keydown", function(e){
+      if(e.key === "Enter"){
+        e.preventDefault();
+        $("btnSaveTarget").click();
+      }
+    });
   }
 
-  bind();
-  generate();
+  async function init(){
+    cleanVisibleUrl();
+    bind();
 
+    State.slug = getSlug();
+    await bootGuardSoft();
+
+    State.targetUrl = buildTargetUrl();
+
+    renderQr();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", init);
+  }else{
+    init();
+  }
 })();
 </script>
-
 </body>
+<!-- DIGIY MON COMMERCE — QR ASTOU depuis moule EXPLORE — 20260514 -->
 </html>
+
+
