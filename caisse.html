@@ -860,6 +860,15 @@ init();
     return m?Number(String(m[1]).replace(/[^\d]/g,''))||0:0;
   }
 
+  function salePrice(text){
+    const s=String(text||'');
+    let m=s.match(/\b(?:a|à|prix|pour)\s+(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)?\b/i);
+    if(m)return Number(String(m[1]).replace(/[^\d]/g,''))||0;
+    m=s.match(/\b(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)\b/i);
+    return m?Number(String(m[1]).replace(/[^\d]/g,''))||0:0;
+  }
+
+
   function cleanName(s){
     return String(s||'')
       .replace(/\b(ajoute|ajouter|rajoute|rajouter|article|articles|stock|prix|vendu|vends|vend|vente|panier|mets|met|a|à|de|du|des|fcfa|f|francs|piece|pièce|pieces|pièces|unite|unité|unités|client|doit|dette|credit|crédit|vendeur|fin|mois|date|tel|telephone|téléphone|whatsapp|wa)\b/gi,' ')
@@ -966,14 +975,14 @@ init();
       const b=parseBatch(original);
       if(b.length>=2)return{type:'product_batch',title:'📦 Liste d’articles',items:b,note:original};
       if(b.length===1&&(original.includes(' à ')||original.includes(' a ')))return{type:'product_upsert',title:'📦 Article / stock',name:b[0].name,qty:b[0].qty,price:b[0].price,note:original};
-      return{type:'product_upsert',title:'📦 Article / stock',name:cleanName(original)||'Article',qty:qty(original),price:num(original),note:original};
+      return{type:'product_upsert',title:'📦 Article / stock',name:cleanName(original)||'Article',qty:qty(original),price:salePrice(original),note:original};
     }
 
     if(/\b(dette client|dettes clients|credit vendeur|client doit|doit|reste a payer|reste à payer)\b/.test(t))return{type:'client_debt',title:'📒 Dette client',client:clientName(original),phone:phone(original),amount:num(original),dueDate:parseDate(original),note:original};
 
     if(/\b(vendu|vends|vend|vente|mets au panier|met au panier|panier)\b/.test(t)){
       const m=original.match(/(?:vendu|vends|vend|vente|panier)\s+(.+?)(?:\s+(?:a|à)\s+\d|$)/i);
-      return{type:'sale_cart',title:'🛒 Vente / panier',name:cleanName(m?.[1]||original)||'Article',qty:qty(original),price:num(original),note:original};
+      return{type:'sale_cart',title:'🛒 Vente / panier',name:cleanName(m?.[1]||original)||'Article',qty:qty(original),price:salePrice(original),note:original};
     }
 
     if(/\b(note|rappelle|a faire|à faire|depense|dépense|achat)\b/.test(t))return{type:'note',title:'✍️ Note comptoir',amount:num(original),note:original};
@@ -1195,6 +1204,14 @@ init();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 
