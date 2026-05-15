@@ -4,8 +4,8 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Caisse POS universelle · V32 actions utiles</title>
-<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales blindées et oreille métier."/>
+<title>MON COMMERCE — Caisse POS universelle · V33 porte confirme pro</title>
+<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales, oreille métier et porte confirmer mon activité."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
@@ -398,6 +398,14 @@ a{text-decoration:none;color:inherit}
 }
 .nav-chip.door strong{font-weight:950}
 
+.nav-chip.confirm{
+  background:linear-gradient(135deg,#e8fff1,#fff8e8);
+  border-color:#f1d89b;
+  color:#0a4a25;
+  box-shadow:0 5px 14px rgba(22,167,101,.10);
+}
+.nav-chip.confirm strong{font-weight:950}
+
 </style>
 </head>
 <body>
@@ -420,6 +428,7 @@ a{text-decoration:none;color:inherit}
 
   <div class="home-strip comptoir">
     <button class="nav-chip active" onclick="showPage('page-caisse')">💰 Encaisser</button>
+    <a class="nav-chip confirm" href="./confirme-pro.html">✅ Confirmer mon activité</a>
     <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
     <a class="nav-chip door" href="./admin.html">📦 Marchandises</a>
     <button class="nav-chip gold" onclick="resetProductsFromProfile()">🧩 Profil métier</button>
@@ -433,7 +442,7 @@ a{text-decoration:none;color:inherit}
     <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
   </div>
 
-  <div class="profile-hint">🧩 <strong>Moule universel V32 :</strong> clic pour vendre, Actions utiles pour stock, crédit client, dépenses et commandes.</div>
+  <div class="profile-hint">🧩 <strong>Moule universel V33 :</strong> commence par Confirmer mon activité, puis Marchandises, Actions utiles et Caisse.</div>
   <div id="articles"></div>
   <div class="search-wrap">
     <span class="search-ico">🔍</span>
@@ -596,6 +605,7 @@ a{text-decoration:none;color:inherit}
   </div>
   <div class="home-strip comptoir">
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
+    <a class="nav-chip confirm" href="./confirme-pro.html">✅ Confirmer mon activité</a>
     <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
     <a class="nav-chip gold" href="./actions.html">⚡ Actions utiles</a>
@@ -645,6 +655,7 @@ a{text-decoration:none;color:inherit}
   <div id="notes"></div>
   <div class="home-strip comptoir">
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
+    <a class="nav-chip confirm" href="./confirme-pro.html">✅ Confirmer mon activité</a>
     <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
     <button class="nav-chip active" onclick="showPage('page-notes')">✍️ Notes</button>
     <a class="nav-chip gold" href="./actions.html">⚡ Actions utiles</a>
@@ -942,7 +953,7 @@ function setupCaisseNotice(){
     "Choisis le paiement.",
     "Quand l’argent est reçu, touche Encaisser.",
     "Le ticket reste disponible si le client le demande.",
-    "Pour tes coordonnées pro, touche Coordonnées pro. Pour prix, stock et marchandises, touche Marchandises. Pour crédit client, dépense ou ajout stock, touche Actions utiles."
+    "Pour mettre ton activité au propre, touche Confirmer mon activité. Pour tes coordonnées pro, touche Coordonnées pro. Pour prix, stock et marchandises, touche Marchandises. Pour crédit client, dépense ou ajout stock, touche Actions utiles."
   ].join(" ");
 
   let speaking=false;
@@ -993,9 +1004,9 @@ const DEMARRAGE_TEXT = [
   "Trois : la Caisse. C’est cet écran. Quand tes marchandises sont prêtes,",
   "tu touches une carte pour l’ajouter au panier, tu confirmes l’addition, et tu encaisses.",
   "Quatre : les Stats et les Notes, accessibles dans la barre en haut.",
-  "Cinq : le bouton jaune Actions utiles. Il prépare les textes du terrain en un clic :",
+  "Cinq : Confirmer mon activité. Cette porte vérifie le nom, la ville, le WhatsApp, les services, les paiements, le QR et la publication. Six : le bouton jaune Actions utiles. Il prépare les textes du terrain en un clic :",
   "dette client, ajout de stock, dépense ou commande. Plus besoin d'écrire.",
-  "Pour démarrer maintenant : touche Marchandises, programme tes articles, puis reviens encaisser."
+  "Pour démarrer maintenant : touche Confirmer mon activité, puis Marchandises, programme tes articles, puis reviens encaisser."
 ].join(' ');
 
 let _demarrageSpeaking = false;
@@ -1196,7 +1207,7 @@ const GUIDE_TEXTS = {
     "Quatrième zone : les Stats et les Notes.",
     "Les Stats gardent l’historique de toutes tes ventes et ton chiffre du jour.",
     "Les Actions utiles préparent les textes métier au clic : dette client, ajout stock, dépense, commande ou livraison. Les Notes gardent ensuite la trace.",
-    "Pour démarrer : va d’abord dans Marchandises, programme tes articles, puis reviens ici pour encaisser. Pour le stock, crédit client ou dépense, touche Actions utiles."
+    "Pour démarrer : va d’abord dans Confirmer mon activité, puis dans Marchandises, programme tes articles, puis reviens ici pour encaisser. Pour le stock, crédit client ou dépense, touche Actions utiles."
   ].join(' '),
   'page-paiement': [
     "Tu es sur le paiement.",
@@ -2074,6 +2085,319 @@ window.checkPremierLancement = checkPremierLancement;
 <button id="btnGuideAudio" onclick="speakGuide(_guideCurrentPage)">🎧 Guide</button>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
