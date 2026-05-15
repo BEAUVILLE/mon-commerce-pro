@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#04110d"/>
+<title>DIGIY — Confirme ton activité</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;900;950&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#04110d;
+  --surface:#071a10;
+  --card:#0c2318;
+  --border:#1a3d26;
+  --gold:#facc15;
+  --gold-dim:#b48a00;
+  --green:#16a765;
+  --green-light:#22c97e;
+  --red:#f87171;
+  --orange:#fb923c;
+  --text:#e8f5ec;
+  --muted:#8fbaa0;
+  --font:Outfit,system-ui,sans-serif;
+  --display:'Cormorant Garamond',Georgia,serif;
+  --radius:20px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:
+    radial-gradient(circle at top left,rgba(250,204,21,.08),transparent 30%),
+    radial-gradient(circle at bottom right,rgba(22,167,101,.08),transparent 34%),
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+/* HEADER */
+.header{
+  position:sticky;top:0;z-index:30;
+  background:rgba(4,17,13,.96);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(16px);
+  padding:14px 16px 12px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{
+  width:42px;height:42px;border-radius:14px;
+  background:linear-gradient(135deg,var(--gold),#fff3b0);
+  color:#04110d;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:950;flex-shrink:0;
+  box-shadow:0 10px 26px rgba(250,204,21,.18);
+}
+.brand-text{min-width:0}
+.brand-text .name{font-size:18px;font-weight:950;color:var(--text);line-height:1}
+.brand-text .sub{font-size:11px;color:var(--muted);font-weight:800;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step-counter{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:999px;padding:7px 13px;
+  font-size:13px;font-weight:950;color:var(--gold);
+  white-space:nowrap;
+}
+
+/* PROGRESS */
+.progress-wrap{background:var(--border);height:4px}
+.progress-bar{
+  height:100%;width:0;
+  background:linear-gradient(90deg,var(--green),var(--gold));
+  transition:width .35s ease;
+}
+
+/* DOCTRINE */
+.doctrine{
+  text-align:center;
+  padding:14px 16px 10px;
+  font-size:12px;font-weight:950;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gold-dim);
+}
+
+/* MAIN */
+.wizard{
+  padding:0 14px 110px;
+  max-width:560px;margin:0 auto;
+}
+.step{display:none;flex-direction:column;gap:16px;animation:fadeUp .24s ease}
+.step.active{display:flex}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.step-kicker{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(250,204,21,.12);border:1px solid rgba(250,204,21,.22);
+  border-radius:999px;padding:6px 12px;
+  font-size:11px;font-weight:950;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:8px;
+}
+.step-title{
+  font-family:var(--display);
+  font-size:clamp(25px,6vw,34px);
+  font-weight:700;line-height:1.04;
+  color:var(--text);
+}
+.step-card{
+  background:linear-gradient(180deg,rgba(12,35,24,.98),rgba(7,26,16,.98));
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:0 18px 60px rgba(0,0,0,.22);
+}
+.step-phrase{
+  font-size:15px;font-weight:800;
+  color:var(--text);line-height:1.5;
+  padding:16px;
+  border-bottom:1px solid var(--border);
+}
+.step-example{
+  padding:12px 16px;
+  background:rgba(250,204,21,.06);
+  border-bottom:1px solid var(--border);
+  font-size:13px;font-weight:800;
+  color:var(--gold-dim);line-height:1.5;
+  font-style:italic;
+}
+.helper-line{
+  padding:12px 16px;
+  background:rgba(22,167,101,.06);
+  border-bottom:1px solid var(--border);
+  font-size:13px;font-weight:800;
+  color:var(--muted);line-height:1.5;
+}
+
+/* VALUE */
+.current-val{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+}
+.current-val-label{
+  font-size:11px;font-weight:950;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--muted);margin-bottom:7px;
+}
+.current-val-value{
+  font-size:18px;font-weight:950;color:var(--green-light);
+  line-height:1.3;
+  word-break:break-word;
+}
+.current-val-value.empty{
+  color:var(--muted);font-style:italic;font-size:14px;
+}
+.mini-note{
+  margin-top:8px;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.45;
+  font-weight:750;
+}
+
+/* EDIT */
+.edit-zone{
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  display:none;
+}
+.edit-zone.open{display:block}
+.field-label{
+  font-size:11px;font-weight:950;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--muted);margin-bottom:8px;
+}
+input.field,select.field,textarea.field{
+  width:100%;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--border);
+  border-radius:14px;padding:14px;
+  font-size:16px;font-weight:800;color:var(--text);
+  outline:none;transition:border-color .15s,background .15s;
+}
+input.field:focus,select.field:focus,textarea.field:focus{
+  border-color:var(--gold);
+  background:rgba(250,204,21,.05);
+}
+textarea.field{min-height:96px;resize:vertical;line-height:1.45}
+
+/* CHECKS */
+.check-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:8px;padding:14px 16px;
+  border-bottom:1px solid var(--border);
+}
+.check-item{
+  border:1px solid var(--border);
+  border-radius:15px;padding:12px;
+  display:flex;align-items:center;gap:9px;
+  background:rgba(255,255,255,.03);
+  cursor:pointer;transition:background .15s,border-color .15s,transform .12s;
+  text-align:left;color:var(--text);
+}
+.check-item:active{transform:scale(.98)}
+.check-item.checked{
+  background:rgba(22,167,101,.13);
+  border-color:rgba(34,201,126,.75);
+}
+.check-icon{font-size:18px}
+.check-label{font-size:13px;font-weight:950;color:var(--text);line-height:1.25}
+.check-mark{
+  margin-left:auto;font-size:15px;
+  opacity:0;transition:opacity .15s;color:var(--green-light);
+}
+.check-item.checked .check-mark{opacity:1}
+
+/* QR */
+.qr-box{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+}
+.qr-img{
+  width:96px;height:96px;border-radius:14px;
+  background:#fff;padding:7px;object-fit:contain;
+  border:1px solid rgba(255,255,255,.18);
+}
+.qr-copy{
+  flex:1;
+  min-width:0;
+}
+.qr-copy strong{display:block;color:var(--gold);font-size:14px;margin-bottom:6px}
+.qr-copy span{display:block;color:var(--muted);font-size:12px;line-height:1.45;word-break:break-all}
+
+/* BUTTONS */
+.btns{
+  padding:14px 16px;
+  display:flex;flex-direction:column;gap:9px;
+}
+.btn{
+  width:100%;padding:15px 16px;
+  border-radius:16px;border:none;
+  font-size:15px;font-weight:950;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .13s,box-shadow .13s,opacity .13s;
+}
+.btn:active{transform:scale(.975)}
+.btn-confirm{
+  background:linear-gradient(135deg,var(--green),#0da058);
+  color:#fff;
+  box-shadow:0 8px 24px rgba(22,167,101,.25);
+}
+.btn-edit{
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--border);
+  color:var(--text);
+}
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold),#e5b800);
+  color:#04110d;
+  box-shadow:0 8px 24px rgba(250,204,21,.2);
+}
+.btn-ghost{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--muted);
+  font-size:13px;
+  padding:12px 16px;
+}
+
+/* BADGE */
+.confirmed-badge{
+  display:none;align-items:center;gap:8px;
+  padding:12px 16px;
+  background:rgba(22,167,101,.1);
+  border-top:1px solid rgba(22,167,101,.2);
+  font-size:13px;font-weight:950;
+  color:var(--green-light);
+}
+.confirmed-badge.show{display:flex}
+
+/* NAV */
+.nav-bottom{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(4,17,13,.98);
+  border-top:1px solid var(--border);
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  display:flex;gap:10px;
+  max-width:560px;margin:0 auto;
+  z-index:20;
+}
+.nav-btn{
+  flex:1;padding:14px;border-radius:15px;
+  font-size:14px;font-weight:950;border:none;
+  transition:transform .13s;
+}
+.nav-btn:active{transform:scale(.96)}
+.nav-prev{
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--border);
+  color:var(--muted);
+}
+.nav-next{
+  background:var(--gold);
+  color:#04110d;
+  flex:2;
+}
+
+/* FINAL */
+.final-screen{
+  display:none;flex-direction:column;align-items:center;
+  text-align:center;padding:44px 16px 110px;gap:20px;
+  max-width:560px;margin:0 auto;
+}
+.final-screen.show{display:flex}
+.final-star{font-size:72px;line-height:1}
+.final-title{
+  font-family:var(--display);font-size:36px;font-weight:700;
+  color:var(--text);line-height:1.08;
+}
+.final-sub{
+  font-size:15px;color:var(--muted);font-weight:800;line-height:1.6;
+  max-width:360px;
+}
+.final-doctrine{
+  background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.22);
+  border-radius:18px;padding:16px 20px;
+  font-size:14px;font-weight:950;color:var(--gold);
+  line-height:1.6;font-style:italic;
+  max-width:380px;
+}
+.final-actions{display:flex;flex-direction:column;gap:10px;width:100%;max-width:380px}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:92px;left:50%;
+  transform:translateX(-50%) translateY(18px);
+  background:var(--green);color:#fff;
+  padding:11px 20px;border-radius:999px;
+  font-weight:950;font-size:14px;
+  transition:.22s;z-index:99;opacity:0;white-space:nowrap;
+  box-shadow:0 8px 24px rgba(22,167,101,.3);
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* AUDIO */
+#btnGuideOnboard{
+  position:fixed;bottom:78px;right:14px;z-index:200;
+  background:linear-gradient(160deg,#fff8e8,#fff3d0);
+  border:1.5px solid #f1d89b;color:#7a4c00;
+  border-radius:999px;padding:10px 14px;
+  font-size:12px;font-weight:950;
+  box-shadow:0 6px 18px rgba(122,76,0,.22);
+  display:inline-flex;align-items:center;gap:5px;
+  cursor:pointer;transition:transform .13s;
+}
+#btnGuideOnboard:active{transform:scale(.95)}
+
+@media(max-width:400px){
+  .check-grid{grid-template-columns:1fr}
+  .brand-text .name{font-size:17px}
+  .step-title{font-size:24px}
+  .qr-box{align-items:flex-start}
+  .qr-img{width:84px;height:84px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">
+    <div class="logo">⚡</div>
+    <div class="brand-text">
+      <div class="name">DIGIY</div>
+      <div class="sub">Confirme ton activité</div>
+    </div>
+  </div>
+  <div class="step-counter" id="stepCounter">1 / 15</div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="doctrine" id="doctrineTop">DIGIY prépare · Le pro vérifie · Le terrain confirme</div>
+
+<main class="wizard" id="wizard"></main>
+
+<section class="final-screen" id="finalScreen">
+  <div class="final-star">🦅</div>
+  <div class="final-title">Ton activité est prête.</div>
+  <div class="final-sub">Tout est confirmé. DIGIY a structuré ta fiche. Le terrain peut démarrer proprement.</div>
+  <div class="final-doctrine">“DIGIY prépare. Le pro vérifie. Le terrain confirme.”</div>
+  <div class="final-actions">
+    <button class="btn btn-gold" onclick="goPublic()">🌍 Voir ma fiche publique</button>
+    <button class="btn btn-confirm" onclick="goCaisse()">💰 Aller à la caisse</button>
+    <button class="btn btn-edit" onclick="restart()">🔄 Recommencer la vérification</button>
+  </div>
+</section>
+
+<div class="nav-bottom" id="navBottom">
+  <button class="nav-btn nav-prev" id="btnPrev" onclick="prevStep()">← Retour</button>
+  <button class="nav-btn nav-next" id="btnNext" onclick="nextStep()">Suivant →</button>
+</div>
+
+<button id="btnGuideOnboard" onclick="speakStepGuide()">🎧 Guide</button>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════
+   DIGIY — CONFIRME TON ACTIVITÉ PRO
+   Le pro clique plus qu'il n'écrit.
+   DIGIY prépare. Le pro vérifie. Le terrain confirme.
+   Stockage principal : caisse_shop
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* STORAGE */
+function readJSON(k, fb){
+  try{
+    const d = localStorage.getItem(k);
+    return d ? JSON.parse(d) : fb;
+  }catch(e){ return fb; }
+}
+function saveJSON(k, v){
+  try{
+    localStorage.setItem(k, JSON.stringify(v));
+    return true;
+  }catch(e){ return false; }
+}
+function getShop(){ return readJSON('caisse_shop', {}); }
+function saveShop(data){
+  const s = getShop();
+  Object.assign(s, data);
+  saveJSON('caisse_shop', s);
+}
+function getConfirmed(){ return readJSON('digiy_confirmed', {}); }
+function setConfirmed(key){
+  const c = getConfirmed();
+  c[key] = Date.now();
+  saveJSON('digiy_confirmed', c);
+}
+function cleanPhone(v){
+  return String(v || '').replace(/[^\d+]/g, '').trim();
+}
+
+/* ROUTES */
+const ROUTES = {
+  admin: './admin.html',
+  caisse: './caisse.html',
+  profile: './profile.html',
+  qr: './qr.html'
+};
+
+/* STEPS */
+const STEPS = [
+  {
+    id:'identity',
+    num:1,
+    icon:'🏪',
+    title:"Identité de l'activité",
+    phrase:"Voici le nom de ton activité. Confirme si c'est bien comme ça.",
+    type:'text',
+    shopKey:'display_name',
+    placeholder:'Ex : Astou Boutique, Aliou Taxi, Salon Mariama…',
+    btnConfirm:"✅ C'est bon",
+    btnEdit:'✏️ Modifier',
+    guide:"Étape un. Le nom de ton activité. C'est le premier mot que le client verra. Confirme s'il est bon, ou touche Modifier pour le changer."
+  },
+  {
+    id:'metier',
+    num:2,
+    icon:'🔧',
+    title:'Métier / catégorie',
+    phrase:'Choisis ton métier principal pour que les clients te trouvent facilement.',
+    type:'select',
+    shopKey:'category',
+    options:['Boutique / Textile','Alimentation / Épicerie','Beauté / Cosmétique','Salon coiffure','Chauffeur / Transport','Artisan / Services','Restaurant / Restauration','Quincaillerie / Matériaux','Mode / Prêt-à-porter','Autre'],
+    btnConfirm:'✅ Confirmer ce métier',
+    btnEdit:'➕ Choisir un autre',
+    guide:'Étape deux. Ton métier. Le client cherche par catégorie. Choisis celle qui correspond le mieux à ce que tu fais.'
+  },
+  {
+    id:'zone',
+    num:3,
+    icon:'📍',
+    title:'Ville / zone',
+    phrase:"Indique où tu travailles. C'est ce qui aide le client à te repérer.",
+    type:'text',
+    shopKey:'city',
+    placeholder:'Ex : Saly, Ngaparou, Mbour, Somone, Dakar…',
+    btnConfirm:'✅ Confirmer ma zone',
+    btnEdit:'📍 Modifier la ville',
+    guide:"Étape trois. Ta zone. Saly, Ngaparou, Mbour, Dakar. C'est ce qui fait que le client te trouve dans son quartier."
+  },
+  {
+    id:'whatsapp',
+    num:4,
+    icon:'📱',
+    title:'Contact WhatsApp',
+    phrase:'Ce numéro permet aux clients de te contacter directement.',
+    type:'tel',
+    shopKey:'whatsapp',
+    placeholder:'Ex : 221771234567',
+    btnConfirm:'✅ Ce numéro est bon',
+    btnEdit:'✏️ Changer le numéro',
+    guide:"Étape quatre. Ton WhatsApp. C'est le lien direct entre le client et toi. Vérifie que le numéro commence bien par l'indicatif pays."
+  },
+  {
+    id:'description',
+    num:5,
+    icon:'💬',
+    title:'Description courte',
+    phrase:'DIGIY a préparé une phrase simple pour présenter ton activité.',
+    type:'textarea',
+    shopKey:'bio',
+    placeholder:'Je propose un service sérieux, rapide et direct pour les clients de ma zone.',
+    example:'“Je propose un service sérieux, rapide et direct pour les clients de ma zone.”',
+    btnConfirm:'✅ Garder cette phrase',
+    btnEdit:'✏️ Ajuster',
+    guide:'Étape cinq. Ta description. Deux ou trois phrases suffisent. Le client doit comprendre en cinq secondes ce que tu fais et pourquoi te choisir.'
+  },
+  {
+    id:'services',
+    num:6,
+    icon:'✅',
+    title:'Services proposés',
+    phrase:'Coche les services que tu proposes vraiment.',
+    type:'checks',
+    shopKey:'services',
+    options:[
+      {key:'vente',label:'Vente directe',icon:'🛒'},
+      {key:'livraison',label:'Livraison',icon:'🛵'},
+      {key:'commande',label:'Sur commande',icon:'📝'},
+      {key:'retrait',label:'Retrait sur place',icon:'🏪'},
+      {key:'conseil',label:'Conseil / essayage',icon:'💡'},
+      {key:'credit',label:'Crédit client',icon:'🤝'},
+      {key:'reparation',label:'Réparation',icon:'🔧'},
+      {key:'autre',label:'Autre service',icon:'➕'}
+    ],
+    btnConfirm:'✅ Confirmer mes services',
+    guide:"Étape six. Tes services. Coche seulement ce que tu fais vraiment. Le client doit savoir exactement ce qu'il peut attendre de toi."
+  },
+  {
+    id:'offres',
+    num:7,
+    icon:'🎁',
+    title:'Produits / offres',
+    phrase:'Choisis ce que tu veux montrer aux clients.',
+    type:'info',
+    shopKey:'offres_ok',
+    phrase2:"Tes marchandises viennent directement de ta caisse. Si tu as déjà programmé tes articles, c'est bon.",
+    btnConfirm:'✅ Confirmer mes offres',
+    btnEdit:'📦 Aller programmer les marchandises',
+    editAction:'admin',
+    guide:"Étape sept. Tes offres. Si tu as déjà des marchandises dans ta caisse, elles apparaîtront automatiquement sur ta fiche. Sinon, va dans Marchandises."
+  },
+  {
+    id:'tarifs',
+    num:8,
+    icon:'🏷️',
+    title:'Tarifs',
+    phrase:'Ajoute tes prix si tu veux les afficher. Sinon, le client peut demander par WhatsApp.',
+    type:'radio',
+    shopKey:'tarifs_mode',
+    options:[
+      {key:'afficher',label:'Afficher mes tarifs',icon:'✅'},
+      {key:'demande',label:'Prix sur demande',icon:'💬'}
+    ],
+    defaultKey:'demande',
+    btnConfirm:'✅ Confirmer le choix',
+    btnEdit:'✏️ Modifier',
+    guide:'Étape huit. Tes tarifs. Tu peux afficher tes prix directement, ou laisser le client te demander par WhatsApp. Les deux fonctionnent.'
+  },
+  {
+    id:'photo',
+    num:9,
+    icon:'📸',
+    title:"Photo de l'activité",
+    phrase:'Ajoute une belle photo pour donner confiance.',
+    type:'text',
+    shopKey:'photo_url',
+    placeholder:'https://... lien vers ta photo en ligne',
+    btnConfirm:'✅ Cette photo est bonne',
+    btnEdit:'📸 Changer la photo',
+    guide:'Étape neuf. Ta photo. Une image claire de ta boutique ou de ton activité. Elle doit être accessible sur Internet. Copie le lien ici.'
+  },
+  {
+    id:'horaires',
+    num:10,
+    icon:'🕒',
+    title:'Horaires',
+    phrase:'Indique quand les clients peuvent te contacter.',
+    type:'text',
+    shopKey:'hours',
+    placeholder:'Ex : Lun-Sam 8h-21h, Dim 9h-18h',
+    btnConfirm:'✅ Confirmer mes horaires',
+    btnEdit:'🕒 Modifier',
+    guide:'Étape dix. Tes horaires. Le client a besoin de savoir quand tu es disponible avant de se déplacer ou d’écrire.'
+  },
+  {
+    id:'paiement',
+    num:11,
+    icon:'💳',
+    title:'Modes de paiement',
+    phrase:'Choisis comment tu veux être payé directement.',
+    type:'checks',
+    shopKey:'pay_modes',
+    options:[
+      {key:'especes',label:'Espèces',icon:'💵'},
+      {key:'wave',label:'Wave',icon:'🌊'},
+      {key:'orange',label:'Orange Money',icon:'🟠'},
+      {key:'carte',label:'Carte / TPE',icon:'💳'},
+      {key:'virement',label:'Virement',icon:'🏦'},
+      {key:'autre',label:'Autre',icon:'➕'}
+    ],
+    btnConfirm:'✅ Confirmer les paiements',
+    guide:'Étape onze. Tes modes de paiement. Coche tout ce que tu acceptes. Le client choisira ce qui lui convient.'
+  },
+  {
+    id:'qrcode',
+    num:12,
+    icon:'📲',
+    title:'QR Code',
+    phrase:"Ton QR permet au client d'ouvrir ta fiche rapidement.",
+    type:'qr',
+    shopKey:'qr_ok',
+    btnConfirm:'✅ Confirmer mon lien QR',
+    btnEdit:'👁️ Voir / imprimer mon QR',
+    editAction:'qr',
+    guide:"Étape douze. Ton QR code. Le client scanne, ta fiche s'ouvre. Tu peux l'imprimer et l'afficher au comptoir ou l'envoyer par WhatsApp."
+  },
+  {
+    id:'publication',
+    num:13,
+    icon:'🌍',
+    title:'Publication',
+    phrase:'Quand tout est prêt, tu peux rendre ta fiche visible.',
+    type:'radio',
+    shopKey:'is_published',
+    options:[
+      {key:'preview',label:'Voir avant de publier',icon:'👁️'},
+      {key:'published',label:'Publier ma fiche',icon:'🌍'},
+      {key:'draft',label:'Garder en brouillon',icon:'⏸️'}
+    ],
+    defaultKey:'preview',
+    btnConfirm:'✅ Confirmer la visibilité',
+    guide:'Étape treize. La publication. Regarde ta fiche avant. Ensuite tu peux publier, ou garder en brouillon si tu veux encore modifier.'
+  },
+  {
+    id:'note_metier',
+    num:14,
+    icon:'✍️',
+    title:'Note rapide métier',
+    phrase:"Écris ou dicte une action simple, DIGIY range l'information.",
+    type:'note',
+    shopKey:'last_note',
+    placeholder:"Ex : J'ai vendu un produit à 5000. / J'ai reçu 28000 en cash.",
+    example:"“J'ai vendu un produit à 5000.” — “J'ai reçu 28000 en cash.” — “J'ai fait une course chauffeur.”",
+    btnConfirm:'✅ Enregistrer',
+    btnEdit:'🧹 Vider',
+    guide:"Étape quatorze. Une note rapide. Ce que tu veux garder en mémoire maintenant. Une vente, une rentrée d'argent, une course. Dicte ou écris, DIGIY enregistre."
+  },
+  {
+    id:'validation',
+    num:15,
+    icon:'🦅',
+    title:'Validation finale',
+    phrase:'Relis vite. Si tout est bon, DIGIY garde ta fiche propre.',
+    type:'summary',
+    shopKey:'validated',
+    btnConfirm:'✅ Tout est bon',
+    btnEdit:'✏️ Corriger une section',
+    guide:'Étape quinze. La validation. Tu es à la fin. Relis rapidement. Si tout est bon, touche le bouton vert. DIGIY garde ta fiche propre et prête.'
+  }
+];
+
+let current = 0;
+let checks = {};
+
+/* INIT */
+function init(){
+  const shop = getShop();
+  STEPS.forEach(s=>{
+    if(s.type === 'checks'){
+      const saved = shop[s.shopKey];
+      checks[s.id] = new Set(Array.isArray(saved) ? saved : []);
+    }
+  });
+  renderAll();
+  goStep(0);
+}
+
+/* HELPERS */
+function esc(v){
+  return String(v ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
+function productCount(){
+  const p = readJSON('caisse_prods', []);
+  return Array.isArray(p) ? p.length : 0;
+}
+function getPublicUrl(){
+  const shop = getShop();
+  if(shop.qr_target_url) return shop.qr_target_url;
+  if(shop.public_url) return shop.public_url;
+  if(shop.slug) return window.location.origin + '/profile.html?slug=' + encodeURIComponent(shop.slug);
+  return window.location.origin + '/profile.html';
+}
+function safeQrApi(url){
+  return 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=' + encodeURIComponent(url);
+}
+
+/* RENDER */
+function renderAll(){
+  const wizard = document.getElementById('wizard');
+  wizard.innerHTML = STEPS.map(s=>renderStep(s)).join('');
+}
+
+function renderStep(s){
+  const shop = getShop();
+  const confirmed = getConfirmed();
+  const val = shop[s.shopKey];
+  const isConfirmed = !!confirmed[s.id];
+
+  let currentValHtml = '';
+  let editZoneHtml = '';
+  let checkGridHtml = '';
+
+  if(s.type === 'text' || s.type === 'tel'){
+    const shown = val || 'Non renseigné';
+    const empty = val ? '' : 'empty';
+    const inputType = s.type === 'tel' ? 'tel' : 'text';
+    currentValHtml = `
+      <div class="current-val">
+        <div class="current-val-label">Valeur actuelle</div>
+        <div class="current-val-value ${empty}">${esc(shown)}</div>
+      </div>`;
+    editZoneHtml = `
+      <div class="edit-zone" id="edit-${s.id}">
+        <div class="field-label">Nouvelle valeur</div>
+        <input class="field" type="${inputType}" id="inp-${s.id}" value="${esc(val || '')}" placeholder="${esc(s.placeholder || '')}"/>
+      </div>`;
+  }
+
+  else if(s.type === 'textarea'){
+    const shown = val || s.placeholder || 'Non renseigné';
+    const empty = val ? '' : 'empty';
+    currentValHtml = `
+      <div class="current-val">
+        <div class="current-val-label">Description actuelle</div>
+        <div class="current-val-value ${empty}">${esc(shown)}</div>
+      </div>`;
+    editZoneHtml = `
+      <div class="edit-zone" id="edit-${s.id}">
+        <div class="field-label">Modifier la description</div>
+        <textarea class="field" id="inp-${s.id}">${esc(val || s.placeholder || '')}</textarea>
+      </div>`;
+  }
+
+  else if(s.type === 'select'){
+    const selected = val || s.options[0];
+    const opts = s.options.map(o=>`<option value="${esc(o)}" ${selected===o?'selected':''}>${esc(o)}</option>`).join('');
+    currentValHtml = `
+      <div class="current-val">
+        <div class="current-val-label">Métier sélectionné</div>
+        <div class="current-val-value ${val ? '' : 'empty'}">${esc(val || 'Non choisi')}</div>
+      </div>`;
+    editZoneHtml = `
+      <div class="edit-zone" id="edit-${s.id}">
+        <div class="field-label">Choisir</div>
+        <select class="field" id="inp-${s.id}">${opts}</select>
+      </div>`;
+  }
+
+  else if(s.type === 'radio'){
+    const selected = val || s.defaultKey || s.options[0].key;
+    checkGridHtml = `
+      <div class="check-grid" id="edit-${s.id}" style="display:grid">
+        ${s.options.map(o=>`
+          <button type="button" class="check-item ${selected===o.key?'checked':''}" data-key="${esc(o.key)}" onclick="selectRadio('${s.id}','${esc(o.key)}',this)">
+            <span class="check-icon">${o.icon}</span>
+            <span class="check-label">${esc(o.label)}</span>
+            <span class="check-mark">✓</span>
+          </button>`).join('')}
+      </div>`;
+  }
+
+  else if(s.type === 'checks'){
+    const active = checks[s.id] || new Set();
+    checkGridHtml = `
+      <div class="check-grid" id="edit-${s.id}" style="display:grid">
+        ${s.options.map(o=>`
+          <button type="button" class="check-item ${active.has(o.key)?'checked':''}" data-key="${esc(o.key)}" onclick="toggleCheck('${s.id}','${esc(o.key)}',this)">
+            <span class="check-icon">${o.icon}</span>
+            <span class="check-label">${esc(o.label)}</span>
+            <span class="check-mark">✓</span>
+          </button>`).join('')}
+      </div>`;
+  }
+
+  else if(s.type === 'note'){
+    editZoneHtml = `
+      <div class="edit-zone open" id="edit-${s.id}">
+        <div class="field-label">Ta note rapide</div>
+        <textarea class="field" id="inp-${s.id}" placeholder="${esc(s.placeholder || '')}"></textarea>
+      </div>`;
+  }
+
+  else if(s.type === 'info'){
+    const n = productCount();
+    const msg = n > 0
+      ? `${n} article${n > 1 ? 's' : ''} programmé${n > 1 ? 's' : ''}`
+      : 'Aucune marchandise encore';
+    currentValHtml = `
+      <div class="current-val">
+        <div class="current-val-label">Marchandises dans la caisse</div>
+        <div class="current-val-value ${n ? '' : 'empty'}">${esc(msg)}</div>
+        <div class="mini-note">Cette étape confirme que la fiche peut reprendre les offres déjà préparées dans la caisse.</div>
+      </div>`;
+  }
+
+  else if(s.type === 'qr'){
+    const url = getPublicUrl();
+    currentValHtml = `
+      <div class="current-val">
+        <div class="current-val-label">Lien de ta fiche</div>
+        <div class="current-val-value" style="font-size:13px;word-break:break-all">${esc(url)}</div>
+      </div>
+      <div class="qr-box">
+        <img class="qr-img" alt="QR code de la fiche" src="${safeQrApi(url)}"/>
+        <div class="qr-copy">
+          <strong>QR prêt à montrer</strong>
+          <span>Le QR ouvre le lien public connu par DIGIY. Si tu as une page QR dédiée, le bouton ouvre qr.html.</span>
+        </div>
+      </div>`;
+  }
+
+  else if(s.type === 'summary'){
+    const c = getConfirmed();
+    const ids = STEPS.filter(x=>x.id !== 'validation').map(x=>x.id);
+    const count = ids.filter(id=>!!c[id]).length;
+    currentValHtml = `
+      <div class="current-val">
+        <div class="current-val-label">Sections confirmées</div>
+        <div class="current-val-value">${count} / ${STEPS.length - 1} sections vérifiées</div>
+        <div class="mini-note">Tu peux finaliser, ou revenir au début pour corriger une section.</div>
+      </div>`;
+  }
+
+  const exampleHtml = s.example ? `<div class="step-example">${esc(s.example)}</div>` : '';
+  const phrase2Html = s.phrase2 ? `<div class="helper-line">${esc(s.phrase2)}</div>` : '';
+
+  let secondButton = '';
+  if(s.btnEdit){
+    if(s.editAction === 'admin'){
+      secondButton = `<button type="button" class="btn btn-edit" onclick="goAdmin()">${s.btnEdit}</button>`;
+    }else if(s.editAction === 'qr'){
+      secondButton = `<button type="button" class="btn btn-edit" onclick="goQr()">${s.btnEdit}</button>`;
+    }else{
+      secondButton = `<button type="button" class="btn btn-edit" onclick="toggleEdit('${s.id}')">${s.btnEdit}</button>`;
+    }
+  }
+
+  let btnsHtml = '';
+  if(s.type === 'note'){
+    btnsHtml = `
+      <div class="btns">
+        <button type="button" class="btn btn-confirm" onclick="saveNote('${s.id}')">✅ Enregistrer</button>
+        <button type="button" class="btn btn-edit" onclick="clearNote('${s.id}')">🧹 Vider</button>
+      </div>`;
+  }else if(s.type === 'summary'){
+    btnsHtml = `
+      <div class="btns">
+        <button type="button" class="btn btn-gold" onclick="finish()">✅ Tout est bon — Finaliser</button>
+        <button type="button" class="btn btn-edit" onclick="goStep(0)">✏️ Recommencer la vérification</button>
+        <button type="button" class="btn btn-confirm" onclick="goPublic()">🌍 Voir ma fiche publique</button>
+      </div>`;
+  }else{
+    btnsHtml = `
+      <div class="btns">
+        <button type="button" class="btn btn-confirm" onclick="confirmStep('${s.id}')">${s.btnConfirm || '✅ Confirmer'}</button>
+        ${secondButton}
+      </div>`;
+  }
+
+  return `
+    <section class="step" id="step-${s.id}">
+      <div>
+        <div class="step-kicker">${s.icon} Étape ${s.num}</div>
+        <h1 class="step-title">${esc(s.title)}</h1>
+      </div>
+      <div class="step-card">
+        <div class="step-phrase">${esc(s.phrase)}</div>
+        ${exampleHtml}
+        ${phrase2Html}
+        ${currentValHtml}
+        ${checkGridHtml}
+        ${editZoneHtml}
+        ${btnsHtml}
+        <div class="confirmed-badge ${isConfirmed ? 'show' : ''}" id="badge-${s.id}">
+          ✅ Section confirmée — tu peux passer à la suite
+        </div>
+      </div>
+    </section>`;
+}
+
+/* NAVIGATION */
+function goStep(idx){
+  document.querySelectorAll('.step').forEach(el=>el.classList.remove('active'));
+  const step = STEPS[idx];
+  if(!step) return;
+  const el = document.getElementById('step-' + step.id);
+  if(el) el.classList.add('active');
+  current = idx;
+
+  const pct = ((idx + 1) / STEPS.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('stepCounter').textContent = (idx + 1) + ' / ' + STEPS.length;
+  document.getElementById('btnPrev').style.visibility = idx === 0 ? 'hidden' : 'visible';
+  document.getElementById('btnNext').textContent = idx === STEPS.length - 1 ? 'Finaliser →' : 'Suivant →';
+
+  try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){ window.scrollTo(0,0); }
+}
+function nextStep(){
+  if(current < STEPS.length - 1) goStep(current + 1);
+  else finish();
+}
+function prevStep(){
+  if(current > 0) goStep(current - 1);
+}
+
+/* CONFIRMATION */
+function confirmStep(id){
+  const s = STEPS.find(x=>x.id === id);
+  if(!s) return;
+
+  if(['text','tel','textarea','select'].includes(s.type)){
+    const inp = document.getElementById('inp-' + id);
+    if(inp){
+      let value = inp.value.trim();
+      if(s.type === 'tel') value = cleanPhone(value);
+      if(value) saveShop({[s.shopKey]: value});
+    }
+    const ez = document.getElementById('edit-' + id);
+    if(ez) ez.classList.remove('open');
+  }
+
+  if(s.type === 'checks'){
+    const arr = [...(checks[id] || new Set())];
+    saveShop({[s.shopKey]: arr});
+  }
+
+  if(s.type === 'radio'){
+    const active = document.querySelector('#edit-' + id + ' .check-item.checked');
+    const value = active ? active.getAttribute('data-key') : (s.defaultKey || s.options[0].key);
+    saveShop({[s.shopKey]: value});
+  }
+
+  if(s.type === 'info'){
+    saveShop({[s.shopKey]: true});
+  }
+
+  if(s.type === 'qr'){
+    const url = getPublicUrl();
+    saveShop({[s.shopKey]: true, qr_target_url: url});
+  }
+
+  setConfirmed(id);
+  const badge = document.getElementById('badge-' + id);
+  if(badge) badge.classList.add('show');
+
+  toast('✅ Section confirmée');
+  setTimeout(()=>nextStep(), 560);
+}
+
+/* EDIT */
+function toggleEdit(id){
+  const ez = document.getElementById('edit-' + id);
+  if(!ez) return;
+  const isOpen = ez.classList.contains('open');
+  ez.classList.toggle('open');
+  if(!isOpen){
+    const inp = ez.querySelector('input,textarea,select');
+    if(inp) setTimeout(()=>inp.focus(), 80);
+  }
+}
+
+/* CHECKS */
+function toggleCheck(stepId, key, btn){
+  if(!checks[stepId]) checks[stepId] = new Set();
+  if(checks[stepId].has(key)){
+    checks[stepId].delete(key);
+    btn.classList.remove('checked');
+  }else{
+    checks[stepId].add(key);
+    btn.classList.add('checked');
+  }
+}
+function selectRadio(stepId, key, btn){
+  const grid = document.getElementById('edit-' + stepId);
+  if(grid){
+    grid.querySelectorAll('.check-item').forEach(b=>b.classList.remove('checked'));
+  }
+  btn.classList.add('checked');
+  btn.setAttribute('data-key', key);
+}
+
+/* NOTE RAPIDE */
+function saveNote(id){
+  const inp = document.getElementById('inp-' + id);
+  const text = (inp && inp.value ? inp.value : '').trim();
+  if(!text){
+    toast("Écris une note d'abord");
+    return;
+  }
+  const notes = readJSON('caisse_notes', []);
+  const safeNotes = Array.isArray(notes) ? notes : [];
+  safeNotes.unshift({
+    id: Date.now(),
+    date: new Date().toISOString(),
+    type: 'autre',
+    amount: 0,
+    text
+  });
+  saveJSON('caisse_notes', safeNotes);
+
+  const s = STEPS.find(x=>x.id === id);
+  if(s) saveShop({[s.shopKey]: text});
+
+  setConfirmed(id);
+  const badge = document.getElementById('badge-' + id);
+  if(badge) badge.classList.add('show');
+
+  toast('✅ Note enregistrée');
+  setTimeout(()=>nextStep(), 650);
+}
+function clearNote(id){
+  const inp = document.getElementById('inp-' + id);
+  if(inp) inp.value = '';
+  toast('🧹 Vidé');
+}
+
+/* FINAL */
+function finish(){
+  saveShop({validated: new Date().toISOString()});
+  setConfirmed('validation');
+
+  document.getElementById('wizard').style.display = 'none';
+  document.getElementById('doctrineTop').style.display = 'none';
+  document.getElementById('navBottom').style.display = 'none';
+  document.getElementById('btnGuideOnboard').style.display = 'none';
+  document.getElementById('stepCounter').textContent = 'Terminé 🦅';
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('finalScreen').classList.add('show');
+
+  toast('🦅 Activité confirmée !');
+}
+
+/* ROUTE ACTIONS */
+function goPublic(){ window.location.href = ROUTES.profile; }
+function goCaisse(){ window.location.href = ROUTES.caisse; }
+function goAdmin(){ window.location.href = ROUTES.admin; }
+function goQr(){ window.location.href = ROUTES.qr; }
+
+function restart(){
+  document.getElementById('wizard').style.display = '';
+  document.getElementById('doctrineTop').style.display = '';
+  document.getElementById('navBottom').style.display = '';
+  document.getElementById('btnGuideOnboard').style.display = '';
+  document.getElementById('finalScreen').classList.remove('show');
+  renderAll();
+  goStep(0);
+}
+
+/* TOAST */
+let _tt = null;
+function toast(msg){
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(_tt);
+  _tt = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* AUDIO GUIDE */
+let _guideSpeaking = false;
+function speakStepGuide(){
+  if(!('speechSynthesis' in window)){
+    toast('Audio non disponible');
+    return;
+  }
+
+  const btn = document.getElementById('btnGuideOnboard');
+
+  if(_guideSpeaking){
+    try{ speechSynthesis.cancel(); }catch(e){}
+    _guideSpeaking = false;
+    if(btn) btn.textContent = '🎧 Guide';
+    return;
+  }
+
+  const s = STEPS[current];
+  const text = s.guide || s.phrase;
+
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR';
+    u.rate = 0.84;
+    u.pitch = 1.02;
+
+    const stop = ()=>{
+      _guideSpeaking = false;
+      if(btn) btn.textContent = '🎧 Guide';
+    };
+
+    u.onstart = ()=>{
+      _guideSpeaking = true;
+      if(btn) btn.textContent = '⏹ Stop';
+    };
+    u.onend = stop;
+    u.onerror = stop;
+
+    const speakNow = ()=>{
+      const voices = speechSynthesis.getVoices() || [];
+      const fr = voices.find(v=>/^fr/i.test(v.lang));
+      if(fr) u.voice = fr;
+      try{ speechSynthesis.speak(u); }catch(e){ stop(); }
+    };
+
+    if(speechSynthesis.getVoices().length){
+      speakNow();
+    }else{
+      speechSynthesis.onvoiceschanged = ()=>{
+        speechSynthesis.onvoiceschanged = null;
+        speakNow();
+      };
+      setTimeout(speakNow, 160);
+    }
+  }catch(e){
+    _guideSpeaking = false;
+    if(btn) btn.textContent = '🎧 Guide';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
