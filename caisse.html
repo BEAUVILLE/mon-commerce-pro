@@ -1189,6 +1189,39 @@ init();
       .filter(it=>it&&it.name);
   }
 
+
+  function singleComptoirArticle(original){
+    const raw=String(original||'').trim();
+    const t=norm(raw);
+
+    // On refuse les phrases qui ressemblent à des chemins, dettes, notes ou actions longues.
+    if(!raw || /\d/.test(wordsToNumbers(raw)))return null;
+    if(/\b(note|notes|stats|statistiques|historique|dette|doit|client|ajoute|ajouter|stock|article|articles|vendu|vends|vend|vente|panier|addition|caisse|encaisser)\b/.test(t))return null;
+
+    const name=articleAlias(cleanName(raw));
+    if(!name || name.length<2)return null;
+
+    const p=findProduct(name);
+    if(p && Number(p.price||0)>0){
+      return{
+        type:'sale_cart',
+        title:'🛒 Article vocal',
+        name:p.name,
+        qty:1,
+        price:Number(p.price||0),
+        note:raw,
+        fromExisting:true
+      };
+    }
+
+    return{
+      type:'article_learning',
+      title:'🎯 Article à apprendre',
+      name:name,
+      note:raw
+    };
+  }
+
   function parse(text){
     const original=String(text||'').trim(),t=norm(original);
     if(!original)return null;
@@ -1219,6 +1252,9 @@ init();
     if(comptoirItems.length>=2)return{type:'sale_batch_cart',title:'🛒 Ventes / panier',items:comptoirItems,note:original};
     if(comptoirItems.length===1)return{type:'sale_cart',title:'🛒 Vente / panier',name:comptoirItems[0].name,qty:comptoirItems[0].qty,price:comptoirItems[0].price,note:original};
 
+    const singleArticle=singleComptoirArticle(original);
+    if(singleArticle)return singleArticle;
+
     if(/\b(note|rappelle|a faire|à faire|depense|dépense|achat)\b/.test(t))return{type:'note',title:'✍️ Note comptoir',amount:num(original),note:original};
 
     return{type:'unknown',title:'🗣️ À préciser',note:original};
@@ -1236,16 +1272,16 @@ init();
       return;
     }
 
-    btn.disabled=d.type==='unknown'||(d.type==='sale_cart'&&!Number(d.price||0))||(d.type==='sale_batch_cart'&&d.items.some(it=>!Number(it.price||0)));
+    btn.disabled=d.type==='unknown'||d.type==='article_learning'||(d.type==='sale_cart'&&!Number(d.price||0))||(d.type==='sale_batch_cart'&&d.items.some(it=>!Number(it.price||0)));
 
     if(d.type==='navigate')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Chemin préparé : ${esc(d.href||d.target)}</span><em>Valide pour ouvrir le bon chemin.</em>`;
     else if(d.type==='product_batch')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${d.items.length} articles préparés.</span><div class="digiy-pos-table">${d.items.map((it,i)=>`<div class="digiy-pos-row"><span>${i+1}. ${esc(it.name)}</span><span>${esc(it.qty)} × ${it.price?esc(fmt(it.price)):'prix à compléter'}</span></div>`).join('')}</div><em>Valide pour ajouter / mettre à jour ces articles.</em>`;
     else if(d.type==='product_upsert')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Article : ${esc(d.name)}</span><span>Stock à ajouter : ${esc(d.qty)}</span><span>Prix : ${d.price?esc(fmt(d.price)):'à compléter côté Articles'}</span><em>Brouillon seulement.</em>`;
-    else if(d.type==='sale_cart')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Article : ${esc(d.name)}</span><span>Quantité : ${esc(d.qty)}</span><span>${d.price?'Prix annoncé : '+esc(fmt(d.price)):'⚠️ Prix manquant : dis par exemple “vendu 3 savon à 500”.'}</span><em>${d.price?'Valide pour ajouter au panier.':'Prix obligatoire pour éviter l’écriture après.'}</em>`;
+    else if(d.type==='sale_cart')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Article : ${esc(d.name)}</span><span>Quantité : ${esc(d.qty)}</span><span>${d.price?(d.fromExisting?'Prix fiche article : ':'Prix annoncé : ')+esc(fmt(d.price)):'⚠️ Prix manquant : dis par exemple “dentifrice 2 à 1200”.'}</span><em>${d.price?'Valide pour ajouter au panier.':'Prix obligatoire pour éviter l’écriture après.'}</em>`;
     else if(d.type==='sale_batch_cart')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${d.items.length} ventes préparées.</span><div class="digiy-pos-table">${d.items.map((it,i)=>`<div class="digiy-pos-row"><span>${i+1}. ${esc(it.qty)} × ${esc(it.name)}</span><span>${it.price?esc(fmt(it.price)):'⚠️ prix manquant'}</span></div>`).join('')}</div><em>${d.items.some(it=>!Number(it.price||0))?'Annonce le prix pour chaque ligne avant validation.':'Valide pour ajouter au panier.'}</em>`;
     else if(d.type==='client_debt')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Client : ${esc(d.client)}</span><span>Tel : ${esc(d.phone||'—')}</span><span>Somme due : ${d.amount?esc(fmt(d.amount)):'à compléter'}</span><span>Date : ${esc(d.dueDate||'à préciser')}</span><em>Dette client = argent attendu. Pas encore recette.</em>`;
     else if(d.type==='note')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${esc(d.note)}</span><span>${d.amount?'Montant : '+esc(fmt(d.amount)):'Montant optionnel'}</span><em>Valide pour garder la note.</em>`;
-    else box.innerHTML=`<strong>À préciser</strong><span>${esc(d.note)}</span><em>Essaie : “dentifrice 2 à 1200”, “2 pains à 250”, “vendu 3 savons à 500”.</em>`;
+    else box.innerHTML=`<strong>À préciser</strong><span>${esc(d.note)}</span><em>Essaie : “café”, si l’article existe déjà. Sinon : “café 1 à 500”, “dentifrice 2 à 1200”.</em>`;
   }
 
   function upsert(it){
@@ -1436,7 +1472,7 @@ init();
     const panel=document.createElement('section');
     panel.className='digiy-pos-ear';
     panel.id='digiyPosEar';
-    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Oreille métier POS · V9</div><div class="digiy-pos-ear-help">Dis court : article + quantité + prix. DIGIY prépare le panier. Le ticket reste au choix.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Ex. Dentifrice 2 à 1200, deux pains à 250 / Vendu 3 savons à 500 / Va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro pose sa base. Ensuite la voix rend la caisse fluide.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="Ajoute 12 savons à 500, 10 huiles à 1500, 6 dentifrices à 1200">Liste articles</button><button type="button" data-pos-example="Vendu 3 savons">Vente panier</button><button type="button" data-pos-example="Fatou dette client 50000 tel 771234567 date fin du mois">Dette client</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ajouter article">Articles</button></div>`;
+    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Oreille métier POS · V10</div><div class="digiy-pos-ear-help">Entraîne la caisse : article seul si déjà créé, sinon article + quantité + prix.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Ex. Café / Dentifrice 2 à 1200 / Deux pains à 250 / Va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro pose sa base. Ensuite la voix rend la caisse fluide.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="Ajoute 12 savons à 500, 10 huiles à 1500, 6 dentifrices à 1200">Liste articles</button><button type="button" data-pos-example="Vendu 3 savons">Vente panier</button><button type="button" data-pos-example="Fatou dette client 50000 tel 771234567 date fin du mois">Dette client</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ajouter article">Articles</button></div>`;
     anchor.insertAdjacentElement('afterend',panel);
 
     $('digiyPosMic')?.addEventListener('click',startVoice);
@@ -1462,6 +1498,13 @@ init();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
