@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Caisse POS universelle · Profil métier · V26 clic-écrit-voix</title>
+<title>MON COMMERCE — Caisse POS universelle · V29 terrain propre</title>
 <meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales blindées et oreille métier."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -343,6 +343,29 @@ a{text-decoration:none;color:inherit}
 }
 .profile-hint strong{color:#2a1900}
 
+
+/* DIGIY — Bouton guide audio flottant */
+#btnGuideAudio{
+  position:fixed;
+  bottom:calc(88px + env(safe-area-inset-bottom));
+  right:14px;
+  z-index:200;
+  background:linear-gradient(160deg,#fff8e8,#fff3d0);
+  border:1.5px solid #f1d89b;
+  color:#7a4c00;
+  border-radius:999px;
+  padding:10px 16px;
+  font-size:13px;
+  font-weight:950;
+  box-shadow:0 8px 20px rgba(122,76,0,.20);
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  transition:transform .14s,box-shadow .14s;
+  -webkit-tap-highlight-color:transparent;
+}
+#btnGuideAudio:active{transform:scale(.95);box-shadow:0 4px 10px rgba(122,76,0,.14)}
 </style>
 </head>
 <body>
@@ -376,7 +399,7 @@ a{text-decoration:none;color:inherit}
     <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
   </div>
 
-  <div class="profile-hint">🧩 <strong>Moule universel V26 :</strong> clic prioritaire, écrit en secours, voix limitée aux actions simples.</div>
+  <div class="profile-hint">🧩 <strong>Moule universel V29 :</strong> clic prioritaire, écrit en secours, voix simple. Diagnostic rangé dans Stats.</div>
   <div id="articles"></div>
   <div class="search-wrap">
     <span class="search-ico">🔍</span>
@@ -553,6 +576,9 @@ a{text-decoration:none;color:inherit}
     
     <div class="section-card">
       <div class="section-title">Contrôle stockage</div>
+      <div style="padding:12px 14px 0;color:var(--muted);font-size:13px;font-weight:800;line-height:1.35">
+        Zone de vérification pour le pro / test terrain. Pas besoin devant le client.
+      </div>
       <div style="padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn-outline" onclick="debugStats()">🔎 Vérifier stockage</button>
         <button class="btn-outline" onclick="renderStats();showToast('Stats relues')">🔄 Relire les stats</button>
@@ -565,8 +591,9 @@ a{text-decoration:none;color:inherit}
     </div>
     <div class="section-card">
       <div class="section-title">Historique</div>
-      <div style="padding:12px 14px"><button class="btn-outline" onclick="debugStats()">🔎 Vérifier stockage</button>
-        <button class="btn-danger" onclick="clearHistorique()">🗑️ Effacer l’historique des ventes</button></div>
+      <div style="padding:12px 14px">
+        <button class="btn-danger" onclick="clearHistorique()">🗑️ Effacer l’historique des ventes</button>
+      </div>
     </div>
     <div id="historiqueList"></div>
   </div>
@@ -615,6 +642,10 @@ a{text-decoration:none;color:inherit}
 <div class="toast" id="toast"></div>
 
 <script>
+/* DIGIY POS — TERRAIN PROPRE V29
+   Clic prioritaire · écrit secours · voix actions simples · profil métier · stats locales.
+   Ne pas transformer le moule en caisse sur mesure.
+*/
 let cart = [];
 let selCat = "Tous";
 let selPay_ = "esp";
@@ -872,7 +903,7 @@ function setupCaisseNotice(){
     "Puis confirme.",
     "Choisis le paiement.",
     "Quand l’argent est reçu, touche Encaisser.",
-    "Le reçu sort ensuite.",
+    "Le ticket reste disponible si le client le demande.",
     "Pour les prix et le stock, va dans le catalogue ou charge le profil métier."
   ].join(" ");
 
@@ -922,6 +953,8 @@ function showPage(id){
   document.getElementById(id).classList.add("active");
   if(id==="page-stats") renderStats();
   if(id==="page-notes") renderNotes();
+  _guideCurrentPage = id;
+  try{ speechSynthesis.cancel(); _guideSpeaking=false; const b=document.getElementById("btnGuideAudio"); if(b) b.textContent="🎧 Guide"; }catch(e){}
   window.scrollTo(0,0);
 }
 function buildCats(){
@@ -1016,6 +1049,109 @@ function updatePayHelp(){
   };
   const h=help[selPay_]||help.esp;setText("payHelpTitle",h[0]);setText("payHelpText",h[1]);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DIGIY — GUIDE AUDIO TERRAIN · V27
+   Un tap = explication claire de l'écran en cours.
+   Conçu pour les commerçants terrain : métier maîtrisé, lecture secondaire.
+   speakGuide  → lit le guide de la page active.
+   speakConfirm → confirme une action clé (encaissement).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const GUIDE_TEXTS = {
+  'page-caisse': [
+    "Tu es sur la caisse.",
+    "Touche une marchandise pour l'ajouter au panier.",
+    "Le total s'affiche en bas de l'écran.",
+    "Quand le panier est prêt, touche le bouton Addition.",
+    "Tu peux chercher une marchandise en haut, ou filtrer par catégorie."
+  ].join(' '),
+  'page-paiement': [
+    "Tu es sur le paiement.",
+    "Choisis comment le client paie : espèces, Wave, Orange Money, ou carte.",
+    "Attends que l'argent soit bien reçu.",
+    "Puis touche le bouton vert Encaisser en bas."
+  ].join(' '),
+  'page-vente-ok': [
+    "Vente bien enregistrée.",
+    "Tu peux démarrer une nouvelle vente,",
+    "voir ou imprimer le ticket,",
+    "ou consulter tes statistiques."
+  ].join(' '),
+  'page-recu': [
+    "Voici le reçu de la vente.",
+    "Tu peux l'imprimer en touchant le bouton imprimer.",
+    "Ou démarrer une nouvelle vente."
+  ].join(' '),
+  'page-stats': [
+    "Tu es dans les statistiques.",
+    "Tu vois le chiffre d'affaires d'aujourd'hui,",
+    "le total depuis le début,",
+    "et les articles les plus vendus.",
+    "L'historique montre toutes les ventes enregistrées."
+  ].join(' '),
+  'page-notes': [
+    "Tu es dans les notes du comptoir.",
+    "Tu peux noter une dette client,",
+    "une dépense, un achat de stock,",
+    "ou n'importe quelle information utile.",
+    "Les notes restent dans ce téléphone."
+  ].join(' ')
+};
+
+let _guideSpeaking = false;
+let _guideCurrentPage = 'page-caisse';
+
+function speakConfirm(text){
+  if(!('speechSynthesis' in window))return;
+  try{
+    speechSynthesis.cancel();
+    _guideSpeaking = false;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR'; u.rate = 0.90; u.pitch = 1.05;
+    const trySpeak = () => {
+      const fr = (speechSynthesis.getVoices()||[]).find(v=>/^fr/i.test(v.lang));
+      if(fr) u.voice = fr;
+      try{ speechSynthesis.speak(u) }catch(e){}
+    };
+    if(speechSynthesis.getVoices().length){ trySpeak() }
+    else{ speechSynthesis.onvoiceschanged = ()=>{ speechSynthesis.onvoiceschanged=null; trySpeak() }; setTimeout(trySpeak,120) }
+  }catch(e){}
+}
+
+function speakGuide(pageId){
+  if(!('speechSynthesis' in window)){ showToast('Audio non disponible sur ce navigateur.'); return }
+  const btn = document.getElementById('btnGuideAudio');
+  if(_guideSpeaking){
+    try{ speechSynthesis.cancel() }catch(e){}
+    _guideSpeaking = false;
+    if(btn){ btn.textContent = '🎧 Guide' }
+    return;
+  }
+  const text = GUIDE_TEXTS[pageId || _guideCurrentPage] || GUIDE_TEXTS['page-caisse'];
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR'; u.rate = 0.84; u.pitch = 1.02;
+    const stop = () => {
+      _guideSpeaking = false;
+      if(btn){ btn.textContent = '🎧 Guide' }
+    };
+    u.onstart = () => {
+      _guideSpeaking = true;
+      if(btn){ btn.textContent = '⏹ Stop' }
+    };
+    u.onend = stop; u.onerror = stop;
+    const trySpeak = () => {
+      const fr = (speechSynthesis.getVoices()||[]).find(v=>/^fr/i.test(v.lang));
+      if(fr) u.voice = fr;
+      try{ speechSynthesis.speak(u) }catch(e){ stop() }
+    };
+    if(speechSynthesis.getVoices().length){ trySpeak() }
+    else{ speechSynthesis.onvoiceschanged = ()=>{ speechSynthesis.onvoiceschanged=null; trySpeak() }; setTimeout(trySpeak,120) }
+  }catch(e){ _guideSpeaking = false }
+}
+
 function encaisser(){
   if(!cart.length){showToast("Aucune vente");return}
   const {sub,rem,total}=calcTotals();if(total<=0){showToast("Total invalide");return}
@@ -1063,6 +1199,7 @@ function encaisser(){
   setText("recuTotal",fmt(total));setText("recuPaymode","Paiement : "+(payLabels[selPay_]||"Paiement"));
   setText("okAmountBig",fmt(total));
   showToast("✅ Vente enregistrée. Ticket disponible si besoin.");
+  speakConfirm("Vente enregistrée. " + Math.round(total) + " francs.");
   showPage("page-vente-ok");
 }
 function nouvelleVente(){
@@ -1166,6 +1303,8 @@ window.renderAddition   = renderAddition;
 window.updateTotals     = updateTotals;
 window.showToast        = showToast;
 window.nouvelleVente    = nouvelleVente;
+window.speakConfirm     = speakConfirm;
+window.speakGuide       = speakGuide;
 </script>
 
 
@@ -1565,7 +1704,8 @@ window.nouvelleVente    = nouvelleVente;
 
     btn.disabled=d.type==='unknown'||d.type==='article_learning'||d.type==='voice_limited'||(d.type==='sale_cart'&&!Number(d.price||0))||(d.type==='sale_batch_cart'&&d.items.some(it=>!Number(it.price||0)));
 
-    if(d.type==='navigate')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Chemin préparé : ${esc(d.href||d.target)}</span><em>Valide pour ouvrir le bon chemin.</em>`;
+    if(d.type==='voice_limited')box.innerHTML=`<strong>🎤 Voix — chemin seulement</strong><span>« ${esc(d.note)} »</span><em>La voix guide les chemins. Pour vendre, clique la marchandise ou écris la phrase.</em>`;
+    else if(d.type==='navigate')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Chemin préparé : ${esc(d.href||d.target)}</span><em>Valide pour ouvrir le bon chemin.</em>`;
     else if(d.type==='product_batch')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${d.items.length} articles préparés.</span><div class="digiy-pos-table">${d.items.map((it,i)=>`<div class="digiy-pos-row"><span>${i+1}. ${esc(it.name)}</span><span>${esc(it.qty)} × ${it.price?esc(fmt(it.price)):'prix à compléter'}</span></div>`).join('')}</div><em>Valide pour ajouter / mettre à jour ces articles.</em>`;
     else if(d.type==='product_upsert')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Article : ${esc(d.name)}</span><span>Stock à ajouter : ${esc(d.qty)}</span><span>Prix : ${d.price?esc(fmt(d.price)):'à compléter côté Articles'}</span><em>Brouillon seulement.</em>`;
     else if(d.type==='sale_cart')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Article : ${esc(d.name)}</span><span>Quantité : ${esc(d.qty)}</span><span>${d.price?(d.fromExisting?'Prix fiche article : ':'Prix annoncé : ')+esc(fmt(d.price)):'⚠️ Prix manquant : dis par exemple “dentifrice 2 à 1200”.'}</span><em>${d.price?'Valide pour ajouter au panier.':'Prix obligatoire pour éviter l’écriture après.'}</em>`;
@@ -1769,7 +1909,7 @@ window.nouvelleVente    = nouvelleVente;
     const panel=document.createElement('section');
     panel.className='digiy-pos-ear';
     panel.id='digiyPosEar';
-    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Assistant comptoir POS · V26</div><div class="digiy-pos-ear-help">Clic d’abord pour vendre. Écrit en secours. Voix seulement pour actions simples.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Écris : robe stylée 1 à 18000 / Awa doit 10000 / ou dis seulement : va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler simple</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer l’écrit</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro clique les marchandises. DIGIY connaît le prix. La voix guide les chemins simples.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="robe stylée 1 à 18000">Écrit vente</button><button type="button" data-pos-example="Awa doit 10000 pour robe stylée">Écrit dette</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ouvre les notes">Notes</button><button type="button" data-pos-example="Nouvelle vente">Nouvelle vente</button></div>`;
+    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Assistant comptoir POS · V29</div><div class="digiy-pos-ear-help">Clic d’abord pour vendre. Écrit en secours. Voix seulement pour actions simples.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Écris : robe stylée 1 à 18000 / Awa doit 10000 / ou dis seulement : va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler simple</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer l’écrit</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro clique les marchandises. DIGIY connaît le prix. La voix guide les chemins simples.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="robe stylée 1 à 18000">Écrit vente</button><button type="button" data-pos-example="Awa doit 10000 pour robe stylée">Écrit dette</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ouvre les notes">Notes</button><button type="button" data-pos-example="Nouvelle vente">Nouvelle vente</button></div>`;
     anchor.insertAdjacentElement('afterend',panel);
 
     $('digiyPosMic')?.addEventListener('click',startVoice);
@@ -1794,8 +1934,55 @@ window.nouvelleVente    = nouvelleVente;
   window.DIGIY_OREILLE_METIER_POS={BUILD,parse,renderDraft,executeDraft};
 })();
 </script>
+
+<button id="btnGuideAudio" onclick="speakGuide(_guideCurrentPage)">🎧 Guide</button>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
