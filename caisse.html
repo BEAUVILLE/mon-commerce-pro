@@ -775,16 +775,50 @@ function encaisser(){
   const client=(document.getElementById("clientInput").value||"").trim();
   const payLabels={esp:"Espèces",wave:"Wave",orange:"Orange Money",crd:"Carte / TPE"};
   const now=new Date();
+
+  const vente={
+    id:Date.now(),
+    date:now.toISOString(),
+    day:now.toISOString().slice(0,10),
+    client,
+    items:cart.map(i=>({
+      id:i.id,
+      name:i.name,
+      emoji:i.emoji,
+      qty:Number(i.qty||0),
+      price:Number(i.price||0),
+      lineTotal:Number(i.price||0)*Number(i.qty||0)
+    })),
+    subtotal:sub,
+    remise:rem,
+    total,
+    pay:selPay_,
+    payLabel:payLabels[selPay_]||"Paiement"
+  };
+
   const ventes=getVentes();
-  ventes.unshift({id:Date.now(),date:now.toISOString(),client,items:cart.map(i=>({id:i.id,name:i.name,emoji:i.emoji,qty:Number(i.qty),price:Number(i.price)})),subtotal:sub,remise:rem,total,pay:selPay_,payLabel:payLabels[selPay_]||"Paiement"});
+  ventes.unshift(vente);
   saveVentes(ventes);
+
+  // Relecture immédiate : si le téléphone refuse localStorage, on le voit tout de suite.
+  const check=getVentes();
+  if(!Array.isArray(check)||!check.find(v=>Number(v.id)===Number(vente.id))){
+    showToast("Vente non gardée sur ce téléphone. Stockage navigateur bloqué.");
+    return;
+  }
+
   const prods=readJSON("caisse_prods",getProds());
   cart.forEach(ci=>{const p=prods.find(x=>Number(x.id)===Number(ci.id));if(p)p.stock=Math.max(0,Number(p.stock||0)-Number(ci.qty||0))});
   saveProds(prods);
+
+  if(typeof renderStats==="function")renderStats();
+
   document.getElementById("recuShopName").textContent=getShopName();
   document.getElementById("recuDate").textContent=now.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" — "+now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+(client?" · "+esc(client):"");
   document.getElementById("recuLines").innerHTML=cart.map(i=>`<div class="recu-line"><span>${esc(i.emoji||"📦")} ${esc(i.name)} ×${Number(i.qty)}</span><span>${fmt(Number(i.price)*Number(i.qty))}</span></div>`).join("")+(rem>0?`<div class="recu-line"><span>Remise</span><span>- ${fmt(rem)}</span></div>`:"");
-  setText("recuTotal",fmt(total));setText("recuPaymode","Paiement : "+(payLabels[selPay_]||"Paiement"));showPage("page-recu");
+  setText("recuTotal",fmt(total));setText("recuPaymode","Paiement : "+(payLabels[selPay_]||"Paiement"));
+  showToast("✅ Vente enregistrée dans les stats");
+  showPage("page-recu");
 }
 function nouvelleVente(){
   cart=[];document.getElementById("clientInput").value="";document.getElementById("remiseVal").value="";document.getElementById("searchInput").value="";
@@ -849,37 +883,70 @@ init();
   const saveNotesSafe=n=>{try{if(typeof window.saveNotes==='function')window.saveNotes(n);else localStorage.setItem('caisse_notes',JSON.stringify(n))}catch(_){}};
   const nextId=list=>(list||[]).reduce((m,p)=>Math.max(m,Number(p.id)||0),0)+1;
 
+
+  function articleAlias(name){
+    let s=String(name||'').trim();
+
+    // Homophones fréquents du micro en boutique
+    // "pain" est souvent transcrit "pin" ou "pins".
+    if(/\bpin(s)?\b/i.test(s) && !/\bcode\s+pin\b/i.test(s)){
+      s=s.replace(/\bpins\b/ig,'pains').replace(/\bpin\b/ig,'pain');
+    }
+
+    return s.replace(/\s+/g,' ').trim();
+  }
+
   function findProduct(name){
-    const k=norm(name);
+    const fixed=articleAlias(name);
+    const k=norm(fixed);
     const list=prods();
     return list.find(p=>norm(p.name)===k)||list.find(p=>norm(p.name).includes(k)||k.includes(norm(p.name)))||null;
   }
 
+
+  function wordsToNumbers(text){
+    const map={
+      'un':'1','une':'1','deux':'2','trois':'3','quatre':'4','cinq':'5',
+      'six':'6','sept':'7','huit':'8','neuf':'9','dix':'10','onze':'11',
+      'douze':'12','treize':'13','quatorze':'14','quinze':'15','seize':'16',
+      'vingt':'20','trente':'30','quarante':'40','cinquante':'50'
+    };
+    return String(text||'').replace(/\b(un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|onze|douze|treize|quatorze|quinze|seize|vingt|trente|quarante|cinquante)\b/gi,function(m){
+      return map[norm(m)]||m;
+    });
+  }
+
   function num(v){
-    const m=String(v||'').match(/(\d[\d\s.,]*)/);
+    const src=wordsToNumbers(v);
+    const m=String(src||'').match(/(\d[\d\s.,]*)/);
     return m?Number(String(m[1]).replace(/[^\d]/g,''))||0:0;
   }
 
   function salePrice(text){
-    const s=String(text||'');
+    const s=wordsToNumbers(text);
     let m=s.match(/\b(?:a|à|prix|pour)\s+(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)?\b/i);
     if(m)return Number(String(m[1]).replace(/[^\d]/g,''))||0;
     m=s.match(/\b(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)\b/i);
-    return m?Number(String(m[1]).replace(/[^\d]/g,''))||0:0;
+    if(m)return Number(String(m[1]).replace(/[^\d]/g,''))||0;
+    const nums=[...s.matchAll(/\b(\d[\d\s.,]*)\b/g)].map(x=>Number(String(x[1]).replace(/[^\d]/g,''))||0).filter(Boolean);
+    return nums.length>=2 ? nums[nums.length-1] : 0;
   }
 
 
   function cleanName(s){
-    return String(s||'')
+    const cleaned=String(s||'')
       .replace(/\b(ajoute|ajouter|rajoute|rajouter|article|articles|stock|prix|vendu|vends|vend|vente|panier|mets|met|a|à|de|du|des|fcfa|f|francs|piece|pièce|pieces|pièces|unite|unité|unités|client|doit|dette|credit|crédit|vendeur|fin|mois|date|tel|telephone|téléphone|whatsapp|wa)\b/gi,' ')
       .replace(/\d+/g,' ')
       .replace(/[.,;:!?]/g,' ')
       .replace(/\s+/g,' ')
       .trim();
+
+    return articleAlias(cleaned);
   }
 
   function qty(text){
-    const m=norm(text).match(/\b(\d+)\s+(?:x\s+)?([a-z0-9\- ]{2,})/);
+    const src=wordsToNumbers(text);
+    const m=norm(src).match(/\b(\d+)\s+(?:x\s+)?([a-z0-9\- ]{2,})/);
     return m?Number(m[1])||1:1;
   }
 
@@ -939,20 +1006,23 @@ init();
   }
 
   function parseSegment(seg){
-    let m=String(seg||'').match(/^\s*(\d+)\s+(.+?)\s+(?:a|à)\s+(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)?\s*$/i);
+    const src=wordsToNumbers(seg);
+
+    let m=String(src||'').match(/^\s*(\d+)\s+(.+?)\s+(?:a|à|prix|pour)\s+(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)?\s*$/i);
     if(m)return{name:cleanName(m[2]),qty:Number(m[1])||1,price:Number(String(m[3]).replace(/[^\d]/g,''))||0};
 
-    m=String(seg||'').match(/^\s*(.+?)\s+(\d+)\s+(?:a|à)\s+(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)?\s*$/i);
+    m=String(src||'').match(/^\s*(.+?)\s+(\d+)\s+(?:a|à|prix|pour)\s+(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)?\s*$/i);
     if(m)return{name:cleanName(m[1]),qty:Number(m[2])||1,price:Number(String(m[3]).replace(/[^\d]/g,''))||0};
 
-    m=String(seg||'').match(/^\s*(\d+)\s+(.+?)\s*$/i);
+    m=String(src||'').match(/^\s*(\d+)\s+(.+?)\s*$/i);
     if(m)return{name:cleanName(m[2]),qty:Number(m[1])||1,price:0};
 
     return null;
   }
 
   function parseBatch(text){
-    return splitItems(text).map(parseSegment).filter(x=>x&&x.name);
+    const src=wordsToNumbers(text);
+    return splitItems(src).map(parseSegment).filter(x=>x&&x.name);
   }
 
   function parseNav(original,t){
@@ -962,6 +1032,74 @@ init();
     if(/\b(articles?|ajouter article|ajout article|catalogue|stock)\b/.test(t)&&!/\d/.test(t))return{type:'navigate',title:'🧭 Aller aux articles',target:'admin-articles',href:'./admin.html#articleList'};
     if(/\b(addition|panier|ouvrir panier)\b/.test(t))return{type:'navigate',title:'🧭 Ouvrir l’addition',target:'addition'};
     return null;
+  }
+
+
+  function parseSaleItems(original){
+    const raw=String(original||'')
+      .replace(/\b(vendu|vends|vend|vente|mets au panier|met au panier|panier)\b/ig,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+    const items=parseBatch(raw);
+    return items.map(it=>({name:it.name,qty:Number(it.qty||1),price:Number(it.price||0)})).filter(it=>it.name);
+  }
+
+  function ensureSaleProduct(it){
+    it={...it,name:articleAlias(it.name)};
+    const list=prods();
+    const k=norm(it.name);
+    let p=list.find(x=>norm(x.name)===k)||list.find(x=>norm(x.name).includes(k)||k.includes(norm(x.name)));
+    if(p){
+      if(Number(it.price||0))p.price=Number(it.price);
+      if(Number(p.stock||0)<Number(it.qty||1))p.stock=Number(it.qty||1);
+    }else{
+      p={id:nextId(list),name:it.name,cat:'Autres',emoji:'📦',price:Number(it.price||0),stock:Math.max(Number(it.qty||1),1),published:true};
+      list.push(p);
+    }
+    saveProdsSafe(list);
+    if(window.buildCats)window.buildCats();
+    if(window.renderProds)window.renderProds();
+    return p;
+  }
+
+
+  function directSaleItems(original){
+    const src=wordsToNumbers(String(original||''))
+      .replace(/\b(vendu|vends|vend|vente|mets au panier|met au panier|panier)\b/ig,' ')
+      .replace(/\bet puis\b/ig,',')
+      .replace(/\bpuis\b/ig,',')
+      .replace(/[;|]/g,',')
+      .replace(/\s+/g,' ')
+      .trim();
+
+    return src.split(',')
+      .map(x=>x.trim())
+      .filter(Boolean)
+      .map(seg=>{
+        let m=seg.match(/^\s*(\d+)\s+(.+?)\s+(?:a|à|prix|pour)\s+(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)?\s*$/i);
+        if(m)return{
+          name:articleAlias(cleanName(m[2])),
+          qty:Number(m[1])||1,
+          price:Number(String(m[3]).replace(/[^\d]/g,''))||0
+        };
+
+        m=seg.match(/^\s*(.+?)\s+(\d+)\s+(?:a|à|prix|pour)\s+(\d[\d\s.,]*)\s*(?:f|fcfa|francs?)?\s*$/i);
+        if(m)return{
+          name:articleAlias(cleanName(m[1])),
+          qty:Number(m[2])||1,
+          price:Number(String(m[3]).replace(/[^\d]/g,''))||0
+        };
+
+        m=seg.match(/^\s*(\d+)\s+(.+?)\s*$/i);
+        if(m)return{
+          name:articleAlias(cleanName(m[2])),
+          qty:Number(m[1])||1,
+          price:0
+        };
+
+        return null;
+      })
+      .filter(it=>it&&it.name);
   }
 
   function parse(text){
@@ -981,8 +1119,12 @@ init();
     if(/\b(dette client|dettes clients|credit vendeur|client doit|doit|reste a payer|reste à payer)\b/.test(t))return{type:'client_debt',title:'📒 Dette client',client:clientName(original),phone:phone(original),amount:num(original),dueDate:parseDate(original),note:original};
 
     if(/\b(vendu|vends|vend|vente|mets au panier|met au panier|panier)\b/.test(t)){
-      const m=original.match(/(?:vendu|vends|vend|vente|panier)\s+(.+?)(?:\s+(?:a|à)\s+\d|$)/i);
-      return{type:'sale_cart',title:'🛒 Vente / panier',name:cleanName(m?.[1]||original)||'Article',qty:qty(original),price:salePrice(original),note:original};
+      const items=directSaleItems(original);
+      if(items.length>=2)return{type:'sale_batch_cart',title:'🛒 Ventes / panier',items,note:original};
+      if(items.length===1)return{type:'sale_cart',title:'🛒 Vente / panier',name:items[0].name,qty:items[0].qty,price:items[0].price,note:original};
+
+      const m=original.match(/(?:vendu|vends|vend|vente|panier)\s+(.+?)(?:\s+(?:a|à|prix|pour)\s+\d|$)/i);
+      return{type:'sale_cart',title:'🛒 Vente / panier',name:articleAlias(cleanName(m?.[1]||original))||'Article',qty:qty(original),price:salePrice(original),note:original};
     }
 
     if(/\b(note|rappelle|a faire|à faire|depense|dépense|achat)\b/.test(t))return{type:'note',title:'✍️ Note comptoir',amount:num(original),note:original};
@@ -1002,18 +1144,20 @@ init();
       return;
     }
 
-    btn.disabled=d.type==='unknown';
+    btn.disabled=d.type==='unknown'||(d.type==='sale_cart'&&!Number(d.price||0))||(d.type==='sale_batch_cart'&&d.items.some(it=>!Number(it.price||0)));
 
     if(d.type==='navigate')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Chemin préparé : ${esc(d.href||d.target)}</span><em>Valide pour ouvrir le bon chemin.</em>`;
     else if(d.type==='product_batch')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${d.items.length} articles préparés.</span><div class="digiy-pos-table">${d.items.map((it,i)=>`<div class="digiy-pos-row"><span>${i+1}. ${esc(it.name)}</span><span>${esc(it.qty)} × ${it.price?esc(fmt(it.price)):'prix à compléter'}</span></div>`).join('')}</div><em>Valide pour ajouter / mettre à jour ces articles.</em>`;
     else if(d.type==='product_upsert')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Article : ${esc(d.name)}</span><span>Stock à ajouter : ${esc(d.qty)}</span><span>Prix : ${d.price?esc(fmt(d.price)):'à compléter côté Articles'}</span><em>Brouillon seulement.</em>`;
-    else if(d.type==='sale_cart')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Article : ${esc(d.name)}</span><span>Quantité : ${esc(d.qty)}</span><span>${d.price?'Prix entendu : '+esc(fmt(d.price)):'Prix repris si l’article existe.'}</span><em>Valide pour ajouter au panier.</em>`;
+    else if(d.type==='sale_cart')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Article : ${esc(d.name)}</span><span>Quantité : ${esc(d.qty)}</span><span>${d.price?'Prix annoncé : '+esc(fmt(d.price)):'⚠️ Prix manquant : dis par exemple “vendu 3 savon à 500”.'}</span><em>${d.price?'Valide pour ajouter au panier.':'Prix obligatoire pour éviter l’écriture après.'}</em>`;
+    else if(d.type==='sale_batch_cart')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${d.items.length} ventes préparées.</span><div class="digiy-pos-table">${d.items.map((it,i)=>`<div class="digiy-pos-row"><span>${i+1}. ${esc(it.qty)} × ${esc(it.name)}</span><span>${it.price?esc(fmt(it.price)):'⚠️ prix manquant'}</span></div>`).join('')}</div><em>${d.items.some(it=>!Number(it.price||0))?'Annonce le prix pour chaque ligne avant validation.':'Valide pour ajouter au panier.'}</em>`;
     else if(d.type==='client_debt')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Client : ${esc(d.client)}</span><span>Tel : ${esc(d.phone||'—')}</span><span>Somme due : ${d.amount?esc(fmt(d.amount)):'à compléter'}</span><span>Date : ${esc(d.dueDate||'à préciser')}</span><em>Dette client = argent attendu. Pas encore recette.</em>`;
     else if(d.type==='note')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${esc(d.note)}</span><span>${d.amount?'Montant : '+esc(fmt(d.amount)):'Montant optionnel'}</span><em>Valide pour garder la note.</em>`;
     else box.innerHTML=`<strong>À préciser</strong><span>${esc(d.note)}</span><em>Essaie : “Ajoute 12 savons à 500”, “12 savons à 500, 10 huiles à 1500”, “Vendu 3 savons”.</em>`;
   }
 
   function upsert(it){
+    it={...it,name:articleAlias(it.name)};
     const list=prods();
     let p=findProduct(it.name);
 
@@ -1041,6 +1185,19 @@ init();
     if(d.target&&typeof window.showPage==='function')window.showPage(d.target);
   }
 
+
+  function afterSaleToAddition(){
+    try{
+      if(window.updatePanierBar)window.updatePanierBar();
+      if(window.renderAddition)window.renderAddition();
+      if(window.updateTotals)window.updateTotals();
+
+      setTimeout(function(){
+        if(window.openAddition)window.openAddition();
+      },180);
+    }catch(_){}
+  }
+
   function executeDraft(){
     const d=lastDraft;
     if(!d||d.type==='unknown')return;
@@ -1065,28 +1222,36 @@ init();
     }
 
     if(d.type==='sale_cart'){
-      let p=findProduct(d.name);
-
-      if(!p&&d.price){
-        const list=prods();
-        p={id:nextId(list),name:d.name,cat:'Autres',emoji:'📦',price:Number(d.price||0),stock:Math.max(Number(d.qty||1),1),published:true};
-        list.push(p);
-        saveProdsSafe(list);
-
-        if(window.buildCats)window.buildCats();
-        if(window.renderProds)window.renderProds();
-      }
-
-      if(!p){
-        toast('Article introuvable. Ajoute d’abord l’article ou donne le prix.');
+      if(!Number(d.price||0)){
+        toast('Prix manquant. Dis : vendu 3 savon à 500.');
         return;
       }
+
+      const p=ensureSaleProduct({name:d.name,qty:d.qty,price:d.price});
 
       for(let i=0;i<Number(d.qty||1);i++){
         if(window.addToCart)window.addToCart(p.id);
       }
 
-      toast('🛒 Ajouté au panier');
+      afterSaleToAddition();
+      toast('🛒 Panier prêt. Confirme l’addition puis encaisse pour enregistrer les stats.');
+    }
+
+    if(d.type==='sale_batch_cart'){
+      if(d.items.some(it=>!Number(it.price||0))){
+        toast('Prix manquant sur une ligne. Annonce le prix pour chaque article.');
+        return;
+      }
+
+      d.items.forEach(it=>{
+        const p=ensureSaleProduct(it);
+        for(let i=0;i<Number(it.qty||1);i++){
+          if(window.addToCart)window.addToCart(p.id);
+        }
+      });
+
+      afterSaleToAddition();
+      toast('🛒 Panier prêt. Confirme l’addition puis encaisse pour enregistrer les stats.');
     }
 
     if(d.type==='client_debt'){
@@ -1153,9 +1318,10 @@ init();
       recognition.onresult=e=>{
         const said=e?.results?.[0]?.[0]?.transcript||'';
         if(input&&said){
-          input.value=said;
-          renderDraft(parse(said));
-          toast('Phrase captée. Vérifie puis valide.');
+          const current=(input.value||'').trim();
+          input.value=current ? current.replace(/[\s,.;]+$/,'')+', '+said.trim() : said.trim();
+          renderDraft(parse(input.value));
+          toast('Phrase ajoutée. Tu peux reparler ou valider.');
         }
       };
 
@@ -1178,7 +1344,7 @@ init();
     const panel=document.createElement('section');
     panel.className='digiy-pos-ear';
     panel.id='digiyPosEar';
-    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Oreille métier POS</div><div class="digiy-pos-ear-help">Dis le chemin ou dicte les articles. DIGIY prépare. Tu valides.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Ex. Ajoute 12 savons à 500, 10 huiles à 1500 / Vendu 3 savons / Va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro pose sa base. Ensuite la voix rend la caisse fluide.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="Ajoute 12 savons à 500, 10 huiles à 1500, 6 dentifrices à 1200">Liste articles</button><button type="button" data-pos-example="Vendu 3 savons">Vente panier</button><button type="button" data-pos-example="Fatou dette client 50000 tel 771234567 date fin du mois">Dette client</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ajouter article">Articles</button></div>`;
+    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Oreille métier POS · V7</div><div class="digiy-pos-ear-help">Dis quantité + article + prix. DIGIY prépare le panier. Les stats se gardent après Encaisser.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Ex. Vendu 2 dentifrices à 1200, deux pains à 250 / Ajoute 12 savons à 500 / Va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro pose sa base. Ensuite la voix rend la caisse fluide.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="Ajoute 12 savons à 500, 10 huiles à 1500, 6 dentifrices à 1200">Liste articles</button><button type="button" data-pos-example="Vendu 3 savons">Vente panier</button><button type="button" data-pos-example="Fatou dette client 50000 tel 771234567 date fin du mois">Dette client</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ajouter article">Articles</button></div>`;
     anchor.insertAdjacentElement('afterend',panel);
 
     $('digiyPosMic')?.addEventListener('click',startVoice);
@@ -1204,6 +1370,13 @@ init();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
