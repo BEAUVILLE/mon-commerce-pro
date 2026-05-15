@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Caisse POS universelle · Profil métier · V24 stats</title>
+<title>MON COMMERCE — Caisse POS universelle · Profil métier · V26 clic-écrit-voix</title>
 <meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales blindées et oreille métier."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -376,7 +376,7 @@ a{text-decoration:none;color:inherit}
     <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
   </div>
 
-  <div class="profile-hint">🧩 <strong>Moule universel V24 :</strong> profil métier + stats blindées. Clique les marchandises, ajuste les quantités, puis Encaisser.</div>
+  <div class="profile-hint">🧩 <strong>Moule universel V26 :</strong> clic prioritaire, écrit en secours, voix limitée aux actions simples.</div>
   <div id="articles"></div>
   <div class="search-wrap">
     <span class="search-ico">🔍</span>
@@ -535,7 +535,7 @@ a{text-decoration:none;color:inherit}
   <div class="topbar">
     <div class="topbar-left"><button class="back-btn" onclick="showPage('page-caisse')">← Caisse</button></div>
     <div style="font-size:14px;font-weight:950">Stats & historique</div>
-    <a class="link-btn" href="./admin.html#articleList">📦 <span class="txt">Articles</span></a>
+    <button class="link-btn" onclick="debugStats()" title="Vérifier le stockage">🔎 <span class="txt">Stockage</span></button>
   </div>
   <div class="home-strip comptoir">
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
@@ -550,6 +550,15 @@ a{text-decoration:none;color:inherit}
       <div class="stat-card"><div class="stat-label">CA total</div><div class="stat-value" id="stat-ca-total">0 F</div></div>
       <div class="stat-card"><div class="stat-label">Total ventes</div><div class="stat-value green" id="stat-nb-total">0</div></div>
     </div>
+    
+    <div class="section-card">
+      <div class="section-title">Contrôle stockage</div>
+      <div style="padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-outline" onclick="debugStats()">🔎 Vérifier stockage</button>
+        <button class="btn-outline" onclick="renderStats();showToast('Stats relues')">🔄 Relire les stats</button>
+      </div>
+    </div>
+
     <div class="section-card">
       <div class="section-title">Top articles</div>
       <div id="topArticles" style="padding:10px 14px"></div>
@@ -609,6 +618,7 @@ a{text-decoration:none;color:inherit}
 let cart = [];
 let selCat = "Tous";
 let selPay_ = "esp";
+let _toastTimer = null;
 
 
 /* DIGIY POS — PROFIL MÉTIER
@@ -941,6 +951,15 @@ function addToCart(id){
   if(ex)ex.qty++;else cart.push({...p,qty:1});
   updatePanierBar();renderAddition();showToast("+ "+p.name);
 }
+/* Version silencieuse pour l'oreille métier : pas de toast, retourne true si ajouté */
+function addToCartSilent(id){
+  const p=getProds().find(x=>Number(x.id)===Number(id));if(!p)return false;
+  const ex=cart.find(x=>Number(x.id)===Number(id));
+  const current=ex?ex.qty:0;
+  if(current>=Number(p.stock))return false;
+  if(ex)ex.qty++;else cart.push({...p,qty:1});
+  return true;
+}
 function changeQty(id,delta){
   const item=cart.find(x=>Number(x.id)===Number(id));if(!item)return;
   const prod=getProds().find(x=>Number(x.id)===Number(id));const max=prod?Number(prod.stock):999999;
@@ -1093,7 +1112,15 @@ function renderStats(){
 
 function debugStats(){
   const ventes=getVentes();
-  alert("Ventes gardées : "+ventes.length+"\\nClé : caisse_ventes\\nDernière vente : "+(localStorage.getItem("caisse_last_vente")||"aucune"));
+  const last=localStorage.getItem("caisse_last_vente")||"aucune";
+  const touch=localStorage.getItem("caisse_stats_touch")||"aucune";
+  alert(
+    "Stockage caisse\\n\\n"+
+    "Ventes gardées : "+ventes.length+"\\n"+
+    "Clé ventes : caisse_ventes\\n"+
+    "Dernière sauvegarde : "+touch+"\\n\\n"+
+    "Dernière vente :\\n"+last
+  );
 }
 
 function clearHistorique(){if(confirm("Effacer tout l’historique des ventes ?")){saveVentes([]);renderStats();showToast("Historique effacé")}}
@@ -1115,10 +1142,30 @@ function fmt(n){return Math.round(Number(n)||0).toLocaleString("fr-FR")+" F"}
 function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val}
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
 function escAttr(v){return esc(v).replaceAll("`","&#096;")}
-function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove("show"),2400)}
 
 document.getElementById("additionOverlay").addEventListener("click",e=>{if(e.target===e.currentTarget)closeAddition()});
 init();
+
+/* DIGIY — exposition explicite sur window pour l'oreille métier (second script IIFE) */
+window.addToCart        = addToCart;
+window.addToCartSilent  = addToCartSilent;
+window.showPage         = showPage;
+window.openAddition     = openAddition;
+window.closeAddition    = closeAddition;
+window.buildCats        = buildCats;
+window.renderProds      = renderProds;
+window.getProds         = getProds;
+window.saveProds        = saveProds;
+window.getNotes         = getNotes;
+window.saveNotes        = saveNotes;
+window.renderStats      = renderStats;
+window.renderNotes      = renderNotes;
+window.updatePanierBar  = updatePanierBar;
+window.renderAddition   = renderAddition;
+window.updateTotals     = updateTotals;
+window.showToast        = showToast;
+window.nouvelleVente    = nouvelleVente;
 </script>
 
 
@@ -1131,7 +1178,7 @@ init();
 (function(){
   'use strict';
   const BUILD='oreille-metier-pos-v2-20260515';
-  let lastDraft=null, recognition=null, listening=false;
+  let lastDraft=null, recognition=null, listening=false, lastInputSource='text';
   const $=id=>document.getElementById(id);
   const fmt=n=>Math.round(Number(n||0)).toLocaleString('fr-FR')+' F';
   const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
@@ -1291,6 +1338,7 @@ init();
   }
 
   function parseNav(original,t){
+    if(/\b(nouvelle vente|nouveau panier|vider panier|reprendre vente)\b/.test(t))return{type:'navigate',title:'🧭 Nouvelle vente',target:'new-sale'};
     if(/\b(retour caisse|caisse|encaisser|faire une vente|vente rapide)\b/.test(t))return{type:'navigate',title:'🧭 Aller à la caisse',target:'page-caisse'};
     if(/\b(notes?|ouvrir notes?|note comptoir|noter)\b/.test(t))return{type:'navigate',title:'🧭 Aller aux notes',target:'page-notes'};
     if(/\b(stats?|statistiques|historique|voir ventes)\b/.test(t))return{type:'navigate',title:'🧭 Aller aux stats',target:'page-stats'};
@@ -1490,6 +1538,19 @@ init();
     return{type:'unknown',title:'🗣️ À préciser',note:original};
   }
 
+
+  function parseForInput(text, source){
+    const d=parse(text);
+    if(source==='voice' && d && ['sale_cart','sale_batch_cart','product_batch','product_upsert','article_learning'].includes(d.type)){
+      return {
+        type:'voice_limited',
+        title:'🎙️ Voix limitée',
+        note:text
+      };
+    }
+    return d;
+  }
+
   function renderDraft(d){
     const box=$('digiyPosDraft'),btn=$('digiyPosValidate');
     if(!box||!btn)return;
@@ -1502,7 +1563,7 @@ init();
       return;
     }
 
-    btn.disabled=d.type==='unknown'||d.type==='article_learning'||(d.type==='sale_cart'&&!Number(d.price||0))||(d.type==='sale_batch_cart'&&d.items.some(it=>!Number(it.price||0)));
+    btn.disabled=d.type==='unknown'||d.type==='article_learning'||d.type==='voice_limited'||(d.type==='sale_cart'&&!Number(d.price||0))||(d.type==='sale_batch_cart'&&d.items.some(it=>!Number(it.price||0)));
 
     if(d.type==='navigate')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Chemin préparé : ${esc(d.href||d.target)}</span><em>Valide pour ouvrir le bon chemin.</em>`;
     else if(d.type==='product_batch')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${d.items.length} articles préparés.</span><div class="digiy-pos-table">${d.items.map((it,i)=>`<div class="digiy-pos-row"><span>${i+1}. ${esc(it.name)}</span><span>${esc(it.qty)} × ${it.price?esc(fmt(it.price)):'prix à compléter'}</span></div>`).join('')}</div><em>Valide pour ajouter / mettre à jour ces articles.</em>`;
@@ -1530,6 +1591,7 @@ init();
   }
 
   function execNav(d){
+    if(d.target==='new-sale'){if(window.nouvelleVente)window.nouvelleVente();return}
     if(d.target==='admin-articles'&&d.href){
       location.href=d.href;
       return;
@@ -1588,9 +1650,11 @@ init();
       const p=ensureSaleProduct({name:d.name,qty:d.qty,price:d.price});
 
       for(let i=0;i<Number(d.qty||1);i++){
-        if(window.addToCart)window.addToCart(p.id);
+        if(window.addToCartSilent)window.addToCartSilent(p.id);
+        else if(window.addToCart)window.addToCart(p.id);
       }
 
+      if(window.updatePanierBar)window.updatePanierBar();
       afterSaleToAddition();
       toast('🛒 Panier prêt. Confirme l’addition puis encaisse pour enregistrer les stats.');
     }
@@ -1604,10 +1668,12 @@ init();
       d.items.forEach(it=>{
         const p=ensureSaleProduct(it);
         for(let i=0;i<Number(it.qty||1);i++){
-          if(window.addToCart)window.addToCart(p.id);
+          if(window.addToCartSilent)window.addToCartSilent(p.id);
+          else if(window.addToCart)window.addToCart(p.id);
         }
       });
 
+      if(window.updatePanierBar)window.updatePanierBar();
       afterSaleToAddition();
       toast('🛒 Panier prêt. Confirme l’addition puis encaisse pour enregistrer les stats.');
     }
@@ -1678,8 +1744,9 @@ init();
         if(input&&said){
           const current=(input.value||'').trim();
           input.value=current ? current.replace(/[\s,.;]+$/,'')+', '+said.trim() : said.trim();
-          renderDraft(parse(input.value));
-          toast('Phrase ajoutée. Tu peux reparler ou valider.');
+          lastInputSource='voice';
+          renderDraft(parseForInput(input.value,'voice'));
+          toast('Voix reçue. Actions simples seulement.');
         }
       };
 
@@ -1702,11 +1769,11 @@ init();
     const panel=document.createElement('section');
     panel.className='digiy-pos-ear';
     panel.id='digiyPosEar';
-    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Oreille métier POS universelle · V10</div><div class="digiy-pos-ear-help">Entraîne la caisse : article seul si déjà créé, sinon article + quantité + prix.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Ex. Café / Dentifrice 2 à 1200 / Deux pains à 250 / Va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro pose sa base. Ensuite la voix rend la caisse fluide.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="Ajoute 12 savons à 500, 10 huiles à 1500, 6 dentifrices à 1200">Liste articles</button><button type="button" data-pos-example="Vendu 3 savons">Vente panier</button><button type="button" data-pos-example="Fatou dette client 50000 tel 771234567 date fin du mois">Dette client</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ajouter article">Articles</button></div>`;
+    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Assistant comptoir POS · V26</div><div class="digiy-pos-ear-help">Clic d’abord pour vendre. Écrit en secours. Voix seulement pour actions simples.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Écris : robe stylée 1 à 18000 / Awa doit 10000 / ou dis seulement : va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler simple</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer l’écrit</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro clique les marchandises. DIGIY connaît le prix. La voix guide les chemins simples.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="robe stylée 1 à 18000">Écrit vente</button><button type="button" data-pos-example="Awa doit 10000 pour robe stylée">Écrit dette</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ouvre les notes">Notes</button><button type="button" data-pos-example="Nouvelle vente">Nouvelle vente</button></div>`;
     anchor.insertAdjacentElement('afterend',panel);
 
     $('digiyPosMic')?.addEventListener('click',startVoice);
-    $('digiyPosPrepare')?.addEventListener('click',()=>renderDraft(parse($('digiyPosVoiceInput')?.value||'')));
+    $('digiyPosPrepare')?.addEventListener('click',()=>{lastInputSource='text';renderDraft(parseForInput($('digiyPosVoiceInput')?.value||'','text'));});
     $('digiyPosValidate')?.addEventListener('click',executeDraft);
     $('digiyPosClear')?.addEventListener('click',()=>{
       if($('digiyPosVoiceInput'))$('digiyPosVoiceInput').value='';
@@ -1716,7 +1783,8 @@ init();
     panel.querySelectorAll('[data-pos-example]').forEach(btn=>btn.addEventListener('click',()=>{
       const v=btn.getAttribute('data-pos-example')||'';
       if($('digiyPosVoiceInput'))$('digiyPosVoiceInput').value=v;
-      renderDraft(parse(v));
+      lastInputSource='text';
+      renderDraft(parseForInput(v,'text'));
     }));
   }
 
@@ -1728,6 +1796,50 @@ init();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
