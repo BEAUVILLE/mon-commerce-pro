@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#eefaf2"/>
+<title>MON COMMERCE — Actions utiles</title>
+<meta name="description" content="Actions utiles POS DIGIY : crédit client, ajout stock, dépense, commande, note rapide, validation au clic."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#eefaf2;--surface:#f8fff9;--card:#fff;--border:#cfe8d7;--text:#102318;--muted:#5f7468;
+  --green:#16a765;--gold:#7a4c00;--accent:#f5a623;--red:#d94b4b;--blue:#2878d8;
+  --shadow:0 8px 24px rgba(16,35,24,.08);--radius:18px;
+  --font:Outfit,'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);background:linear-gradient(180deg,#e9f8ee,#f7fff9 55%,#eefaf2);color:var(--text);min-height:100vh}
+a{text-decoration:none;color:inherit}button,input,select,textarea{font-family:inherit}button{cursor:pointer}
+.topbar{
+  position:sticky;top:0;z-index:30;background:rgba(248,255,249,.96);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(12px);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:40px;height:40px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:950}
+.title{font-size:18px;font-weight:950;line-height:1.05}
+.sub{font-size:12px;color:var(--muted);font-weight:850;margin-top:2px}
+.wrap{padding:14px;max-width:980px;margin:0 auto}
+.link,.btn,.chip{
+  border:1px solid var(--border);background:#fff;border-radius:14px;padding:11px 13px;font-size:14px;font-weight:950;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 4px 14px rgba(16,35,24,.04)
+}
+.btn-main{background:var(--green);border-color:var(--green);color:#fff}
+.btn-gold{background:var(--accent);border-color:var(--accent);color:#000}
+.btn-danger{background:rgba(217,75,75,.12);border-color:rgba(217,75,75,.25);color:var(--red)}
+.btn-blue{background:#eaf3ff;border-color:#bcd7ff;color:#1557a6}
+.strip{display:flex;gap:8px;overflow-x:auto;padding:10px 0 14px}.strip::-webkit-scrollbar{display:none}
+.hero,.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+.hero{padding:16px;background:linear-gradient(180deg,#fff8e8,#ffffff)}
+.kicker{display:inline-flex;background:#0f5132;color:#dcfce7;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:950;margin-bottom:10px}
+.hero h1{font-size:clamp(28px,7vw,54px);line-height:.96;letter-spacing:-.05em;margin:0 0 10px;font-weight:950}
+.hero p{color:#5b3b00;font-size:15px;line-height:1.45;font-weight:850}
+.grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:14px;align-items:start}
+.card-head{padding:13px 14px;border-bottom:1px solid var(--border);font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:950}
+.actions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+.action-btn{
+  width:100%;min-height:94px;border:1px solid var(--border);background:#fff;border-radius:18px;padding:13px;text-align:left;
+  display:flex;flex-direction:column;gap:7px;box-shadow:0 5px 16px rgba(16,35,24,.05)
+}
+.action-btn.active{border-color:var(--green);background:#e9f8ee}
+.action-icon{font-size:26px}.action-title{font-size:15px;font-weight:950}.action-desc{font-size:12px;color:var(--muted);font-weight:850;line-height:1.3}
+.form{padding:14px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}
+label{font-size:12px;font-weight:950;color:var(--muted)}
+input,select,textarea{
+  width:100%;border:1px solid var(--border);background:#fff;border-radius:14px;padding:13px 12px;
+  font-size:16px;font-weight:850;color:var(--text);outline:none
+}
+textarea{min-height:110px;resize:vertical;line-height:1.45}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+.preview{padding:14px;background:#f8fff9;border-top:1px solid var(--border)}
+.preview-title{font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:950;color:var(--muted);margin-bottom:8px}
+.preview-box{border:1px dashed #b8e4c8;background:#fff;border-radius:16px;padding:13px;font-size:15px;font-weight:850;line-height:1.45;white-space:pre-wrap}
+.footer-actions{display:flex;gap:10px;flex-wrap:wrap;padding:14px;border-top:1px solid var(--border)}
+.list{padding:14px}.note{border:1px solid var(--border);border-radius:16px;padding:12px;margin-bottom:8px;background:#fff}
+.note-title{font-size:14px;font-weight:950}.note-text{font-size:13px;color:var(--muted);font-weight:850;line-height:1.4;margin-top:5px}.note-date{font-size:11px;color:var(--muted);font-weight:850;margin-top:7px}
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:var(--green);color:white;padding:12px 18px;border-radius:999px;font-weight:950;
+  transition:.25s;z-index:99;box-shadow:0 10px 30px rgba(16,35,24,.2);white-space:nowrap
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.help{padding:12px 14px;background:#fff8e8;border:1px solid #f1d89b;border-radius:18px;color:#5b3b00;font-weight:850;line-height:1.4;margin-bottom:14px}
+#btnActionsGuide{
+  position:fixed;bottom:24px;right:16px;z-index:200;background:linear-gradient(160deg,#fff8e8,#fff3d0);
+  border:1.5px solid #f1d89b;color:#7a4c00;border-radius:999px;padding:11px 18px;font-size:14px;
+  font-weight:950;box-shadow:0 8px 20px rgba(122,76,0,.22);display:inline-flex;align-items:center;gap:7px
+}
+@media(max-width:780px){.grid{grid-template-columns:1fr}.actions-grid{grid-template-columns:1fr}.form{grid-template-columns:1fr}.link span{display:none}.wrap{padding:10px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">⚡</div>
+    <div>
+      <div class="title">Actions utiles</div>
+      <div class="sub">Textes métier prêts · validation au clic</div>
+    </div>
+  </div>
+  <a class="link" href="./caisse.html">💰 <span>Caisse</span></a>
+</header>
+
+<main class="wrap">
+  <div class="strip">
+    <a class="link" href="./caisse.html">← Caisse</a>
+    <a class="link" href="./admin.html">📦 Marchandises</a>
+    <a class="link" href="./profile.html">🏪 Coordonnées pro</a>
+    <a class="link" href="./caisse.html#notes">✍️ Notes</a>
+  </div>
+
+  <section class="hero">
+    <div class="kicker">Le pro clique plus qu’il n’écrit</div>
+    <h1>Choisis l’action, DIGIY prépare le texte, tu valides.</h1>
+    <p>
+      Cette page sert aux gestes du comptoir qui ne sont pas une vente simple :
+      ajouter du stock, noter une dette client, une dépense, une commande, une taille, une couleur, une livraison ou une perte.
+    </p>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <div class="card-head">Choisir une action</div>
+      <div class="actions-grid" id="actionGrid"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head">Préparer la note</div>
+      <div class="form">
+        <div class="field">
+          <label>Client / personne</label>
+          <input id="client" placeholder="Ex : Awa"/>
+        </div>
+        <div class="field">
+          <label>Marchandise / sujet</label>
+          <input id="item" placeholder="Ex : robe stylée"/>
+        </div>
+        <div class="field">
+          <label>Montant FCFA</label>
+          <input id="amount" type="number" inputmode="numeric" placeholder="Ex : 10000"/>
+        </div>
+        <div class="field">
+          <label>Quantité</label>
+          <input id="qty" type="number" inputmode="numeric" placeholder="Ex : 12"/>
+        </div>
+        <div class="field">
+          <label>Date / délai</label>
+          <input id="dateInfo" placeholder="Ex : fin du mois"/>
+        </div>
+        <div class="field">
+          <label>Détail</label>
+          <input id="detail" placeholder="Ex : couleur bleue taille M"/>
+        </div>
+        <div class="field full">
+          <label>Texte préparé</label>
+          <textarea id="prepared" placeholder="DIGIY prépare ici le texte métier."></textarea>
+        </div>
+      </div>
+      <div class="preview">
+        <div class="preview-title">Aperçu avant validation</div>
+        <div class="preview-box" id="previewBox">Choisis une action à gauche.</div>
+      </div>
+      <div class="footer-actions">
+        <button class="btn btn-main" onclick="saveAction()">✅ Valider l’action</button>
+        <button class="btn" onclick="clearForm()">🧹 Vider</button>
+        <button class="btn btn-blue" onclick="renderPreview()">⚡ Préparer</button>
+      </div>
+    </section>
+  </div>
+
+  <section class="card">
+    <div class="card-head">Dernières notes gardées</div>
+    <div class="list" id="notesList"></div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+<button id="btnActionsGuide" onclick="speakActionsGuide()">🎧 Mode d’emploi</button>
+
+<script>
+const ACTIONS = [
+  {key:"client_doit", icon:"🤝", title:"Client doit", desc:"Crédit / dette à récupérer", type:"client_doit", template:d=>`${d.client||"Client"} doit ${money(d.amount)}${d.item?" pour "+d.item:""}${d.dateInfo?" · "+d.dateInfo:""}.`},
+  {key:"stock_add", icon:"📦", title:"Ajouter stock", desc:"Entrée stock ou achat marchandise", type:"stock", template:d=>`Ajout stock : ${d.qty||0} ${d.item||"marchandise"}${d.amount?" · coût/prix "+money(d.amount):""}${d.detail?" · "+d.detail:""}.`},
+  {key:"depense", icon:"💸", title:"Dépense", desc:"Sortie d’argent du comptoir", type:"depense", template:d=>`Dépense : ${money(d.amount)}${d.item?" · "+d.item:""}${d.detail?" · "+d.detail:""}.`},
+  {key:"commande", icon:"📝", title:"Commande cliente", desc:"Demande à préparer", type:"commande", template:d=>`Commande cliente : ${d.client||"Cliente"} demande ${d.qty?d.qty+" ":""}${d.item||"marchandise"}${d.detail?" · "+d.detail:""}${d.dateInfo?" · pour "+d.dateInfo:""}.`},
+  {key:"taille_couleur", icon:"🎨", title:"Taille / couleur", desc:"Précision sur une vente", type:"autre", template:d=>`Note ${d.item||"marchandise"} : ${d.detail||"taille / couleur à préciser"}${d.client?" · "+d.client:""}.`},
+  {key:"remise", icon:"🏷️", title:"Remise donnée", desc:"Garder trace d’une réduction", type:"vente", template:d=>`Remise donnée : ${money(d.amount)}${d.item?" sur "+d.item:""}${d.client?" · "+d.client:""}.`},
+  {key:"livraison", icon:"🛵", title:"Livraison", desc:"Livraison à faire / suivie", type:"autre", template:d=>`Livraison : ${d.client||"Client"}${d.item?" · "+d.item:""}${d.detail?" · "+d.detail:""}${d.dateInfo?" · "+d.dateInfo:""}.`},
+  {key:"perte", icon:"⚠️", title:"Perte / casse", desc:"Article abîmé ou perdu", type:"stock", template:d=>`Perte / casse : ${d.qty||1} ${d.item||"marchandise"}${d.detail?" · "+d.detail:""}.`},
+  {key:"achat_fournisseur", icon:"🚚", title:"Achat fournisseur", desc:"Stock acheté chez fournisseur", type:"stock", template:d=>`Achat fournisseur : ${d.qty?d.qty+" ":""}${d.item||"marchandise"}${d.amount?" · "+money(d.amount):""}${d.detail?" · "+d.detail:""}.`},
+  {key:"autre", icon:"✍️", title:"Autre note", desc:"Information libre importante", type:"autre", template:d=>`${d.detail||"Note comptoir"}${d.client?" · "+d.client:""}${d.item?" · "+d.item:""}${d.amount?" · "+money(d.amount):""}.`}
+];
+
+let selected = ACTIONS[0];
+let toastTimer=null;
+function $(id){return document.getElementById(id)}
+function readJSON(key,fallback){try{const d=localStorage.getItem(key);return d?JSON.parse(d):fallback}catch(e){return fallback}}
+function saveJSON(key,val){localStorage.setItem(key,JSON.stringify(val))}
+function getNotes(){return readJSON("caisse_notes",[])}
+function saveNotes(n){saveJSON("caisse_notes",n)}
+function getProducts(){return readJSON("caisse_prods",[])}
+function saveProducts(p){saveJSON("caisse_prods",p)}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function money(n){return Number(n||0)>0 ? Math.round(Number(n)).toLocaleString("fr-FR")+" F" : "montant à préciser"}
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2200)}
+
+function formData(){
+  return {
+    client:$("client").value.trim(),
+    item:$("item").value.trim(),
+    amount:Number($("amount").value||0),
+    qty:Number($("qty").value||0),
+    dateInfo:$("dateInfo").value.trim(),
+    detail:$("detail").value.trim()
+  };
+}
+
+function renderActions(){
+  $("actionGrid").innerHTML=ACTIONS.map(a=>`
+    <button class="action-btn ${a.key===selected.key?"active":""}" onclick="selectAction('${a.key}')">
+      <div class="action-icon">${a.icon}</div>
+      <div class="action-title">${esc(a.title)}</div>
+      <div class="action-desc">${esc(a.desc)}</div>
+    </button>
+  `).join("");
+}
+
+function selectAction(key){
+  selected=ACTIONS.find(a=>a.key===key)||ACTIONS[0];
+  renderActions();
+  renderPreview();
+}
+
+function renderPreview(){
+  const txt = selected.template(formData());
+  $("prepared").value = txt;
+  $("previewBox").textContent = txt;
+}
+
+["client","item","amount","qty","dateInfo","detail","prepared"].forEach(id=>{
+  setTimeout(()=>{const el=$(id); if(el) el.addEventListener("input",()=> {
+    if(id==="prepared") $("previewBox").textContent=$("prepared").value || "Texte vide.";
+    else renderPreview();
+  })},0);
+});
+
+function normalize(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}
+function maybeUpdateStock(){
+  if(selected.key!=="stock_add" && selected.key!=="achat_fournisseur") return false;
+  const d=formData();
+  if(!d.item || !d.qty) return false;
+  const items=getProducts();
+  if(!Array.isArray(items) || !items.length) return false;
+  const target=items.find(p=>normalize(p.name)===normalize(d.item)) || items.find(p=>normalize(p.name).includes(normalize(d.item)) || normalize(d.item).includes(normalize(p.name)));
+  if(!target) return false;
+  target.stock=Number(target.stock||0)+Number(d.qty||0);
+  saveProducts(items);
+  return true;
+}
+
+function saveAction(){
+  const text=($("prepared").value||"").trim();
+  if(!text){toast("Prépare une action");return}
+  const d=formData();
+  const stockTouched=maybeUpdateStock();
+  const notes=getNotes();
+  notes.unshift({
+    id:Date.now(),
+    date:new Date().toISOString(),
+    type:selected.type||"autre",
+    amount:Number(d.amount||0),
+    text: text + (stockTouched ? "\nStock mis à jour automatiquement." : "")
+  });
+  saveNotes(notes);
+  renderNotes();
+  toast(stockTouched ? "Action validée + stock mis à jour" : "Action validée");
+}
+
+function clearForm(){
+  ["client","item","amount","qty","dateInfo","detail","prepared"].forEach(id=>$(id).value="");
+  $("previewBox").textContent="Choisis une action à gauche.";
+}
+
+function noteLabel(t){return({vente:"Vente",depense:"Dépense",client_doit:"Client doit",stock:"Stock / achat",commande:"Commande",autre:"Autre"}[t]||"Note")}
+function fmtDate(v){const d=new Date(v);return isNaN(d.getTime())?"":d.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
+function renderNotes(){
+  const notes=getNotes().slice(0,8);
+  $("notesList").innerHTML=notes.length ? notes.map(n=>`
+    <div class="note">
+      <div class="note-title">${esc(noteLabel(n.type))}${Number(n.amount||0)? " · "+money(n.amount):""}</div>
+      <div class="note-text">${esc(n.text||"")}</div>
+      <div class="note-date">${esc(fmtDate(n.date))}</div>
+    </div>
+  `).join("") : '<div class="help" style="margin:0">Aucune note encore. Valide une action pour commencer.</div>';
+}
+
+const ACTIONS_GUIDE = [
+  "Tu es sur Actions utiles.",
+  "Cette page sert quand ce n'est pas une vente simple.",
+  "Tu choisis une action prête : client doit, ajout de stock, dépense, commande cliente, taille, couleur, livraison ou perte.",
+  "DIGIY prépare une phrase métier.",
+  "Tu complètes seulement les champs utiles : client, marchandise, montant, quantité ou détail.",
+  "Tu vérifies le texte préparé.",
+  "Puis tu touches Valider l'action.",
+  "La note est gardée dans le téléphone et visible dans les Notes de la caisse.",
+  "Pour ajout stock, si la marchandise existe déjà, le stock peut être augmenté automatiquement."
+].join(" ");
+
+let guideSpeaking=false;
+function speakActionsGuide(){
+  if(!("speechSynthesis" in window)){alert("Audio non disponible");return}
+  const btn=$("btnActionsGuide");
+  if(guideSpeaking){try{speechSynthesis.cancel()}catch(e){} guideSpeaking=false; btn.textContent="🎧 Mode d’emploi"; return}
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(ACTIONS_GUIDE);
+    u.lang="fr-FR"; u.rate=.84; u.pitch=1.02;
+    const stop=()=>{guideSpeaking=false; btn.textContent="🎧 Mode d’emploi"};
+    u.onstart=()=>{guideSpeaking=true; btn.textContent="⏹ Stop"};
+    u.onend=stop; u.onerror=stop;
+    const speak=()=>{const fr=(speechSynthesis.getVoices()||[]).find(v=>/^fr/i.test(v.lang)); if(fr)u.voice=fr; try{speechSynthesis.speak(u)}catch(e){stop()}};
+    if(speechSynthesis.getVoices().length)speak(); else {speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;speak()}; setTimeout(speak,120)}
+  }catch(e){guideSpeaking=false}
+}
+
+renderActions();
+renderPreview();
+renderNotes();
+</script>
+</body>
+</html>
