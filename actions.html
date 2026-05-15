@@ -76,8 +76,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--green)}
 #btnActionsGuide{
   position:fixed;bottom:24px;right:16px;z-index:200;background:linear-gradient(160deg,#fff8e8,#fff3d0);
   border:1.5px solid #f1d89b;color:#7a4c00;border-radius:999px;padding:11px 18px;font-size:14px;
-  font-weight:950;box-shadow:0 8px 20px rgba(122,76,0,.22);display:inline-flex;align-items:center;gap:7px
+  font-weight:950;box-shadow:0 8px 20px rgba(122,76,0,.22);display:inline-flex;align-items:center;gap:7px;
+  cursor:pointer;transition:transform .14s,box-shadow .14s;-webkit-tap-highlight-color:transparent
 }
+#btnActionsGuide:active{transform:scale(.95);box-shadow:0 4px 10px rgba(122,76,0,.14)}
 @media(max-width:780px){.grid{grid-template-columns:1fr}.actions-grid{grid-template-columns:1fr}.form{grid-template-columns:1fr}.link span{display:none}.wrap{padding:10px}}
 </style>
 </head>
@@ -289,13 +291,14 @@ function renderNotes(){
 const ACTIONS_GUIDE = [
   "Tu es sur Actions utiles.",
   "Cette page sert quand ce n'est pas une vente simple.",
-  "Tu choisis une action prête : client doit, ajout de stock, dépense, commande cliente, taille, couleur, livraison ou perte.",
-  "DIGIY prépare une phrase métier.",
-  "Tu complètes seulement les champs utiles : client, marchandise, montant, quantité ou détail.",
-  "Tu vérifies le texte préparé.",
-  "Puis tu touches Valider l'action.",
+  "Tu choisis une action prête parmi dix modèles :",
+  "client doit, ajout de stock, dépense, commande cliente, taille ou couleur, remise donnée, livraison, perte ou casse, achat fournisseur, ou note libre.",
+  "DIGIY prépare le texte métier en une phrase.",
+  "Tu complètes seulement les champs utiles : client, marchandise, montant, quantité, date ou détail.",
+  "Le texte préparé s'affiche. Tu peux le modifier avant de valider si besoin.",
+  "Puis tu touches le bouton vert Valider l'action.",
   "La note est gardée dans le téléphone et visible dans les Notes de la caisse.",
-  "Pour ajout stock, si la marchandise existe déjà, le stock peut être augmenté automatiquement."
+  "Pour ajout stock ou achat fournisseur, si la marchandise existe déjà, le stock est augmenté automatiquement."
 ].join(" ");
 
 let guideSpeaking=false;
