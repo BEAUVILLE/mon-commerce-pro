@@ -4,8 +4,8 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Caisse POS universelle · Profil métier</title>
-<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales et oreille métier."/>
+<title>MON COMMERCE — Caisse POS universelle · Profil métier · V24 stats</title>
+<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales blindées et oreille métier."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
@@ -376,7 +376,7 @@ a{text-decoration:none;color:inherit}
     <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
   </div>
 
-  <div class="profile-hint">🧩 <strong>Moule universel :</strong> le profil métier peut charger ses produits, mots et exemples sans casser la caisse.</div>
+  <div class="profile-hint">🧩 <strong>Moule universel V24 :</strong> profil métier + stats blindées. Clique les marchandises, ajuste les quantités, puis Encaisser.</div>
   <div id="articles"></div>
   <div class="search-wrap">
     <span class="search-ico">🔍</span>
@@ -515,7 +515,7 @@ a{text-decoration:none;color:inherit}
       <div class="amount-label">Encaissement validé</div>
       <div class="amount-value" id="okAmountBig">0 F</div>
       <div class="amount-note">
-        La vente est gardée dans les stats. Le ticket reste disponible si le client ou la cliente le demande.
+        La vente est gardée dans l’historique local. Va dans Stats pour vérifier le chiffre.
       </div>
     </div>
 
@@ -556,7 +556,8 @@ a{text-decoration:none;color:inherit}
     </div>
     <div class="section-card">
       <div class="section-title">Historique</div>
-      <div style="padding:12px 14px"><button class="btn-danger" onclick="clearHistorique()">🗑️ Effacer l’historique des ventes</button></div>
+      <div style="padding:12px 14px"><button class="btn-outline" onclick="debugStats()">🔎 Vérifier stockage</button>
+        <button class="btn-danger" onclick="clearHistorique()">🗑️ Effacer l’historique des ventes</button></div>
     </div>
     <div id="historiqueList"></div>
   </div>
@@ -807,6 +808,41 @@ function getProds(){
 function saveProds(items){saveJSON("caisse_prods",items)}
 function getVentes(){return readJSON("caisse_ventes",[])}
 function saveVentes(v){saveJSON("caisse_ventes",v)}
+
+function normalizeSaleForStats(v){
+  const d = v && v.date ? new Date(v.date) : new Date();
+  const safeDate = isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  const items = Array.isArray(v && v.items) ? v.items : [];
+  const computed = items.reduce((s,i)=>s+(Number(i.price||0)*Number(i.qty||0)),0);
+  return {
+    ...(v||{}),
+    id:Number(v && v.id)||Date.now(),
+    date:safeDate,
+    day:String(v && v.day || safeDate.slice(0,10)),
+    items,
+    total:Number(v && v.total || computed || 0),
+    subtotal:Number(v && v.subtotal || computed || 0),
+    remise:Number(v && v.remise || 0),
+    payLabel:(v && v.payLabel) || "Paiement"
+  };
+}
+
+function persistVente(vente){
+  const clean=normalizeSaleForStats(vente);
+  const ventes=getVentes().filter(v=>Number(v.id)!==Number(clean.id));
+  ventes.unshift(clean);
+  saveVentes(ventes);
+
+  // Double trace locale : utile si un navigateur ou un vieux cache fait des caprices.
+  try{
+    localStorage.setItem("caisse_last_vente", JSON.stringify(clean));
+    localStorage.setItem("caisse_stats_touch", String(Date.now()));
+  }catch(e){}
+
+  const check=getVentes();
+  return Array.isArray(check) && check.some(v=>Number(v.id)===Number(clean.id));
+}
+
 function getNotes(){return readJSON("caisse_notes",[])}
 function saveNotes(n){saveJSON("caisse_notes",n)}
 function getShopName(){return localStorage.getItem("caisse_shop")||"Ma Boutique"}
@@ -988,13 +1024,9 @@ function encaisser(){
     payLabel:payLabels[selPay_]||"Paiement"
   };
 
-  const ventes=getVentes();
-  ventes.unshift(vente);
-  saveVentes(ventes);
-
-  // Relecture immédiate : si le téléphone refuse localStorage, on le voit tout de suite.
-  const check=getVentes();
-  if(!Array.isArray(check)||!check.find(v=>Number(v.id)===Number(vente.id))){
+  // Sauvegarde blindée : vente gardée, relue, puis stats actualisées.
+  const saved=persistVente(vente);
+  if(!saved){
     showToast("Vente non gardée sur ce téléphone. Stockage navigateur bloqué.");
     return;
   }
@@ -1004,6 +1036,7 @@ function encaisser(){
   saveProds(prods);
 
   if(typeof renderStats==="function")renderStats();
+  if(typeof updateProfileLabels==="function")updateProfileLabels();
 
   document.getElementById("recuShopName").textContent=getShopName();
   document.getElementById("recuDate").textContent=now.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" — "+now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+(client?" · "+esc(client):"");
@@ -1019,15 +1052,50 @@ function nouvelleVente(){
   buildCats();renderProds();renderAddition();updatePanierBar();updateTotals();showPage("page-caisse");
 }
 function renderStats(){
-  const ventes=getVentes();const today=new Date().toDateString();const va=ventes.filter(v=>new Date(v.date).toDateString()===today);
-  const caA=va.reduce((s,v)=>s+Number(v.total||0),0);const caT=ventes.reduce((s,v)=>s+Number(v.total||0),0);
-  setText("stat-ca",fmt(caA));setText("stat-nb",va.length);setText("stat-ca-total",fmt(caT));setText("stat-nb-total",ventes.length);
-  const counter={};ventes.forEach(v=>(v.items||[]).forEach(i=>counter[i.name]=(counter[i.name]||0)+Number(i.qty||0)));
-  const top=Object.entries(counter).sort((a,b)=>b[1]-a[1]).slice(0,5);const topEl=document.getElementById("topArticles");
-  topEl.innerHTML=top.length?top.map(([name,qty])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:800"><span>${esc(name)}</span><span style="color:var(--green)">${qty} vendu${qty>1?"s":""}</span></div>`).join(""):`<div class="no-data">Aucune vente enregistrée</div>`;
+  const ventes=getVentes().map(normalizeSaleForStats).filter(v=>Number(v.total||0)>=0);
+  const todayIso=new Date().toISOString().slice(0,10);
+  const va=ventes.filter(v=>String(v.day || String(v.date).slice(0,10))===todayIso);
+
+  const caA=va.reduce((s,v)=>s+Number(v.total||0),0);
+  const caT=ventes.reduce((s,v)=>s+Number(v.total||0),0);
+
+  setText("stat-ca",fmt(caA));
+  setText("stat-nb",va.length);
+  setText("stat-ca-total",fmt(caT));
+  setText("stat-nb-total",ventes.length);
+
+  const counter={};
+  ventes.forEach(v=>(v.items||[]).forEach(i=>{
+    const name=i.name||profileWord("productLabel","Article");
+    counter[name]=(counter[name]||0)+Number(i.qty||0);
+  }));
+
+  const top=Object.entries(counter).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const topEl=document.getElementById("topArticles");
+  if(topEl){
+    topEl.innerHTML=top.length
+      ? top.map(([name,qty])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:800"><span>${esc(name)}</span><span style="color:var(--green)">${qty} vendu${qty>1?"s":""}</span></div>`).join("")
+      : `<div class="no-data">Aucune vente enregistrée</div>`;
+  }
+
   const h=document.getElementById("historiqueList");
-  h.innerHTML=ventes.length?ventes.map(v=>{const d=new Date(v.date);return`<div class="list-card"><div class="list-head"><div><div class="list-date">${d.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})} ${d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}${v.client?" · "+esc(v.client):""}</div><span class="badge">${esc(v.payLabel||"Paiement")}</span></div><div class="list-total">${fmt(v.total)}</div></div><div class="list-detail">${(v.items||[]).map(i=>`${esc(i.emoji||"📦")} ${esc(i.name)} ×${Number(i.qty)}`).join(" · ")}</div></div>`}).join(""):`<div class="no-data">Aucune vente pour l’instant</div>`;
+  if(h){
+    h.innerHTML=ventes.length
+      ? ventes.map(v=>{
+          const d=new Date(v.date);
+          return `<div class="list-card"><div class="list-head"><div><div class="list-date">${d.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})} ${d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}${v.client?" · "+esc(v.client):""}</div><span class="badge">${esc(v.payLabel||"Paiement")}</span></div><div class="list-total">${fmt(v.total)}</div></div><div class="list-detail">${(v.items||[]).map(i=>`${esc(i.emoji||"📦")} ${esc(i.name)} ×${Number(i.qty)}`).join(" · ")}</div></div>`;
+        }).join("")
+      : `<div class="no-data">Aucune vente pour l’instant</div>`;
+  }
+
+  try{localStorage.setItem("caisse_stats_last_render", String(Date.now()))}catch(e){}
 }
+
+function debugStats(){
+  const ventes=getVentes();
+  alert("Ventes gardées : "+ventes.length+"\\nClé : caisse_ventes\\nDernière vente : "+(localStorage.getItem("caisse_last_vente")||"aucune"));
+}
+
 function clearHistorique(){if(confirm("Effacer tout l’historique des ventes ?")){saveVentes([]);renderStats();showToast("Historique effacé")}}
 function saveNote(){
   const type=document.getElementById("noteType").value;const amount=Number(document.getElementById("noteAmount").value||0);const text=(document.getElementById("noteText").value||"").trim();
@@ -1660,6 +1728,51 @@ init();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
