@@ -1,722 +1,834 @@
-/*
-  DIGIY OREILLE MÉTIER — POS / COMMERCE V1
-  Doctrine : Tu parles de l’action à DIGIY. DIGIY prépare. Tu valides. Ton assistant métier s’exécute.
-  Sans API. Sans Supabase. Navigateur + règles terrain + validation humaine.
-*/
-(function(){
-  "use strict";
-
-  const BUILD = "oreille-metier-pos-v1-20260515";
-  let lastDraft = null;
-  let recognition = null;
-  let listening = false;
-
-  function $(id){ return document.getElementById(id); }
-  function money(n){ return Math.round(Number(n||0)).toLocaleString("fr-FR") + " F"; }
-
-  function esc(v){
-    return String(v == null ? "" : v)
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/\"/g,"&quot;")
-      .replace(/'/g,"&#039;");
-  }
-
-  function stripAccents(v){
-    return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-  }
-
-  function norm(v){
-    return stripAccents(String(v||"").toLowerCase())
-      .replace(/[’']/g," ")
-      .replace(/\s+/g," ")
-      .trim();
-  }
-
-  function toast(msg){
-    if(typeof window.showToast === "function") window.showToast(msg);
-    else alert(msg);
-  }
-
-  function products(){
-    try{
-      return typeof window.getProds === "function" ? window.getProds() : [];
-    }catch(_){
-      return [];
-    }
-  }
-
-  function saveProducts(items){
-    try{
-      if(typeof window.saveProds === "function") window.saveProds(items);
-    }catch(_){}
-  }
-
-  function getNotesSafe(){
-    try{
-      return typeof window.getNotes === "function"
-        ? window.getNotes()
-        : JSON.parse(localStorage.getItem("caisse_notes") || "[]");
-    }catch(_){
-      return [];
-    }
-  }
-
-  function saveNotesSafe(notes){
-    try{
-      if(typeof window.saveNotes === "function") window.saveNotes(notes);
-      else localStorage.setItem("caisse_notes", JSON.stringify(notes));
-    }catch(_){}
-  }
-
-  function findProduct(name){
-    const key = norm(name);
-    if(!key) return null;
-
-    const list = products();
-
-    return list.find(p => norm(p.name) === key)
-      || list.find(p => norm(p.name).includes(key) || key.includes(norm(p.name)))
-      || null;
-  }
-
-  function nextProductId(list){
-    return (list || []).reduce((m,p) => Math.max(m, Number(p.id) || 0), 0) + 1;
-  }
-
-  function extractAmount(text){
-    const raw = String(text || "").replace(/\s+/g," ");
-    const m = raw.match(/(\d[\d\s.,]*)\s*(?:f|fcfa|xof|francs?)?/i);
-    if(!m) return 0;
-    return Number(String(m[1]).replace(/[^\d]/g,"")) || 0;
-  }
-
-  function extractQty(text){
-    const t = norm(text);
-    const m = t.match(/\b(\d+)\s+(?:x\s+)?([a-z0-9\- ]{2,})/i);
-    if(m) return Number(m[1]) || 1;
-    return 1;
-  }
-
-  function cleanProductName(part){
-    return String(part || "")
-      .replace(/\b(ajoute|ajouter|article|stock|prix|vendu|vends|vend|j ai vendu|jai vendu|vente|panier|mets|met|a|à|de|du|des|fcfa|f|francs|cash|wave|orange|money|client|doit|dette|credit|crédit|vendeur|fin|mois|date|tel|telephone|téléphone)\b/gi," ")
-      .replace(/\d+/g," ")
-      .replace(/[.,;:!?]/g," ")
-      .replace(/\s+/g," ")
-      .trim();
-  }
-
-  function parseDate(text){
-    const t = norm(text);
-    const d = new Date();
-
-    function iso(x){
-      const y = x.getFullYear();
-      const m = String(x.getMonth() + 1).padStart(2,"0");
-      const day = String(x.getDate()).padStart(2,"0");
-      return `${y}-${m}-${day}`;
-    }
-
-    if(t.includes("fin du mois")) return iso(new Date(d.getFullYear(), d.getMonth() + 1, 0));
-
-    if(t.includes("demain")){
-      d.setDate(d.getDate() + 1);
-      return iso(d);
-    }
-
-    const w = {
-      dimanche:0,
-      lundi:1,
-      mardi:2,
-      mercredi:3,
-      jeudi:4,
-      vendredi:5,
-      samedi:6
-    };
-
-    for(const [name,target] of Object.entries(w)){
-      if(t.includes(name)){
-        let add = (target - d.getDay() + 7) % 7;
-        if(add === 0) add = 7;
-        d.setDate(d.getDate() + add);
-        return iso(d);
-      }
-    }
-
-    const m = String(text || "").match(/\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?\b/);
-
-    if(m){
-      const year = m[3]
-        ? Number(String(m[3]).length === 2 ? "20" + m[3] : m[3])
-        : d.getFullYear();
-
-      return iso(new Date(year, Number(m[2]) - 1, Number(m[1])));
-    }
-
-    return "";
-  }
-
-  function extractPhone(text){
-    const m = String(text || "").match(/(?:tel|tél|telephone|téléphone|whatsapp|wa)\s*[:\-]?\s*([+0-9][0-9\s().-]{6,})/i);
-
-    if(m && m[1]) return m[1].replace(/[^\d+]/g,"");
-
-    const any = String(text || "").match(/(?:\+?221)?\s*(7[05678])[\s.-]?(\d{3})[\s.-]?(\d{2})[\s.-]?(\d{2})/);
-
-    if(any) return (any[1] + any[2] + any[3] + any[4]).replace(/[^\d]/g,"");
-
-    return "";
-  }
-
-  function extractClientName(text){
-    const raw = String(text || "")
-      .replace(/(?:tel|tél|telephone|téléphone|whatsapp|wa)\s*[:\-]?\s*[+0-9][0-9\s().-]{6,}/ig," ")
-      .replace(/\d[\d\s.,]*/g," ");
-
-    const stop = new Set(
-      "pos pay commerce boutique client doit dette dettes credit crédit vendeur date fin mois en fois payable vendredi lundi mardi mercredi jeudi samedi dimanche tel telephone téléphone whatsapp wa vente vendu vends vend panier article ajoute ajouter stock prix"
-      .split(" ")
-    );
-
-    const words = raw
-      .replace(/[.,;:!?()]/g," ")
-      .split(/\s+/)
-      .map(x => x.trim())
-      .filter(Boolean);
-
-    for(const w of words){
-      const k = norm(w);
-      if(k.length < 2 || stop.has(k)) continue;
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    }
-
-    return "Client";
-  }
-
-  function parse(text){
-    const original = String(text || "").trim();
-    const t = norm(original);
-
-    if(!original) return null;
-
-    if(/\b(dette client|dettes clients|credit vendeur|client doit|doit|reste a payer|reste à payer)\b/.test(t)){
-      return {
-        type:"client_debt",
-        title:"📒 Dette client",
-        client: extractClientName(original),
-        phone: extractPhone(original),
-        amount: extractAmount(original),
-        dueDate: parseDate(original),
-        note: original
-      };
-    }
-
-    if(/\b(ajoute|ajouter|article|stock|prix)\b/.test(t)){
-      const amount = extractAmount(original);
-      const qty = extractQty(original);
-      let name = "";
-
-      let m = original.match(/(?:ajoute|ajouter|article|stock|prix)\s+(.+?)(?:\s+(?:a|à|prix|stock|quantite|quantité|de)\s+|$)/i);
-
-      if(m && m[1]) name = cleanProductName(m[1]);
-
-      if(!name){
-        const afterQty = original.match(/\b\d+\s+(.+?)(?:\s+(?:a|à)\s+\d|$)/i);
-        name = cleanProductName(afterQty?.[1] || original);
-      }
-
-      return {
-        type:"product_upsert",
-        title:"📦 Article / stock",
-        name: name || "Article",
-        qty,
-        price: amount,
-        note: original
-      };
-    }
-
-    if(/\b(vendu|vends|vend|vente|mets au panier|met au panier|panier)\b/.test(t)){
-      const amount = extractAmount(original);
-      const qty = extractQty(original);
-
-      const m = original.match(/(?:vendu|vends|vend|vente|panier)\s+(.+?)(?:\s+(?:a|à)\s+\d|$)/i);
-
-      const name = cleanProductName(m?.[1] || original);
-
-      return {
-        type:"sale_cart",
-        title:"🛒 Vente / panier",
-        name: name || "Article",
-        qty,
-        price: amount,
-        note: original
-      };
-    }
-
-    if(/\b(note|rappelle|a faire|à faire|depense|dépense|achat)\b/.test(t)){
-      return {
-        type:"note",
-        title:"✍️ Note comptoir",
-        amount: extractAmount(original),
-        note: original
-      };
-    }
-
-    return {
-      type:"unknown",
-      title:"🗣️ À préciser",
-      note: original
-    };
-  }
-
-  function renderDraft(draft){
-    const box = $("digiyPosDraft");
-    const btn = $("digiyPosValidate");
-
-    if(!box || !btn) return;
-
-    lastDraft = draft;
-
-    if(!draft){
-      box.innerHTML = `
-        <strong>Doctrine</strong>
-        <span>Dis l’action. DIGIY prépare. Tu valides. Ta caisse s’exécute.</span>
-      `;
-      btn.disabled = true;
-      return;
-    }
-
-    btn.disabled = draft.type === "unknown";
-
-    if(draft.type === "product_upsert"){
-      box.innerHTML = `
-        <strong>${esc(draft.title)}</strong>
-        <span>Article : ${esc(draft.name)}</span>
-        <span>Stock à ajouter : ${esc(draft.qty)}</span>
-        <span>Prix : ${draft.price ? esc(money(draft.price)) : "à compléter côté Articles"}</span>
-        <em>Brouillon seulement. Valide pour mettre à jour la caisse locale.</em>
-      `;
-    }else if(draft.type === "sale_cart"){
-      box.innerHTML = `
-        <strong>${esc(draft.title)}</strong>
-        <span>Article : ${esc(draft.name)}</span>
-        <span>Quantité : ${esc(draft.qty)}</span>
-        <span>${draft.price ? "Prix entendu : " + esc(money(draft.price)) : "Prix repris dans la caisse si l’article existe."}</span>
-        <em>Valide pour ajouter au panier.</em>
-      `;
-    }else if(draft.type === "client_debt"){
-      box.innerHTML = `
-        <strong>${esc(draft.title)}</strong>
-        <span>Client : ${esc(draft.client)}</span>
-        <span>Tel : ${esc(draft.phone || "—")}</span>
-        <span>Somme due : ${draft.amount ? esc(money(draft.amount)) : "à compléter"}</span>
-        <span>Date : ${esc(draft.dueDate || "à préciser")}</span>
-        <em>Dette client = argent attendu. Pas encore recette.</em>
-      `;
-    }else if(draft.type === "note"){
-      box.innerHTML = `
-        <strong>${esc(draft.title)}</strong>
-        <span>${esc(draft.note)}</span>
-        <span>${draft.amount ? "Montant : " + esc(money(draft.amount)) : "Montant optionnel"}</span>
-        <em>Valide pour garder la note.</em>
-      `;
-    }else{
-      box.innerHTML = `
-        <strong>À préciser</strong>
-        <span>${esc(draft.note)}</span>
-        <em>Essaie : “Ajoute 12 savons à 500”, “Vendu 3 savons”, “Fatou dette client 50000 fin du mois”.</em>
-      `;
-    }
-  }
-
-  function executeDraft(){
-    const d = lastDraft;
-
-    if(!d || d.type === "unknown") return;
-
-    if(d.type === "product_upsert"){
-      const list = products();
-      let p = findProduct(d.name);
-
-      if(p){
-        p.stock = Number(p.stock || 0) + Number(d.qty || 0);
-        if(d.price) p.price = Number(d.price);
-      }else{
-        list.push({
-          id: nextProductId(list),
-          name: d.name,
-          cat: "Autres",
-          emoji: "📦",
-          price: Number(d.price || 0),
-          stock: Number(d.qty || 0),
-          published: true
-        });
-      }
-
-      saveProducts(list);
-
-      if(typeof window.buildCats === "function") window.buildCats();
-      if(typeof window.renderProds === "function") window.renderProds();
-
-      toast("📦 Article préparé dans la caisse");
-    }
-
-    if(d.type === "sale_cart"){
-      let p = findProduct(d.name);
-
-      if(!p && d.price){
-        const list = products();
-
-        p = {
-          id: nextProductId(list),
-          name: d.name,
-          cat: "Autres",
-          emoji: "📦",
-          price: Number(d.price || 0),
-          stock: Math.max(Number(d.qty || 1), 1),
-          published: true
-        };
-
-        list.push(p);
-        saveProducts(list);
-
-        if(typeof window.buildCats === "function") window.buildCats();
-        if(typeof window.renderProds === "function") window.renderProds();
-      }
-
-      if(!p){
-        toast("Article introuvable. Ajoute d’abord l’article ou donne le prix.");
-        return;
-      }
-
-      for(let i = 0; i < Number(d.qty || 1); i++){
-        if(typeof window.addToCart === "function") window.addToCart(p.id);
-      }
-
-      toast("🛒 Ajouté au panier");
-    }
-
-    if(d.type === "client_debt"){
-      const notes = getNotesSafe();
-
-      notes.unshift({
-        id: Date.now(),
-        date: new Date().toISOString(),
-        type: "client_doit",
-        amount: Number(d.amount || 0),
-        text: `${d.client}${d.phone ? " · Tel " + d.phone : ""}${d.dueDate ? " · Date " + d.dueDate : ""}\n${d.note}`
-      });
-
-      saveNotesSafe(notes);
-
-      if(typeof window.renderNotes === "function") window.renderNotes();
-
-      toast("📒 Dette client gardée en note comptoir");
-    }
-
-    if(d.type === "note"){
-      const notes = getNotesSafe();
-
-      notes.unshift({
-        id: Date.now(),
-        date: new Date().toISOString(),
-        type: "autre",
-        amount: Number(d.amount || 0),
-        text: d.note
-      });
-
-      saveNotesSafe(notes);
-
-      if(typeof window.renderNotes === "function") window.renderNotes();
-
-      toast("✍️ Note gardée");
-    }
-
-    const input = $("digiyPosVoiceInput");
-
-    if(input) input.value = "";
-
-    renderDraft(null);
-  }
-
-  function startVoice(){
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const btn = $("digiyPosMic");
-    const input = $("digiyPosVoiceInput");
-
-    if(!SR){
-      toast("Voix non disponible sur ce navigateur. Écris la phrase, ça marche aussi.");
-      return;
-    }
-
-    try{
-      if(recognition && listening){
-        recognition.stop();
-        return;
-      }
-
-      recognition = new SR();
-      recognition.lang = "fr-FR";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => {
-        listening = true;
-        if(btn) btn.textContent = "🎧 J’écoute…";
-      };
-
-      recognition.onend = () => {
-        listening = false;
-        if(btn) btn.textContent = "🎙️ Parler";
-      };
-
-      recognition.onerror = () => {
-        listening = false;
-        if(btn) btn.textContent = "🎙️ Parler";
-        toast("Voix non comprise. Écris la phrase.");
-      };
-
-      recognition.onresult = (event) => {
-        const said = event?.results?.[0]?.[0]?.transcript || "";
-
-        if(input && said){
-          input.value = said;
-          renderDraft(parse(said));
-          toast("Phrase captée. Vérifie puis valide.");
-        }
-      };
-
-      recognition.start();
-    }catch(_){
-      toast("Micro déjà ouvert ou navigateur bloqué.");
-    }
-  }
-
-  function inject(){
-    if($("digiyPosEar")) return;
-
-    const anchor =
-      document.querySelector("#page-caisse .home-strip")
-      || document.querySelector("#page-caisse .topbar");
-
-    if(!anchor) return;
-
-    const css = document.createElement("style");
-
-    css.textContent = `
-      .digiy-pos-ear{
-        margin:10px 12px 10px;
-        padding:14px;
-        border:2px solid #cfe8d7;
-        border-radius:20px;
-        background:linear-gradient(160deg,#fff,#f6fff8);
-        box-shadow:0 8px 24px rgba(16,35,24,.08);
-        display:grid;
-        gap:10px;
-        color:#102318;
-      }
-
-      .digiy-pos-ear-title{
-        font-size:13px;
-        font-weight:950;
-        text-transform:uppercase;
-        letter-spacing:.08em;
-        color:#7a4c00;
-      }
-
-      .digiy-pos-ear-help{
-        font-size:13px;
-        line-height:1.45;
-        color:#5f7468;
-        font-weight:850;
-      }
-
-      .digiy-pos-ear-grid{
-        display:grid;
-        grid-template-columns:1fr .9fr;
-        gap:10px;
-        align-items:start;
-      }
-
-      .digiy-pos-ear textarea{
-        width:100%;
-        min-height:96px;
-        border:1px solid #cfe8d7;
-        border-radius:14px;
-        padding:12px;
-        font-size:16px;
-        font-weight:850;
-        color:#102318;
-        background:#fff;
-        resize:vertical;
-        outline:none;
-      }
-
-      .digiy-pos-ear-actions{
-        display:flex;
-        gap:8px;
-        flex-wrap:wrap;
-        margin-top:8px;
-      }
-
-      .digiy-pos-ear button{
-        min-height:42px;
-        border-radius:999px;
-        border:1px solid #cfe8d7;
-        background:#fff;
-        color:#102318;
-        padding:9px 12px;
-        font-size:13px;
-        font-weight:950;
-        cursor:pointer;
-      }
-
-      .digiy-pos-ear button.primary{
-        background:#f5a623;
-        border-color:#f5a623;
-        color:#000;
-      }
-
-      .digiy-pos-ear button.confirm{
-        background:#16a765;
-        border-color:#16a765;
-        color:#fff;
-      }
-
-      .digiy-pos-ear button:disabled{
-        opacity:.55;
-        cursor:not-allowed;
-      }
-
-      .digiy-pos-draft{
-        min-height:96px;
-        border:1px solid #cfe8d7;
-        border-radius:14px;
-        background:#fff;
-        padding:12px;
-        display:grid;
-        gap:5px;
-        font-size:13px;
-        line-height:1.4;
-        color:#5f7468;
-        font-weight:850;
-      }
-
-      .digiy-pos-draft strong{
-        color:#102318;
-        font-size:15px;
-        font-weight:950;
-      }
-
-      .digiy-pos-draft em{
-        color:#7a4c00;
-        font-style:normal;
-        font-weight:950;
-      }
-
-      .digiy-pos-examples{
-        display:flex;
-        gap:7px;
-        flex-wrap:wrap;
-      }
-
-      .digiy-pos-examples button{
-        font-size:12px;
-        min-height:34px;
-        padding:7px 10px;
-      }
-
-      @media(max-width:760px){
-        .digiy-pos-ear-grid{
-          grid-template-columns:1fr;
-        }
-
-        .digiy-pos-ear{
-          margin-left:10px;
-          margin-right:10px;
-        }
-
-        .digiy-pos-ear textarea{
-          min-height:88px;
-        }
-      }
-    `;
-
-    document.head.appendChild(css);
-
-    const panel = document.createElement("section");
-
-    panel.className = "digiy-pos-ear";
-    panel.id = "digiyPosEar";
-
-    panel.innerHTML = `
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#eefaf2"/>
+<title>MON COMMERCE — Caisse</title>
+<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain : encaisser vite, addition, paiement, reçu, notes et stats locales."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#eefaf2;
+  --surface:#f8fff9;
+  --card:#ffffff;
+  --border:#cfe8d7;
+  --accent:#f5a623;
+  --gold:#7a4c00;
+  --green:#16a765;
+  --red:#d94b4b;
+  --blue:#2878d8;
+  --text:#102318;
+  --muted:#5f7468;
+  --shadow:0 8px 24px rgba(16,35,24,.08);
+  --radius:16px;
+  --font:Outfit,'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  background:linear-gradient(180deg,#e9f8ee 0%,#f7fff9 45%,#eefaf2 100%);
+  color:var(--text);
+  font-family:var(--font);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+
+.page{display:none;flex-direction:column;min-height:100vh}
+.page.active{display:flex}
+
+.topbar{
+  background:rgba(248,255,249,.94);
+  border-bottom:1px solid var(--border);
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:50;
+  backdrop-filter:blur(12px);
+}
+.topbar-left{display:flex;align-items:center;gap:10px;min-width:0}
+.logo-badge{
+  width:36px;height:36px;border-radius:10px;background:var(--accent);color:#000;
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:950;flex:0 0 auto;
+}
+.shop-title{font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:185px}
+.shop-sub{font-size:10px;color:var(--muted);font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:7px}
+.ico-btn,.link-btn{
+  min-width:36px;height:36px;border-radius:10px;border:1px solid var(--border);
+  background:#fff;color:var(--text);display:inline-flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:900;padding:0 10px;box-shadow:0 4px 14px rgba(16,35,24,.04);
+}
+.link-btn{width:auto;font-size:12px;gap:5px}
+.clock{
+  font-size:12px;font-weight:800;color:var(--gold);background:#fff8e8;border:1px solid #f1d89b;
+  border-radius:8px;padding:6px 9px;font-variant-numeric:tabular-nums
+}
+.back-btn{
+  display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);
+  color:var(--text);font-size:13px;font-weight:900;border-radius:10px;padding:9px 12px;
+}
+
+.home-strip{
+  display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:10px 12px;background:rgba(248,255,249,.6);
+}
+.home-strip::-webkit-scrollbar{display:none}
+.nav-chip{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:999px;
+  border:1px solid var(--border);background:#fff;color:var(--muted);font-size:12px;font-weight:900;
+}
+.nav-chip.active{background:var(--green);border-color:var(--green);color:#fff}
+.nav-chip.gold{background:var(--accent);border-color:var(--accent);color:#000}
+
+.search-wrap{padding:0 14px 0;position:relative}
+.search-wrap input{
+  width:100%;background:#fff;border:1px solid var(--border);border-radius:12px;
+  padding:12px 14px 12px 38px;color:var(--text);font-size:15px;outline:none;box-shadow:var(--shadow)
+}
+.search-wrap input:focus{border-color:var(--green)}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-ico{position:absolute;left:26px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+
+.cats-bar{display:flex;gap:7px;padding:10px 14px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.cats-bar::-webkit-scrollbar{display:none}
+.cat-pill{
+  flex:0 0 auto;padding:7px 14px;border-radius:20px;border:1px solid var(--border);
+  background:#fff;color:var(--muted);font-size:12px;font-weight:900;white-space:nowrap
+}
+.cat-pill.active{background:var(--green);border-color:var(--green);color:#fff}
+
+.prods{
+  flex:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));
+  gap:10px;padding:2px 14px 108px;overflow-y:auto;align-content:start;
+}
+.pcard{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 10px;
+  cursor:pointer;display:flex;flex-direction:column;gap:6px;position:relative;box-shadow:var(--shadow)
+}
+.pcard:active{transform:scale(.97)}
+.pcard.oos{opacity:.36;pointer-events:none}
+.pcard-emoji{font-size:27px;line-height:1}
+.pcard-name{font-size:12px;font-weight:800;line-height:1.3}
+.pcard-price{font-size:14px;font-weight:950;color:var(--gold)}
+.stk-badge{position:absolute;top:7px;right:7px;font-size:9px;font-weight:950;padding:3px 6px;border-radius:6px}
+.stk-ok{background:rgba(22,167,101,.12);color:var(--green)}
+.stk-low{background:rgba(217,75,75,.12);color:var(--red)}
+
+.panier-bar,.fixed-bar{
+  position:fixed;bottom:0;left:0;right:0;background:rgba(248,255,249,.96);
+  border-top:1px solid var(--border);padding:12px 16px;
+  padding-bottom:calc(12px + env(safe-area-inset-bottom));z-index:50;box-shadow:0 -10px 24px rgba(16,35,24,.08)
+}
+.panier-bar{display:flex;align-items:center;gap:12px}
+.panier-bar.hidden{display:none}
+.panier-info{flex:1}
+.panier-count-lbl{font-size:12px;color:var(--muted);font-weight:700}
+.panier-total-lbl{font-size:19px;font-weight:950;color:var(--gold)}
+.btn-main{
+  background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:15px 18px;
+  font-size:15px;font-weight:950;white-space:nowrap;box-shadow:0 8px 18px rgba(22,167,101,.22)
+}
+.btn-gold{
+  background:var(--accent);color:#000;border:none;border-radius:var(--radius);padding:14px 16px;
+  font-size:14px;font-weight:950;white-space:nowrap
+}
+.btn-outline{
+  background:#fff;border:1px solid var(--border);color:var(--text);border-radius:var(--radius);
+  padding:13px 14px;font-size:13px;font-weight:900
+}
+.btn-danger{
+  background:rgba(217,75,75,.12);border:1px solid rgba(217,75,75,.25);color:var(--red);
+  border-radius:var(--radius);padding:13px 14px;font-size:13px;font-weight:900
+}
+
+/* addition */
+.sheet-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:180;display:flex;align-items:flex-end;
+  justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px)
+}
+.sheet-overlay.open{opacity:1;pointer-events:all}
+.sheet{
+  width:100%;max-width:540px;background:var(--surface);border-radius:20px 20px 0 0;border:1px solid var(--border);
+  border-bottom:none;padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom));
+  max-height:88vh;overflow-y:auto;transform:translateY(100%);transition:transform .28s;box-shadow:0 -18px 34px rgba(16,35,24,.18)
+}
+.sheet-overlay.open .sheet{transform:translateY(0)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px}
+.sheet-title{font-size:18px;font-weight:950}
+.sheet-sub{font-size:12px;color:var(--muted);font-weight:700;margin-top:2px}
+.close-btn{width:36px;height:36px;border-radius:11px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:20px}
+
+.section-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow)}
+.section-title{
+  font-size:11px;font-weight:950;color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--border);
+  text-transform:uppercase;letter-spacing:.5px
+}
+.cart-line{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border)}
+.cart-line:last-child{border-bottom:none}
+.cart-emoji{font-size:22px;flex:0 0 auto}
+.cart-info{flex:1;min-width:0}
+.cart-name{font-size:13px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-meta{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
+.cart-price{font-size:13px;font-weight:950;color:var(--gold);white-space:nowrap}
+.qty-box{display:flex;align-items:center;gap:6px}
+.qty-btn{width:30px;height:30px;border-radius:9px;border:1px solid var(--border);background:#fff;color:var(--text);font-size:17px;font-weight:950}
+.qty-val{min-width:18px;text-align:center;font-size:13px;font-weight:950}
+
+.field-group{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.field-input,.field-select,.field-textarea{
+  width:100%;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);
+  font-size:14px;outline:none
+}
+.field-textarea{min-height:90px;resize:vertical}
+.field-input:focus,.field-select:focus,.field-textarea:focus{border-color:var(--green)}
+.remise-fields{display:flex;gap:8px}.remise-fields input{flex:1}
+
+.totaux-block{padding:12px 14px;display:flex;flex-direction:column;gap:7px}
+.trow{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-weight:750}
+.trow.remise-row span:last-child{color:var(--red)}
+.trow.big{font-size:25px;font-weight:950;color:var(--text);margin-top:4px;padding-top:10px;border-top:1px solid var(--border)}
+.trow.big span:last-child{color:var(--gold)}
+.actions-row{display:flex;gap:10px;margin-top:12px}.actions-row>*{flex:1}
+
+/* paiement */
+.pay-body{flex:1;overflow-y:auto;padding:16px 14px 108px;display:flex;flex-direction:column;gap:14px}
+.amount-card{
+  background:linear-gradient(180deg,#e2f8ea,#fff);border:1px solid #b8e4c8;border-radius:20px;
+  padding:24px 16px;text-align:center;box-shadow:var(--shadow)
+}
+.amount-label{font-size:12px;color:var(--muted);font-weight:950;text-transform:uppercase;letter-spacing:.08em}
+.amount-value{font-size:40px;line-height:1.1;font-weight:950;color:var(--gold);margin-top:8px}
+.amount-note{font-size:12px;color:var(--muted);font-weight:700;margin-top:8px;line-height:1.4}
+.pay-modes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.pay-mode-btn{
+  background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:16px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:7px;color:var(--text)
+}
+.pay-mode-btn.active{border-color:var(--green);background:#e9f8ee}
+.pay-mode-icon{font-size:28px}
+.pay-mode-lbl{font-size:12px;font-weight:950;color:var(--muted);text-align:center}
+.pay-mode-btn.active .pay-mode-lbl{color:var(--green)}
+.pay-help{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px;line-height:1.45;box-shadow:var(--shadow)}
+.pay-help-title{font-size:14px;font-weight:950;color:var(--green);margin-bottom:6px}
+.pay-help-text{font-size:13px;color:var(--text);font-weight:700}
+
+/* reçu */
+.recu-body{flex:1;overflow-y:auto;padding:20px 16px 108px}
+.recu-paper{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:22px 18px;box-shadow:var(--shadow)}
+.recu-head{text-align:center;padding-bottom:14px;border-bottom:1px dashed var(--border);margin-bottom:14px}
+.recu-logo{font-size:36px;margin-bottom:6px}.recu-shopname{font-size:18px;font-weight:950}
+.recu-date{font-size:11px;color:var(--muted);font-weight:700;margin-top:4px;line-height:1.4}
+.recu-lines{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.recu-line{display:flex;justify-content:space-between;font-size:13px;gap:12px}.recu-line span:last-child{font-weight:850;white-space:nowrap}
+.recu-separator{border:none;border-top:1px dashed var(--border);margin:10px 0}
+.recu-total-line{display:flex;justify-content:space-between;font-size:18px;font-weight:950;color:var(--gold)}
+.recu-paymode{text-align:center;font-size:12px;color:var(--muted);font-weight:750;margin-top:10px}
+.recu-merci{text-align:center;font-size:13px;font-weight:950;color:var(--green);margin-top:14px;padding-top:14px;border-top:1px dashed var(--border)}
+
+/* stats / notes */
+.content{padding:14px 14px 108px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+.stat-label{font-size:11px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.04em}
+.stat-value{font-size:22px;font-weight:950;color:var(--gold);margin-top:5px}
+.stat-value.green{color:var(--green)}
+.list-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px;box-shadow:var(--shadow)}
+.list-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}
+.list-date{font-size:11px;color:var(--muted);font-weight:750;line-height:1.35}
+.list-total{font-size:15px;font-weight:950;color:var(--gold);white-space:nowrap}
+.list-detail{font-size:12px;color:var(--muted);font-weight:750;line-height:1.45}
+.badge{font-size:10px;font-weight:950;padding:4px 8px;border-radius:999px;background:rgba(22,167,101,.12);color:var(--green);display:inline-flex;margin-top:5px}
+.no-data{text-align:center;padding:34px 20px;color:var(--muted);font-size:13px;font-weight:800;line-height:1.5}
+.note-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.note-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.note-title{font-size:14px;font-weight:950;margin-bottom:6px}.note-text{font-size:13px;line-height:1.45;color:var(--text);font-weight:700;white-space:pre-wrap}
+.note-meta{font-size:11px;color:var(--muted);font-weight:750;margin-top:8px}
+
+.toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--green);
+  color:#fff;font-weight:950;font-size:13px;padding:11px 20px;border-radius:999px;z-index:400;transition:transform .3s;
+  white-space:nowrap;pointer-events:none;box-shadow:0 10px 26px rgba(16,35,24,.20)
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+
+/* DIGIY — comptoir pur : gros, clair, sans bruit */
+.shop-title{font-size:18px;font-weight:950;max-width:230px}
+.shop-sub{font-size:12px;font-weight:900}
+.clock{font-size:14px;font-weight:950}
+.nav-chip{font-size:14px;font-weight:950;padding:11px 15px}
+.pcard{min-height:122px;padding:14px 12px;border-radius:18px}
+.pcard-emoji{font-size:34px}
+.pcard-name{font-size:15px;font-weight:950}
+.pcard-price{font-size:18px;font-weight:950}
+.stk-badge{font-size:11px;padding:5px 8px;border-radius:999px}
+.search-wrap input{font-size:17px;font-weight:850;padding:15px 14px 15px 42px;border-radius:16px}
+.cat-pill{font-size:14px;font-weight:950;padding:9px 16px}
+.panier-count-lbl{font-size:14px;font-weight:850}
+.panier-total-lbl{font-size:24px;font-weight:950}
+.btn-main,.btn-gold,.btn-outline,.btn-danger{font-size:16px;font-weight:950;border-radius:18px}
+.amount-value{font-size:48px}
+.amount-note,.pay-help-text,.cart-name,.cart-price,.field-input,.field-select,.field-textarea{font-size:16px;font-weight:850}
+.section-title{font-size:13px}
+.recu-shopname{font-size:22px}
+.recu-total-line{font-size:24px}
+.recu-line{font-size:16px}
+
+.audio-notice-btn{
+  min-width:42px;
+  height:36px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff8e8;
+  color:var(--gold);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:15px;
+  font-weight:950;
+  padding:0 10px;
+  box-shadow:0 4px 14px rgba(16,35,24,.04);
+}
+
+.home-strip.comptoir{
+  padding:10px 12px;
+}
+
+.home-strip.comptoir .optional{
+  display:none!important;
+}
+
+@media(max-width:680px){
+  .shop-title{font-size:17px;max-width:170px}
+  .shop-sub{font-size:11px}
+  .topbar{padding:10px 12px}
+  .prods{grid-template-columns:repeat(auto-fill,minmax(142px,1fr));padding-bottom:126px}
+  .pcard{min-height:130px}
+  .panier-bar,.fixed-bar{padding:14px 14px;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+}
+
+@media(max-width:680px){
+  .stats-grid,.note-grid{grid-template-columns:1fr}
+  .shop-title{max-width:150px}
+  .link-btn span.txt{display:none}
+  .home-strip{padding:9px 10px}
+  .prods{grid-template-columns:repeat(auto-fill,minmax(124px,1fr));padding-left:10px;padding-right:10px}
+}
+@media(print){
+  .topbar,.home-strip,.panier-bar,.fixed-bar,.link-btn,.ico-btn,.btn-outline,.btn-main,.btn-gold,.btn-danger{display:none!important}
+  body{background:#fff;color:#000}
+  .page{display:block}
+  .recu-body{padding:0}
+  .recu-paper{box-shadow:none;border:none}
+}
+</style>
+</head>
+<body>
+
+<div class="page active" id="page-caisse">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo-badge">🛒</div>
       <div>
-        <div class="digiy-pos-ear-title">🎙️ Oreille métier POS</div>
-        <div class="digiy-pos-ear-help">Dis l’action. DIGIY prépare. Tu valides. Ta caisse s’exécute.</div>
+        <div class="shop-title" id="shopTitle">Ma Boutique</div>
+        <div class="shop-sub">Comptoir · vente rapide</div>
       </div>
+    </div>
+    <div class="topbar-right">
+      <div class="clock" id="clockEl">--:--</div>
+      <button class="audio-notice-btn" id="btnCaisseNotice" type="button" title="Notice rapide">🎧</button>
+      <button class="ico-btn" onclick="showPage('page-stats')" title="Stats">📊</button>
+    </div>
+  </div>
 
-      <div class="digiy-pos-ear-grid">
-        <div>
-          <textarea id="digiyPosVoiceInput" placeholder="Ex. Ajoute 12 savons à 500 / Vendu 3 savons / Fatou dette client 50000 fin du mois"></textarea>
+  <div class="home-strip comptoir">
+    <button class="nav-chip active" onclick="showPage('page-caisse')">💰 Encaisser</button>
+    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
+    <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
+    <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
+    <a class="nav-chip" href="./index.html">🏠 Accueil</a>
+    <a class="nav-chip optional" href="./profile.html">🏪 Ma fiche commerce</a>
+    <a class="nav-chip optional" href="https://mon-commerce.digiylyfe.com/">🌍 Voir côté client</a>
+    <a class="nav-chip optional" href="./admin.html">⚙️ Admin</a>
+    <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
+  </div>
 
-          <div class="digiy-pos-ear-actions">
-            <button id="digiyPosMic" type="button">🎙️ Parler</button>
-            <button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer</button>
-            <button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button>
-            <button id="digiyPosClear" type="button">Effacer</button>
-          </div>
+  <div id="articles"></div>
+  <div class="search-wrap">
+    <span class="search-ico">🔍</span>
+    <input type="text" id="searchInput" placeholder="Chercher un article…" oninput="renderProds()">
+  </div>
+  <div class="cats-bar" id="catsBar"></div>
+  <div class="prods" id="prodsGrid"></div>
+
+  <div class="panier-bar hidden" id="panierBar">
+    <div class="panier-info">
+      <div class="panier-count-lbl" id="panierCountLbl">0 article</div>
+      <div class="panier-total-lbl" id="panierTotalLbl">0 F</div>
+    </div>
+    <button class="btn-gold" onclick="openAddition()">🧾 Addition</button>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="additionOverlay">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div>
+        <div class="sheet-title">Addition</div>
+        <div class="sheet-sub">Vérifie l’addition, puis confirme.</div>
+      </div>
+      <button class="close-btn" onclick="closeAddition()">×</button>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Articles</div>
+      <div id="additionItems"></div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Client</div>
+      <div class="field-group">
+        <input class="field-input" id="clientInput" type="text" placeholder="Nom du client (optionnel)">
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Remise</div>
+      <div class="field-group">
+        <div class="remise-fields">
+          <input class="field-input" id="remiseVal" type="number" placeholder="Montant remise…" min="0" oninput="updateTotals()">
+          <select class="field-select" id="remiseType" onchange="updateTotals()">
+            <option value="pct">%</option>
+            <option value="fix">F CFA</option>
+          </select>
         </div>
-
-        <div class="digiy-pos-draft" id="digiyPosDraft">
-          <strong>Doctrine</strong>
-          <span>Dis l’action. DIGIY prépare. Tu valides. Ta caisse s’exécute.</span>
-        </div>
       </div>
-
-      <div class="digiy-pos-examples">
-        <button type="button" data-pos-example="Ajoute 12 savons à 500">Ajoute stock</button>
-        <button type="button" data-pos-example="Vendu 3 savons">Vente panier</button>
-        <button type="button" data-pos-example="Fatou dette client 50000 tel 771234567 date fin du mois">Dette client</button>
-        <button type="button" data-pos-example="Note achat sachets 2000">Note</button>
+    </div>
+    <div class="section-card">
+      <div class="totaux-block">
+        <div class="trow"><span>Sous-total</span><span id="subtotalEl">0 F</span></div>
+        <div class="trow remise-row" id="remiseRow" style="display:none"><span>Remise</span><span id="remiseEl">0 F</span></div>
+        <div class="trow big"><span>Total</span><span id="totalEl">0 F</span></div>
       </div>
-    `;
+    </div>
+    <div class="actions-row">
+      <button class="btn-outline" onclick="clearCart()">Vider</button>
+      <button class="btn-main" onclick="confirmAddition()">✅ Confirmer</button>
+    </div>
+  </div>
+</div>
 
-    anchor.insertAdjacentElement("afterend", panel);
+<div class="page" id="page-paiement">
+  <div class="topbar">
+    <div class="topbar-left"><button class="back-btn" onclick="backToAddition()">← Addition</button></div>
+    <div style="font-size:14px;font-weight:950">Paiement</div>
+    <a class="link-btn" href="./dashboard-pro.html">🏠 <span class="txt">Accueil</span></a>
+      <a class="link-btn" href="./profile.html">🏪 <span class="txt">Fiche</span></a>
+  </div>
+  <div class="pay-body">
+    <div class="amount-card">
+      <div class="amount-label">Montant à encaisser</div>
+      <div class="amount-value" id="payAmountBig">0 F</div>
+      <div class="amount-note">Choisis le mode de paiement, puis valide la vente.</div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Mode de paiement</div>
+      <div class="pay-modes-grid">
+        <button class="pay-mode-btn active" id="pm-esp" onclick="selPay('esp')"><div class="pay-mode-icon">💵</div><div class="pay-mode-lbl">Espèces</div></button>
+        <button class="pay-mode-btn" id="pm-wave" onclick="selPay('wave')"><div class="pay-mode-icon">🌊</div><div class="pay-mode-lbl">Wave</div></button>
+        <button class="pay-mode-btn" id="pm-orange" onclick="selPay('orange')"><div class="pay-mode-icon">🟠</div><div class="pay-mode-lbl">Orange Money</div></button>
+        <button class="pay-mode-btn" id="pm-crd" onclick="selPay('crd')"><div class="pay-mode-icon">💳</div><div class="pay-mode-lbl">Carte / TPE</div></button>
+      </div>
+    </div>
+    <div class="pay-help">
+      <div class="pay-help-title" id="payHelpTitle">Espèces</div>
+      <div class="pay-help-text" id="payHelpText">Reçois l’argent du client, rends la monnaie si besoin, puis confirme l’encaissement.</div>
+    </div>
+  </div>
+  <div class="fixed-bar"><button class="btn-main" style="width:100%" onclick="encaisser()">✅ Encaisser — <span id="encTotalLbl">0 F</span></button></div>
+</div>
 
-    $("digiyPosMic")?.addEventListener("click", startVoice);
+<div class="page" id="page-recu">
+  <div class="topbar">
+    <div class="topbar-left"><div class="logo-badge">🧾</div><div><div class="shop-title">Reçu</div><div class="shop-sub">Vente enregistrée</div></div></div>
+    <a class="link-btn" href="./dashboard-pro.html">🏠 <span class="txt">Accueil</span></a>
+      <a class="link-btn" href="./profile.html">🏪 <span class="txt">Fiche</span></a>
+  </div>
+  <div class="recu-body">
+    <div class="recu-paper">
+      <div class="recu-head">
+        <div class="recu-logo">🧾</div>
+        <div class="recu-shopname" id="recuShopName">Ma Boutique</div>
+        <div class="recu-date" id="recuDate"></div>
+      </div>
+      <div class="recu-lines" id="recuLines"></div>
+      <hr class="recu-separator">
+      <div class="recu-total-line"><span>TOTAL</span><span id="recuTotal">0 F</span></div>
+      <div class="recu-paymode" id="recuPaymode"></div>
+      <div class="recu-merci">✅ Merci pour votre achat !</div>
+    </div>
+  </div>
+  <div class="fixed-bar">
+    <div class="actions-row" style="margin:0">
+      <button class="btn-outline" onclick="window.print()">🖨️ Imprimer</button>
+      <button class="btn-gold" onclick="nouvelleVente()">🛒 Nouvelle vente</button>
+    </div>
+  </div>
+</div>
 
-    $("digiyPosPrepare")?.addEventListener("click", () => {
-      renderDraft(parse($("digiyPosVoiceInput")?.value || ""));
+<div class="page" id="page-stats">
+  <div class="topbar">
+    <div class="topbar-left"><button class="back-btn" onclick="showPage('page-caisse')">← Caisse</button></div>
+    <div style="font-size:14px;font-weight:950">Stats & historique</div>
+    <a class="link-btn" href="./admin.html#articleList">📦 <span class="txt">Articles</span></a>
+  </div>
+  <div class="home-strip comptoir">
+    <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
+    <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
+    <button class="nav-chip active" onclick="showPage('page-stats')">📊 Stats</button>
+    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
+  </div>
+  <div class="content">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">CA aujourd’hui</div><div class="stat-value" id="stat-ca">0 F</div></div>
+      <div class="stat-card"><div class="stat-label">Ventes aujourd’hui</div><div class="stat-value green" id="stat-nb">0</div></div>
+      <div class="stat-card"><div class="stat-label">CA total</div><div class="stat-value" id="stat-ca-total">0 F</div></div>
+      <div class="stat-card"><div class="stat-label">Total ventes</div><div class="stat-value green" id="stat-nb-total">0</div></div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Top articles</div>
+      <div id="topArticles" style="padding:10px 14px"></div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Historique</div>
+      <div style="padding:12px 14px"><button class="btn-danger" onclick="clearHistorique()">🗑️ Effacer l’historique des ventes</button></div>
+    </div>
+    <div id="historiqueList"></div>
+  </div>
+</div>
+
+<div class="page" id="page-notes">
+  <div class="topbar">
+    <div class="topbar-left"><button class="back-btn" onclick="showPage('page-caisse')">← Caisse</button></div>
+    <div style="font-size:14px;font-weight:950">Notes du comptoir</div>
+    <a class="link-btn" href="./dashboard-pro.html">🏠 <span class="txt">Accueil</span></a>
+      <a class="link-btn" href="./profile.html">🏪 <span class="txt">Fiche</span></a>
+  </div>
+  <div id="notes"></div>
+  <div class="home-strip comptoir">
+    <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
+    <button class="nav-chip active" onclick="showPage('page-notes')">✍️ Notes</button>
+    <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
+    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
+  </div>
+  <div class="content">
+    <div class="section-card">
+      <div class="section-title">Noter vite</div>
+      <div class="field-group">
+        <select class="field-select" id="noteType">
+          <option value="vente">Vente</option>
+          <option value="depense">Dépense</option>
+          <option value="client_doit">Client doit</option>
+          <option value="stock">Stock / achat</option>
+          <option value="autre">Autre</option>
+        </select>
+        <input class="field-input" id="noteAmount" type="number" inputmode="numeric" placeholder="Montant optionnel">
+        <textarea class="field-textarea" id="noteText" placeholder="Ex : Awa doit 2 000 F / Achat sachets / Livraison payée…"></textarea>
+        <button class="btn-main" onclick="saveNote()">💾 Enregistrer la note</button>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="section-title">Notes gardées sur ce téléphone</div>
+      <div style="padding:12px 14px">
+        <button class="btn-danger" onclick="clearNotes()">🧹 Effacer toutes les notes</button>
+      </div>
+    </div>
+    <div id="notesList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let cart = [];
+let selCat = "Tous";
+let selPay_ = "esp";
+
+const DEFAULT_PRODUCTS = [
+  {id:1,name:"Riz 5 kg",cat:"Alimentation",emoji:"🌾",price:3500,stock:50},
+  {id:2,name:"Huile 1 L",cat:"Alimentation",emoji:"🫙",price:1500,stock:30},
+  {id:3,name:"Pain",cat:"Alimentation",emoji:"🍞",price:250,stock:20},
+  {id:4,name:"Sucre 1 kg",cat:"Alimentation",emoji:"🍬",price:800,stock:40},
+  {id:5,name:"Lait poudre",cat:"Alimentation",emoji:"🥛",price:2200,stock:15},
+  {id:6,name:"Oeufs x6",cat:"Alimentation",emoji:"🥚",price:1200,stock:25},
+  {id:7,name:"Eau 1,5 L",cat:"Boissons",emoji:"💧",price:500,stock:60},
+  {id:8,name:"Jus Bissap",cat:"Boissons",emoji:"🍹",price:700,stock:20},
+  {id:9,name:"Coca Cola",cat:"Boissons",emoji:"🥤",price:800,stock:24},
+  {id:10,name:"Café soluble",cat:"Boissons",emoji:"☕",price:1000,stock:18},
+  {id:11,name:"Savon",cat:"Hygiène",emoji:"🧼",price:400,stock:35},
+  {id:12,name:"Dentifrice",cat:"Hygiène",emoji:"🪥",price:1200,stock:15},
+  {id:13,name:"Déodorant",cat:"Hygiène",emoji:"🧴",price:1800,stock:10},
+  {id:14,name:"Papier WC x4",cat:"Hygiène",emoji:"🧻",price:1500,stock:20},
+  {id:15,name:"Allumettes",cat:"Maison",emoji:"🔥",price:150,stock:80},
+  {id:16,name:"Bougie",cat:"Maison",emoji:"🕯️",price:500,stock:30},
+  {id:17,name:"Lessive 1 kg",cat:"Maison",emoji:"🧺",price:1800,stock:20},
+  {id:18,name:"Biscuits",cat:"Snacks",emoji:"🍪",price:500,stock:40},
+  {id:19,name:"Chips",cat:"Snacks",emoji:"🥔",price:400,stock:35},
+  {id:20,name:"Cacahuètes",cat:"Snacks",emoji:"🥜",price:300,stock:50}
+];
+
+
+function cleanVisibleUrl(){
+  try{
+    const u=new URL(location.href);
+    let dirty=false;
+    ["phone","tel","owner_phone","p_phone","pin","pin4","token","session_token"].forEach(k=>{
+      if(u.searchParams.has(k)){u.searchParams.delete(k);dirty=true}
     });
+    if(dirty)history.replaceState({},document.title,u.pathname+u.search+u.hash);
+  }catch(e){}
+}
 
-    $("digiyPosValidate")?.addEventListener("click", executeDraft);
+function readJSON(key,fallback){try{const d=localStorage.getItem(key);return d?JSON.parse(d):fallback}catch(e){return fallback}}
+function saveJSON(key,val){localStorage.setItem(key,JSON.stringify(val))}
+function getProds(){
+  let items = readJSON("caisse_prods", null);
+  if(!Array.isArray(items) || !items.length){
+    items = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+    saveJSON("caisse_prods", items);
+  }
+  return items.map((p,i)=>({
+    id:Number(p.id)||i+1,
+    source_id:p.source_id||"",
+    name:p.name||"Article",
+    cat:p.cat||p.category||"Autres",
+    emoji:p.emoji||"📦",
+    price:Number(p.price||p.price_xof||0),
+    stock:Number(p.stock||p.stock_qty||0),
+    published:p.published!==false
+  })).filter(p=>p.published!==false);
+}
+function saveProds(items){saveJSON("caisse_prods",items)}
+function getVentes(){return readJSON("caisse_ventes",[])}
+function saveVentes(v){saveJSON("caisse_ventes",v)}
+function getNotes(){return readJSON("caisse_notes",[])}
+function saveNotes(n){saveJSON("caisse_notes",n)}
+function getShopName(){return localStorage.getItem("caisse_shop")||"Ma Boutique"}
+function setShopName(n){localStorage.setItem("caisse_shop",n);document.querySelectorAll("#shopTitle,#recuShopName").forEach(el=>el.textContent=n)}
 
-    $("digiyPosClear")?.addEventListener("click", () => {
-      if($("digiyPosVoiceInput")) $("digiyPosVoiceInput").value = "";
-      renderDraft(null);
-    });
 
-    panel.querySelectorAll("[data-pos-example]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const v = btn.getAttribute("data-pos-example") || "";
-        if($("digiyPosVoiceInput")) $("digiyPosVoiceInput").value = v;
-        renderDraft(parse(v));
-      });
-    });
+function setupCaisseNotice(){
+  const btn=document.getElementById("btnCaisseNotice");
+  if(!btn || !("speechSynthesis" in window)) return;
+
+  const TEXT=[
+    "Caisse MON COMMERCE.",
+    "Touche un article pour l’ajouter au panier.",
+    "Le total apparaît en bas.",
+    "Touche Addition pour vérifier.",
+    "Tu peux ajuster la quantité ou mettre une remise.",
+    "Puis confirme.",
+    "Choisis le paiement.",
+    "Quand l’argent est reçu, touche Encaisser.",
+    "Le reçu sort ensuite.",
+    "Pour les prix et le stock, va dans Articles."
+  ].join(" ");
+
+  let speaking=false;
+
+  function stop(){
+    try{speechSynthesis.cancel()}catch(e){}
+    speaking=false;
+    btn.textContent="🎧";
   }
 
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", inject);
-  }else{
-    inject();
+  function speak(){
+    stop();
+    const u=new SpeechSynthesisUtterance(TEXT);
+    u.lang="fr-FR";
+    u.rate=.86;
+    u.pitch=1;
+    const voices=speechSynthesis.getVoices()||[];
+    const fr=voices.find(v=>/^fr/i.test(v.lang));
+    if(fr)u.voice=fr;
+    u.onstart=function(){speaking=true;btn.textContent="⏹"};
+    u.onend=stop;
+    u.onerror=stop;
+    setTimeout(function(){try{speechSynthesis.speak(u)}catch(e){stop()}},80);
   }
 
-  window.DIGIY_OREILLE_METIER_POS = {
-    BUILD,
-    parse,
-    renderDraft,
-    executeDraft
+  btn.addEventListener("click",function(){speaking?stop():speak()});
+  window.addEventListener("beforeunload",stop);
+}
+
+function init(){
+  cleanVisibleUrl();
+  setShopName(getShopName());
+  buildCats();
+  renderProds();
+  renderStats();
+  renderNotes();
+  updatePanierBar();
+  tickClock();setInterval(tickClock,1000);setupCaisseNotice();
+  if(location.hash==="#notes") showPage("page-notes");
+  if(location.hash==="#stats") showPage("page-stats");
+}
+function tickClock(){const t=new Date();document.getElementById("clockEl").textContent=t.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="page-stats") renderStats();
+  if(id==="page-notes") renderNotes();
+  window.scrollTo(0,0);
+}
+function buildCats(){
+  const cats=["Tous",...new Set(getProds().map(p=>p.cat||"Autres"))];
+  const bar=document.getElementById("catsBar");
+  bar.innerHTML=cats.map(c=>`<button class="cat-pill${c===selCat?" active":""}" data-cat="${escAttr(c)}">${esc(c)}</button>`).join("");
+  bar.querySelectorAll(".cat-pill").forEach(b=>b.onclick=()=>{selCat=b.dataset.cat;buildCats();renderProds()});
+}
+function renderProds(){
+  const q=(document.getElementById("searchInput").value||"").toLowerCase();
+  const items=getProds().filter(p=>(selCat==="Tous"||p.cat===selCat)&&(!q||String(p.name).toLowerCase().includes(q)));
+  const g=document.getElementById("prodsGrid");
+  if(!items.length){g.innerHTML=`<div style="grid-column:1/-1" class="no-data">Aucun article trouvé. Va dans Articles pour ajouter ou initialiser.</div>`;return}
+  g.innerHTML=items.map(p=>`
+    <div class="pcard${Number(p.stock)<=0?" oos":""}" onclick="addToCart(${Number(p.id)})">
+      <span class="stk-badge ${Number(p.stock)<=5?"stk-low":"stk-ok"}">${Number(p.stock)||0}</span>
+      <div class="pcard-emoji">${esc(p.emoji||"📦")}</div>
+      <div class="pcard-name">${esc(p.name)}</div>
+      <div class="pcard-price">${fmt(p.price)}</div>
+    </div>`).join("");
+}
+function addToCart(id){
+  const p=getProds().find(x=>Number(x.id)===Number(id));if(!p)return;
+  const ex=cart.find(x=>Number(x.id)===Number(id));
+  const current=ex?ex.qty:0;
+  if(current>=Number(p.stock)){showToast("Stock limité");return}
+  if(ex)ex.qty++;else cart.push({...p,qty:1});
+  updatePanierBar();renderAddition();showToast("+ "+p.name);
+}
+function changeQty(id,delta){
+  const item=cart.find(x=>Number(x.id)===Number(id));if(!item)return;
+  const prod=getProds().find(x=>Number(x.id)===Number(id));const max=prod?Number(prod.stock):999999;
+  item.qty+=delta;
+  if(item.qty<=0)cart=cart.filter(x=>Number(x.id)!==Number(id));
+  else if(item.qty>max){item.qty=max;showToast("Stock limité")}
+  updatePanierBar();renderAddition();updateTotals();
+}
+function updatePanierBar(){
+  const bar=document.getElementById("panierBar");const cnt=cart.reduce((s,i)=>s+Number(i.qty||0),0);
+  if(!cnt){bar.classList.add("hidden");return}
+  bar.classList.remove("hidden");
+  document.getElementById("panierCountLbl").textContent=cnt+" article"+(cnt>1?"s":"");
+  document.getElementById("panierTotalLbl").textContent=fmt(cartTotal());
+}
+function cartTotal(){return cart.reduce((s,i)=>s+Number(i.price||0)*Number(i.qty||0),0)}
+function openAddition(){if(!cart.length){showToast("Ajoute un article d’abord");return}renderAddition();updateTotals();document.getElementById("additionOverlay").classList.add("open")}
+function closeAddition(){document.getElementById("additionOverlay").classList.remove("open")}
+function renderAddition(){
+  const el=document.getElementById("additionItems");
+  if(!cart.length){el.innerHTML=`<div class="no-data">Aucun article</div>`;return}
+  el.innerHTML=cart.map(i=>`
+    <div class="cart-line">
+      <div class="cart-emoji">${esc(i.emoji||"📦")}</div>
+      <div class="cart-info"><div class="cart-name">${esc(i.name)}</div><div class="cart-meta">${fmt(i.price)} × ${Number(i.qty)}</div></div>
+      <div class="cart-price">${fmt(Number(i.price)*Number(i.qty))}</div>
+      <div class="qty-box"><button class="qty-btn" onclick="changeQty(${Number(i.id)},-1)">−</button><div class="qty-val">${Number(i.qty)}</div><button class="qty-btn" onclick="changeQty(${Number(i.id)},1)">+</button></div>
+    </div>`).join("");
+}
+function clearCart(){if(!cart.length)return;if(confirm("Vider l’addition ?")){cart=[];updatePanierBar();closeAddition();showToast("Addition vidée")}}
+function calcTotals(){
+  const sub=cartTotal();const rv=parseFloat(document.getElementById("remiseVal").value||"0")||0;const rt=document.getElementById("remiseType").value;
+  const rem=rv>0?(rt==="pct"?Math.round(sub*rv/100):Math.min(rv,sub)):0;return{sub,rem,total:Math.max(0,sub-rem)}
+}
+function updateTotals(){
+  const {sub,rem,total}=calcTotals();
+  setText("subtotalEl",fmt(sub));setText("totalEl",fmt(total));setText("payAmountBig",fmt(total));setText("encTotalLbl",fmt(total));
+  const rr=document.getElementById("remiseRow");
+  if(rem>0){rr.style.display="flex";setText("remiseEl","- "+fmt(rem))}else rr.style.display="none";
+}
+function confirmAddition(){if(!cart.length){showToast("Addition vide");return}updateTotals();closeAddition();preparePayment();showPage("page-paiement")}
+function backToAddition(){showPage("page-caisse");setTimeout(openAddition,80)}
+function preparePayment(){updateTotals();updatePayHelp()}
+function selPay(m){
+  selPay_=m;document.querySelectorAll(".pay-mode-btn").forEach(b=>b.classList.remove("active"));
+  const btn=document.getElementById("pm-"+m);if(btn)btn.classList.add("active");updatePayHelp();
+}
+function updatePayHelp(){
+  const help={
+    esp:["Espèces","Reçois l’argent du client, rends la monnaie si besoin, puis confirme l’encaissement."],
+    wave:["Wave","Demande au client d’envoyer le montant par Wave. Vérifie la notification ou le reçu avant de confirmer."],
+    orange:["Orange Money","Demande au client d’envoyer le montant par Orange Money. Vérifie la confirmation avant de valider la vente."],
+    crd:["Carte / TPE","Encaisse avec ton TPE ou ton service carte habituel. Quand le paiement est accepté, confirme ici."]
   };
-})();
+  const h=help[selPay_]||help.esp;setText("payHelpTitle",h[0]);setText("payHelpText",h[1]);
+}
+function encaisser(){
+  if(!cart.length){showToast("Aucune vente");return}
+  const {sub,rem,total}=calcTotals();if(total<=0){showToast("Total invalide");return}
+  const client=(document.getElementById("clientInput").value||"").trim();
+  const payLabels={esp:"Espèces",wave:"Wave",orange:"Orange Money",crd:"Carte / TPE"};
+  const now=new Date();
+  const ventes=getVentes();
+  ventes.unshift({id:Date.now(),date:now.toISOString(),client,items:cart.map(i=>({id:i.id,name:i.name,emoji:i.emoji,qty:Number(i.qty),price:Number(i.price)})),subtotal:sub,remise:rem,total,pay:selPay_,payLabel:payLabels[selPay_]||"Paiement"});
+  saveVentes(ventes);
+  const prods=readJSON("caisse_prods",getProds());
+  cart.forEach(ci=>{const p=prods.find(x=>Number(x.id)===Number(ci.id));if(p)p.stock=Math.max(0,Number(p.stock||0)-Number(ci.qty||0))});
+  saveProds(prods);
+  document.getElementById("recuShopName").textContent=getShopName();
+  document.getElementById("recuDate").textContent=now.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" — "+now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+(client?" · "+esc(client):"");
+  document.getElementById("recuLines").innerHTML=cart.map(i=>`<div class="recu-line"><span>${esc(i.emoji||"📦")} ${esc(i.name)} ×${Number(i.qty)}</span><span>${fmt(Number(i.price)*Number(i.qty))}</span></div>`).join("")+(rem>0?`<div class="recu-line"><span>Remise</span><span>- ${fmt(rem)}</span></div>`:"");
+  setText("recuTotal",fmt(total));setText("recuPaymode","Paiement : "+(payLabels[selPay_]||"Paiement"));showPage("page-recu");
+}
+function nouvelleVente(){
+  cart=[];document.getElementById("clientInput").value="";document.getElementById("remiseVal").value="";document.getElementById("searchInput").value="";
+  selCat="Tous";selPay_="esp";document.querySelectorAll(".pay-mode-btn").forEach(b=>b.classList.remove("active"));document.getElementById("pm-esp").classList.add("active");
+  buildCats();renderProds();renderAddition();updatePanierBar();updateTotals();showPage("page-caisse");
+}
+function renderStats(){
+  const ventes=getVentes();const today=new Date().toDateString();const va=ventes.filter(v=>new Date(v.date).toDateString()===today);
+  const caA=va.reduce((s,v)=>s+Number(v.total||0),0);const caT=ventes.reduce((s,v)=>s+Number(v.total||0),0);
+  setText("stat-ca",fmt(caA));setText("stat-nb",va.length);setText("stat-ca-total",fmt(caT));setText("stat-nb-total",ventes.length);
+  const counter={};ventes.forEach(v=>(v.items||[]).forEach(i=>counter[i.name]=(counter[i.name]||0)+Number(i.qty||0)));
+  const top=Object.entries(counter).sort((a,b)=>b[1]-a[1]).slice(0,5);const topEl=document.getElementById("topArticles");
+  topEl.innerHTML=top.length?top.map(([name,qty])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:800"><span>${esc(name)}</span><span style="color:var(--green)">${qty} vendu${qty>1?"s":""}</span></div>`).join(""):`<div class="no-data">Aucune vente enregistrée</div>`;
+  const h=document.getElementById("historiqueList");
+  h.innerHTML=ventes.length?ventes.map(v=>{const d=new Date(v.date);return`<div class="list-card"><div class="list-head"><div><div class="list-date">${d.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})} ${d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}${v.client?" · "+esc(v.client):""}</div><span class="badge">${esc(v.payLabel||"Paiement")}</span></div><div class="list-total">${fmt(v.total)}</div></div><div class="list-detail">${(v.items||[]).map(i=>`${esc(i.emoji||"📦")} ${esc(i.name)} ×${Number(i.qty)}`).join(" · ")}</div></div>`}).join(""):`<div class="no-data">Aucune vente pour l’instant</div>`;
+}
+function clearHistorique(){if(confirm("Effacer tout l’historique des ventes ?")){saveVentes([]);renderStats();showToast("Historique effacé")}}
+function saveNote(){
+  const type=document.getElementById("noteType").value;const amount=Number(document.getElementById("noteAmount").value||0);const text=(document.getElementById("noteText").value||"").trim();
+  if(!text&&!amount){showToast("Écris une note");return}
+  const notes=getNotes();notes.unshift({id:Date.now(),date:new Date().toISOString(),type,amount,text});saveNotes(notes);
+  document.getElementById("noteAmount").value="";document.getElementById("noteText").value="";renderNotes();showToast("Note gardée");
+}
+function renderNotes(){
+  const notes=getNotes();const el=document.getElementById("notesList");
+  el.innerHTML=notes.length?notes.map(n=>{const d=new Date(n.date);return`<div class="note-card"><div class="note-title">${noteLabel(n.type)} ${n.amount?`· ${fmt(n.amount)}`:""}</div>${n.text?`<div class="note-text">${esc(n.text)}</div>`:""}<div class="note-meta">${d.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})} ${d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</div><div style="margin-top:10px"><button class="btn-danger" onclick="deleteNote(${Number(n.id)})">🗑️ Supprimer</button></div></div>`}).join(""):`<div class="no-data">Aucune note. Les notes restent dans le téléphone.</div>`;
+}
+function noteLabel(t){return({vente:"Vente",depense:"Dépense",client_doit:"Client doit",stock:"Stock / achat",autre:"Autre"}[t]||"Note")}
+function deleteNote(id){const notes=getNotes().filter(n=>Number(n.id)!==Number(id));saveNotes(notes);renderNotes();showToast("Note supprimée")}
+function clearNotes(){if(confirm("Effacer toutes les notes de ce téléphone ?")){saveNotes([]);renderNotes();showToast("Notes effacées")}}
+
+function fmt(n){return Math.round(Number(n)||0).toLocaleString("fr-FR")+" F"}
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function escAttr(v){return esc(v).replaceAll("`","&#096;")}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+
+document.getElementById("additionOverlay").addEventListener("click",e=>{if(e.target===e.currentTarget)closeAddition()});
+init();
+</script>
+<script src="./oreille-metier-pos-v2.js?v=oreille-pos-v2"></script>
+</body>
+</html>
+
+
+
+
