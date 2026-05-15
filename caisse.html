@@ -4,8 +4,8 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Caisse</title>
-<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain : encaisser vite, addition, paiement, reçu, notes et stats locales."/>
+<title>MON COMMERCE — Caisse POS universelle · Profil métier</title>
+<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales et oreille métier."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
@@ -329,6 +329,20 @@ a{text-decoration:none;color:inherit}
   .recu-body{padding:0}
   .recu-paper{box-shadow:none;border:none}
 }
+
+.profile-hint{
+  margin:0 14px 10px;
+  border:1px solid #f1d89b;
+  background:#fff8e8;
+  color:#5b3b00;
+  border-radius:16px;
+  padding:10px 12px;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.35;
+}
+.profile-hint strong{color:#2a1900}
+
 </style>
 </head>
 <body>
@@ -339,7 +353,7 @@ a{text-decoration:none;color:inherit}
       <div class="logo-badge">🛒</div>
       <div>
         <div class="shop-title" id="shopTitle">Ma Boutique</div>
-        <div class="shop-sub">Comptoir · vente rapide</div>
+        <div class="shop-sub">Comptoir · moule POS universel</div>
       </div>
     </div>
     <div class="topbar-right">
@@ -351,7 +365,8 @@ a{text-decoration:none;color:inherit}
 
   <div class="home-strip comptoir">
     <button class="nav-chip active" onclick="showPage('page-caisse')">💰 Encaisser</button>
-    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
+    <a class="nav-chip" href="./admin.html#articleList">📦 <span data-products-label>Articles</span></a>
+    <button class="nav-chip gold" onclick="resetProductsFromProfile()">🧩 Profil métier</button>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
     <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
     <a class="nav-chip" href="./index.html">🏠 Accueil</a>
@@ -361,10 +376,11 @@ a{text-decoration:none;color:inherit}
     <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
   </div>
 
+  <div class="profile-hint">🧩 <strong>Moule universel :</strong> le profil métier peut charger ses produits, mots et exemples sans casser la caisse.</div>
   <div id="articles"></div>
   <div class="search-wrap">
     <span class="search-ico">🔍</span>
-    <input type="text" id="searchInput" placeholder="Chercher un article…" oninput="renderProds()">
+    <input type="text" id="searchInput" placeholder="Chercher une marchandise…" oninput="renderProds()">
   </div>
   <div class="cats-bar" id="catsBar"></div>
   <div class="prods" id="prodsGrid"></div>
@@ -388,11 +404,11 @@ a{text-decoration:none;color:inherit}
       <button class="close-btn" onclick="closeAddition()">×</button>
     </div>
     <div class="section-card">
-      <div class="section-title">Articles</div>
+      <div class="section-title"><span data-products-label>Articles</span></div>
       <div id="additionItems"></div>
     </div>
     <div class="section-card">
-      <div class="section-title">Client</div>
+      <div class="section-title"><span data-customer-label>Client</span></div>
       <div class="field-group">
         <input class="field-input" id="clientInput" type="text" placeholder="Nom du client (optionnel)">
       </div>
@@ -499,7 +515,7 @@ a{text-decoration:none;color:inherit}
       <div class="amount-label">Encaissement validé</div>
       <div class="amount-value" id="okAmountBig">0 F</div>
       <div class="amount-note">
-        La vente est gardée dans les stats. Le ticket reste disponible si le client le demande.
+        La vente est gardée dans les stats. Le ticket reste disponible si le client ou la cliente le demande.
       </div>
     </div>
 
@@ -525,7 +541,7 @@ a{text-decoration:none;color:inherit}
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
     <button class="nav-chip active" onclick="showPage('page-stats')">📊 Stats</button>
-    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
+    <a class="nav-chip" href="./admin.html#articleList">📦 <span data-products-label>Articles</span></a>
   </div>
   <div class="content">
     <div class="stats-grid">
@@ -558,7 +574,7 @@ a{text-decoration:none;color:inherit}
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
     <button class="nav-chip active" onclick="showPage('page-notes')">✍️ Notes</button>
     <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
-    <a class="nav-chip" href="./admin.html#articleList">📦 Articles</a>
+    <a class="nav-chip" href="./admin.html#articleList">📦 <span data-products-label>Articles</span></a>
   </div>
   <div class="content">
     <div class="section-card">
@@ -593,7 +609,148 @@ let cart = [];
 let selCat = "Tous";
 let selPay_ = "esp";
 
-const DEFAULT_PRODUCTS = [
+
+/* DIGIY POS — PROFIL MÉTIER
+   Le moule caisse.html reste universel.
+   POS_PROFILE habille le moule : vocabulaire, produits de départ, phrases, synonymes.
+   Pour un autre pro, on change ce profil, pas toute la caisse.
+*/
+const POS_PROFILE = window.POS_PROFILE || {
+  profileName: "POS Boutique Linge & Style",
+  productLabel: "Marchandise",
+  productLabelPlural: "Marchandises",
+  customerLabel: "Cliente",
+  customerLabelPlural: "Clientes",
+  noteLabel: "Note cliente",
+  starterProducts: [
+    {id:1, name:"Drap 2 places", cat:"Linge de maison", emoji:"🛏️", price:15000, stock:10},
+    {id:2, name:"Drap 1 place", cat:"Linge de maison", emoji:"🛏️", price:9000, stock:12},
+    {id:3, name:"Serviette bain", cat:"Serviettes", emoji:"🧺", price:5000, stock:20},
+    {id:4, name:"Serviette plage", cat:"Serviettes", emoji:"🏖️", price:7000, stock:16},
+    {id:5, name:"Fouta", cat:"Serviettes", emoji:"🌊", price:8000, stock:18},
+    {id:6, name:"Robe stylée", cat:"Robes", emoji:"👗", price:18000, stock:8},
+    {id:7, name:"Robe plage", cat:"Robes", emoji:"👗", price:12000, stock:10},
+    {id:8, name:"Tenue femme", cat:"Tenues", emoji:"✨", price:25000, stock:6},
+    {id:9, name:"Parure lit", cat:"Linge de maison", emoji:"🛌", price:22000, stock:7},
+    {id:10, name:"Coussin déco", cat:"Déco maison", emoji:"🛋️", price:6000, stock:14},
+    {id:11, name:"Nappe maison", cat:"Déco maison", emoji:"🍽️", price:10000, stock:9},
+    {id:12, name:"Crème beauté", cat:"Beauté", emoji:"🧴", price:3500, stock:15}
+  ],
+  trainingPhrases: [
+    "robe stylée 1 à 18000",
+    "2 serviettes bain à 5000",
+    "drap 2 places 1 à 15000",
+    "fouta 3 à 8000",
+    "parure lit 1 à 22000",
+    "ajoute 12 serviettes bain à 5000",
+    "Awa doit 10000 pour robe stylée",
+    "note couleur bleue taille M",
+    "va aux stats",
+    "ouvre les marchandises",
+    "nouvelle vente"
+  ],
+  aliases: [
+    "article = marchandise",
+    "articles = marchandises",
+    "serviettes = serviette",
+    "robes = robe",
+    "draps = drap",
+    "foutas = fouta",
+    "parures = parure",
+    "deux = 2",
+    "trois = 3",
+    "quatre = 4",
+    "bleu = bleue",
+    "taille moyenne = taille M",
+    "stat = stats",
+    "statistique = stats"
+  ]
+};
+
+function profileWord(label, fallback){
+  try{return (POS_PROFILE && POS_PROFILE[label]) || fallback}catch(_){return fallback}
+}
+
+function profileAliasPairs(){
+  try{
+    return (POS_PROFILE.aliases||[]).map(x=>{
+      const p=String(x).split("=");
+      return p.length>=2 ? {from:p[0].trim(), to:p.slice(1).join("=").trim()} : null;
+    }).filter(Boolean);
+  }catch(_){return[]}
+}
+
+function applyProfileAliasesText(value){
+  let s=String(value||"");
+  profileAliasPairs().forEach(pair=>{
+    if(!pair.from || !pair.to)return;
+    const safe=pair.from.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+    s=s.replace(new RegExp("\\b"+safe+"\\b","gi"), pair.to);
+  });
+  return s;
+}
+
+function profileDefaultProducts(){
+  const items=(POS_PROFILE && Array.isArray(POS_PROFILE.starterProducts)) ? POS_PROFILE.starterProducts : [];
+  return items.map((p,i)=>({
+    id:Number(p.id)||i+1,
+    source_id:p.source_id||"profile",
+    name:p.name||profileWord("productLabel","Article"),
+    cat:p.cat||p.category||"Autres",
+    emoji:p.emoji||"📦",
+    price:Number(p.price||p.price_xof||0),
+    stock:Number(p.stock||p.stock_qty||0),
+    published:p.published!==false
+  }));
+}
+
+function resetProductsFromProfile(){
+  if(!confirm("Charger les produits / marchandises du profil métier ? Cela remplace les produits gardés sur ce téléphone."))return;
+  saveJSON("caisse_prods", profileDefaultProducts());
+  selCat="Tous";
+  buildCats();
+  renderProds();
+  updateProfileLabels();
+  showToast("Profil métier chargé");
+}
+
+window.POS_PROFILE=POS_PROFILE;
+window.applyProfileAliasesText=applyProfileAliasesText;
+window.profileWord=profileWord;
+window.resetProductsFromProfile=resetProductsFromProfile;
+
+function updateProfileLabels(){
+  const product=profileWord("productLabel","Article");
+  const products=profileWord("productLabelPlural","Articles");
+  const customer=profileWord("customerLabel","Client");
+  const note=profileWord("noteLabel","Note");
+
+  const search=document.getElementById("searchInput");
+  if(search)search.placeholder="Chercher une "+product.toLowerCase()+"…";
+
+  const clientInput=document.getElementById("clientInput");
+  if(clientInput)clientInput.placeholder="Nom du "+customer.toLowerCase()+" (optionnel)";
+
+  document.querySelectorAll("[data-products-label]").forEach(el=>el.textContent=products);
+  document.querySelectorAll("[data-product-label]").forEach(el=>el.textContent=product);
+  document.querySelectorAll("[data-customer-label]").forEach(el=>el.textContent=customer);
+  document.querySelectorAll("[data-note-label]").forEach(el=>el.textContent=note);
+
+  document.querySelectorAll('a[href="./admin.html#articleList"]').forEach(a=>{
+    if(a.textContent.includes("Articles"))a.innerHTML="📦 <span data-products-label>"+products+"</span>";
+  });
+
+  const sections=[...document.querySelectorAll(".section-title")];
+  sections.forEach(el=>{
+    if(el.textContent.trim()==="Articles")el.innerHTML='<span data-products-label>'+products+'</span>';
+    if(el.textContent.trim()==="Top articles")el.textContent="Top "+products.toLowerCase();
+    if(el.textContent.trim()==="Client")el.innerHTML='<span data-customer-label>'+customer+'</span>';
+  });
+}
+
+const DEFAULT_PRODUCTS = profileDefaultProducts();
+
+const LEGACY_DEFAULT_PRODUCTS = [
   {id:1,name:"Riz 5 kg",cat:"Alimentation",emoji:"🌾",price:3500,stock:50},
   {id:2,name:"Huile 1 L",cat:"Alimentation",emoji:"🫙",price:1500,stock:30},
   {id:3,name:"Pain",cat:"Alimentation",emoji:"🍞",price:250,stock:20},
@@ -670,7 +827,7 @@ function setupCaisseNotice(){
     "Choisis le paiement.",
     "Quand l’argent est reçu, touche Encaisser.",
     "Le reçu sort ensuite.",
-    "Pour les prix et le stock, va dans Articles."
+    "Pour les prix et le stock, va dans le catalogue ou charge le profil métier."
   ].join(" ");
 
   let speaking=false;
@@ -703,6 +860,7 @@ function setupCaisseNotice(){
 function init(){
   cleanVisibleUrl();
   setShopName(getShopName());
+  updateProfileLabels();
   buildCats();
   renderProds();
   renderStats();
@@ -759,7 +917,7 @@ function updatePanierBar(){
   const bar=document.getElementById("panierBar");const cnt=cart.reduce((s,i)=>s+Number(i.qty||0),0);
   if(!cnt){bar.classList.add("hidden");return}
   bar.classList.remove("hidden");
-  document.getElementById("panierCountLbl").textContent=cnt+" article"+(cnt>1?"s":"");
+  document.getElementById("panierCountLbl").textContent=cnt+" "+(cnt>1?profileWord("productLabelPlural","articles").toLowerCase():profileWord("productLabel","article").toLowerCase());
   document.getElementById("panierTotalLbl").textContent=fmt(cartTotal());
 }
 function cartTotal(){return cart.reduce((s,i)=>s+Number(i.price||0)*Number(i.qty||0),0)}
@@ -896,7 +1054,7 @@ init();
 </script>
 
 
-<!-- DIGIY — Oreille métier POS intégrée dans le même fichier -->
+<!-- DIGIY — Oreille métier POS universelle intégrée dans le même fichier -->
 <script>
 /* DIGIY OREILLE MÉTIER — POS / COMMERCE V2
    Chemins métier + liste d’articles dictée.
@@ -922,8 +1080,12 @@ init();
   function articleAlias(name){
     let s=String(name||'').trim();
 
-    // Homophones fréquents du micro en boutique
-    // "pain" est souvent transcrit "pin" ou "pins".
+    // Applique d'abord les synonymes du profil métier POS_PROFILE.
+    try{
+      if(typeof window.applyProfileAliasesText==='function')s=window.applyProfileAliasesText(s);
+    }catch(_){}
+
+    // Homophones fréquents : utile pour certains profils, sans bloquer le moule.
     if(/\bpin(s)?\b/i.test(s) && !/\bcode\s+pin\b/i.test(s)){
       s=s.replace(/\bpins\b/ig,'pains').replace(/\bpin\b/ig,'pain');
     }
@@ -1281,7 +1443,7 @@ init();
     else if(d.type==='sale_batch_cart')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${d.items.length} ventes préparées.</span><div class="digiy-pos-table">${d.items.map((it,i)=>`<div class="digiy-pos-row"><span>${i+1}. ${esc(it.qty)} × ${esc(it.name)}</span><span>${it.price?esc(fmt(it.price)):'⚠️ prix manquant'}</span></div>`).join('')}</div><em>${d.items.some(it=>!Number(it.price||0))?'Annonce le prix pour chaque ligne avant validation.':'Valide pour ajouter au panier.'}</em>`;
     else if(d.type==='client_debt')box.innerHTML=`<strong>${esc(d.title)}</strong><span>Client : ${esc(d.client)}</span><span>Tel : ${esc(d.phone||'—')}</span><span>Somme due : ${d.amount?esc(fmt(d.amount)):'à compléter'}</span><span>Date : ${esc(d.dueDate||'à préciser')}</span><em>Dette client = argent attendu. Pas encore recette.</em>`;
     else if(d.type==='note')box.innerHTML=`<strong>${esc(d.title)}</strong><span>${esc(d.note)}</span><span>${d.amount?'Montant : '+esc(fmt(d.amount)):'Montant optionnel'}</span><em>Valide pour garder la note.</em>`;
-    else box.innerHTML=`<strong>À préciser</strong><span>${esc(d.note)}</span><em>Essaie : “café”, si l’article existe déjà. Sinon : “café 1 à 500”, “dentifrice 2 à 1200”.</em>`;
+    else box.innerHTML=`<strong>À préciser</strong><span>${esc(d.note)}</span><em>Essaie une phrase du profil métier, ou charge le profil avec le bouton 🧩.</em>`;
   }
 
   function upsert(it){
@@ -1472,7 +1634,7 @@ init();
     const panel=document.createElement('section');
     panel.className='digiy-pos-ear';
     panel.id='digiyPosEar';
-    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Oreille métier POS · V10</div><div class="digiy-pos-ear-help">Entraîne la caisse : article seul si déjà créé, sinon article + quantité + prix.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Ex. Café / Dentifrice 2 à 1200 / Deux pains à 250 / Va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro pose sa base. Ensuite la voix rend la caisse fluide.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="Ajoute 12 savons à 500, 10 huiles à 1500, 6 dentifrices à 1200">Liste articles</button><button type="button" data-pos-example="Vendu 3 savons">Vente panier</button><button type="button" data-pos-example="Fatou dette client 50000 tel 771234567 date fin du mois">Dette client</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ajouter article">Articles</button></div>`;
+    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Oreille métier POS universelle · V10</div><div class="digiy-pos-ear-help">Entraîne la caisse : article seul si déjà créé, sinon article + quantité + prix.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Ex. Café / Dentifrice 2 à 1200 / Deux pains à 250 / Va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro pose sa base. Ensuite la voix rend la caisse fluide.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="Ajoute 12 savons à 500, 10 huiles à 1500, 6 dentifrices à 1200">Liste articles</button><button type="button" data-pos-example="Vendu 3 savons">Vente panier</button><button type="button" data-pos-example="Fatou dette client 50000 tel 771234567 date fin du mois">Dette client</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ajouter article">Articles</button></div>`;
     anchor.insertAdjacentElement('afterend',panel);
 
     $('digiyPosMic')?.addEventListener('click',startVoice);
@@ -1498,6 +1660,51 @@ init();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
