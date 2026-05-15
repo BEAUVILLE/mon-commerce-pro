@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Caisse POS universelle · V30 portes pro</title>
+<title>MON COMMERCE — Caisse POS universelle · V32 actions utiles</title>
 <meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales blindées et oreille métier."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -366,6 +366,30 @@ a{text-decoration:none;color:inherit}
   -webkit-tap-highlight-color:transparent;
 }
 #btnGuideAudio:active{transform:scale(.95);box-shadow:0 4px 10px rgba(122,76,0,.14)}
+/* DIGIY — Bouton démarrage premier lancement */
+#btnDemarrage{
+  position:fixed;
+  bottom:calc(88px + env(safe-area-inset-bottom));
+  left:14px;
+  z-index:200;
+  background:linear-gradient(160deg,#e6fff0,#c8f5db);
+  border:1.5px solid #7edaaa;
+  color:#0a4a25;
+  border-radius:999px;
+  padding:10px 16px;
+  font-size:13px;
+  font-weight:950;
+  box-shadow:0 8px 20px rgba(22,167,101,.18);
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  transition:transform .14s,box-shadow .14s;
+  -webkit-tap-highlight-color:transparent;
+}
+#btnDemarrage:active{transform:scale(.95)}
+#btnDemarrage.hidden{display:none}
+
 
 .nav-chip.door{
   background:#eaf3ff;
@@ -397,9 +421,10 @@ a{text-decoration:none;color:inherit}
   <div class="home-strip comptoir">
     <button class="nav-chip active" onclick="showPage('page-caisse')">💰 Encaisser</button>
     <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
-    <a class="nav-chip door" href="./admin.html#articleList">📦 Marchandises</a>
+    <a class="nav-chip door" href="./admin.html">📦 Marchandises</a>
     <button class="nav-chip gold" onclick="resetProductsFromProfile()">🧩 Profil métier</button>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
+    <a class="nav-chip gold" href="./actions.html">⚡ Actions utiles</a>
     <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
     <a class="nav-chip" href="./index.html">🏠 Accueil</a>
     <a class="nav-chip optional" href="./profile.html">🏪 Ma fiche commerce</a>
@@ -408,7 +433,7 @@ a{text-decoration:none;color:inherit}
     <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
   </div>
 
-  <div class="profile-hint">🧩 <strong>Moule universel V30 :</strong> clic prioritaire, écrit secours, voix simple. Portes pro visibles : coordonnées et marchandises.</div>
+  <div class="profile-hint">🧩 <strong>Moule universel V32 :</strong> clic pour vendre, Actions utiles pour stock, crédit client, dépenses et commandes.</div>
   <div id="articles"></div>
   <div class="search-wrap">
     <span class="search-ico">🔍</span>
@@ -573,8 +598,9 @@ a{text-decoration:none;color:inherit}
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
     <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
+    <a class="nav-chip gold" href="./actions.html">⚡ Actions utiles</a>
     <button class="nav-chip active" onclick="showPage('page-stats')">📊 Stats</button>
-    <a class="nav-chip door" href="./admin.html#articleList">📦 Marchandises</a>
+    <a class="nav-chip door" href="./admin.html">📦 Marchandises</a>
   </div>
   <div class="content">
     <div class="stats-grid">
@@ -621,8 +647,9 @@ a{text-decoration:none;color:inherit}
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
     <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
     <button class="nav-chip active" onclick="showPage('page-notes')">✍️ Notes</button>
+    <a class="nav-chip gold" href="./actions.html">⚡ Actions utiles</a>
     <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
-    <a class="nav-chip door" href="./admin.html#articleList">📦 Marchandises</a>
+    <a class="nav-chip door" href="./admin.html">📦 Marchandises</a>
   </div>
   <div class="content">
     <div class="section-card">
@@ -653,7 +680,7 @@ a{text-decoration:none;color:inherit}
 <div class="toast" id="toast"></div>
 
 <script>
-/* DIGIY POS — PORTES PRO V30
+/* DIGIY POS — ACTIONS UTILES V32
    Clic prioritaire · écrit secours · voix actions simples · profil métier · stats locales.
    Ne pas transformer le moule en caisse sur mesure.
 */
@@ -789,7 +816,7 @@ function updateProfileLabels(){
   document.querySelectorAll("[data-customer-label]").forEach(el=>el.textContent=customer);
   document.querySelectorAll("[data-note-label]").forEach(el=>el.textContent=note);
 
-  document.querySelectorAll('a[href="./admin.html#articleList"]').forEach(a=>{
+  document.querySelectorAll('a[href="./admin.html"]').forEach(a=>{
     if(a.textContent.includes("Articles"))a.innerHTML="📦 <span data-products-label>"+products+"</span>";
   });
 
@@ -915,7 +942,7 @@ function setupCaisseNotice(){
     "Choisis le paiement.",
     "Quand l’argent est reçu, touche Encaisser.",
     "Le ticket reste disponible si le client le demande.",
-    "Pour tes coordonnées pro, touche Coordonnées pro. Pour prix, stock et marchandises, touche Marchandises."
+    "Pour tes coordonnées pro, touche Coordonnées pro. Pour prix, stock et marchandises, touche Marchandises. Pour crédit client, dépense ou ajout stock, touche Actions utiles."
   ].join(" ");
 
   let speaking=false;
@@ -945,6 +972,89 @@ function setupCaisseNotice(){
   window.addEventListener("beforeunload",stop);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DIGIY — GUIDE PREMIER DÉMARRAGE V31
+   S’affiche uniquement si le pro n’a pas encore de marchandises programmées.
+   Explique l’écosystème complet en 45 secondes.
+   Se masque une fois que le pro a validé qu’il a compris (à la main ou auto).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const DEMARRAGE_TEXT = [
+  "Bienvenue dans Mon Commerce par DIGIY.",
+  "C’est ton logiciel de caisse terrain. Je vais t’expliquer comment démarrer.",
+  "Ce logiciel a quatre zones.",
+  "Un : les Marchandises. Touche le bouton bleu Marchandises en haut.",
+  "C’est là que tu entres tout ce que tu vends : le nom, le prix, le stock.",
+  "C’est la première chose à faire avant de vendre.",
+  "Deux : Coordonnées pro. Touche le bouton bleu Coordonnées pro.",
+  "Tu remplis le nom de ton commerce, ton WhatsApp, ton adresse, tes horaires.",
+  "Le client verra ta fiche pour te trouver et te contacter.",
+  "Trois : la Caisse. C’est cet écran. Quand tes marchandises sont prêtes,",
+  "tu touches une carte pour l’ajouter au panier, tu confirmes l’addition, et tu encaisses.",
+  "Quatre : les Stats et les Notes, accessibles dans la barre en haut.",
+  "Cinq : le bouton jaune Actions utiles. Il prépare les textes du terrain en un clic :",
+  "dette client, ajout de stock, dépense ou commande. Plus besoin d'écrire.",
+  "Pour démarrer maintenant : touche Marchandises, programme tes articles, puis reviens encaisser."
+].join(' ');
+
+let _demarrageSpeaking = false;
+
+function speakDemarrage(){
+  if(!('speechSynthesis' in window)){ showToast('Audio non disponible.'); return }
+  const btn = document.getElementById('btnDemarrage');
+  if(_demarrageSpeaking){
+    try{ speechSynthesis.cancel() }catch(e){}
+    _demarrageSpeaking = false;
+    if(btn) btn.textContent = '🚀 Démarrage';
+    return;
+  }
+  try{
+    speechSynthesis.cancel();
+    _guideSpeaking = false;
+    const u = new SpeechSynthesisUtterance(DEMARRAGE_TEXT);
+    u.lang = 'fr-FR'; u.rate = 0.84; u.pitch = 1.02;
+    const stop = () => {
+      _demarrageSpeaking = false;
+      if(btn) btn.textContent = '🚀 Démarrage';
+    };
+    u.onstart = () => {
+      _demarrageSpeaking = true;
+      if(btn) btn.textContent = '⏹ Stop';
+    };
+    u.onend = stop; u.onerror = stop;
+    const trySpeak = () => {
+      const fr = (speechSynthesis.getVoices()||[]).find(v=>/^fr/i.test(v.lang));
+      if(fr) u.voice = fr;
+      try{ speechSynthesis.speak(u) }catch(e){ stop() }
+    };
+    if(speechSynthesis.getVoices().length){ trySpeak() }
+    else{ speechSynthesis.onvoiceschanged = ()=>{ speechSynthesis.onvoiceschanged=null; trySpeak() }; setTimeout(trySpeak,120) }
+  }catch(e){ _demarrageSpeaking = false }
+}
+
+/* Affiche le bouton Démarrage seulement si pas de marchandises ou premier lancement */
+function checkPremierLancement(){
+  const btn = document.getElementById('btnDemarrage');
+  if(!btn) return;
+  try{
+    const prods = getProds();
+    const vu = localStorage.getItem('caisse_demarrage_vu');
+    /* Masqué si : déjà vu ET au moins une marchandise */
+    if(vu && prods && prods.length > 0){
+      btn.classList.add('hidden');
+    } else {
+      btn.classList.remove('hidden');
+    }
+  }catch(e){ btn.classList.add('hidden') }
+}
+
+function dismissDemarrage(){
+  localStorage.setItem('caisse_demarrage_vu','1');
+  const btn = document.getElementById('btnDemarrage');
+  if(btn) btn.classList.add('hidden');
+  try{ speechSynthesis.cancel() }catch(e){}
+}
 function init(){
   cleanVisibleUrl();
   setShopName(getShopName());
@@ -957,6 +1067,7 @@ function init(){
   tickClock();setInterval(tickClock,1000);setupCaisseNotice();
   if(location.hash==="#notes") showPage("page-notes");
   if(location.hash==="#stats") showPage("page-stats");
+  checkPremierLancement();
 }
 function tickClock(){const t=new Date();document.getElementById("clockEl").textContent=t.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
 function showPage(id){
@@ -1071,11 +1182,21 @@ function updatePayHelp(){
 
 const GUIDE_TEXTS = {
   'page-caisse': [
-    "Tu es sur la caisse.",
-    "Touche une marchandise pour l'ajouter au panier.",
-    "Le total s'affiche en bas de l'écran.",
-    "Quand le panier est prêt, touche le bouton Addition.",
-    "Tu peux chercher une marchandise en haut, filtrer par catégorie, ouvrir Coordonnées pro, ou gérer les Marchandises."
+    "Bienvenue dans Mon Commerce par DIGIY. C’est ton logiciel de caisse terrain.",
+    "Il y a quatre zones. Je les explique dans l’ordre.",
+    "Première zone : les Marchandises. Touche le bouton bleu Marchandises dans la barre en haut.",
+    "C’est là que tu programmes ce que tu vends : le nom, le prix, le stock, la catégorie.",
+    "Si c’est la première fois que tu utilises le logiciel, commence par là.",
+    "Deuxième zone : Coordonnées pro. Touche le bouton bleu Coordonnées pro.",
+    "C’est ta fiche commerce : ton nom, ton WhatsApp, ton adresse, tes horaires.",
+    "Le client voit cette fiche quand il te cherche.",
+    "Troisième zone : la Caisse. C’est ici, sur cette page.",
+    "Touche une marchandise pour l’ajouter au panier. Le total s’affiche en bas.",
+    "Touche Addition pour vérifier. Choisis le paiement. Touche Encaisser.",
+    "Quatrième zone : les Stats et les Notes.",
+    "Les Stats gardent l’historique de toutes tes ventes et ton chiffre du jour.",
+    "Les Actions utiles préparent les textes métier au clic : dette client, ajout stock, dépense, commande ou livraison. Les Notes gardent ensuite la trace.",
+    "Pour démarrer : va d’abord dans Marchandises, programme tes articles, puis reviens ici pour encaisser. Pour le stock, crédit client ou dépense, touche Actions utiles."
   ].join(' '),
   'page-paiement': [
     "Tu es sur le paiement.",
@@ -1096,17 +1217,17 @@ const GUIDE_TEXTS = {
   ].join(' '),
   'page-stats': [
     "Tu es dans les statistiques.",
-    "Tu vois le chiffre d'affaires d'aujourd'hui,",
-    "le total depuis le début,",
-    "et les articles les plus vendus.",
-    "L'historique montre toutes les ventes enregistrées."
+    "Tu vois le chiffre d'affaires d'aujourd'hui, le total depuis le début, et les articles les plus vendus.",
+    "L'historique montre toutes les ventes enregistrées.",
+    "Depuis cette page, tu peux aussi accéder aux Actions utiles avec le bouton jaune dans la barre,",
+    "pour gérer un crédit client, une dépense ou un ajout de stock sans quitter l'écosystème."
   ].join(' '),
   'page-notes': [
     "Tu es dans les notes du comptoir.",
-    "Tu peux noter une dette client,",
-    "une dépense, un achat de stock,",
-    "ou n'importe quelle information utile.",
-    "Les notes restent dans ce téléphone."
+    "Tu peux noter une dette client, une dépense, un achat de stock, ou n'importe quelle information utile.",
+    "Les notes restent dans ce téléphone.",
+    "Si tu veux préparer un texte structuré en un clic, touche le bouton jaune Actions utiles dans la barre en haut.",
+    "Actions utiles propose des modèles prêts pour une dette client, un ajout de stock, une dépense ou une commande."
   ].join(' ')
 };
 
@@ -1316,6 +1437,9 @@ window.showToast        = showToast;
 window.nouvelleVente    = nouvelleVente;
 window.speakConfirm     = speakConfirm;
 window.speakGuide       = speakGuide;
+window.speakDemarrage   = speakDemarrage;
+window.dismissDemarrage = dismissDemarrage;
+window.checkPremierLancement = checkPremierLancement;
 </script>
 
 
@@ -1492,7 +1616,7 @@ window.speakGuide       = speakGuide;
     if(/\b(retour caisse|caisse|encaisser|faire une vente|vente rapide)\b/.test(t))return{type:'navigate',title:'🧭 Aller à la caisse',target:'page-caisse'};
     if(/\b(notes?|ouvrir notes?|note comptoir|noter)\b/.test(t))return{type:'navigate',title:'🧭 Aller aux notes',target:'page-notes'};
     if(/\b(stats?|statistiques|historique|voir ventes)\b/.test(t))return{type:'navigate',title:'🧭 Aller aux stats',target:'page-stats'};
-    if(/\b(articles?|ajouter article|ajout article|catalogue|stock)\b/.test(t)&&!/\d/.test(t))return{type:'navigate',title:'🧭 Aller aux articles',target:'admin-articles',href:'./admin.html#articleList'};
+    if(/\b(articles?|ajouter article|ajout article|catalogue|stock)\b/.test(t)&&!/\d/.test(t))return{type:'navigate',title:'🧭 Aller aux articles',target:'admin-articles',href:'./admin.html'};
     if(/\b(addition|panier|ouvrir panier)\b/.test(t))return{type:'navigate',title:'🧭 Ouvrir l’addition',target:'addition'};
     return null;
   }
@@ -1946,9 +2070,54 @@ window.speakGuide       = speakGuide;
 })();
 </script>
 
+<button id="btnDemarrage" onclick="speakDemarrage()">🚀 Démarrage</button>
 <button id="btnGuideAudio" onclick="speakGuide(_guideCurrentPage)">🎧 Guide</button>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
