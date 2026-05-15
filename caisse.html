@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Caisse POS universelle · V29 terrain propre</title>
+<title>MON COMMERCE — Caisse POS universelle · V30 portes pro</title>
 <meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales blindées et oreille métier."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -366,6 +366,14 @@ a{text-decoration:none;color:inherit}
   -webkit-tap-highlight-color:transparent;
 }
 #btnGuideAudio:active{transform:scale(.95);box-shadow:0 4px 10px rgba(122,76,0,.14)}
+
+.nav-chip.door{
+  background:#eaf3ff;
+  border-color:#bcd7ff;
+  color:#1557a6;
+}
+.nav-chip.door strong{font-weight:950}
+
 </style>
 </head>
 <body>
@@ -388,7 +396,8 @@ a{text-decoration:none;color:inherit}
 
   <div class="home-strip comptoir">
     <button class="nav-chip active" onclick="showPage('page-caisse')">💰 Encaisser</button>
-    <a class="nav-chip" href="./admin.html#articleList">📦 <span data-products-label>Articles</span></a>
+    <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
+    <a class="nav-chip door" href="./admin.html#articleList">📦 Marchandises</a>
     <button class="nav-chip gold" onclick="resetProductsFromProfile()">🧩 Profil métier</button>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
     <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
@@ -399,7 +408,7 @@ a{text-decoration:none;color:inherit}
     <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
   </div>
 
-  <div class="profile-hint">🧩 <strong>Moule universel V29 :</strong> clic prioritaire, écrit en secours, voix simple. Diagnostic rangé dans Stats.</div>
+  <div class="profile-hint">🧩 <strong>Moule universel V30 :</strong> clic prioritaire, écrit secours, voix simple. Portes pro visibles : coordonnées et marchandises.</div>
   <div id="articles"></div>
   <div class="search-wrap">
     <span class="search-ico">🔍</span>
@@ -562,9 +571,10 @@ a{text-decoration:none;color:inherit}
   </div>
   <div class="home-strip comptoir">
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
+    <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
     <button class="nav-chip active" onclick="showPage('page-stats')">📊 Stats</button>
-    <a class="nav-chip" href="./admin.html#articleList">📦 <span data-products-label>Articles</span></a>
+    <a class="nav-chip door" href="./admin.html#articleList">📦 Marchandises</a>
   </div>
   <div class="content">
     <div class="stats-grid">
@@ -609,9 +619,10 @@ a{text-decoration:none;color:inherit}
   <div id="notes"></div>
   <div class="home-strip comptoir">
     <button class="nav-chip" onclick="showPage('page-caisse')">💰 Encaisser</button>
+    <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
     <button class="nav-chip active" onclick="showPage('page-notes')">✍️ Notes</button>
     <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
-    <a class="nav-chip" href="./admin.html#articleList">📦 <span data-products-label>Articles</span></a>
+    <a class="nav-chip door" href="./admin.html#articleList">📦 Marchandises</a>
   </div>
   <div class="content">
     <div class="section-card">
@@ -642,7 +653,7 @@ a{text-decoration:none;color:inherit}
 <div class="toast" id="toast"></div>
 
 <script>
-/* DIGIY POS — TERRAIN PROPRE V29
+/* DIGIY POS — PORTES PRO V30
    Clic prioritaire · écrit secours · voix actions simples · profil métier · stats locales.
    Ne pas transformer le moule en caisse sur mesure.
 */
@@ -904,7 +915,7 @@ function setupCaisseNotice(){
     "Choisis le paiement.",
     "Quand l’argent est reçu, touche Encaisser.",
     "Le ticket reste disponible si le client le demande.",
-    "Pour les prix et le stock, va dans le catalogue ou charge le profil métier."
+    "Pour tes coordonnées pro, touche Coordonnées pro. Pour prix, stock et marchandises, touche Marchandises."
   ].join(" ");
 
   let speaking=false;
@@ -1064,7 +1075,7 @@ const GUIDE_TEXTS = {
     "Touche une marchandise pour l'ajouter au panier.",
     "Le total s'affiche en bas de l'écran.",
     "Quand le panier est prêt, touche le bouton Addition.",
-    "Tu peux chercher une marchandise en haut, ou filtrer par catégorie."
+    "Tu peux chercher une marchandise en haut, filtrer par catégorie, ouvrir Coordonnées pro, ou gérer les Marchandises."
   ].join(' '),
   'page-paiement': [
     "Tu es sur le paiement.",
@@ -1909,7 +1920,7 @@ window.speakGuide       = speakGuide;
     const panel=document.createElement('section');
     panel.className='digiy-pos-ear';
     panel.id='digiyPosEar';
-    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Assistant comptoir POS · V29</div><div class="digiy-pos-ear-help">Clic d’abord pour vendre. Écrit en secours. Voix seulement pour actions simples.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Écris : robe stylée 1 à 18000 / Awa doit 10000 / ou dis seulement : va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler simple</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer l’écrit</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro clique les marchandises. DIGIY connaît le prix. La voix guide les chemins simples.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="robe stylée 1 à 18000">Écrit vente</button><button type="button" data-pos-example="Awa doit 10000 pour robe stylée">Écrit dette</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ouvre les notes">Notes</button><button type="button" data-pos-example="Nouvelle vente">Nouvelle vente</button></div>`;
+    panel.innerHTML=`<div><div class="digiy-pos-ear-title">🎙️ Assistant comptoir POS · V30</div><div class="digiy-pos-ear-help">Clic d’abord pour vendre. Écrit en secours. Voix seulement pour actions simples.</div></div><div class="digiy-pos-ear-grid"><div><textarea id="digiyPosVoiceInput" placeholder="Écris : robe stylée 1 à 18000 / Awa doit 10000 / ou dis seulement : va aux stats"></textarea><div class="digiy-pos-ear-actions"><button id="digiyPosMic" type="button">🎙️ Parler simple</button><button class="primary" id="digiyPosPrepare" type="button">⚡ Préparer l’écrit</button><button class="confirm" id="digiyPosValidate" type="button" disabled>✅ Valider l’action</button><button id="digiyPosClear" type="button">Effacer</button></div></div><div class="digiy-pos-draft" id="digiyPosDraft"><strong>Doctrine</strong><span>Le pro clique les marchandises. DIGIY connaît le prix. La voix guide les chemins simples.</span></div></div><div class="digiy-pos-examples"><button type="button" data-pos-example="robe stylée 1 à 18000">Écrit vente</button><button type="button" data-pos-example="Awa doit 10000 pour robe stylée">Écrit dette</button><button type="button" data-pos-example="Va aux stats">Stats</button><button type="button" data-pos-example="Ouvre les notes">Notes</button><button type="button" data-pos-example="Nouvelle vente">Nouvelle vente</button></div>`;
     anchor.insertAdjacentElement('afterend',panel);
 
     $('digiyPosMic')?.addEventListener('click',startVoice);
@@ -1938,6 +1949,51 @@ window.speakGuide       = speakGuide;
 <button id="btnGuideAudio" onclick="speakGuide(_guideCurrentPage)">🎧 Guide</button>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
