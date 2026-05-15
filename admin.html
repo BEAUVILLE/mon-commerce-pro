@@ -72,6 +72,29 @@ input:focus,select:focus{border-color:var(--green)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .help{padding:12px 14px;background:#fff8e8;border:1px solid #f1d89b;border-radius:18px;color:#5b3b00;font-weight:850;line-height:1.4;margin-bottom:14px}
 @media(max-width:680px){.form{grid-template-columns:1fr}.title{font-size:16px}.link span{display:none}.wrap{padding:10px}}
+
+/* DIGIY — Guide audio admin marchandises */
+#btnAdminGuide{
+  position:fixed;
+  bottom:24px;
+  right:16px;
+  z-index:200;
+  background:linear-gradient(160deg,#fff8e8,#fff3d0);
+  border:1.5px solid #f1d89b;
+  color:#7a4c00;
+  border-radius:999px;
+  padding:11px 18px;
+  font-size:14px;
+  font-weight:950;
+  box-shadow:0 8px 20px rgba(122,76,0,.22);
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  cursor:pointer;
+  transition:transform .14s, box-shadow .14s;
+  -webkit-tap-highlight-color:transparent;
+}
+#btnAdminGuide:active{transform:scale(.95);box-shadow:0 4px 10px rgba(122,76,0,.14)}
 </style>
 </head>
 <body>
@@ -273,8 +296,78 @@ function exportJSON(){
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DIGIY — GUIDE AUDIO ADMIN MARCHANDISES
+   Même moteur que la caisse V29. Un tap = mode d'emploi complet.
+   Pour le pro qui programme sa caisse avant d'ouvrir.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const ADMIN_GUIDE_STEPS = [
+  "Tu es sur la page des marchandises.",
+  "C'est ici que tu prépares ta caisse avant d'ouvrir.",
+  "Pour ajouter une marchandise : écris le nom, le prix, le stock disponible, la catégorie, et choisis un emoji.",
+  "Le nom, c'est ce que tu verras sur les grosses cartes de la caisse. Par exemple : Fouta, Robe stylée, Drap deux places.",
+  "Le prix, c'est le montant en francs CFA que tu encaisses. Par exemple : huit mille.",
+  "Le stock, c'est combien tu en as. La caisse s'en sert pour ne pas vendre ce que tu n'as plus.",
+  "La catégorie permet de filtrer par groupe dans la caisse. Par exemple : Serviettes, Robes, Linge de maison.",
+  "L'emoji, c'est l'image qui s'affiche sur la carte. Tu peux laisser la valeur par défaut.",
+  "Quand tout est rempli, touche le bouton vert Enregistrer.",
+  "Pour modifier une marchandise déjà dans la liste, touche le bouton Modifier sur sa carte.",
+  "Si tu veux repartir du profil de départ, touche le bouton Charger profil dans la barre en haut.",
+  "Quand tu as fini, retourne à la caisse avec le bouton Caisse."
+].join(' ');
+
+let _adminGuideSpeaking = false;
+
+function speakAdminGuide(){
+  if(!('speechSynthesis' in window)){
+    alert('Audio non disponible sur ce navigateur.');
+    return;
+  }
+  const btn = document.getElementById('btnAdminGuide');
+  if(_adminGuideSpeaking){
+    try{ speechSynthesis.cancel() }catch(e){}
+    _adminGuideSpeaking = false;
+    if(btn) btn.textContent = '🎧 Mode d’emploi';
+    return;
+  }
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(ADMIN_GUIDE_STEPS);
+    u.lang = 'fr-FR';
+    u.rate = 0.84;
+    u.pitch = 1.02;
+    const stop = () => {
+      _adminGuideSpeaking = false;
+      if(btn) btn.textContent = '🎧 Mode d’emploi';
+    };
+    u.onstart = () => {
+      _adminGuideSpeaking = true;
+      if(btn) btn.textContent = '⏹ Stop';
+    };
+    u.onend = stop;
+    u.onerror = stop;
+    const trySpeak = () => {
+      const fr = (speechSynthesis.getVoices()||[]).find(v => /^fr/i.test(v.lang));
+      if(fr) u.voice = fr;
+      try{ speechSynthesis.speak(u) }catch(e){ stop() }
+    };
+    if(speechSynthesis.getVoices().length){ trySpeak() }
+    else{
+      speechSynthesis.onvoiceschanged = () => {
+        speechSynthesis.onvoiceschanged = null;
+        trySpeak();
+      };
+      setTimeout(trySpeak, 120);
+    }
+  }catch(e){ _adminGuideSpeaking = false }
+}
+
 render();
 </script>
+
+<button id="btnAdminGuide" onclick="speakAdminGuide()">🎧 Mode d’emploi</button>
 </body>
 </html>
 
