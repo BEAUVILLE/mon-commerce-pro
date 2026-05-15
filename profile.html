@@ -388,6 +388,29 @@
       .card{border-radius:24px}
       .cover{height:215px}
     }
+
+    /* DIGIY — Guide audio fiche commerce (thème sombre) */
+    #btnProfileGuide{
+      position:fixed;
+      bottom:calc(var(--bottom) + env(safe-area-inset-bottom, 0px) + 10px);
+      right:14px;
+      z-index:200;
+      background:linear-gradient(135deg,#facc15,#f59e0b);
+      border:none;
+      color:#06140f;
+      border-radius:999px;
+      padding:12px 18px;
+      font-size:14px;
+      font-weight:1000;
+      box-shadow:0 8px 24px rgba(250,204,21,.32);
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      cursor:pointer;
+      transition:transform .14s, box-shadow .14s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    #btnProfileGuide:active{transform:scale(.95);box-shadow:0 4px 12px rgba(250,204,21,.20)}
   </style>
 </head>
 
@@ -1240,6 +1263,79 @@
     setupNotice();
   }
 
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     DIGIY — GUIDE AUDIO FICHE COMMERCE · V2
+     Même moteur que la caisse V29 et admin marchandises.
+     Un tap = mode d'emploi complet, champ par champ.
+     Pour le pro qui remplit sa fiche pour la première fois.
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  const PROFILE_GUIDE_TEXT = [
+    "Tu es sur la fiche commerce.",
+    "C'est ce que le client voit quand il cherche ton commerce.",
+    "Il y a plusieurs champs à remplir, prenons-les un par un.",
+    "Nom visible : c'est le nom principal de ton commerce. Par exemple : Astou Boutique. C'est ce qui apparaît en grand sur la fiche publique.",
+    "Famille : choisis la catégorie qui correspond le mieux. Boutique, Alimentation, Beauté, Mode, Services.",
+    "Ville ou zone : indique où tu es. Par exemple : Saly, Ngaparou, Somone, Mbour.",
+    "Repère : dis comment te trouver. Par exemple : près de la pharmacie, route principale, face à l'hôtel.",
+    "WhatsApp client : ton numéro avec l'indicatif pays. Commence par 221 pour le Sénégal. Le client pourra te contacter directement depuis la fiche.",
+    "Horaires : quand tu es ouvert. Par exemple : huit heures à vingt-deux heures.",
+    "Photo vitrine : si tu as une photo de ton commerce disponible sur Internet, colle son adresse ici. Elle doit commencer par h-t-t-p-s.",
+    "Description : deux ou trois phrases pour expliquer ce que tu vends. Par exemple : boutique à Saly, textile maison, plage et produits du quotidien.",
+    "Liens utiles : si tu as un TikTok, un Instagram, une page Google Maps, ou un catalogue en ligne, colle les liens ici. Maximum trois liens.",
+    "Le QR code : c'est le code que le client scanne pour voir ta fiche. Il est généré automatiquement. Tu n'as pas besoin de le modifier.",
+    "Visibilité : choisis Visible pour que ta fiche soit accessible au client. Brouillon si tu n'es pas encore prêt.",
+    "Quand tu as tout rempli, touche le bouton jaune Enregistrer. Ta fiche est sauvegardée.",
+    "Tu peux voir ta fiche publique avec le bouton Voir Astou."
+  ].join(' ');
+
+  let _profileGuideSpeaking = false;
+
+  function speakProfileGuide(){
+    if(!('speechSynthesis' in window)){
+      alert('Audio non disponible sur ce navigateur.');
+      return;
+    }
+    const btn = document.getElementById('btnProfileGuide');
+    if(_profileGuideSpeaking){
+      try{ speechSynthesis.cancel() }catch(e){}
+      _profileGuideSpeaking = false;
+      if(btn) btn.textContent = '🎧 Mode d’emploi';
+      return;
+    }
+    try{
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(PROFILE_GUIDE_TEXT);
+      u.lang = 'fr-FR';
+      u.rate = 0.84;
+      u.pitch = 1.02;
+      const stop = () => {
+        _profileGuideSpeaking = false;
+        if(btn) btn.textContent = '🎧 Mode d’emploi';
+      };
+      u.onstart = () => {
+        _profileGuideSpeaking = true;
+        if(btn) btn.textContent = '⏹ Stop';
+      };
+      u.onend = stop;
+      u.onerror = stop;
+      const trySpeak = () => {
+        const fr = (speechSynthesis.getVoices()||[]).find(v => /^fr/i.test(v.lang));
+        if(fr) u.voice = fr;
+        try{ speechSynthesis.speak(u) }catch(e){ stop() }
+      };
+      if(speechSynthesis.getVoices().length){ trySpeak() }
+      else{
+        speechSynthesis.onvoiceschanged = () => {
+          speechSynthesis.onvoiceschanged = null;
+          trySpeak();
+        };
+        setTimeout(trySpeak, 120);
+      }
+    }catch(e){ _profileGuideSpeaking = false }
+  }
+
   async function init(){
     cleanOldStorage();
     cleanUrl();
@@ -1271,5 +1367,7 @@
   init();
 })();
 </script>
+
+<button id="btnProfileGuide" onclick="speakProfileGuide()">🎧 Mode d’emploi</button>
 </body>
 </html>
