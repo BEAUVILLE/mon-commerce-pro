@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#06140f"/>
-  <title>MON COMMERCE — Ma fiche</title>
+  <title>MON COMMERCE — Ma fiche commerce · moule universel</title>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -430,7 +430,7 @@
 
       <div class="quick">
         <a class="primary" href="#publicCard">🏪 Réglage</a>
-        <a href="https://mon-commerce.digiylyfe.com/fiche-astou.html" target="_blank" rel="noopener">🛍️ Astou</a>
+        <a href="./confirme-pro.html">✅ Confirmer</a>
         <a href="./qr.html">🔳 QR</a>
         <button id="btnNotice" type="button">🎧 Notice</button>
       </div>
@@ -543,19 +543,19 @@
           <label>QR visible sur la fiche Astou</label>
           <div class="hint">
             Le QR doit ouvrir la fiche publique, jamais le domaine PRO.
-            Le code force automatiquement <strong>mon-commerce.digiylyfe.com</strong>.
+            Le code force automatiquement <strong>mon-commerce.digiylyfe.com</strong> et garde le pro maître de son lien.
           </div>
         </div>
 
         <div class="formGrid">
           <div class="field">
             <label for="qr_target_url">Lien ouvert par le QR</label>
-            <input id="qr_target_url" placeholder="https://mon-commerce.digiylyfe.com/fiche-astou.html"/>
+            <input id="qr_target_url" placeholder="https://mon-commerce.digiylyfe.com/fiche.html?slug=mon-commerce-..."/>
           </div>
 
           <div class="field">
             <label for="qr_image_url">Image QR URL</label>
-            <input id="qr_image_url" placeholder="https://quickchart.io/qr?size=280&text=https%3A%2F%2Fmon-commerce.digiylyfe.com%2Ffiche-astou.html"/>
+            <input id="qr_image_url" placeholder="QR généré automatiquement si vide"/>
           </div>
         </div>
 
@@ -600,7 +600,7 @@
 
         <div class="actions">
           <button class="btn primary" id="btnSave" type="button">💾 Enregistrer</button>
-          <button class="btn blue" id="btnOpenPublic" type="button">👁️ Voir Astou</button>
+          <button class="btn blue" id="btnOpenPublic" type="button">👁️ Voir côté client</button>
         </div>
 
         <div class="status" id="saveBox">Prêt.</div>
@@ -661,7 +661,7 @@
     <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
     <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
     <a class="navItem active" href="./profile.html"><span class="ico">🏪</span><span>Réglage</span></a>
-    <a class="navItem" href="https://mon-commerce.digiylyfe.com/fiche-astou.html" target="_blank" rel="noopener"><span class="ico">🛍️</span><span>Astou</span></a>
+    <a class="navItem" href="./confirme-pro.html"><span class="ico">✅</span><span>Confirmer</span></a>
   </div>
 </nav>
 
@@ -686,8 +686,18 @@
   const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
   const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
 
-  const ASTOU_PUBLIC = "https://mon-commerce.digiylyfe.com/fiche-astou.html";
-  const ASTOU_QR_IMAGE = "https://quickchart.io/qr?size=280&text=https%3A%2F%2Fmon-commerce.digiylyfe.com%2Ffiche-astou.html";
+  const PUBLIC_ROOT = "https://mon-commerce.digiylyfe.com/";
+
+  function defaultPublicUrl(){
+    if(slug){
+      return PUBLIC_ROOT + "fiche.html?slug=" + encodeURIComponent(slug);
+    }
+    return PUBLIC_ROOT;
+  }
+
+  function defaultQrImage(){
+    return "https://quickchart.io/qr?size=280&text=" + encodeURIComponent(defaultPublicUrl());
+  }
 
   let sb = null;
   let slug = "";
@@ -730,7 +740,7 @@
 
   function forcePublicUrl(v){
     const raw = safe(v);
-    if(!raw) return ASTOU_PUBLIC;
+    if(!raw) return defaultPublicUrl();
 
     return raw
       .replace(/https?:\/\/mon-commerce-pro\.digiylyfe\.com\/fiche-astou\.html/gi, ASTOU_PUBLIC)
@@ -739,7 +749,7 @@
 
   function forceQrImage(v){
     const raw = safe(v);
-    if(!raw) return ASTOU_QR_IMAGE;
+    if(!raw) return defaultQrImage();
 
     return raw
       .replace(/mon-commerce-pro\.digiylyfe\.com/gi, "mon-commerce.digiylyfe.com")
@@ -788,7 +798,11 @@
   }
 
   function localFicheUrl(){
-    return ASTOU_PUBLIC;
+    return forcePublicUrl(
+      $("qr_target_url")?.value ||
+      storageGet("digiy_pos_qr_target_url") ||
+      defaultPublicUrl()
+    );
   }
 
   function cleanUrl(){
@@ -979,14 +993,14 @@
   function apply(row){
     if(!row) return;
 
-    $("display_name").value = row.display_name || row.shop_name || row.name || "Astou Boutique";
-    $("category").value = row.category || "Boutique";
-    $("city").value = row.city || "Saly";
-    $("address").value = row.address || row.address_label || "Saly · Sénégal";
-    $("whatsapp").value = row.whatsapp || row.phone || row.owner_phone || "221778765785";
-    $("hours").value = row.hours || row.opening_hours || "À confirmer directement";
+    $("display_name").value = row.display_name || row.shop_name || row.name || "";
+    $("category").value = row.category || "";
+    $("city").value = row.city || "";
+    $("address").value = row.address || row.address_label || "";
+    $("whatsapp").value = row.whatsapp || row.phone || row.owner_phone || "";
+    $("hours").value = row.hours || row.opening_hours || "";
     $("photo_url").value = row.photo_url || row.image_url || "";
-    $("bio").value = row.bio || row.description || "Boutique à Saly · textile maison, plage, hôtel, beauté et produits utiles du quotidien.";
+    $("bio").value = row.bio || row.description || "";
 
     $("url1").value = row.url1 || storageGet("digiy_pos_url_1") || "";
     $("url1_label").value = row.url1_label || storageGet("digiy_pos_url_1_label") || "";
@@ -998,13 +1012,13 @@
     $("qr_target_url").value = forcePublicUrl(
       row.qr_target_url ||
       storageGet("digiy_pos_qr_target_url") ||
-      ASTOU_PUBLIC
+      defaultPublicUrl()
     );
 
     $("qr_image_url").value = forceQrImage(
       row.qr_image_url ||
       storageGet("digiy_pos_qr_image_url") ||
-      ASTOU_QR_IMAGE
+      defaultQrImage()
     );
 
     $("badge").value = row.badge || "✅ Commerce équipé";
@@ -1044,6 +1058,42 @@
     }catch(_){}
   }
 
+
+  function saveCaisseShop(d){
+    try{
+      const raw = localStorage.getItem("caisse_shop");
+      let shop = {};
+      if(raw){
+        try{
+          const parsed = JSON.parse(raw);
+          if(parsed && typeof parsed === "object") shop = parsed;
+          else shop.display_name = String(raw || "");
+        }catch(_){
+          shop.display_name = String(raw || "");
+        }
+      }
+
+      Object.assign(shop,{
+        display_name: d.display_name || "",
+        shop_name: d.display_name || "",
+        category: d.category || "",
+        city: d.city || "",
+        address: d.address || "",
+        whatsapp: d.whatsapp || phone || "",
+        hours: d.hours || "",
+        photo_url: d.photo_url || "",
+        bio: d.bio || "",
+        qr_target_url: forcePublicUrl(d.qr_target_url),
+        qr_image_url: forceQrImage(d.qr_image_url),
+        is_published: !!d.is_published,
+        work_currency: d.work_currency || "XOF",
+        updated_at: d.updated_at || new Date().toISOString()
+      });
+
+      localStorage.setItem("caisse_shop", JSON.stringify(shop));
+    }catch(_){}
+  }
+
   function saveLocalValues(d){
     try{
       localStorage.setItem("digiy_pos_url_1", d.url1 || "");
@@ -1070,7 +1120,7 @@
       localStorage.setItem("digiy_pos_hours", d.hours || "");
       localStorage.setItem("digiy_pos_description", d.bio || "");
       localStorage.setItem("digiy_pos_phone", d.whatsapp || phone || "");
-      localStorage.setItem("caisse_shop", d.display_name || "");
+      saveCaisseShop(d);
     }catch(_){}
   }
 
@@ -1142,9 +1192,9 @@
   }
 
   function render(){
-    const name = safe($("display_name").value) || "Astou Boutique";
-    const cat = safe($("category").value) || "Boutique";
-    const city = safe($("city").value) || "Saly";
+    const name = safe($("display_name").value) || "Nom commerce";
+    const cat = safe($("category").value) || "Famille";
+    const city = safe($("city").value) || "Ville";
     const whatsapp = normPhone($("whatsapp").value);
     const address = safe($("address").value);
     const hours = safe($("hours").value);
@@ -1204,7 +1254,7 @@
 
     if(!btn || !("speechSynthesis" in window)) return;
 
-    const TEXT = "Ma fiche commerce. Remplis le nom visible, WhatsApp, adresse, horaires, description, liens utiles et QR public. Puis enregistre. La fiche Astou reste publique, légère, et le client contacte directement.";
+    const TEXT = "Ma fiche commerce. Remplis le nom visible, WhatsApp, adresse, horaires, description, liens utiles et QR public. Puis enregistre. La fiche reste légère, publique, et le client contacte directement.";
 
     let speaking = false;
 
@@ -1275,19 +1325,19 @@
     "Tu es sur la fiche commerce.",
     "C'est ce que le client voit quand il cherche ton commerce.",
     "Il y a plusieurs champs à remplir, prenons-les un par un.",
-    "Nom visible : c'est le nom principal de ton commerce. Par exemple : Astou Boutique. C'est ce qui apparaît en grand sur la fiche publique.",
+    "Nom visible : c'est le nom principal de ton commerce. Par exemple : Ma Boutique. C'est ce qui apparaît en grand sur la fiche publique.",
     "Famille : choisis la catégorie qui correspond le mieux. Boutique, Alimentation, Beauté, Mode, Services.",
     "Ville ou zone : indique où tu es. Par exemple : Saly, Ngaparou, Somone, Mbour.",
     "Repère : dis comment te trouver. Par exemple : près de la pharmacie, route principale, face à l'hôtel.",
     "WhatsApp client : ton numéro avec l'indicatif pays. Commence par 221 pour le Sénégal. Le client pourra te contacter directement depuis la fiche.",
     "Horaires : quand tu es ouvert. Par exemple : huit heures à vingt-deux heures.",
     "Photo vitrine : si tu as une photo de ton commerce disponible sur Internet, colle son adresse ici. Elle doit commencer par h-t-t-p-s.",
-    "Description : deux ou trois phrases pour expliquer ce que tu vends. Par exemple : boutique à Saly, textile maison, plage et produits du quotidien.",
+    "Description : deux ou trois phrases pour expliquer ce que tu vends. Par exemple : commerce à Saly, produits utiles du quotidien et contact direct.",
     "Liens utiles : si tu as un TikTok, un Instagram, une page Google Maps, ou un catalogue en ligne, colle les liens ici. Maximum trois liens.",
     "Le QR code : c'est le code que le client scanne pour voir ta fiche. Il est généré automatiquement. Tu n'as pas besoin de le modifier.",
     "Visibilité : choisis Visible pour que ta fiche soit accessible au client. Brouillon si tu n'es pas encore prêt.",
     "Quand tu as tout rempli, touche le bouton jaune Enregistrer. Ta fiche est sauvegardée.",
-    "Tu peux voir ta fiche publique avec le bouton Voir Astou."
+    "Tu peux voir ta fiche publique avec le bouton Voir côté client."
   ].join(' ');
 
   let _profileGuideSpeaking = false;
@@ -1340,6 +1390,39 @@
     cleanOldStorage();
     cleanUrl();
     bind();
+
+    await bootGuard();
+    readStorage();
+
+    if(!slug && !phone){
+      setStatus("statusBox","Compte non reconnu. Passe par ton code d’accès.","err");
+      setTimeout(()=>{
+        location.href = "./pin.html";
+      },900);
+      reveal();
+      return;
+    }
+
+    setStatus("statusBox","Compte reconnu. Les identifiants restent cachés.","ok");
+
+    await loadProfile();
+
+    $("qr_target_url").value = forcePublicUrl($("qr_target_url").value || defaultPublicUrl());
+    $("qr_image_url").value = forceQrImage($("qr_image_url").value || defaultQrImage());
+
+    render();
+    reveal();
+  }
+
+  window.speakProfileGuide = speakProfileGuide;
+
+  init();
+})();
+</script>
+
+<button id="btnProfileGuide" onclick="speakProfileGuide()">🎧 Mode d’emploi</button>
+</body>
+</html>
 
     await bootGuard();
     readStorage();
