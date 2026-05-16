@@ -4,8 +4,8 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Caisse POS universelle · V33 porte confirme pro</title>
-<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle avec profil métier : encaisser, addition, paiement, reçu, notes, stats locales, oreille métier et porte confirmer mon activité."/>
+<title>MON COMMERCE — Caisse POS universelle · V34 moule vierge</title>
+<meta name="description" content="MON COMMERCE by DIGIY — caisse terrain universelle : encaisser, addition, paiement, reçu, notes, stats locales, oreille métier, porte confirmer mon activité et moule vierge par défaut."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
@@ -431,7 +431,7 @@ a{text-decoration:none;color:inherit}
     <a class="nav-chip confirm" href="./confirme-pro.html">✅ Confirmer mon activité</a>
     <a class="nav-chip door" href="./profile.html">🏪 Coordonnées pro</a>
     <a class="nav-chip door" href="./admin.html">📦 Marchandises</a>
-    <button class="nav-chip gold" onclick="resetProductsFromProfile()">🧩 Profil métier</button>
+    <button class="nav-chip gold" onclick="resetProductsFromProfile()">🧩 Exemple métier</button>
     <button class="nav-chip" onclick="showPage('page-notes')">✍️ Notes</button>
     <a class="nav-chip gold" href="./actions.html">⚡ Actions utiles</a>
     <button class="nav-chip" onclick="showPage('page-stats')">📊 Stats</button>
@@ -442,7 +442,7 @@ a{text-decoration:none;color:inherit}
     <a class="nav-chip optional" href="https://pro-espace.digiylyfe.com/">🧭 Camembert</a>
   </div>
 
-  <div class="profile-hint">🧩 <strong>Moule universel V33 :</strong> commence par Confirmer mon activité, puis Marchandises, Actions utiles et Caisse.</div>
+  <div class="profile-hint">🧩 <strong>Moule universel V34 :</strong> vierge par défaut. Confirme ton activité, programme tes marchandises, puis encaisse. L’exemple métier se charge seulement si tu le demandes.</div>
   <div id="articles"></div>
   <div class="search-wrap">
     <span class="search-ico">🔍</span>
@@ -691,7 +691,7 @@ a{text-decoration:none;color:inherit}
 <div class="toast" id="toast"></div>
 
 <script>
-/* DIGIY POS — ACTIONS UTILES V32
+/* DIGIY POS — ACTIONS UTILES V34
    Clic prioritaire · écrit secours · voix actions simples · profil métier · stats locales.
    Ne pas transformer le moule en caisse sur mesure.
 */
@@ -703,8 +703,8 @@ let _toastTimer = null;
 
 /* DIGIY POS — PROFIL MÉTIER
    Le moule caisse.html reste universel.
-   POS_PROFILE habille le moule : vocabulaire, produits de départ, phrases, synonymes.
-   Pour un autre pro, on change ce profil, pas toute la caisse.
+   POS_PROFILE sert seulement d’exemple volontaire : vocabulaire, produits de départ, phrases, synonymes.
+   Le moule ne charge plus automatiquement les marchandises. Le pro garde la main.
 */
 const POS_PROFILE = window.POS_PROFILE || {
   profileName: "POS Boutique Linge & Style",
@@ -796,13 +796,13 @@ function profileDefaultProducts(){
 }
 
 function resetProductsFromProfile(){
-  if(!confirm("Charger les produits / marchandises du profil métier ? Cela remplace les produits gardés sur ce téléphone."))return;
+  if(!confirm("Charger un exemple métier ? Cela remplace les marchandises gardées sur ce téléphone."))return;
   saveJSON("caisse_prods", profileDefaultProducts());
   selCat="Tous";
   buildCats();
   renderProds();
   updateProfileLabels();
-  showToast("Profil métier chargé");
+  showToast("Exemple métier chargé");
 }
 
 window.POS_PROFILE=POS_PROFILE;
@@ -839,6 +839,7 @@ function updateProfileLabels(){
   });
 }
 
+// Exemple volontaire uniquement : jamais chargé automatiquement.
 const DEFAULT_PRODUCTS = profileDefaultProducts();
 
 const LEGACY_DEFAULT_PRODUCTS = [
@@ -879,11 +880,8 @@ function cleanVisibleUrl(){
 function readJSON(key,fallback){try{const d=localStorage.getItem(key);return d?JSON.parse(d):fallback}catch(e){return fallback}}
 function saveJSON(key,val){localStorage.setItem(key,JSON.stringify(val))}
 function getProds(){
-  let items = readJSON("caisse_prods", null);
-  if(!Array.isArray(items) || !items.length){
-    items = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
-    saveJSON("caisse_prods", items);
-  }
+  let items = readJSON("caisse_prods", []);
+  if(!Array.isArray(items)) items = [];
   return items.map((p,i)=>({
     id:Number(p.id)||i+1,
     source_id:p.source_id||"",
@@ -935,8 +933,20 @@ function persistVente(vente){
 
 function getNotes(){return readJSON("caisse_notes",[])}
 function saveNotes(n){saveJSON("caisse_notes",n)}
-function getShopName(){return localStorage.getItem("caisse_shop")||"Ma Boutique"}
-function setShopName(n){localStorage.setItem("caisse_shop",n);document.querySelectorAll("#shopTitle,#recuShopName").forEach(el=>el.textContent=n)}
+function getShopName(){
+  const raw = localStorage.getItem("caisse_shop");
+  if(!raw) return "Ma Boutique";
+  try{
+    const data = JSON.parse(raw);
+    if(data && typeof data === "object"){
+      return data.display_name || data.name || data.business_name || data.shop_name || "Ma Boutique";
+    }
+  }catch(e){}
+  return raw || "Ma Boutique";
+}
+function setShopName(n){
+  document.querySelectorAll("#shopTitle,#recuShopName").forEach(el=>el.textContent=n||"Ma Boutique");
+}
 
 
 function setupCaisseNotice(){
@@ -1006,7 +1016,7 @@ const DEMARRAGE_TEXT = [
   "Quatre : les Stats et les Notes, accessibles dans la barre en haut.",
   "Cinq : Confirmer mon activité. Cette porte vérifie le nom, la ville, le WhatsApp, les services, les paiements, le QR et la publication. Six : le bouton jaune Actions utiles. Il prépare les textes du terrain en un clic :",
   "dette client, ajout de stock, dépense ou commande. Plus besoin d'écrire.",
-  "Pour démarrer maintenant : touche Confirmer mon activité, puis Marchandises, programme tes articles, puis reviens encaisser."
+  "Pour démarrer maintenant : touche Confirmer mon activité, puis Marchandises, programme tes articles, puis reviens encaisser. L’exemple métier est seulement là pour tester."
 ].join(' ');
 
 let _demarrageSpeaking = false;
@@ -1100,7 +1110,7 @@ function renderProds(){
   const q=(document.getElementById("searchInput").value||"").toLowerCase();
   const items=getProds().filter(p=>(selCat==="Tous"||p.cat===selCat)&&(!q||String(p.name).toLowerCase().includes(q)));
   const g=document.getElementById("prodsGrid");
-  if(!items.length){g.innerHTML=`<div style="grid-column:1/-1" class="no-data">Aucun article trouvé. Va dans Articles pour ajouter ou initialiser.</div>`;return}
+  if(!items.length){g.innerHTML=`<div style="grid-column:1/-1" class="no-data">Aucune marchandise encore. Va dans Marchandises pour programmer tes articles, ou charge un exemple métier si tu veux tester.</div>`;return}
   g.innerHTML=items.map(p=>`
     <div class="pcard${Number(p.stock)<=0?" oos":""}" onclick="addToCart(${Number(p.id)})">
       <span class="stk-badge ${Number(p.stock)<=5?"stk-low":"stk-ok"}">${Number(p.stock)||0}</span>
@@ -2085,6 +2095,631 @@ window.checkPremierLancement = checkPremierLancement;
 <button id="btnGuideAudio" onclick="speakGuide(_guideCurrentPage)">🎧 Guide</button>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
