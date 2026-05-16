@@ -95,6 +95,12 @@ input:focus,select:focus{border-color:var(--green)}
   -webkit-tap-highlight-color:transparent;
 }
 #btnAdminGuide:active{transform:scale(.95);box-shadow:0 4px 10px rgba(122,76,0,.14)}
+
+.link.confirm-door{
+  background:#e9f8ee;
+  border-color:#b8e4c8;
+  color:#0a4a25;
+}
 </style>
 </head>
 <body>
@@ -113,13 +119,15 @@ input:focus,select:focus{border-color:var(--green)}
   <div class="strip">
     <a class="link" href="./caisse.html">← Caisse</a>
     <a class="link" href="./profile.html">🏪 Coordonnées pro</a>
-    <button class="link" onclick="loadProfile()">🧩 Charger profil</button>
+    <a class="link confirm-door" href="./confirme-pro.html">✅ Confirmer activité</a>
+    <button class="link" onclick="loadProfile()">🧩 Charger exemple textile</button>
     <button class="link" onclick="exportJSON()">⬇️ Export</button>
   </div>
 
   <div class="help">
-    Cette page est la porte pour programmer les marchandises du pro : nom, prix, stock, catégorie, emoji et visibilité.
-    La caisse lit ces données dans <strong>localStorage / caisse_prods</strong>.
+    Cette page programme les marchandises du pro : nom, prix, stock, catégorie, emoji et visibilité.
+    Le moule reste vierge : rien n’est imposé. Le pro ajoute ses articles, ou charge volontairement un exemple textile.
+    La caisse lit ensuite ces données dans <strong>localStorage / caisse_prods</strong>.
   </div>
 
   <section class="card" id="articleList">
@@ -200,7 +208,7 @@ function render(){
   const items=getProducts();
   const list=document.getElementById("list");
   if(!items.length){
-    list.innerHTML='<div class="help" style="grid-column:1/-1;margin:0">Aucune marchandise. Clique “Charger profil” ou ajoute ta première marchandise.</div>';
+    list.innerHTML='<div class="help" style="grid-column:1/-1;margin:0">Aucune marchandise. Ajoute ta première marchandise, ou clique “Charger exemple textile” pour tester.</div>';
     return;
   }
   list.innerHTML=items.map(p=>`
@@ -280,10 +288,10 @@ function clearProducts(){
 }
 
 function loadProfile(){
-  if(!confirm("Charger les marchandises du profil textile ? Cela remplace la liste actuelle."))return;
+  if(!confirm("Charger un exemple textile ? Cela remplace la liste actuelle sur ce téléphone."))return;
   saveProducts(JSON.parse(JSON.stringify(PROFILE_PRODUCTS)));
   render();
-  toast("Profil chargé");
+  toast("Exemple textile chargé");
 }
 
 function exportJSON(){
@@ -314,7 +322,7 @@ const ADMIN_GUIDE_STEPS = [
   "L'emoji, c'est l'image qui s'affiche sur la carte. Tu peux laisser la valeur par défaut.",
   "Quand tout est rempli, touche le bouton vert Enregistrer.",
   "Pour modifier une marchandise déjà dans la liste, touche le bouton Modifier sur sa carte.",
-  "Si tu veux repartir du profil de départ, touche le bouton Charger profil dans la barre en haut.",
+  "Si tu veux tester avec un exemple, touche le bouton Charger exemple textile dans la barre en haut.",
   "Quand tu as fini, retourne à la caisse avec le bouton Caisse."
 ].join(' ');
 
@@ -370,6 +378,23 @@ render();
 <button id="btnAdminGuide" onclick="speakAdminGuide()">🎧 Mode d’emploi</button>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
