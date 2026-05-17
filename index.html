@@ -466,7 +466,7 @@
       max-width:860px;
       margin:0 auto;
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-columns:repeat(5,minmax(0,1fr));
       gap:6px;
     }
 
@@ -638,6 +638,7 @@
       <a class="navItem" id="navCaisse" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
       <a class="navItem" id="navArticles" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
       <a class="navItem" id="navFiche" href="./profile.html"><span class="ico">🏪</span><span>Fiche</span></a>
+      <a class="navItem" id="navActions" href="./actions.html"><span class="ico">⚡</span><span>Actions</span></a>
     </div>
   </nav>
 
@@ -660,6 +661,7 @@
         pin: digiyLocal("pin.html"),
         qr: digiyLocal("qr.html"),
         public: "https://mon-commerce.digiylyfe.com/",
+        actions: digiyLocal("actions.html"),
         pay: "https://commencer-a-payer.digiylyfe.com/"
       };
 
@@ -820,6 +822,7 @@
           navCaisse: URLS.caisse,
           navArticles: URLS.articles,
           navFiche: URLS.profile,
+          navActions: URLS.actions,
           menuPin: URLS.pin,
           menuQr: URLS.qr,
           menuPublic: URLS.public,
@@ -1155,6 +1158,12 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 
