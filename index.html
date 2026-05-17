@@ -467,19 +467,19 @@
       margin:0 auto;
       display:grid;
       grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:6px;
+      gap:4px;
     }
 
     .navItem{
-      min-height:58px;
-      border-radius:17px;
+      min-height:54px;
+      border-radius:14px;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      gap:3px;
+      gap:2px;
       color:rgba(247,251,248,.72);
-      font-size:.72rem;
+      font-size:.65rem;
       font-weight:1000;
       border:1px solid rgba(255,255,255,.07);
       background:rgba(255,255,255,.035);
@@ -573,6 +573,22 @@
             <div class="actionSub">Ce que le client voit de ton commerce.</div>
           </div>
         </a>
+
+        <a class="actionCard" id="goMonArgent" href="https://pro-pay.digiylyfe.com/admin.html">
+          <div class="actionIcon">💰</div>
+          <div>
+            <div class="actionTitle">Mon Argent</div>
+            <div class="actionSub">Entrées, dépenses, ventes — piloter sans cahier.</div>
+          </div>
+        </a>
+
+        <a class="actionCard" id="goActions" href="./actions.html">
+          <div class="actionIcon">⚡</div>
+          <div>
+            <div class="actionTitle">Actions utiles</div>
+            <div class="actionSub">Confirmer, partager, QR, liens rapides.</div>
+          </div>
+        </a>
       </section>
 
       <section class="today">
@@ -662,6 +678,7 @@
         qr: digiyLocal("qr.html"),
         public: "https://mon-commerce.digiylyfe.com/",
         actions: digiyLocal("actions.html"),
+        monArgent: "https://pro-pay.digiylyfe.com/admin.html",
         pay: "https://commencer-a-payer.digiylyfe.com/"
       };
 
@@ -823,6 +840,8 @@
           navArticles: URLS.articles,
           navFiche: URLS.profile,
           navActions: URLS.actions,
+          goMonArgent: URLS.monArgent,
+          goActions: URLS.actions,
           menuPin: URLS.pin,
           menuQr: URLS.qr,
           menuPublic: URLS.public,
@@ -1158,6 +1177,11 @@
   </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
