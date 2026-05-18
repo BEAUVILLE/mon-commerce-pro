@@ -69,6 +69,78 @@
     }
     .navItem .ico{font-size:1.18rem;line-height:1}
     .navItem.active{color:#06140f;background:linear-gradient(135deg,var(--gold),var(--green));border-color:rgba(255,255,255,.18)}
+
+    /* =========================================================
+       DIGIY POS — ALERTES VOCALES V1 (porte MON COMMERCE)
+       À poser surtout sur caisse.html/cockpit ensuite.
+       ========================================================= */
+    .voiceBox{
+      margin-top:16px;
+      padding:14px;
+      border-radius:24px;
+      border:1px solid rgba(250,204,21,.32);
+      background:
+        radial-gradient(460px 180px at 0% 0%, rgba(250,204,21,.18), transparent 70%),
+        rgba(255,255,255,.055);
+      display:grid;
+      gap:10px;
+      text-align:left;
+    }
+    .voiceTitle{
+      color:#fef3c7;
+      font-size:1.06rem;
+      font-weight:1000;
+      line-height:1.2;
+    }
+    .voiceSub{
+      color:rgba(184,207,196,.86);
+      font-size:.94rem;
+      font-weight:850;
+      line-height:1.45;
+    }
+    .voiceStatus{
+      display:inline-flex;
+      width:max-content;
+      max-width:100%;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.045);
+      color:rgba(247,251,248,.76);
+      font-size:.84rem;
+      font-weight:950;
+    }
+    .voiceActions{
+      display:grid;
+      gap:8px;
+      grid-template-columns:1fr;
+    }
+    .btn.voiceMain{
+      border:none;
+      color:#06140f;
+      background:linear-gradient(135deg,var(--gold),var(--green));
+    }
+    .voiceTests{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px;
+    }
+    .voiceTest{
+      min-height:46px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.045);
+      color:var(--text);
+      font-size:.86rem;
+      font-weight:1000;
+      padding:9px;
+    }
+    @media(max-width:520px){
+      .voiceTests{grid-template-columns:1fr}
+      .voiceBox{text-align:center}
+      .voiceStatus{margin:0 auto}
+    }
+
   </style>
 </head>
 
@@ -87,6 +159,27 @@
     <a class="btn ghost" id="goAstouFiche" href="./fiche-astou.html">🛍️ Voir la fiche Astou</a>
     <a class="btn ghost" id="goQr" href="./qr.html">🔳 Mon QR boutique</a>
   </div>
+
+
+  <div class="voiceBox" id="posVoiceBox" aria-label="Alertes vocales DIGIY POS">
+    <div>
+      <div class="voiceTitle">🔔 Alertes vocales DIGIY POS</div>
+      <div class="voiceSub">
+        Ton comptoir parle métier : vente enregistrée, stock bas, total du jour prêt.
+        Cette porte est un sas ; le vrai moteur doit ensuite être posé sur la caisse ou le cockpit commerce.
+      </div>
+    </div>
+    <span class="voiceStatus" id="voiceStatus">Voix non activée</span>
+    <div class="voiceActions">
+      <button class="btn voiceMain" id="btnVoiceAlerts" type="button">🔔 Activer les alertes vocales</button>
+      <div class="voiceTests" aria-label="Tester les alertes POS">
+        <button class="voiceTest" data-pos-say="Vente enregistrée." type="button">💰 Vente</button>
+        <button class="voiceTest" data-pos-say="Stock bas. Produit à vérifier." type="button">📦 Stock</button>
+        <button class="voiceTest" data-pos-say="Total du jour prêt." type="button">📊 Total</button>
+      </div>
+    </div>
+  </div>
+
 
   <div class="note">Ancien lien gardé pour compatibilité. Pas de double accueil, pas de bruit.</div>
 </main>
@@ -179,14 +272,102 @@
     }catch(_){}
   }
 
+
+  /* =========================================================
+     DIGIY POS — MOTEUR VOIX MÉTIER V1
+     Le navigateur exige un clic humain avant de parler.
+     ========================================================= */
+  let posVoiceEnabled = false;
+  let posVoiceTouched = false;
+
+  function setVoiceStatus(txt){
+    const el = document.getElementById("voiceStatus");
+    if(el) el.textContent = txt;
+  }
+
+  function chooseVoice(){
+    try{
+      const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      return voices.find(v => /^fr/i.test(v.lang || "") && /Google|Thomas|Amelie|Audrey|Daniel/i.test(v.name || "")) ||
+             voices.find(v => /^fr/i.test(v.lang || "")) ||
+             voices[0] ||
+             null;
+    }catch(_){
+      return null;
+    }
+  }
+
+  function speakPOS(text){
+    if(!("speechSynthesis" in window)){
+      setVoiceStatus("Voix indisponible sur ce navigateur");
+      return;
+    }
+    if(!posVoiceEnabled){
+      setVoiceStatus("Clique d’abord sur Activer les alertes vocales");
+      return;
+    }
+
+    try{
+      window.speechSynthesis.cancel();
+      const msg = new SpeechSynthesisUtterance(String(text || "").trim());
+      msg.lang = "fr-FR";
+      msg.rate = 0.88;
+      msg.pitch = 1.02;
+      msg.volume = 1;
+      const v = chooseVoice();
+      if(v) msg.voice = v;
+      msg.onstart = () => setVoiceStatus("DIGIY parle…");
+      msg.onend = () => setVoiceStatus("Alertes vocales actives");
+      window.speechSynthesis.speak(msg);
+    }catch(_){
+      setVoiceStatus("Voix bloquée par le navigateur");
+    }
+  }
+
+  function initPOSVoice(){
+    const btn = document.getElementById("btnVoiceAlerts");
+    if(btn){
+      btn.addEventListener("click", function(){
+        posVoiceTouched = true;
+        posVoiceEnabled = true;
+        try{ localStorage.setItem("digiy_pos_voice_enabled","1"); }catch(_){}
+        setVoiceStatus("Alertes vocales actives");
+        speakPOS("Alertes vocales POS activées. Vente enregistrée, stock bas, total du jour prêt.");
+      });
+    }
+
+    document.querySelectorAll("[data-pos-say]").forEach(function(el){
+      el.addEventListener("click", function(){
+        posVoiceTouched = true;
+        speakPOS(el.getAttribute("data-pos-say") || "");
+      });
+    });
+
+    try{
+      if(localStorage.getItem("digiy_pos_voice_enabled") === "1"){
+        posVoiceEnabled = true;
+        setVoiceStatus("Alertes vocales actives");
+      }
+    }catch(_){}
+
+    if("speechSynthesis" in window){
+      window.speechSynthesis.onvoiceschanged = function(){
+        chooseVoice();
+      };
+    }
+  }
+
+
   function go(){
     const target = "./index.html";
     setTimeout(function(){
+      if(posVoiceTouched) return;
       try{ location.replace(target); }
       catch(_){ location.href = target; }
-    },900);
+    },1800);
   }
 
+  initPOSVoice();
   rememberThenClean();
   go();
 })();
@@ -194,3 +375,4 @@
 
 </body>
 </html>
+
