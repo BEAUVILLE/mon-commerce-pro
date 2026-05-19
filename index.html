@@ -1,1182 +1,393 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MON COMMERCE PRO — Comptoir</title>
-  <meta name="theme-color" content="#06140f" />
-  <meta
-    name="description"
-    content="MON COMMERCE PRO by DIGIY — comptoir numérique : encaisser, gérer les articles, voir le tableau du jour et la fiche commerce."
-  />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap"
-    rel="stylesheet"
-  >
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>MON COMMERCE — Entrée</title>
+  <meta name="theme-color" content="#1e7a46"/>
+  <meta name="description" content="MON COMMERCE PRO — porte courte vers le HUB commerce, avec secours anti-404."/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <meta name="digiy-build" content="pos-index-porte-hub-anti-404-20260519"/>
 
   <script>
-    window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
-    window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
-    window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
     window.DIGIY_MODULE = "POS";
     window.DIGIY_LOGIN_URL = "./pin.html";
-
-    function digiyBasePath() {
-      const parts = location.pathname.split("/").filter(Boolean);
-      const isGh = /\.github\.io$/i.test(location.hostname);
-      if (isGh && parts.length > 0) return "/" + parts[0] + "/";
-      return "/";
-    }
-
-    function digiyLocal(path) {
-      path = String(path || "").replace(/^\/+/, "");
-      return digiyBasePath() + path;
-    }
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./guard.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
 
   <style>
     :root{
-      --bg:#04110d;
-      --bg2:#071b14;
-      --card:rgba(255,255,255,.055);
-      --card2:rgba(255,255,255,.085);
-      --line:rgba(255,255,255,.12);
-      --text:#f7fbf8;
-      --muted:#b8cfc4;
-      --gold:#facc15;
-      --gold2:#f59e0b;
+      --bg:#1e7a46;
+      --bg2:#155a34;
+      --bg3:#0e4226;
+      --gold:#c4973f;
       --green:#22c55e;
-      --red:#ef4444;
-      --blue:#38bdf8;
-      --shadow:0 18px 44px rgba(0,0,0,.30);
-      --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      --bottom:88px;
+      --line:rgba(255,255,255,.18);
+      --text:#f0fff5;
+      --muted:rgba(240,255,245,.78);
+      --shadow:0 18px 46px rgba(0,0,0,.24);
+      --r:26px;
+      --max:760px;
     }
 
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;min-height:100%}
+
+    html{
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
+    }
+
     body{
-      font-family:var(--font);
+      margin:0;
+      min-height:100dvh;
+      display:grid;
+      place-items:center;
+      padding:16px;
       color:var(--text);
+      font-family:Outfit,system-ui,-apple-system,"Segoe UI",sans-serif;
+      font-size:19px;
+      font-weight:950;
       background:
-        radial-gradient(850px 480px at 0% -5%, rgba(250,204,21,.12), transparent 60%),
-        radial-gradient(720px 460px at 100% 0%, rgba(34,197,94,.13), transparent 58%),
-        linear-gradient(180deg,#06140f,var(--bg));
-      padding:12px 12px calc(var(--bottom) + env(safe-area-inset-bottom,0px) + 18px);
+        radial-gradient(600px 390px at 16% 0%,rgba(74,222,128,.18),transparent 58%),
+        radial-gradient(420px 280px at 92% 8%,rgba(196,151,63,.15),transparent 52%),
+        linear-gradient(180deg,var(--bg) 0%,var(--bg2) 60%,var(--bg3) 100%);
     }
 
     a{color:inherit;text-decoration:none}
-    button{font:inherit}
-    .wrap{max-width:860px;margin:0 auto}
+    button{font:inherit;color:inherit;cursor:pointer}
 
-    .top{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.045);
-      border-radius:26px;
-      padding:14px;
+    .door{
+      width:min(var(--max),100%);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:var(--r);
+      background:
+        radial-gradient(500px 220px at 100% 0%,rgba(196,151,63,.12),transparent 70%),
+        rgba(8,50,24,.78);
       box-shadow:var(--shadow);
-    }
-
-    .topLine{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
+      padding:22px;
+      display:grid;
+      gap:16px;
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
     }
 
     .brand{
       display:flex;
       align-items:center;
-      gap:12px;
-      min-width:0;
+      gap:13px;
     }
 
-    .logo{
-      width:52px;
-      height:52px;
-      border-radius:18px;
+    .badge{
+      width:58px;
+      height:58px;
+      border-radius:20px;
       display:grid;
       place-items:center;
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      color:#10140d;
-      font-size:25px;
-      font-weight:1000;
-      box-shadow:0 16px 36px rgba(250,204,21,.22);
+      background:rgba(196,151,63,.16);
+      border:1px solid rgba(196,151,63,.32);
+      font-size:30px;
       flex:0 0 auto;
+    }
+
+    .kicker{
+      color:#fff0a8;
+      font-size:12px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-weight:1000;
+    }
+
+    .brandTitle{
+      color:#fff;
+      font-size:18px;
+      font-weight:1000;
+      margin-top:2px;
     }
 
     h1{
       margin:0;
-      font-size:clamp(1.65rem,5vw,2.55rem);
+      color:#fff;
+      font-size:clamp(36px,9vw,62px);
       line-height:.96;
-      letter-spacing:-.04em;
+      letter-spacing:-.055em;
       font-weight:1000;
     }
 
-    .sub{
-      margin-top:7px;
+    h1 span{color:#fff0a8}
+
+    .lead{
+      margin:0;
       color:var(--muted);
-      font-size:1rem;
-      line-height:1.38;
-      font-weight:850;
-    }
-
-    .menuBtn{
-      width:48px;
-      height:48px;
-      border-radius:18px;
-      border:1px solid rgba(250,204,21,.24);
-      background:rgba(250,204,21,.10);
-      color:#fde68a;
+      font-size:17px;
       font-weight:1000;
-      font-size:22px;
-      cursor:pointer;
-      flex:0 0 auto;
+      line-height:1.42;
     }
 
-    .statusBox{
-      margin-top:12px;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:22px;
-      background:rgba(0,0,0,.14);
-      padding:12px;
-      display:grid;
-      gap:9px;
-    }
-
-    .statusMain{
+    .status{
+      min-height:54px;
       display:flex;
       align-items:center;
       gap:10px;
+      padding:12px 14px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.15);
+      background:rgba(255,255,255,.08);
+      color:rgba(240,255,245,.92);
+      font-size:15px;
       font-weight:1000;
-      font-size:1.05rem;
+      line-height:1.35;
     }
 
     .dot{
-      width:12px;
-      height:12px;
-      border-radius:999px;
-      background:var(--gold);
-      box-shadow:0 0 0 5px rgba(250,204,21,.12);
+      width:13px;
+      height:13px;
+      border-radius:50%;
+      background:#f59e0b;
+      box-shadow:0 0 0 6px rgba(245,158,11,.12);
       flex:0 0 auto;
     }
-    .dot.ok{background:var(--green);box-shadow:0 0 0 5px rgba(34,197,94,.13)}
-    .dot.bad{background:var(--red);box-shadow:0 0 0 5px rgba(239,68,68,.13)}
 
-    .statusSub{
-      color:var(--muted);
-      font-size:.92rem;
-      line-height:1.45;
-      font-weight:800;
+    .status.ok .dot{
+      background:#22c55e;
+      box-shadow:0 0 0 6px rgba(34,197,94,.12);
     }
 
-    .storeLine{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
+    .status.bad .dot{
+      background:#ef4444;
+      box-shadow:0 0 0 6px rgba(239,68,68,.12);
     }
 
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:34px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.045);
-      color:var(--muted);
-      font-size:.78rem;
-      font-weight:1000;
-    }
-
-    .pill.ok{
-      border-color:rgba(34,197,94,.26);
-      background:rgba(34,197,94,.10);
-      color:#bbf7d0;
-    }
-
-    .heroAction{
-      margin-top:12px;
-      display:grid;
-      grid-template-columns:1.2fr .8fr;
-      gap:10px;
-    }
-
-    .btn{
-      min-height:58px;
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,.12);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      padding:13px 14px;
-      background:rgba(255,255,255,.055);
-      color:var(--text);
-      font-weight:1000;
-      font-size:1rem;
-      text-align:center;
-      cursor:pointer;
-    }
-
-    .btn:active{transform:scale(.99)}
-    .btn.primary{
-      background:linear-gradient(135deg,var(--gold),var(--gold2));
-      border-color:rgba(250,204,21,.35);
-      color:#10140d;
-      box-shadow:0 14px 32px rgba(250,204,21,.18);
-    }
-    .btn.green{
-      background:linear-gradient(135deg,#22c55e,#16a34a);
-      border-color:rgba(34,197,94,.35);
-      color:#04110d;
-      box-shadow:0 14px 32px rgba(34,197,94,.15);
-    }
-    .btn.blue{
-      background:rgba(56,189,248,.12);
-      border-color:rgba(56,189,248,.25);
-      color:#bae6fd;
-    }
-    .btn.ghost{
-      background:rgba(255,255,255,.035);
-      color:var(--muted);
-    }
-
-    .quick{
-      margin-top:12px;
+    .actions{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:10px;
     }
 
-    .actionCard{
-      min-height:112px;
-      border-radius:24px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.045);
-      box-shadow:0 12px 26px rgba(0,0,0,.18);
-      padding:14px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .actionIcon{
-      font-size:28px;
-      line-height:1;
-    }
-
-    .actionTitle{
-      font-size:1.16rem;
-      line-height:1.08;
-      font-weight:1000;
-      letter-spacing:-.025em;
-    }
-
-    .actionSub{
-      margin-top:5px;
-      color:var(--muted);
-      font-size:.84rem;
-      line-height:1.32;
-      font-weight:800;
-    }
-
-    /* ── PAY upsell ─────────────────────────────────────────── */
-    .payUpsellCard{
-      margin:14px 0;padding:16px;border-radius:22px;
-      border:2px solid rgba(250,204,21,.42);
-      background:
-        radial-gradient(circle at right top,rgba(250,204,21,.12),transparent 34%),
-        linear-gradient(160deg,rgba(12,30,22,.97),rgba(6,20,15,.97));
-      box-shadow:0 0 0 1px rgba(250,204,21,.08),0 16px 40px rgba(0,0,0,.28);
-    }
-    .payUpsellBadge{
-      display:inline-flex;align-items:center;gap:6px;padding:5px 11px;
-      border-radius:999px;border:1px solid rgba(250,204,21,.40);
-      background:rgba(250,204,21,.10);color:#fef3c7;
-      font-size:11px;font-weight:1000;letter-spacing:.06em;text-transform:uppercase;
-      margin-bottom:9px;
-    }
-    .payUpsellTitle{font-size:17px;font-weight:1000;color:#fff8dc;margin-bottom:5px;line-height:1.25;}
-    .payUpsellLead{font-size:13px;color:rgba(184,207,196,.82);font-weight:900;line-height:1.5;margin-bottom:11px;}
-    .payUpsellPrice{
-      display:inline-flex;align-items:baseline;gap:5px;padding:7px 13px;
-      border-radius:999px;border:1px solid rgba(250,204,21,.30);
-      background:rgba(250,204,21,.07);color:#fef3c7;
-      font-size:13px;font-weight:1000;margin-bottom:13px;
-    }
-    .payUpsellPrice strong{font-size:18px;color:#facc15;}
-    .payUpsellBtn{
-      display:flex;align-items:center;justify-content:center;gap:8px;
-      min-height:52px;border-radius:18px;border:none;width:100%;
-      background:linear-gradient(135deg,#facc15,#f59e0b);
-      color:#1a1200;font-size:15px;font-weight:1000;cursor:pointer;
-      box-shadow:0 8px 20px rgba(250,204,21,.20);
-    }
-    .payUpsellBtn:hover{filter:brightness(1.06);}
-
-    .actionCard.main{
-      background:linear-gradient(135deg,rgba(250,204,21,.18),rgba(34,197,94,.08));
-      border-color:rgba(250,204,21,.25);
-    }
-
-    .today{
-      margin-top:12px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.04);
-      border-radius:24px;
-      box-shadow:var(--shadow);
-      padding:14px;
-    }
-
-    .todayTitle{
-      font-size:1.15rem;
-      font-weight:1000;
-      margin-bottom:10px;
-    }
-
-    .todayGrid{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:10px;
-    }
-
-    .mini{
-      border:1px solid rgba(255,255,255,.10);
+    .btn{
+      min-height:60px;
       border-radius:18px;
-      background:rgba(0,0,0,.12);
-      padding:12px;
-    }
-
-    .miniLabel{
-      color:var(--muted);
-      font-size:.74rem;
-      font-weight:1000;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-    }
-
-    .miniValue{
-      margin-top:6px;
-      font-size:1.25rem;
-      font-weight:1000;
-      letter-spacing:-.03em;
-    }
-
-    .note{
-      margin-top:12px;
-      border:1px solid rgba(250,204,21,.22);
-      background:rgba(250,204,21,.08);
-      color:#fde68a;
-      border-radius:20px;
-      padding:12px;
-      font-size:.92rem;
-      line-height:1.45;
-      font-weight:850;
-    }
-
-    .drawer{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.55);
-      display:none;
-      z-index:100;
-      padding:14px;
-    }
-
-    .drawer.show{display:flex;justify-content:flex-end}
-
-    .drawerPanel{
-      width:min(360px,100%);
-      height:max-content;
-      max-height:calc(100vh - 28px);
-      overflow:auto;
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:26px;
-      background:rgba(4,17,13,.98);
-      box-shadow:0 24px 70px rgba(0,0,0,.55);
-      padding:12px;
-    }
-
-    .drawerHead{
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.09);
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:4px 4px 10px;
-    }
-
-    .drawerTitle{
-      font-weight:1000;
-      color:#fde68a;
-    }
-
-    .drawerClose{
-      width:42px;
-      height:42px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.05);
-      color:var(--text);
-      font-weight:1000;
-      cursor:pointer;
-    }
-
-    .drawerList{
-      display:grid;
-      gap:8px;
-    }
-
-    .drawerList a,
-    .drawerList button{
-      width:100%;
-      min-height:48px;
-      border-radius:17px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.045);
-      color:var(--text);
-      display:flex;
-      align-items:center;
-      justify-content:flex-start;
-      gap:10px;
-      padding:12px;
-      font-weight:1000;
-      cursor:pointer;
-    }
-
-    .bottomNav{
-      position:fixed;
-      left:0;right:0;bottom:0;
-      z-index:70;
-      padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));
-      background:rgba(3,18,13,.94);
-      border-top:1px solid rgba(255,255,255,.10);
-      backdrop-filter:blur(14px);
-    }
-
-    .bottomInner{
-      max-width:860px;
-      margin:0 auto;
-      display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:4px;
-    }
-
-    .navItem{
-      min-height:54px;
-      border-radius:14px;
-      display:flex;
-      flex-direction:column;
       align-items:center;
       justify-content:center;
-      gap:2px;
-      color:rgba(247,251,248,.72);
-      font-size:.65rem;
+      gap:9px;
+      padding:13px 14px;
+      color:var(--text);
+      font-size:17px;
       font-weight:1000;
-      border:1px solid rgba(255,255,255,.07);
-      background:rgba(255,255,255,.035);
+      text-align:center;
+      box-shadow:0 10px 24px rgba(0,0,0,.13);
     }
 
-    .navItem .ico{font-size:1.25rem;line-height:1}
-    .navItem.active{
-      color:#06140f;
-      background:linear-gradient(135deg,var(--gold),var(--green));
-      border-color:rgba(255,255,255,.18);
+    .btn.primary{
+      color:#052215;
+      border-color:rgba(34,197,94,.38);
+      background:linear-gradient(135deg,#22c55e,#bbf7d0);
     }
 
-    @media(max-width:620px){
-      body{padding-left:10px;padding-right:10px}
-      .top{padding:12px;border-radius:24px}
-      .logo{width:48px;height:48px}
-      .heroAction{grid-template-columns:1fr}
-      .quick{grid-template-columns:1fr}
-      .actionCard{min-height:100px}
-      .todayGrid{grid-template-columns:1fr}
+    .btn.gold{
+      color:#241a0d;
+      border-color:rgba(196,151,63,.38);
+      background:linear-gradient(135deg,#c4973f,#fff0a8);
+    }
+
+    .btn.ghost{
+      color:rgba(240,255,245,.88);
+      background:rgba(255,255,255,.06);
+    }
+
+    .rule{
+      padding:12px 14px;
+      border-radius:18px;
+      border:1px dashed rgba(255,255,255,.22);
+      background:rgba(0,0,0,.14);
+      color:rgba(240,255,245,.86);
+      font-size:14px;
+      font-weight:1000;
+      line-height:1.4;
+    }
+
+    .rule b{color:#fff0a8}
+
+    @media(max-width:540px){
+      body{padding:10px}
+      .door{padding:18px;border-radius:24px}
+      .actions{grid-template-columns:1fr}
+      .btn{font-size:18px}
+      .lead{font-size:16px}
+      .rule{font-size:13px}
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-    <header class="top">
-      <div class="topLine">
-        <div class="brand">
-          <div class="logo">🛒</div>
-          <div>
-            <h1>MON COMMERCE</h1>
-            <div class="sub">Ton comptoir numérique. Va à l’essentiel.</div>
-          </div>
-        </div>
-
-        <button class="menuBtn" id="btnMenu" type="button" aria-label="Menu">☰</button>
-      </div>
-
-      <section class="statusBox" aria-live="polite">
-        <div class="statusMain">
-          <span class="dot" id="statusDot"></span>
-          <span id="statusTitle">Lecture du commerce…</span>
-        </div>
-        <div class="statusSub" id="statusSub">
-          On vérifie ton accès sans exposer tes identifiants.
-        </div>
-        <div class="storeLine">
-          <span class="pill" id="pillStore">🏪 Boutique</span>
-          <span class="pill" id="pillAccess">🔐 Accès</span>
-          <span class="pill" id="pillMode">📱 Mobile</span>
-        </div>
-      </section>
-
-      <div class="heroAction">
-        <a class="btn green" id="btnPrimary" href="./pin.html">💰 Encaisser</a>
-        <a class="btn ghost" id="btnSecondary" href="./pin.html">🔐 Entrer avec mon code</a>
-      </div>
-    </header>
-
-    <main>
-      <section class="quick" aria-label="Actions principales">
-        <a class="actionCard main" id="goCaisse" href="./caisse.html">
-          <div class="actionIcon">💰</div>
-          <div>
-            <div class="actionTitle">Encaisser</div>
-            <div class="actionSub">Panier, sous-total, paiement, trace.</div>
-          </div>
-        </a>
-
-        <a class="actionCard" id="goArticles" href="./admin.html#articleList">
-          <div class="actionIcon">📦</div>
-          <div>
-            <div class="actionTitle">Mes articles</div>
-            <div class="actionSub">Prix, stock, catégories, disponibilité.</div>
-          </div>
-        </a>
-
-        <a class="actionCard" id="goDashboard" href="./dashboard-pro.html">
-          <div class="actionIcon">📊</div>
-          <div>
-            <div class="actionTitle">Tableau du jour</div>
-            <div class="actionSub">Lire les ventes et l’activité.</div>
-          </div>
-        </a>
-
-        <a class="actionCard" id="goProfile" href="./profile.html">
-          <div class="actionIcon">🏪</div>
-          <div>
-            <div class="actionTitle">Ma fiche</div>
-            <div class="actionSub">Ce que le client voit de ton commerce.</div>
-          </div>
-        </a>
-
-        <a class="actionCard" id="goMonArgent" href="https://pro-pay.digiylyfe.com/admin.html">
-          <div class="actionIcon">💰</div>
-          <div>
-            <div class="actionTitle">Mon Argent</div>
-            <div class="actionSub">Entrées, dépenses, ventes — piloter sans cahier.</div>
-          </div>
-        </a>
-
-        <a class="actionCard" id="goActions" href="./actions.html">
-          <div class="actionIcon">⚡</div>
-          <div>
-            <div class="actionTitle">Actions utiles</div>
-            <div class="actionSub">Confirmer, partager, QR, liens rapides.</div>
-          </div>
-        </a>
-      </section>
-
-      <section class="today">
-        <div class="todayTitle">Aujourd’hui</div>
-        <div class="todayGrid">
-          <div class="mini">
-            <div class="miniLabel">Ventes</div>
-            <div class="miniValue" id="todaySales">—</div>
-          </div>
-          <div class="mini">
-            <div class="miniLabel">Stock</div>
-            <div class="miniValue" id="todayStock">À jour</div>
-          </div>
-          <div class="mini">
-            <div class="miniLabel">Argent</div>
-            <div class="miniValue">Direct</div>
-          </div>
-        </div>
-
-        <div class="note">
-          Le marketing reste dehors. Ici, on travaille : encaisser, gérer les articles, suivre le stock, garder la main.
-        </div>
-      </section>
-    </main>
-  </div>
-
-    <section class="payUpsellCard" id="payUpsellSection" style="display:none;">
-      <div class="payUpsellBadge">✦ Nouveau · Mon Argent PAY</div>
-      <div class="payUpsellTitle">💰 Pilote ton commerce à la voix</div>
-      <div class="payUpsellLead">
-        Tu dictes "Vente Wave 25 000" — DIGIY prépare, toi tu valides.
-        Entrées, dépenses, stock payé, net du jour : tout lu proprement sans cahier.
-      </div>
-      <div class="payUpsellPrice">À partir de <strong>4 900 F</strong> · 9 € / mois</div>
-      <a class="payUpsellBtn" id="btnMonArgent" href="#">
-        💰 Activer Mon Argent — Starter
-      </a>
-    </section>
-
-  <aside class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawerPanel">
-      <div class="drawerHead">
-        <div class="drawerTitle">Menu utile</div>
-        <button class="drawerClose" id="btnCloseDrawer" type="button">×</button>
-      </div>
-
-      <div class="drawerList">
-        <a id="menuPin" href="./pin.html">🔐 Mon code d’accès</a>
-        <a id="menuQr" href="./qr.html">🔳 Mon QR</a>
-        <a id="menuPublic" href="https://mon-commerce.digiylyfe.com/">🌍 Côté client</a>
-        <a href="https://tarifs.digiylyfe.com/" target="_blank" rel="noopener">📦 Tarifs</a>
-        <a href="https://digiy-hub.digiylyfe.com/" rel="noopener">🧭 HUB</a>
-        <a href="https://digiylyfe.com/" rel="noopener">🏠 Site DIGIYLYFE</a>
-        <a id="menuPay" href="https://commencer-a-payer.digiylyfe.com/">💳 Je commence</a>
-        <button id="btnCheck" type="button">🔄 Vérifier mon accès</button>
+  <main class="door" aria-label="Entrée MON COMMERCE">
+    <div class="brand">
+      <div class="badge">🛒</div>
+      <div>
+        <div class="kicker">DIGIY PRO · POS</div>
+        <div class="brandTitle">Porte d’entrée</div>
       </div>
     </div>
-  </aside>
 
-  <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
-    <div class="bottomInner">
-      <a class="navItem active" id="navHome" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
-      <a class="navItem" id="navCaisse" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
-      <a class="navItem" id="navArticles" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
-      <a class="navItem" id="navFiche" href="./profile.html"><span class="ico">🏪</span><span>Fiche</span></a>
-      <a class="navItem" id="navActions" href="./actions.html"><span class="ico">⚡</span><span>Actions</span></a>
+    <h1>Entrée courte.<br><span>Direction HUB.</span></h1>
+
+    <p class="lead">
+      Cette page ne porte plus le comptoir.
+      Elle ouvre le HUB commerce ; la vraie caisse reste dans caisse.html.
+    </p>
+
+    <div class="status" id="statusBox">
+      <span class="dot"></span>
+      <span id="statusText">Contrôle du HUB commerce…</span>
     </div>
-  </nav>
+
+    <div class="actions">
+      <button class="btn primary" id="btnHub" type="button">🧭 Ouvrir le HUB</button>
+      <a class="btn gold" id="btnCaisse" href="./caisse.html">💰 Caisse</a>
+      <a class="btn ghost" id="btnArticles" href="./admin.html#articleList">📦 Articles</a>
+      <a class="btn ghost" id="btnPin" href="./pin.html">🔐 Accès</a>
+    </div>
+
+    <div class="rule">
+      Ordre propre : poser <b>hub.html</b>, puis poser cet <b>index.html</b>.
+      Si le HUB manque, cette porte ne force pas un 404.
+    </div>
+  </main>
 
   <script>
     (() => {
       "use strict";
 
-      const MODULE = "POS";
-      const ALLOWED_MODULES = ["POS", "pos", "POS_PRO", "COMMERCE", "CAISSE", "MON_COMMERCE"];
-      const ALLOWED_SLUG_PREFIXES = ["pos-", "commerce-", "mon-commerce-", "caisse-"];
-      const FORBIDDEN_SLUG_PREFIXES = ["loc-", "explore-", "driver-", "market-", "build-", "jobs-", "resa-", "pay-"];
-
-      const URLS = {
-        home: digiyLocal("index.html"),
-        caisse: digiyLocal("caisse.html"),
-        admin: digiyLocal("admin.html"),
-        articles: digiyLocal("admin.html#articleList"),
-        dashboard: digiyLocal("dashboard-pro.html"),
-        profile: digiyLocal("profile.html"),
-        pin: digiyLocal("pin.html"),
-        qr: digiyLocal("qr.html"),
-        public: "https://mon-commerce.digiylyfe.com/",
-        actions: digiyLocal("actions.html"),
-        monArgent: "https://pro-pay.digiylyfe.com/admin.html",
-        pay: "https://commencer-a-payer.digiylyfe.com/"
+      const ROUTES = {
+        hub:"./hub.html",
+        caisse:"./caisse.html",
+        articles:"./admin.html#articleList",
+        pin:"./pin.html"
       };
 
-      const SUPPORT_PHONE = "221771342889";
-      const SUPABASE_URL = String(window.DIGIY_SUPABASE_URL || "").trim();
-      const SUPABASE_ANON_KEY = String(window.DIGIY_SUPABASE_ANON_KEY || window.DIGIY_SUPABASE_ANON || "").trim();
-
-      const sb =
-        window.supabase &&
-        typeof window.supabase.createClient === "function" &&
-        SUPABASE_URL &&
-        SUPABASE_ANON_KEY
-          ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-              auth: {
-                persistSession:false,
-                autoRefreshToken:false,
-                detectSessionInUrl:false
-              }
-            })
-          : null;
-
-      const state = {
-        slug:"",
-        phone:"",
-        access:false,
-        storeName:"",
-        plan:""
-      };
+      const SENSITIVE_KEYS = [
+        "phone","tel","p_phone","owner_phone","subscription_phone","checkout_phone",
+        "pin","pin4","token","session_token","slug","module","return","redirect",
+        "redirect_url","url","from","v"
+      ];
 
       const $ = (id) => document.getElementById(id);
-
-      function normPhone(v){
-        return String(v || "").replace(/[^\d]/g, "");
-      }
-
-      function normSlug(v){
-        return String(v || "").trim().toLowerCase();
-      }
-
-      function isForbiddenSlug(value){
-        const s = normSlug(value);
-        return !!s && FORBIDDEN_SLUG_PREFIXES.some((prefix) => s.startsWith(prefix));
-      }
-
-      function isPosSlug(value){
-        const s = normSlug(value);
-        if(!s || isForbiddenSlug(s)) return false;
-        return ALLOWED_SLUG_PREFIXES.some((prefix) => s.startsWith(prefix));
-      }
-
-      function isAllowedModule(value){
-        const raw = String(value || "").trim().toUpperCase();
-        return ALLOWED_MODULES.some((m) => String(m).toUpperCase() === raw);
-      }
-
-      function getParam(name){
-        try{ return new URL(location.href).searchParams.get(name) || ""; }
-        catch(_){ return ""; }
-      }
-
-      function getGuardState(){
-        return window.DIGIY_GUARD?.state || {};
-      }
-
-      function rememberFromUrlBeforeClean(){
-        const slug = normSlug(getParam("slug"));
-        const phone = normPhone(
-          getParam("phone") ||
-          getParam("tel") ||
-          getParam("owner_phone") ||
-          getParam("subscription_phone") ||
-          getParam("checkout_phone") ||
-          getParam("p_phone")
-        );
-
-        try{
-          if(slug && isPosSlug(slug)){
-            sessionStorage.setItem("digiy_pos_last_slug", slug);
-            localStorage.setItem("digiy_pos_last_slug", slug);
-          }
-          if(phone){
-            sessionStorage.setItem("digiy_pos_last_phone", phone);
-            localStorage.setItem("digiy_pos_last_phone", phone);
-          }
-        }catch(_){}
-      }
+      let hubAvailable = false;
 
       function cleanVisibleUrl(){
         try{
-          const u = new URL(location.href);
+          const url = new URL(location.href);
           let changed = false;
 
-          [
-            "slug","phone","tel","module","owner_phone","subscription_phone",
-            "checkout_phone","p_phone","pin","pin4","token","session_token"
-          ].forEach((key) => {
-            if(u.searchParams.has(key)){
-              u.searchParams.delete(key);
+          SENSITIVE_KEYS.forEach((key) => {
+            if(url.searchParams.has(key)){
+              url.searchParams.delete(key);
               changed = true;
             }
           });
 
           if(changed){
-            history.replaceState({}, document.title, u.pathname + u.hash);
+            history.replaceState({}, document.title, url.pathname + url.search + url.hash);
           }
         }catch(_){}
       }
 
-      function stored(key){
-        try{ return sessionStorage.getItem(key) || localStorage.getItem(key) || ""; }
-        catch(_){ return ""; }
-      }
-
-      function getStoredSlug(){
-        const gs = getGuardState();
-        const candidate = normSlug(gs.slug || stored("digiy_pos_last_slug") || "");
-        return isPosSlug(candidate) ? candidate : "";
-      }
-
-      function getStoredPhone(){
-        const gs = getGuardState();
-        return normPhone(gs.phone || stored("digiy_pos_last_phone") || "");
-      }
-
-      function remember(slug, phone){
+      function cleanInternalLinks(){
         try{
-          const s = normSlug(slug);
-          if(s && isPosSlug(s)){
-            sessionStorage.setItem("digiy_pos_last_slug", s);
-            localStorage.setItem("digiy_pos_last_slug", s);
-          }
-          if(phone){
-            sessionStorage.setItem("digiy_pos_last_phone", phone);
-            localStorage.setItem("digiy_pos_last_phone", phone);
-          }
+          document.querySelectorAll("a[href]").forEach((link) => {
+            const href = link.getAttribute("href") || "";
+            if(!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+
+            const url = new URL(href, location.href);
+            if(url.origin !== location.origin) return;
+
+            SENSITIVE_KEYS.forEach((key) => url.searchParams.delete(key));
+
+            const file = url.pathname.split("/").pop() || "index.html";
+            link.setAttribute("href","./" + file + (url.search || "") + (url.hash || ""));
+          });
         }catch(_){}
       }
 
-      function localClean(path){
+      function setStatus(text, kind){
+        const box = $("statusBox");
+        const el = $("statusText");
+        if(el) el.textContent = text;
+        if(box) box.className = kind ? "status " + kind : "status";
+      }
+
+      function safeGo(path){
         try{
-          const u = new URL(path, location.href);
-          u.search = "";
-          return u.pathname + u.hash;
+          const url = new URL(path, location.href);
+          SENSITIVE_KEYS.forEach((key) => url.searchParams.delete(key));
+          const file = url.pathname.split("/").pop() || "index.html";
+          location.href = "./" + file + (url.search || "") + (url.hash || "");
         }catch(_){
-          return path;
+          location.href = path;
         }
       }
 
-      function wireLinks(){
-        const map = {
-          btnPrimary: state.access ? URLS.caisse : URLS.pin,
-          btnSecondary: state.access ? URLS.dashboard : URLS.pin,
-          goCaisse: URLS.caisse,
-          goArticles: URLS.articles,
-          goDashboard: URLS.dashboard,
-          goProfile: URLS.profile,
-          navHome: URLS.home,
-          navCaisse: URLS.caisse,
-          navArticles: URLS.articles,
-          navFiche: URLS.profile,
-          navActions: URLS.actions,
-          goMonArgent: URLS.monArgent,
-          goActions: URLS.actions,
-          menuPin: URLS.pin,
-          menuQr: URLS.qr,
-          menuPublic: URLS.public,
-          menuPay: URLS.pay
-        };
-
-        Object.entries(map).forEach(([id, href]) => {
-          const el = $(id);
-          if(el && el.tagName === "A") el.href = localClean(href);
-        });
-
-        const btnPrimary = $("btnPrimary");
-        const btnSecondary = $("btnSecondary");
-
-        if(state.access){
-          if(btnPrimary) btnPrimary.textContent = "💰 Encaisser";
-          if(btnSecondary) btnSecondary.textContent = "📊 Tableau du jour";
-        }else{
-          if(btnPrimary) btnPrimary.textContent = "🔐 Entrer avec mon code";
-          if(btnSecondary) btnSecondary.textContent = "💳 Je commence";
-          if(btnSecondary) btnSecondary.href = URLS.pay;
-        }
-      }
-
-      function setStatus(kind, title, sub){
-        const dot = $("statusDot");
-        if(dot){
-          dot.className = kind === "ok" ? "dot ok" : kind === "bad" ? "dot bad" : "dot";
-        }
-
-        if($("statusTitle")) $("statusTitle").textContent = title;
-        if($("statusSub")) $("statusSub").textContent = sub;
-      }
-
-      function paint(){
-        if($("pillStore")){
-          $("pillStore").textContent = state.storeName ? "🏪 " + state.storeName : "🏪 Boutique";
-          $("pillStore").className = state.storeName ? "pill ok" : "pill";
-        }
-
-        if($("pillAccess")){
-          $("pillAccess").textContent = state.access ? "✅ Accès ouvert" : "🔐 Accès à ouvrir";
-          $("pillAccess").className = state.access ? "pill ok" : "pill";
-        }
-
-        if($("pillMode")){
-          $("pillMode").textContent = state.slug || state.phone ? "👤 Compte reconnu" : "📱 Mode comptoir";
-        }
-
-        if($("todaySales")) $("todaySales").textContent = state.access ? "Ouvrir" : "—";
-
-        wireLinks();
-      }
-
-      async function bootGuardSoft(){
+      async function checkHub(){
         try{
-          const ready = window.DIGIY_GUARD?.ready;
-          if(!ready) return;
-
-          if(typeof ready === "function"){
-            try{
-              await ready({
-                redirect:false,
-                preserve_validation:true,
-                allow_soft_session:true
-              });
-            }catch(_){
-              await ready();
-            }
-          }else{
-            await ready;
-          }
-        }catch(_){}
-      }
-
-      async function resolvePhoneFromSlug(slug){
-        const s = normSlug(slug);
-        if(!sb || !s || !isPosSlug(s)) return "";
-
-        for(const moduleName of ALLOWED_MODULES){
-          try{
-            const { data, error } = await sb
-              .from("digiy_subscriptions_public")
-              .select("phone,module,slug")
-              .eq("slug", s)
-              .eq("module", moduleName)
-              .limit(1)
-              .maybeSingle();
-
-            if(error) continue;
-            if(data && isAllowedModule(data.module) && isPosSlug(data.slug)){
-              return normPhone(data.phone || "");
-            }
-          }catch(_){}
-        }
-
-        return "";
-      }
-
-      async function rpcFirstSuccess(name, payloads){
-        if(!sb) throw new Error("supabase_not_ready");
-
-        let lastError = null;
-
-        for(const payload of payloads){
-          try{
-            const { data, error } = await sb.rpc(name, payload);
-            if(error){
-              lastError = error;
-              continue;
-            }
-            return data;
-          }catch(err){
-            lastError = err;
-          }
-        }
-
-        throw lastError || new Error("RPC échouée");
-      }
-
-      async function getAccess(phone){
-        if(!phone || !sb) return false;
-
-        const payloads = [];
-        ALLOWED_MODULES.forEach((moduleName) => {
-          payloads.push({ p_phone:phone, p_module:moduleName });
-          payloads.push({ phone, module:moduleName });
-        });
-
-        try{
-          const res = await rpcFirstSuccess("digiy_has_access", payloads);
-
-          if(typeof res === "boolean") return res;
-          if(res && typeof res.ok === "boolean") return res.ok;
-          if(res && typeof res.has_access === "boolean") return res.has_access;
-          if(res && typeof res.allowed === "boolean") return res.allowed;
-          if(res && typeof res.access === "boolean") return res.access;
-
-          return !!res;
+          const res = await fetch(ROUTES.hub + "?check=" + Date.now(), {
+            method:"HEAD",
+            cache:"no-store"
+          });
+          return !!(res && res.ok);
         }catch(_){
           return false;
         }
       }
 
-      async function getStoreContext(slug){
-        const s = normSlug(slug);
-        if(!s || !sb) return null;
-
-        const attempts = [
-          ["pos_get_store_context_by_slug", [{ p_slug:s }, { slug:s }]],
-          ["digiy_pos_get_store_context_by_slug", [{ p_slug:s }, { slug:s }]]
-        ];
-
-        for(const [name, payloads] of attempts){
-          try{
-            const data = await rpcFirstSuccess(name, payloads);
-            if(data) return data;
-          }catch(_){}
-        }
-
-        return null;
-      }
-
-      function pickStoreName(ctx){
-        return String(
-          ctx?.shop_name ||
-          ctx?.display_name ||
-          ctx?.store?.name ||
-          ctx?.store?.shop_name ||
-          ctx?.profile?.display_name ||
-          ctx?.profile?.shop_name ||
-          ""
-        ).trim();
-      }
-
-      async function hydrate(){
-        rememberFromUrlBeforeClean();
+      async function boot(){
         cleanVisibleUrl();
+        cleanInternalLinks();
 
-        state.slug = getStoredSlug();
-        state.phone = getStoredPhone();
+        hubAvailable = await checkHub();
 
-        if(!state.slug && !state.phone){
-          setStatus(
-            "warn",
-            "Mode comptoir",
-            "Entre avec ton code pour ouvrir ta boutique. Ici, on va droit au travail."
-          );
-          state.access = false;
-          state.storeName = "";
-          paint();
+        if(hubAvailable){
+          setStatus("HUB commerce trouvé. Ouverture propre…", "ok");
+          window.setTimeout(() => safeGo(ROUTES.hub), 550);
           return;
         }
 
-        setStatus("warn", "Compte reconnu", "Contrôle de l’accès commerce…");
-        paint();
-
-        if(state.slug && !state.phone){
-          state.phone = await resolvePhoneFromSlug(state.slug);
-        }
-
-        if(state.slug){
-          const ctx = await getStoreContext(state.slug);
-          state.storeName = pickStoreName(ctx) || "Boutique reconnue";
-        }
-
-        state.access = await getAccess(state.phone);
-        remember(state.slug, state.phone);
-
-        if(state.access){
-          setStatus(
-            "ok",
-            "Accès ouvert",
-            "Ta boutique est prête. Encaisse, gère tes articles, lis ta journée."
-          );
-        }else{
-          setStatus(
-            "warn",
-            "Accès à ouvrir",
-            "Compte reconnu. Entre avec ton code ou active ton abonnement pour travailler."
-          );
-        }
-
-        paint();
-
-        // Vérif PAY async après session chargée
-        if(state.phone){
-          checkPayAccess().then(applyPayAccess);
-        }
+        setStatus("HUB commerce introuvable : hub.html n’est pas encore posé. Aucun 404 forcé.", "bad");
       }
 
-      function bindDrawer(){
-        const drawer = $("drawer");
-        const btnMenu = $("btnMenu");
-        const btnClose = $("btnCloseDrawer");
-
-        function open(){
-          if(!drawer) return;
-          drawer.classList.add("show");
-          drawer.setAttribute("aria-hidden","false");
+      $("btnHub")?.addEventListener("click", () => {
+        if(hubAvailable){
+          safeGo(ROUTES.hub);
+          return;
         }
+        setStatus("Impossible d’ouvrir : pose d’abord le fichier hub.html dans le dépôt.", "bad");
+      });
 
-        function close(){
-          if(!drawer) return;
-          drawer.classList.remove("show");
-          drawer.setAttribute("aria-hidden","true");
-        }
+      $("btnCaisse")?.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        safeGo(ROUTES.caisse);
+      });
 
-        btnMenu?.addEventListener("click", open);
-        btnClose?.addEventListener("click", close);
+      $("btnArticles")?.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        safeGo(ROUTES.articles);
+      });
 
-        drawer?.addEventListener("click", (e) => {
-          if(e.target === drawer) close();
-        });
+      $("btnPin")?.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        safeGo(ROUTES.pin);
+      });
 
-        document.addEventListener("keydown", (e) => {
-          if(e.key === "Escape") close();
-        });
-      }
-
-      function bind(){
-        bindDrawer();
-
-        $("btnCheck")?.addEventListener("click", async () => {
-          const btn = $("btnCheck");
-          const old = btn.textContent;
-          btn.disabled = true;
-          btn.textContent = "Contrôle…";
-          try{
-            await hydrate();
-          }finally{
-            btn.disabled = false;
-            btn.textContent = old;
-          }
-        });
-      }
-
-      // ── PAY upsell ──────────────────────────────────────────
-      const PAY_COCKPIT_URL = "https://pay.digiylyfe.com/cockpit.html";
-
-      function buildPayUpsellUrl(){
-        const u = new URL(URLS.pay);
-        u.searchParams.set("module", "PAY");
-        u.searchParams.set("plan", "9A");
-        u.searchParams.set("from", "pos");
-        if(state.slug) u.searchParams.set("slug", state.slug);
-        u.searchParams.set("return", location.href.split("?")[0]);
-        return u.toString();
-      }
-
-      async function checkPayAccess(){
-        if(!sb || !state.phone) return false;
-        try{
-          const { data, error } = await sb.rpc("digiy_check_module_access",{
-            p_phone: state.phone,
-            p_module: "PAY"
-          });
-          if(error) return false;
-          return data === true;
-        }catch(_){ return false; }
-      }
-
-      function applyPayAccess(hasPayAccess){
-        const card   = document.getElementById("payUpsellSection");
-        const btn    = document.getElementById("btnMonArgent");
-        const drawer = document.getElementById("menuPay");
-
-        if(hasPayAccess){
-          // PAY actif → carte cachée, menu pointe sur cockpit PAY
-          if(card) card.style.display = "none";
-          const url = PAY_COCKPIT_URL + (state.slug ? "?slug=" + encodeURIComponent(state.slug) : "");
-          if(btn){ btn.href = url; btn.textContent = "💰 Ouvrir Mon Argent"; }
-          if(drawer){ drawer.href = url; drawer.textContent = "💰 Mon Argent — Cockpit"; }
-        } else {
-          // PAY non actif → carte visible
-          if(card) card.style.display = "";
-          const url = buildPayUpsellUrl();
-          if(btn) btn.href = url;
-          if(drawer){ drawer.href = url; drawer.textContent = "💰 Activer Mon Argent"; }
-        }
-      }
-
-      async function init(){
-        wireLinks();
-        paint();
-        bind();
-        await bootGuardSoft();
-        await hydrate();
-      }
-
-      init();
+      boot();
     })();
   </script>
 </body>
 </html>
+
 
 
 
