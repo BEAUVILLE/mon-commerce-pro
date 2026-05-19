@@ -4,7 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#06140f"/>
-  <title>MON COMMERCE — Ma fiche commerce · moule universel</title>
+  <title>MON COMMERCE — Ma fiche commerce · moule propre</title>
+  <meta name="digiy-build" content="pos-profile-moule-safe-20260519"/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -430,7 +431,7 @@
 
       <div class="quick">
         <a class="primary" href="#publicCard">🏪 Réglage</a>
-        <a href="./confirme-pro.html">✅ Confirmer</a>
+        <a href="./hub.html">🧭 HUB</a>
         <a href="./qr.html">🔳 QR</a>
         <button id="btnNotice" type="button">🎧 Notice</button>
       </div>
@@ -444,7 +445,7 @@
         <div class="formGrid">
           <div class="field">
             <label for="display_name">Nom visible</label>
-            <input id="display_name" placeholder="Ex : Astou Boutique"/>
+            <input id="display_name" placeholder="Ex : Ma Boutique"/>
           </div>
 
           <div class="field">
@@ -466,7 +467,7 @@
         <div class="formGrid">
           <div class="field">
             <label for="city">Ville / zone</label>
-            <input id="city" placeholder="Ex : Saly, Dakar, Thiès"/>
+            <input id="city" placeholder="Ex : ville, quartier, zone"/>
           </div>
 
           <div class="field">
@@ -478,7 +479,7 @@
         <div class="formGrid">
           <div class="field">
             <label for="whatsapp">WhatsApp client</label>
-            <input id="whatsapp" inputmode="numeric" placeholder="Ex : 221778765785"/>
+            <input id="whatsapp" inputmode="numeric" placeholder="Ex : indicatif + numéro WhatsApp"/>
           </div>
 
           <div class="field">
@@ -495,7 +496,7 @@
 
         <div class="field">
           <label for="bio">Description courte</label>
-          <textarea id="bio" placeholder="Ex : Boutique à Saly · textile maison, plage, hôtel, beauté et produits utiles du quotidien."></textarea>
+          <textarea id="bio" placeholder="Ex : Commerce local · produits utiles, accueil direct, contact simple et fiche publique DIGIY."></textarea>
         </div>
 
         <div class="field">
@@ -518,7 +519,7 @@
         <div class="formGrid">
           <div class="field">
             <label for="url2">URL 2</label>
-            <input id="url2" placeholder="https://astou-boutique.digiylyfe.com/"/>
+            <input id="url2" placeholder="https://mon-commerce.digiylyfe.com/"/>
           </div>
 
           <div class="field">
@@ -530,7 +531,7 @@
         <div class="formGrid">
           <div class="field">
             <label for="url3">URL 3</label>
-            <input id="url3" placeholder="https://market.digiylyfe.com/?commerce=astou-boutique"/>
+            <input id="url3" placeholder="https://market.digiylyfe.com/"/>
           </div>
 
           <div class="field">
@@ -540,7 +541,7 @@
         </div>
 
         <div class="field">
-          <label>QR visible sur la fiche Astou</label>
+          <label>QR visible sur la fiche publique</label>
           <div class="hint">
             Le QR doit ouvrir la fiche publique, jamais le domaine PRO.
             Le code force automatiquement <strong>mon-commerce.digiylyfe.com</strong> et garde le pro maître de son lien.
@@ -657,11 +658,11 @@
 
 <nav class="bottomNav" aria-label="Navigation MON COMMERCE">
   <div class="bottomInner">
-    <a class="navItem" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
+    <a class="navItem" href="./hub.html"><span class="ico">🧭</span><span>HUB</span></a>
     <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
     <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
     <a class="navItem active" href="./profile.html"><span class="ico">🏪</span><span>Réglage</span></a>
-    <a class="navItem" href="./confirme-pro.html"><span class="ico">✅</span><span>Confirmer</span></a>
+    <a class="navItem" href="./session.html"><span class="ico">🛡️</span><span>Session</span></a>
   </div>
 </nav>
 
@@ -743,7 +744,7 @@
     if(!raw) return defaultPublicUrl();
 
     return raw
-      .replace(/https?:\/\/mon-commerce-pro\.digiylyfe\.com\/fiche-astou\.html/gi, ASTOU_PUBLIC)
+      .replace(/https?:\/\/mon-commerce-pro\.digiylyfe\.com\/[^\s\"']*/gi, defaultPublicUrl())
       .replace(/mon-commerce-pro\.digiylyfe\.com/gi, "mon-commerce.digiylyfe.com");
   }
 
@@ -752,7 +753,6 @@
     if(!raw) return defaultQrImage();
 
     return raw
-      .replace(/mon-commerce-pro\.digiylyfe\.com/gi, "mon-commerce.digiylyfe.com")
       .replace(/mon-commerce-pro\.digiylyfe\.com/gi, "mon-commerce.digiylyfe.com");
   }
 
@@ -836,7 +836,7 @@
         });
       }
 
-      ["slug","commerce","phone","tel","owner_phone","p_phone","pin","pin4","token","session_token","module"].forEach(k=>{
+      ["slug","commerce","phone","tel","owner_phone","p_phone","subscription_phone","checkout_phone","owner_id","pin","pin4","token","session_token","module","return","redirect","redirect_url","url","from","v"].forEach(k=>{
         if(u.searchParams.has(k)){
           u.searchParams.delete(k);
           changed = true;
@@ -1119,7 +1119,7 @@
       localStorage.setItem("digiy_pos_address", d.address || "");
       localStorage.setItem("digiy_pos_hours", d.hours || "");
       localStorage.setItem("digiy_pos_description", d.bio || "");
-      localStorage.setItem("digiy_pos_phone", d.whatsapp || phone || "");
+      localStorage.setItem("digiy_pos_public_whatsapp", d.whatsapp || "");
       saveCaisseShop(d);
     }catch(_){}
   }
@@ -1160,7 +1160,7 @@
     }
 
     if(d.qr_image_url && !validImagePath(d.qr_image_url)){
-      setStatus("saveBox","L’image QR doit être une URL https://, ./qr-astou.png ou /qr-astou.png","err");
+      setStatus("saveBox","L’image QR doit être une URL https://, ./qr-commerce.png ou /qr-commerce.png","err");
       $("qr_image_url").focus();
       return;
     }
@@ -1198,7 +1198,7 @@
     const whatsapp = normPhone($("whatsapp").value);
     const address = safe($("address").value);
     const hours = safe($("hours").value);
-    const bio = safe($("bio").value) || "Boutique à Saly · textile maison, plage, hôtel, beauté et produits utiles du quotidien.";
+    const bio = safe($("bio").value) || "Commerce local · produits utiles, accueil direct, contact simple et fiche publique DIGIY.";
     const published = $("is_published").value === "true";
 
     const links = [
@@ -1329,7 +1329,7 @@
     "Famille : choisis la catégorie qui correspond le mieux. Boutique, Alimentation, Beauté, Mode, Services.",
     "Ville ou zone : indique où tu es. Par exemple : Saly, Ngaparou, Somone, Mbour.",
     "Repère : dis comment te trouver. Par exemple : près de la pharmacie, route principale, face à l'hôtel.",
-    "WhatsApp client : ton numéro avec l'indicatif pays. Commence par 221 pour le Sénégal. Le client pourra te contacter directement depuis la fiche.",
+    "WhatsApp client : ton numéro public avec l'indicatif pays, si tu veux être contacté directement depuis la fiche.",
     "Horaires : quand tu es ouvert. Par exemple : huit heures à vingt-deux heures.",
     "Photo vitrine : si tu as une photo de ton commerce disponible sur Internet, colle son adresse ici. Elle doit commencer par h-t-t-p-s.",
     "Description : deux ou trois phrases pour expliquer ce que tu vends. Par exemple : commerce à Saly, produits utiles du quotidien et contact direct.",
@@ -1415,37 +1415,6 @@
   }
 
   window.speakProfileGuide = speakProfileGuide;
-
-  init();
-})();
-</script>
-
-<button id="btnProfileGuide" onclick="speakProfileGuide()">🎧 Mode d’emploi</button>
-</body>
-</html>
-
-    await bootGuard();
-    readStorage();
-
-    if(!slug && !phone){
-      setStatus("statusBox","Compte non reconnu. Passe par ton code d’accès.","err");
-      setTimeout(()=>{
-        location.href = "./pin.html";
-      },900);
-      reveal();
-      return;
-    }
-
-    setStatus("statusBox","Compte reconnu. Les identifiants restent cachés.","ok");
-
-    await loadProfile();
-
-    $("qr_target_url").value = forcePublicUrl($("qr_target_url").value || ASTOU_PUBLIC);
-    $("qr_image_url").value = forceQrImage($("qr_image_url").value || ASTOU_QR_IMAGE);
-
-    render();
-    reveal();
-  }
 
   init();
 })();
