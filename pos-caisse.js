@@ -1,0 +1,884 @@
+/* DIGIY — caisse : clic prioritaire, écrit en secours, stats locales. */
+let cart = [];
+let selCat = "Tous";
+let selPay_ = "esp";
+let _toastTimer = null;
+
+
+/* DIGIY POS — PROFIL MÉTIER
+   Le moule caisse.html reste universel.
+   POS_PROFILE sert seulement d’exemple volontaire : vocabulaire, produits de départ, phrases, synonymes.
+   Le moule ne charge plus automatiquement les marchandises. Le pro garde la main.
+*/
+const POS_PROFILE = window.POS_PROFILE || {
+  profileName: "Boutique Linge & Style",
+  productLabel: "Marchandise",
+  productLabelPlural: "Marchandises",
+  customerLabel: "Cliente",
+  customerLabelPlural: "Clientes",
+  noteLabel: "Note cliente",
+  starterProducts: [
+    {id:1, name:"Drap 2 places", cat:"Linge de maison", emoji:"🛏️", price:15000, stock:10},
+    {id:2, name:"Drap 1 place", cat:"Linge de maison", emoji:"🛏️", price:9000, stock:12},
+    {id:3, name:"Serviette bain", cat:"Serviettes", emoji:"🧺", price:5000, stock:20},
+    {id:4, name:"Serviette plage", cat:"Serviettes", emoji:"🏖️", price:7000, stock:16},
+    {id:5, name:"Fouta", cat:"Serviettes", emoji:"🌊", price:8000, stock:18},
+    {id:6, name:"Robe stylée", cat:"Robes", emoji:"👗", price:18000, stock:8},
+    {id:7, name:"Robe plage", cat:"Robes", emoji:"👗", price:12000, stock:10},
+    {id:8, name:"Tenue femme", cat:"Tenues", emoji:"✨", price:25000, stock:6},
+    {id:9, name:"Parure lit", cat:"Linge de maison", emoji:"🛌", price:22000, stock:7},
+    {id:10, name:"Coussin déco", cat:"Déco maison", emoji:"🛋️", price:6000, stock:14},
+    {id:11, name:"Nappe maison", cat:"Déco maison", emoji:"🍽️", price:10000, stock:9},
+    {id:12, name:"Crème beauté", cat:"Beauté", emoji:"🧴", price:3500, stock:15}
+  ],
+  trainingPhrases: [
+    "robe stylée 1 à 18000",
+    "2 serviettes bain à 5000",
+    "drap 2 places 1 à 15000",
+    "fouta 3 à 8000",
+    "parure lit 1 à 22000",
+    "ajoute 12 serviettes bain à 5000",
+    "Awa doit 10000 pour robe stylée",
+    "note couleur bleue taille M",
+    "va aux stats",
+    "ouvre les marchandises",
+    "nouvelle vente"
+  ],
+  aliases: [
+    "article = marchandise",
+    "articles = marchandises",
+    "serviettes = serviette",
+    "robes = robe",
+    "draps = drap",
+    "foutas = fouta",
+    "parures = parure",
+    "deux = 2",
+    "trois = 3",
+    "quatre = 4",
+    "bleu = bleue",
+    "taille moyenne = taille M",
+    "stat = stats",
+    "statistique = stats"
+  ]
+};
+
+function profileWord(label, fallback){
+  try{return (POS_PROFILE && POS_PROFILE[label]) || fallback}catch(_){return fallback}
+}
+
+function profileAliasPairs(){
+  try{
+    return (POS_PROFILE.aliases||[]).map(x=>{
+      const p=String(x).split("=");
+      return p.length>=2 ? {from:p[0].trim(), to:p.slice(1).join("=").trim()} : null;
+    }).filter(Boolean);
+  }catch(_){return[]}
+}
+
+function applyProfileAliasesText(value){
+  let s=String(value||"");
+  profileAliasPairs().forEach(pair=>{
+    if(!pair.from || !pair.to)return;
+    const safe=pair.from.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+    s=s.replace(new RegExp("\\b"+safe+"\\b","gi"), pair.to);
+  });
+  return s;
+}
+
+function profileDefaultProducts(){
+  const items=(POS_PROFILE && Array.isArray(POS_PROFILE.starterProducts)) ? POS_PROFILE.starterProducts : [];
+  return items.map((p,i)=>({
+    id:Number(p.id)||i+1,
+    source_id:p.source_id||"profile",
+    name:p.name||profileWord("productLabel","Article"),
+    cat:p.cat||p.category||"Autres",
+    emoji:p.emoji||"📦",
+    price:Number(p.price||p.price_xof||0),
+    stock:Number(p.stock||p.stock_qty||0),
+    published:p.published!==false
+  }));
+}
+
+function resetProductsFromProfile(){
+  if(!confirm("Charger un exemple métier ? Cela remplace les marchandises gardées sur ce téléphone."))return;
+  saveJSON("caisse_prods", profileDefaultProducts());
+  selCat="Tous";
+  buildCats();
+  renderProds();
+  updateProfileLabels();
+  showToast("Exemple métier chargé");
+}
+
+window.POS_PROFILE=POS_PROFILE;
+window.applyProfileAliasesText=applyProfileAliasesText;
+window.profileWord=profileWord;
+window.resetProductsFromProfile=resetProductsFromProfile;
+
+function updateProfileLabels(){
+  const product=profileWord("productLabel","Article");
+  const products=profileWord("productLabelPlural","Marchandises");
+  const customer=profileWord("customerLabel","Client");
+  const note=profileWord("noteLabel","Note");
+
+  const search=document.getElementById("searchInput");
+  if(search)search.placeholder="Chercher une "+product.toLowerCase()+"…";
+
+  const clientInput=document.getElementById("clientInput");
+  if(clientInput)clientInput.placeholder="Nom du "+customer.toLowerCase()+" (optionnel)";
+
+  document.querySelectorAll("[data-products-label]").forEach(el=>el.textContent=products);
+  document.querySelectorAll("[data-product-label]").forEach(el=>el.textContent=product);
+  document.querySelectorAll("[data-customer-label]").forEach(el=>el.textContent=customer);
+  document.querySelectorAll("[data-note-label]").forEach(el=>el.textContent=note);
+
+  document.querySelectorAll('a[href="./admin.html"]').forEach(a=>{
+    if(a.textContent.includes("Articles")||a.textContent.includes("Marchandises"))a.innerHTML="📦 <span data-products-label>"+products+"</span>";
+  });
+
+  const sections=[...document.querySelectorAll(".section-title")];
+  sections.forEach(el=>{
+    if(el.textContent.trim()==="Articles"||el.textContent.trim()==="Marchandises")el.innerHTML='<span data-products-label>'+products+'</span>';
+    if(el.textContent.trim()==="Top articles")el.textContent="Top "+products.toLowerCase();
+    if(el.textContent.trim()==="Client")el.innerHTML='<span data-customer-label>'+customer+'</span>';
+  });
+}
+
+// Exemple volontaire uniquement : jamais chargé automatiquement.
+const DEFAULT_PRODUCTS = profileDefaultProducts();
+
+const LEGACY_DEFAULT_PRODUCTS = [
+  {id:1,name:"Riz 5 kg",cat:"Alimentation",emoji:"🌾",price:3500,stock:50},
+  {id:2,name:"Huile 1 L",cat:"Alimentation",emoji:"🫙",price:1500,stock:30},
+  {id:3,name:"Pain",cat:"Alimentation",emoji:"🍞",price:250,stock:20},
+  {id:4,name:"Sucre 1 kg",cat:"Alimentation",emoji:"🍬",price:800,stock:40},
+  {id:5,name:"Lait poudre",cat:"Alimentation",emoji:"🥛",price:2200,stock:15},
+  {id:6,name:"Oeufs x6",cat:"Alimentation",emoji:"🥚",price:1200,stock:25},
+  {id:7,name:"Eau 1,5 L",cat:"Boissons",emoji:"💧",price:500,stock:60},
+  {id:8,name:"Jus Bissap",cat:"Boissons",emoji:"🍹",price:700,stock:20},
+  {id:9,name:"Coca Cola",cat:"Boissons",emoji:"🥤",price:800,stock:24},
+  {id:10,name:"Café soluble",cat:"Boissons",emoji:"☕",price:1000,stock:18},
+  {id:11,name:"Savon",cat:"Hygiène",emoji:"🧼",price:400,stock:35},
+  {id:12,name:"Dentifrice",cat:"Hygiène",emoji:"🪥",price:1200,stock:15},
+  {id:13,name:"Déodorant",cat:"Hygiène",emoji:"🧴",price:1800,stock:10},
+  {id:14,name:"Papier WC x4",cat:"Hygiène",emoji:"🧻",price:1500,stock:20},
+  {id:15,name:"Allumettes",cat:"Maison",emoji:"🔥",price:150,stock:80},
+  {id:16,name:"Bougie",cat:"Maison",emoji:"🕯️",price:500,stock:30},
+  {id:17,name:"Lessive 1 kg",cat:"Maison",emoji:"🧺",price:1800,stock:20},
+  {id:18,name:"Biscuits",cat:"Snacks",emoji:"🍪",price:500,stock:40},
+  {id:19,name:"Chips",cat:"Snacks",emoji:"🥔",price:400,stock:35},
+  {id:20,name:"Cacahuètes",cat:"Snacks",emoji:"🥜",price:300,stock:50}
+];
+
+
+function cleanVisibleUrl(){
+  try{
+    const u=new URL(location.href);
+    let dirty=false;
+    ["phone","tel","owner_phone","p_phone","subscription_phone","checkout_phone","owner_id","slug","pin","pin4","token","session_token","module","return","redirect","redirect_url","url","from","v"].forEach(k=>{
+      if(u.searchParams.has(k)){u.searchParams.delete(k);dirty=true}
+    });
+    if(dirty)history.replaceState({},document.title,u.pathname+u.search+u.hash);
+  }catch(e){}
+}
+
+function readJSON(key,fallback){try{const d=localStorage.getItem(key);return d?JSON.parse(d):fallback}catch(e){return fallback}}
+function saveJSON(key,val){localStorage.setItem(key,JSON.stringify(val))}
+function getProds(){
+  let items = readJSON("caisse_prods", []);
+  if(!Array.isArray(items)) items = [];
+  return items.map((p,i)=>({
+    id:Number(p.id)||i+1,
+    source_id:p.source_id||"",
+    name:p.name||"Article",
+    cat:p.cat||p.category||"Autres",
+    emoji:p.emoji||"📦",
+    price:Number(p.price||p.price_xof||0),
+    stock:Number(p.stock||p.stock_qty||0),
+    published:p.published!==false
+  })).filter(p=>p.published!==false);
+}
+function saveProds(items){saveJSON("caisse_prods",items)}
+function getVentes(){return readJSON("caisse_ventes",[])}
+function saveVentes(v){saveJSON("caisse_ventes",v)}
+
+function normalizeSaleForStats(v){
+  const d = v && v.date ? new Date(v.date) : new Date();
+  const safeDate = isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  const items = Array.isArray(v && v.items) ? v.items : [];
+  const computed = items.reduce((s,i)=>s+(Number(i.price||0)*Number(i.qty||0)),0);
+  return {
+    ...(v||{}),
+    id:Number(v && v.id)||Date.now(),
+    date:safeDate,
+    day:String(v && v.day || safeDate.slice(0,10)),
+    items,
+    total:Number(v && v.total || computed || 0),
+    subtotal:Number(v && v.subtotal || computed || 0),
+    remise:Number(v && v.remise || 0),
+    payLabel:(v && v.payLabel) || "Paiement"
+  };
+}
+
+function persistVente(vente){
+  const clean=normalizeSaleForStats(vente);
+  const ventes=getVentes().filter(v=>Number(v.id)!==Number(clean.id));
+  ventes.unshift(clean);
+  saveVentes(ventes);
+
+  // Double trace locale : utile si un navigateur ou un vieux cache fait des caprices.
+  try{
+    localStorage.setItem("caisse_last_vente", JSON.stringify(clean));
+    localStorage.setItem("caisse_stats_touch", String(Date.now()));
+  }catch(e){}
+
+  const check=getVentes();
+  return Array.isArray(check) && check.some(v=>Number(v.id)===Number(clean.id));
+}
+
+function getNotes(){return readJSON("caisse_notes",[])}
+function saveNotes(n){saveJSON("caisse_notes",n)}
+function getShopName(){
+  const raw = localStorage.getItem("caisse_shop");
+  if(!raw) return "Ma Boutique";
+  try{
+    const data = JSON.parse(raw);
+    if(data && typeof data === "object"){
+      return data.display_name || data.name || data.business_name || data.shop_name || "Ma Boutique";
+    }
+  }catch(e){}
+  return raw || "Ma Boutique";
+}
+function setShopName(n){
+  document.querySelectorAll("#shopTitle,#recuShopName").forEach(el=>el.textContent=n||"Ma Boutique");
+}
+
+
+function setupCaisseNotice(){
+  const btn=document.getElementById("btnCaisseNotice");
+  if(!btn || !("speechSynthesis" in window)) return;
+
+  const TEXT=[
+    "Caisse MON COMMERCE.",
+    "Touche un article pour l’ajouter au panier.",
+    "Le total apparaît en bas.",
+    "Touche Addition pour vérifier.",
+    "Tu peux ajuster la quantité ou mettre une remise.",
+    "Puis confirme.",
+    "Choisis le paiement.",
+    "Quand l’argent est reçu, touche Encaisser.",
+    "Le ticket reste disponible si le client le demande.",
+    "Pour mettre ton activité au propre, touche Confirmer mon activité. Pour tes coordonnées pro, touche Coordonnées pro. Pour prix, stock et marchandises, touche Marchandises. Pour crédit client, dépense ou ajout stock, touche Actions utiles."
+  ].join(" ");
+
+  let speaking=false;
+
+  function stop(){
+    try{speechSynthesis.cancel()}catch(e){}
+    speaking=false;
+    btn.textContent="🎧";
+  }
+
+  function speak(){
+    stop();
+    const u=new SpeechSynthesisUtterance(TEXT);
+    u.lang="fr-FR";
+    u.rate=.86;
+    u.pitch=1;
+    const voices=speechSynthesis.getVoices()||[];
+    const fr=voices.find(v=>/^fr/i.test(v.lang));
+    if(fr)u.voice=fr;
+    u.onstart=function(){speaking=true;btn.textContent="⏹"};
+    u.onend=stop;
+    u.onerror=stop;
+    setTimeout(function(){try{speechSynthesis.speak(u)}catch(e){stop()}},80);
+  }
+
+  btn.addEventListener("click",function(){speaking?stop():speak()});
+  window.addEventListener("beforeunload",stop);
+}
+
+
+/* DIGIY POS — Alertes vocales métier V1
+   Activation par clic humain, puis annonces courtes côté caisse. */
+let _posVoiceEnabled = false;
+let _posVoiceUnlocked = false;
+
+function posVoiceStatus(text){
+  const el=document.getElementById("posVoiceStatus");
+  if(el) el.textContent=text;
+}
+
+function refreshPosVoiceButton(){
+  const btn=document.getElementById("btnPosVoiceToggle");
+  if(!btn) return;
+  btn.textContent = _posVoiceEnabled ? "🔔 Voix activée" : "🔔 Activer la voix";
+  btn.setAttribute("aria-pressed", _posVoiceEnabled ? "true" : "false");
+  posVoiceStatus(_posVoiceEnabled ? "Alertes vocales activées" : "Voix non activée");
+}
+
+function pickPosVoice(){
+  if(!("speechSynthesis" in window)) return null;
+  const voices=speechSynthesis.getVoices()||[];
+  return (
+    voices.find(v=>/fr[-_]?FR/i.test(v.lang) && /thomas|paul|daniel|homme|male/i.test(v.name)) ||
+    voices.find(v=>/^fr/i.test(v.lang)) ||
+    voices[0] ||
+    null
+  );
+}
+
+function speakPosAlert(message, force){
+  if(!message || !("speechSynthesis" in window)) return;
+  if(!force && (!_posVoiceEnabled || !_posVoiceUnlocked)) return;
+
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(message);
+    const voice=pickPosVoice();
+    if(voice) u.voice=voice;
+    u.lang=voice?.lang || "fr-FR";
+    u.rate=.88;
+    u.pitch=1.02;
+    u.volume=1;
+    u.onstart=function(){posVoiceStatus("DIGIY parle…")};
+    u.onend=function(){posVoiceStatus(_posVoiceEnabled ? "Alertes vocales activées" : "Voix non activée")};
+    u.onerror=function(){posVoiceStatus("Voix interrompue")};
+    speechSynthesis.speak(u);
+  }catch(e){
+    posVoiceStatus("Voix bloquée par le navigateur");
+  }
+}
+
+function posTotalDuJour(){
+  try{
+    const today=new Date().toISOString().slice(0,10);
+    return getVentes().filter(v=>String(v.day||"")===today)
+      .reduce((s,v)=>s+Number(v.total||0),0);
+  }catch(_){ return 0; }
+}
+
+function posLowStockCount(){
+  try{
+    return getProds().filter(p=>Number(p.stock||0)>0 && Number(p.stock||0)<=5).length;
+  }catch(_){ return 0; }
+}
+
+function setupPosVoiceAlerts(){
+  const toggle=document.getElementById("btnPosVoiceToggle");
+  if(!toggle) return;
+
+  try{ _posVoiceEnabled = localStorage.getItem("digiy_pos_voice_enabled")==="1"; }catch(_){}
+  refreshPosVoiceButton();
+
+  toggle.addEventListener("click",function(){
+    if(!("speechSynthesis" in window)){
+      posVoiceStatus("Voix non disponible sur ce navigateur");
+      showToast("Voix non disponible");
+      return;
+    }
+
+    _posVoiceEnabled = !_posVoiceEnabled;
+    _posVoiceUnlocked = _posVoiceEnabled;
+    try{ localStorage.setItem("digiy_pos_voice_enabled", _posVoiceEnabled ? "1" : "0"); }catch(_){}
+    refreshPosVoiceButton();
+
+    if(_posVoiceEnabled){
+      speakPosAlert("Alertes vocales activées. La caisse parlera pour les ventes, le stock et le total du jour.", true);
+    }else{
+      try{ speechSynthesis.cancel(); }catch(_){}
+    }
+  });
+
+  document.getElementById("btnPosVoiceSale")?.addEventListener("click",function(){
+    _posVoiceUnlocked = true;
+    speakPosAlert("Vente enregistrée. Le ticket reste disponible si besoin.", true);
+  });
+
+  document.getElementById("btnPosVoiceStock")?.addEventListener("click",function(){
+    _posVoiceUnlocked = true;
+    const n=posLowStockCount();
+    speakPosAlert(n ? "Attention. " + n + " marchandise" + (n>1?"s":"") + " en stock bas." : "Stock vérifié. Rien d’urgent pour le moment.", true);
+  });
+
+  document.getElementById("btnPosVoiceTotal")?.addEventListener("click",function(){
+    _posVoiceUnlocked = true;
+    const total=posTotalDuJour();
+    speakPosAlert(total ? "Total du jour prêt. " + Math.round(total) + " francs enregistrés aujourd’hui." : "Total du jour prêt. Aucune vente enregistrée pour l’instant.", true);
+  });
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DIGIY — GUIDE PREMIER DÉMARRAGE V31
+   S’affiche uniquement si le pro n’a pas encore de marchandises programmées.
+   Explique l’écosystème complet en 45 secondes.
+   Se masque une fois que le pro a validé qu’il a compris (à la main ou auto).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const DEMARRAGE_TEXT = [
+  "Bienvenue dans Mon Commerce par DIGIY.",
+  "C’est ton logiciel de caisse terrain. Je vais t’expliquer comment démarrer.",
+  "Ce logiciel a quatre zones.",
+  "Un : les Marchandises. Touche le bouton bleu Marchandises en haut.",
+  "C’est là que tu entres tout ce que tu vends : le nom, le prix, le stock.",
+  "C’est la première chose à faire avant de vendre.",
+  "Deux : Coordonnées pro. Touche le bouton bleu Coordonnées pro.",
+  "Tu remplis le nom de ton commerce, ton WhatsApp, ton adresse, tes horaires.",
+  "Le client verra ta fiche pour te trouver et te contacter.",
+  "Trois : la Caisse. C’est cet écran. Quand tes marchandises sont prêtes,",
+  "tu touches une carte pour l’ajouter au panier, tu confirmes l’addition, et tu encaisses.",
+  "Quatre : les Stats et les Notes, accessibles dans la barre en haut.",
+  "Cinq : Confirmer mon activité. Cette porte vérifie le nom, la ville, le WhatsApp, les services, les paiements, le QR et la publication. Six : le bouton jaune Actions utiles. Il prépare les textes du terrain en un clic :",
+  "dette client, ajout de stock, dépense ou commande. Plus besoin d'écrire.",
+  "Pour démarrer maintenant : touche Confirmer mon activité, puis Marchandises, programme tes articles, puis reviens encaisser. L’exemple métier est seulement là pour tester."
+].join(' ');
+
+let _demarrageSpeaking = false;
+
+function speakDemarrage(){
+  if(!('speechSynthesis' in window)){ showToast('Audio non disponible.'); return }
+  const btn = document.getElementById('btnDemarrage');
+  if(_demarrageSpeaking){
+    try{ speechSynthesis.cancel() }catch(e){}
+    _demarrageSpeaking = false;
+    if(btn) btn.textContent = '🚀 Démarrage';
+    return;
+  }
+  try{
+    speechSynthesis.cancel();
+    _guideSpeaking = false;
+    const u = new SpeechSynthesisUtterance(DEMARRAGE_TEXT);
+    u.lang = 'fr-FR'; u.rate = 0.84; u.pitch = 1.02;
+    const stop = () => {
+      _demarrageSpeaking = false;
+      if(btn) btn.textContent = '🚀 Démarrage';
+    };
+    u.onstart = () => {
+      _demarrageSpeaking = true;
+      if(btn) btn.textContent = '⏹ Stop';
+    };
+    u.onend = stop; u.onerror = stop;
+    const trySpeak = () => {
+      const fr = (speechSynthesis.getVoices()||[]).find(v=>/^fr/i.test(v.lang));
+      if(fr) u.voice = fr;
+      try{ speechSynthesis.speak(u) }catch(e){ stop() }
+    };
+    if(speechSynthesis.getVoices().length){ trySpeak() }
+    else{ speechSynthesis.onvoiceschanged = ()=>{ speechSynthesis.onvoiceschanged=null; trySpeak() }; setTimeout(trySpeak,120) }
+  }catch(e){ _demarrageSpeaking = false }
+}
+
+/* Affiche le bouton Démarrage seulement si pas de marchandises ou premier lancement */
+function checkPremierLancement(){
+  const btn = document.getElementById('btnDemarrage');
+  if(!btn) return;
+  try{
+    const prods = getProds();
+    const vu = localStorage.getItem('caisse_demarrage_vu');
+    /* Masqué si : déjà vu ET au moins une marchandise */
+    if(vu && prods && prods.length > 0){
+      btn.classList.add('hidden');
+    } else {
+      btn.classList.remove('hidden');
+    }
+  }catch(e){ btn.classList.add('hidden') }
+}
+
+function dismissDemarrage(){
+  localStorage.setItem('caisse_demarrage_vu','1');
+  const btn = document.getElementById('btnDemarrage');
+  if(btn) btn.classList.add('hidden');
+  try{ speechSynthesis.cancel() }catch(e){}
+}
+function init(){
+  cleanVisibleUrl();
+  setShopName(getShopName());
+  updateProfileLabels();
+  buildCats();
+  renderProds();
+  renderStats();
+  renderNotes();
+  updatePanierBar();
+  tickClock();setInterval(tickClock,1000);setupCaisseNotice();setupPosVoiceAlerts();
+  if(location.hash==="#notes") showPage("page-notes");
+  if(location.hash==="#stats") showPage("page-stats");
+  checkPremierLancement();
+}
+function tickClock(){const t=new Date();document.getElementById("clockEl").textContent=t.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="page-stats") renderStats();
+  if(id==="page-notes") renderNotes();
+  _guideCurrentPage = id;
+  try{ speechSynthesis.cancel(); _guideSpeaking=false; const b=document.getElementById("btnGuideAudio"); if(b) b.textContent="🎧 Guide"; }catch(e){}
+  window.scrollTo(0,0);
+}
+function buildCats(){
+  const cats=["Tous",...new Set(getProds().map(p=>p.cat||"Autres"))];
+  const bar=document.getElementById("catsBar");
+  bar.innerHTML=cats.map(c=>`<button class="cat-pill${c===selCat?" active":""}" data-cat="${escAttr(c)}">${esc(c)}</button>`).join("");
+  bar.querySelectorAll(".cat-pill").forEach(b=>b.onclick=()=>{selCat=b.dataset.cat;buildCats();renderProds()});
+}
+function renderProds(){
+  const q=(document.getElementById("searchInput").value||"").toLowerCase();
+  const items=getProds().filter(p=>(selCat==="Tous"||p.cat===selCat)&&(!q||String(p.name).toLowerCase().includes(q)));
+  const g=document.getElementById("prodsGrid");
+  if(!items.length){g.innerHTML=`<div style="grid-column:1/-1" class="no-data">Aucune marchandise encore. Va dans Marchandises pour programmer tes articles, ou charge un exemple métier si tu veux tester.</div>`;return}
+  g.innerHTML=items.map(p=>`
+    <div class="pcard${Number(p.stock)<=0?" oos":""}" onclick="addToCart(${Number(p.id)})">
+      <span class="stk-badge ${Number(p.stock)<=5?"stk-low":"stk-ok"}">${Number(p.stock)||0}</span>
+      <div class="pcard-emoji">${esc(p.emoji||"📦")}</div>
+      <div class="pcard-name">${esc(p.name)}</div>
+      <div class="pcard-price">${fmt(p.price)}</div>
+    </div>`).join("");
+}
+function addToCart(id){
+  const p=getProds().find(x=>Number(x.id)===Number(id));if(!p)return;
+  const ex=cart.find(x=>Number(x.id)===Number(id));
+  const current=ex?ex.qty:0;
+  if(current>=Number(p.stock)){showToast("Stock limité");return}
+  if(ex)ex.qty++;else cart.push({...p,qty:1});
+  updatePanierBar();renderAddition();showToast("+ "+p.name);
+}
+/* Version silencieuse pour l'oreille métier : pas de toast, retourne true si ajouté */
+function addToCartSilent(id){
+  const p=getProds().find(x=>Number(x.id)===Number(id));if(!p)return false;
+  const ex=cart.find(x=>Number(x.id)===Number(id));
+  const current=ex?ex.qty:0;
+  if(current>=Number(p.stock))return false;
+  if(ex)ex.qty++;else cart.push({...p,qty:1});
+  return true;
+}
+function changeQty(id,delta){
+  const item=cart.find(x=>Number(x.id)===Number(id));if(!item)return;
+  const prod=getProds().find(x=>Number(x.id)===Number(id));const max=prod?Number(prod.stock):999999;
+  item.qty+=delta;
+  if(item.qty<=0)cart=cart.filter(x=>Number(x.id)!==Number(id));
+  else if(item.qty>max){item.qty=max;showToast("Stock limité")}
+  updatePanierBar();renderAddition();updateTotals();
+}
+function updatePanierBar(){
+  const bar=document.getElementById("panierBar");const cnt=cart.reduce((s,i)=>s+Number(i.qty||0),0);
+  if(!cnt){bar.classList.add("hidden");return}
+  bar.classList.remove("hidden");
+  document.getElementById("panierCountLbl").textContent=cnt+" "+(cnt>1?profileWord("productLabelPlural","articles").toLowerCase():profileWord("productLabel","article").toLowerCase());
+  document.getElementById("panierTotalLbl").textContent=fmt(cartTotal());
+}
+function cartTotal(){return cart.reduce((s,i)=>s+Number(i.price||0)*Number(i.qty||0),0)}
+function openAddition(){if(!cart.length){showToast("Ajoute un article d’abord");return}renderAddition();updateTotals();document.getElementById("additionOverlay").classList.add("open")}
+function closeAddition(){document.getElementById("additionOverlay").classList.remove("open")}
+function renderAddition(){
+  const el=document.getElementById("additionItems");
+  if(!cart.length){el.innerHTML=`<div class="no-data">Aucun article</div>`;return}
+  el.innerHTML=cart.map(i=>`
+    <div class="cart-line">
+      <div class="cart-emoji">${esc(i.emoji||"📦")}</div>
+      <div class="cart-info"><div class="cart-name">${esc(i.name)}</div><div class="cart-meta">${fmt(i.price)} × ${Number(i.qty)}</div></div>
+      <div class="cart-price">${fmt(Number(i.price)*Number(i.qty))}</div>
+      <div class="qty-box"><button class="qty-btn" onclick="changeQty(${Number(i.id)},-1)">−</button><div class="qty-val">${Number(i.qty)}</div><button class="qty-btn" onclick="changeQty(${Number(i.id)},1)">+</button></div>
+    </div>`).join("");
+}
+function clearCart(){if(!cart.length)return;if(confirm("Vider l’addition ?")){cart=[];updatePanierBar();closeAddition();showToast("Addition vidée")}}
+function calcTotals(){
+  const sub=cartTotal();const rv=parseFloat(document.getElementById("remiseVal").value||"0")||0;const rt=document.getElementById("remiseType").value;
+  const rem=rv>0?(rt==="pct"?Math.round(sub*rv/100):Math.min(rv,sub)):0;return{sub,rem,total:Math.max(0,sub-rem)}
+}
+function updateTotals(){
+  const {sub,rem,total}=calcTotals();
+  setText("subtotalEl",fmt(sub));setText("totalEl",fmt(total));setText("payAmountBig",fmt(total));setText("encTotalLbl",fmt(total));
+  const rr=document.getElementById("remiseRow");
+  if(rem>0){rr.style.display="flex";setText("remiseEl","- "+fmt(rem))}else rr.style.display="none";
+}
+function confirmAddition(){if(!cart.length){showToast("Addition vide");return}updateTotals();closeAddition();preparePayment();showPage("page-paiement")}
+function backToAddition(){showPage("page-caisse");setTimeout(openAddition,80)}
+function preparePayment(){updateTotals();updatePayHelp()}
+function selPay(m){
+  selPay_=m;document.querySelectorAll(".pay-mode-btn").forEach(b=>b.classList.remove("active"));
+  const btn=document.getElementById("pm-"+m);if(btn)btn.classList.add("active");updatePayHelp();
+}
+function updatePayHelp(){
+  const help={
+    esp:["Espèces","Reçois l’argent du client, rends la monnaie si besoin, puis confirme l’encaissement."],
+    wave:["Wave","Demande au client d’envoyer le montant par Wave. Vérifie la notification ou le reçu avant de confirmer."],
+    orange:["Orange Money","Demande au client d’envoyer le montant par Orange Money. Vérifie la confirmation avant de valider la vente."],
+    crd:["Carte / TPE","Encaisse avec ton TPE ou ton service carte habituel. Quand le paiement est accepté, confirme ici."]
+  };
+  const h=help[selPay_]||help.esp;setText("payHelpTitle",h[0]);setText("payHelpText",h[1]);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DIGIY — GUIDE AUDIO TERRAIN · V27
+   Un tap = explication claire de l'écran en cours.
+   Conçu pour les commerçants terrain : métier maîtrisé, lecture secondaire.
+   speakGuide  → lit le guide de la page active.
+   speakConfirm → confirme une action clé (encaissement).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const GUIDE_TEXTS = {
+  'page-caisse': [
+    "Bienvenue dans Mon Commerce par DIGIY. C’est ton logiciel de caisse terrain.",
+    "Il y a quatre zones. Je les explique dans l’ordre.",
+    "Première zone : les Marchandises. Touche le bouton bleu Marchandises dans la barre en haut.",
+    "C’est là que tu programmes ce que tu vends : le nom, le prix, le stock, la catégorie.",
+    "Si c’est la première fois que tu utilises le logiciel, commence par là.",
+    "Deuxième zone : Coordonnées pro. Touche le bouton bleu Coordonnées pro.",
+    "C’est ta fiche commerce : ton nom, ton WhatsApp, ton adresse, tes horaires.",
+    "Le client voit cette fiche quand il te cherche.",
+    "Troisième zone : la Caisse. C’est ici, sur cette page.",
+    "Touche une marchandise pour l’ajouter au panier. Le total s’affiche en bas.",
+    "Touche Addition pour vérifier. Choisis le paiement. Touche Encaisser.",
+    "Quatrième zone : les Stats et les Notes.",
+    "Les Stats gardent l’historique de toutes tes ventes et ton chiffre du jour.",
+    "Les Actions utiles préparent les textes métier au clic : dette client, ajout stock, dépense, commande ou livraison. Les Notes gardent ensuite la trace.",
+    "Pour démarrer : va d’abord dans Confirmer mon activité, puis dans Marchandises, programme tes articles, puis reviens ici pour encaisser. Pour le stock, crédit client ou dépense, touche Actions utiles."
+  ].join(' '),
+  'page-paiement': [
+    "Tu es sur le paiement.",
+    "Choisis comment le client paie : espèces, Wave, Orange Money, ou carte.",
+    "Attends que l'argent soit bien reçu.",
+    "Puis touche le bouton vert Encaisser en bas."
+  ].join(' '),
+  'page-vente-ok': [
+    "Vente bien enregistrée.",
+    "Tu peux démarrer une nouvelle vente,",
+    "voir ou imprimer le ticket,",
+    "ou consulter tes statistiques."
+  ].join(' '),
+  'page-recu': [
+    "Voici le reçu de la vente.",
+    "Tu peux l'imprimer en touchant le bouton imprimer.",
+    "Ou démarrer une nouvelle vente."
+  ].join(' '),
+  'page-stats': [
+    "Tu es dans les statistiques.",
+    "Tu vois le chiffre d'affaires d'aujourd'hui, le total depuis le début, et les articles les plus vendus.",
+    "L'historique montre toutes les ventes enregistrées.",
+    "Depuis cette page, tu peux aussi accéder aux Actions utiles avec le bouton jaune dans la barre,",
+    "pour gérer un crédit client, une dépense ou un ajout de stock sans quitter l'écosystème."
+  ].join(' '),
+  'page-notes': [
+    "Tu es dans les notes du comptoir.",
+    "Tu peux noter une dette client, une dépense, un achat de stock, ou n'importe quelle information utile.",
+    "Les notes restent dans ce téléphone.",
+    "Si tu veux préparer un texte structuré en un clic, touche le bouton jaune Actions utiles dans la barre en haut.",
+    "Actions utiles propose des modèles prêts pour une dette client, un ajout de stock, une dépense ou une commande."
+  ].join(' ')
+};
+
+let _guideSpeaking = false;
+let _guideCurrentPage = 'page-caisse';
+
+function speakConfirm(text){
+  if(!('speechSynthesis' in window))return;
+  try{
+    speechSynthesis.cancel();
+    _guideSpeaking = false;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR'; u.rate = 0.90; u.pitch = 1.05;
+    const trySpeak = () => {
+      const fr = (speechSynthesis.getVoices()||[]).find(v=>/^fr/i.test(v.lang));
+      if(fr) u.voice = fr;
+      try{ speechSynthesis.speak(u) }catch(e){}
+    };
+    if(speechSynthesis.getVoices().length){ trySpeak() }
+    else{ speechSynthesis.onvoiceschanged = ()=>{ speechSynthesis.onvoiceschanged=null; trySpeak() }; setTimeout(trySpeak,120) }
+  }catch(e){}
+}
+
+function speakGuide(pageId){
+  if(!('speechSynthesis' in window)){ showToast('Audio non disponible sur ce navigateur.'); return }
+  const btn = document.getElementById('btnGuideAudio');
+  if(_guideSpeaking){
+    try{ speechSynthesis.cancel() }catch(e){}
+    _guideSpeaking = false;
+    if(btn){ btn.textContent = '🎧 Guide' }
+    return;
+  }
+  const text = GUIDE_TEXTS[pageId || _guideCurrentPage] || GUIDE_TEXTS['page-caisse'];
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR'; u.rate = 0.84; u.pitch = 1.02;
+    const stop = () => {
+      _guideSpeaking = false;
+      if(btn){ btn.textContent = '🎧 Guide' }
+    };
+    u.onstart = () => {
+      _guideSpeaking = true;
+      if(btn){ btn.textContent = '⏹ Stop' }
+    };
+    u.onend = stop; u.onerror = stop;
+    const trySpeak = () => {
+      const fr = (speechSynthesis.getVoices()||[]).find(v=>/^fr/i.test(v.lang));
+      if(fr) u.voice = fr;
+      try{ speechSynthesis.speak(u) }catch(e){ stop() }
+    };
+    if(speechSynthesis.getVoices().length){ trySpeak() }
+    else{ speechSynthesis.onvoiceschanged = ()=>{ speechSynthesis.onvoiceschanged=null; trySpeak() }; setTimeout(trySpeak,120) }
+  }catch(e){ _guideSpeaking = false }
+}
+
+function encaisser(){
+  if(!cart.length){showToast("Aucune vente");return}
+  const {sub,rem,total}=calcTotals();if(total<=0){showToast("Total invalide");return}
+  const client=(document.getElementById("clientInput").value||"").trim();
+  const payLabels={esp:"Espèces",wave:"Wave",orange:"Orange Money",crd:"Carte / TPE"};
+  const now=new Date();
+
+  const vente={
+    id:Date.now(),
+    date:now.toISOString(),
+    day:now.toISOString().slice(0,10),
+    client,
+    items:cart.map(i=>({
+      id:i.id,
+      name:i.name,
+      emoji:i.emoji,
+      qty:Number(i.qty||0),
+      price:Number(i.price||0),
+      lineTotal:Number(i.price||0)*Number(i.qty||0)
+    })),
+    subtotal:sub,
+    remise:rem,
+    total,
+    pay:selPay_,
+    payLabel:payLabels[selPay_]||"Paiement"
+  };
+
+  // Sauvegarde blindée : vente gardée, relue, puis stats actualisées.
+  const saved=persistVente(vente);
+  if(!saved){
+    showToast("Vente non gardée sur ce téléphone. Mémoire du téléphone bloquée.");
+    return;
+  }
+
+  const prods=readJSON("caisse_prods",getProds());
+  cart.forEach(ci=>{const p=prods.find(x=>Number(x.id)===Number(ci.id));if(p)p.stock=Math.max(0,Number(p.stock||0)-Number(ci.qty||0))});
+  saveProds(prods);
+
+  if(typeof renderStats==="function")renderStats();
+  if(typeof updateProfileLabels==="function")updateProfileLabels();
+
+  document.getElementById("recuShopName").textContent=getShopName();
+  document.getElementById("recuDate").textContent=now.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" — "+now.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+(client?" · "+esc(client):"");
+  document.getElementById("recuLines").innerHTML=cart.map(i=>`<div class="recu-line"><span>${esc(i.emoji||"📦")} ${esc(i.name)} ×${Number(i.qty)}</span><span>${fmt(Number(i.price)*Number(i.qty))}</span></div>`).join("")+(rem>0?`<div class="recu-line"><span>Remise</span><span>- ${fmt(rem)}</span></div>`:"");
+  setText("recuTotal",fmt(total));setText("recuPaymode","Paiement : "+(payLabels[selPay_]||"Paiement"));
+  setText("okAmountBig",fmt(total));
+  showToast("✅ Vente enregistrée. Ticket disponible si besoin.");
+  if(_posVoiceEnabled){
+    _posVoiceUnlocked = true;
+    speakPosAlert("Vente enregistrée. " + Math.round(total) + " francs.", false);
+  }else{
+    speakConfirm("Vente enregistrée. " + Math.round(total) + " francs.");
+  }
+  showPage("page-vente-ok");
+}
+function nouvelleVente(){
+  cart=[];document.getElementById("clientInput").value="";document.getElementById("remiseVal").value="";document.getElementById("searchInput").value="";
+  selCat="Tous";selPay_="esp";document.querySelectorAll(".pay-mode-btn").forEach(b=>b.classList.remove("active"));document.getElementById("pm-esp").classList.add("active");
+  buildCats();renderProds();renderAddition();updatePanierBar();updateTotals();showPage("page-caisse");
+}
+function renderStats(){
+  const ventes=getVentes().map(normalizeSaleForStats).filter(v=>Number(v.total||0)>=0);
+  const todayIso=new Date().toISOString().slice(0,10);
+  const va=ventes.filter(v=>String(v.day || String(v.date).slice(0,10))===todayIso);
+
+  const caA=va.reduce((s,v)=>s+Number(v.total||0),0);
+  const caT=ventes.reduce((s,v)=>s+Number(v.total||0),0);
+
+  setText("stat-ca",fmt(caA));
+  setText("stat-nb",va.length);
+  setText("stat-ca-total",fmt(caT));
+  setText("stat-nb-total",ventes.length);
+
+  const counter={};
+  ventes.forEach(v=>(v.items||[]).forEach(i=>{
+    const name=i.name||profileWord("productLabel","Article");
+    counter[name]=(counter[name]||0)+Number(i.qty||0);
+  }));
+
+  const top=Object.entries(counter).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const topEl=document.getElementById("topArticles");
+  if(topEl){
+    topEl.innerHTML=top.length
+      ? top.map(([name,qty])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:800"><span>${esc(name)}</span><span style="color:var(--green)">${qty} vendu${qty>1?"s":""}</span></div>`).join("")
+      : `<div class="no-data">Aucune vente enregistrée</div>`;
+  }
+
+  const h=document.getElementById("historiqueList");
+  if(h){
+    h.innerHTML=ventes.length
+      ? ventes.map(v=>{
+          const d=new Date(v.date);
+          return `<div class="list-card"><div class="list-head"><div><div class="list-date">${d.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})} ${d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}${v.client?" · "+esc(v.client):""}</div><span class="badge">${esc(v.payLabel||"Paiement")}</span></div><div class="list-total">${fmt(v.total)}</div></div><div class="list-detail">${(v.items||[]).map(i=>`${esc(i.emoji||"📦")} ${esc(i.name)} ×${Number(i.qty)}`).join(" · ")}</div></div>`;
+        }).join("")
+      : `<div class="no-data">Aucune vente pour l’instant</div>`;
+  }
+
+  try{localStorage.setItem("caisse_stats_last_render", String(Date.now()))}catch(e){}
+}
+
+function debugStats(){
+  const ventes=getVentes();
+  const last=localStorage.getItem("caisse_last_vente")||"aucune";
+  const touch=localStorage.getItem("caisse_stats_touch")||"aucune";
+  alert(
+    "Stockage caisse\\n\\n"+
+    "Ventes gardées : "+ventes.length+"\\n"+
+    "Clé ventes : caisse_ventes\\n"+
+    "Dernière sauvegarde : "+touch+"\\n\\n"+
+    "Dernière vente :\\n"+last
+  );
+}
+
+function clearHistorique(){if(confirm("Effacer tout l’historique des ventes ?")){saveVentes([]);renderStats();showToast("Historique effacé")}}
+function saveNote(){
+  const type=document.getElementById("noteType").value;const amount=Number(document.getElementById("noteAmount").value||0);const text=(document.getElementById("noteText").value||"").trim();
+  if(!text&&!amount){showToast("Écris une note");return}
+  const notes=getNotes();notes.unshift({id:Date.now(),date:new Date().toISOString(),type,amount,text});saveNotes(notes);
+  document.getElementById("noteAmount").value="";document.getElementById("noteText").value="";renderNotes();showToast("Note gardée");
+}
+function renderNotes(){
+  const notes=getNotes();const el=document.getElementById("notesList");
+  el.innerHTML=notes.length?notes.map(n=>{const d=new Date(n.date);return`<div class="note-card"><div class="note-title">${noteLabel(n.type)} ${n.amount?`· ${fmt(n.amount)}`:""}</div>${n.text?`<div class="note-text">${esc(n.text)}</div>`:""}<div class="note-meta">${d.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})} ${d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</div><div style="margin-top:10px"><button class="btn-danger" onclick="deleteNote(${Number(n.id)})">🗑️ Supprimer</button></div></div>`}).join(""):`<div class="no-data">Aucune note. Les notes restent dans le téléphone.</div>`;
+}
+function noteLabel(t){return({vente:"Vente",depense:"Dépense",client_doit:"Client doit",stock:"Stock / achat",autre:"Autre"}[t]||"Note")}
+function deleteNote(id){const notes=getNotes().filter(n=>Number(n.id)!==Number(id));saveNotes(notes);renderNotes();showToast("Note supprimée")}
+function clearNotes(){if(confirm("Effacer toutes les notes de ce téléphone ?")){saveNotes([]);renderNotes();showToast("Notes effacées")}}
+
+function fmt(n){return Math.round(Number(n)||0).toLocaleString("fr-FR")+" F"}
+function setText(id,val){const el=document.getElementById(id);if(el)el.textContent=val}
+function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function escAttr(v){return esc(v).replaceAll("`","&#096;")}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>t.classList.remove("show"),2400)}
+
+document.getElementById("additionOverlay").addEventListener("click",e=>{if(e.target===e.currentTarget)closeAddition()});
+init();
+
+/* DIGIY — exposition explicite sur window pour l'oreille métier (second script IIFE) */
+window.addToCart        = addToCart;
+window.addToCartSilent  = addToCartSilent;
+window.showPage         = showPage;
+window.openAddition     = openAddition;
+window.closeAddition    = closeAddition;
+window.buildCats        = buildCats;
+window.renderProds      = renderProds;
+window.getProds         = getProds;
+window.saveProds        = saveProds;
+window.getNotes         = getNotes;
+window.saveNotes        = saveNotes;
+window.renderStats      = renderStats;
+window.renderNotes      = renderNotes;
+window.updatePanierBar  = updatePanierBar;
+window.renderAddition   = renderAddition;
+window.updateTotals     = updateTotals;
+window.showToast        = showToast;
+window.nouvelleVente    = nouvelleVente;
+window.speakConfirm     = speakConfirm;
+window.speakPosAlert    = speakPosAlert;
+window.speakGuide       = speakGuide;
+window.speakDemarrage   = speakDemarrage;
+window.dismissDemarrage = dismissDemarrage;
+window.checkPremierLancement = checkPremierLancement;
