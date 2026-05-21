@@ -6,7 +6,11 @@ assets/js/digiy-module-bridge.js
 assets/js/digiy-pos-memory.js
 README-decoupe.txt
 Espace professionnel pour gérer un petit commerce simplement : caisse, articles, fiche commerce, QR et accès sécurisé.
-
+CSS sorti → assets/css/caisse.css
+JS caisse sorti → assets/js/pos-caisse.js
+Bridge déplacé → assets/js/digiy-module-bridge.js
+Memory déplacé → assets/js/digiy-pos-memory.js
+caisse.html allégé mais moteur conservé
 Doctrine :
 
 **Le commerçant travaille.  
