@@ -32,3 +32,4 @@
   function snapshot(){ return readRoot(); }
   window.DIGIY_POS_MEMORY = {get,set,push,remove,snapshot,writeRoot,readRoot};
 })();
+
