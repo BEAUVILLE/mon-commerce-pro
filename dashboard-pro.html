@@ -4,375 +4,61 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#06140f"/>
-  <title>MON COMMERCE — Accueil</title>
-  <meta name="description" content="MON COMMERCE by DIGIY — redirection propre vers le comptoir numérique."/>
-
+  <meta name="robots" content="noindex,nofollow"/>
+  <meta name="digiy-build" content="pos-clean-one-page-one-topic-20260521"/>
+  <title>MON COMMERCE — Porte déplacée</title>
   <script>
+    window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
+    window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
+    window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
     window.DIGIY_MODULE = "POS";
     window.DIGIY_LOGIN_URL = "./pin.html";
   </script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./guard.js?v=pos-clean-one-page-one-topic-20260521"></script>
+  <script src="./digiy-module-bridge.js?v=pos-clean-one-page-one-topic-20260521"></script>
+  <script src="./digiy-pos-memory.js?v=pos-clean-one-page-one-topic-20260521"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
-
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800;900&display=swap" rel="stylesheet"/>
   <style>
-    :root{
-      --bg:#04110d;--text:#f7fbf8;--muted:#b8cfc4;--gold:#facc15;--gold2:#f59e0b;
-      --green:#22c55e;--line:rgba(255,255,255,.12);--shadow:0 22px 62px rgba(0,0,0,.38);
-      --font:"Outfit",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--bottom:88px;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;min-height:100%}
-    body{
-      min-height:100dvh;font-family:var(--font);color:var(--text);
-      background:radial-gradient(850px 520px at 0% -10%,rgba(250,204,21,.13),transparent 58%),
-      radial-gradient(800px 480px at 100% 0%,rgba(34,197,94,.13),transparent 58%),
-      linear-gradient(180deg,#06140f,var(--bg));
-      display:flex;align-items:center;justify-content:center;
-      padding:14px 12px calc(var(--bottom) + env(safe-area-inset-bottom,0px) + 16px);
-    }
-    a{color:inherit;text-decoration:none}
-    button{font:inherit;cursor:pointer}
-    .card{
-      width:min(100%,560px);border:1px solid var(--line);border-radius:30px;
-      background:linear-gradient(180deg,rgba(255,255,255,.065),rgba(255,255,255,.035));
-      box-shadow:var(--shadow);padding:22px;text-align:center;
-    }
-    .logo{
-      width:66px;height:66px;border-radius:24px;display:grid;place-items:center;
-      margin:0 auto 14px;background:linear-gradient(135deg,var(--gold),var(--gold2));
-      color:#06140f;font-size:31px;font-weight:1000;
-    }
-    h1{margin:0;font-size:clamp(2rem,7vw,3rem);line-height:.96;letter-spacing:-.05em;font-weight:1000}
-    p{margin:12px auto 0;max-width:440px;color:var(--muted);line-height:1.5;font-size:1rem;font-weight:850}
-    .actions{display:grid;gap:10px;margin-top:18px}
-    .btn{
-      min-height:60px;border-radius:22px;border:1px solid rgba(255,255,255,.12);
-      display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;
-      font-size:1.04rem;font-weight:1000;text-align:center;
-    }
-    .btn.primary{border:none;color:#06140f;background:linear-gradient(135deg,var(--gold),var(--gold2))}
-    .btn.green{border:none;color:#06140f;background:linear-gradient(135deg,#22c55e,#16a34a)}
-    .btn.ghost{color:var(--muted);background:rgba(255,255,255,.04)}
-    .note{margin-top:14px;color:rgba(184,207,196,.75);font-size:.86rem;line-height:1.45;font-weight:800}
-    .bottomNav{
-      position:fixed;left:0;right:0;bottom:0;z-index:80;
-      padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));
-      background:rgba(3,18,13,.94);border-top:1px solid rgba(255,255,255,.10);backdrop-filter:blur(14px);
-    }
-    .bottomInner{max-width:860px;margin:0 auto;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
-    .navItem{
-      min-height:58px;border-radius:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:3px;color:rgba(247,251,248,.72);font-size:.68rem;font-weight:1000;
-      border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035);text-align:center;
-    }
-    .navItem .ico{font-size:1.18rem;line-height:1}
-    .navItem.active{color:#06140f;background:linear-gradient(135deg,var(--gold),var(--green));border-color:rgba(255,255,255,.18)}
-
-    /* =========================================================
-       DIGIY POS — ALERTES VOCALES V1 (porte MON COMMERCE)
-       À poser surtout sur caisse.html/cockpit ensuite.
-       ========================================================= */
-    .voiceBox{
-      margin-top:16px;
-      padding:14px;
-      border-radius:24px;
-      border:1px solid rgba(250,204,21,.32);
-      background:
-        radial-gradient(460px 180px at 0% 0%, rgba(250,204,21,.18), transparent 70%),
-        rgba(255,255,255,.055);
-      display:grid;
-      gap:10px;
-      text-align:left;
-    }
-    .voiceTitle{
-      color:#fef3c7;
-      font-size:1.06rem;
-      font-weight:1000;
-      line-height:1.2;
-    }
-    .voiceSub{
-      color:rgba(184,207,196,.86);
-      font-size:.94rem;
-      font-weight:850;
-      line-height:1.45;
-    }
-    .voiceStatus{
-      display:inline-flex;
-      width:max-content;
-      max-width:100%;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.045);
-      color:rgba(247,251,248,.76);
-      font-size:.84rem;
-      font-weight:950;
-    }
-    .voiceActions{
-      display:grid;
-      gap:8px;
-      grid-template-columns:1fr;
-    }
-    .btn.voiceMain{
-      border:none;
-      color:#06140f;
-      background:linear-gradient(135deg,var(--gold),var(--green));
-    }
-    .voiceTests{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:7px;
-    }
-    .voiceTest{
-      min-height:46px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.045);
-      color:var(--text);
-      font-size:.86rem;
-      font-weight:1000;
-      padding:9px;
-    }
-    @media(max-width:520px){
-      .voiceTests{grid-template-columns:1fr}
-      .voiceBox{text-align:center}
-      .voiceStatus{margin:0 auto}
-    }
-
+    :root{--bg:#06140f;--text:#f7fbf8;--muted:#b8cfc4;--gold:#facc15;--green:#22c55e;--line:rgba(255,255,255,.12);--font:Outfit,system-ui,-apple-system,"Segoe UI",sans-serif;}
+    *{box-sizing:border-box} body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:18px;font-family:var(--font);color:var(--text);background:radial-gradient(700px 420px at 0% 0%,rgba(250,204,21,.14),transparent 60%),radial-gradient(700px 420px at 100% 0%,rgba(34,197,94,.14),transparent 60%),linear-gradient(180deg,#06140f,#03110c);}
+    main{width:min(100%,520px);border:1px solid var(--line);border-radius:30px;padding:22px;background:rgba(255,255,255,.06);box-shadow:0 24px 70px rgba(0,0,0,.34);text-align:center;}
+    .logo{width:66px;height:66px;margin:0 auto 14px;border-radius:24px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold),var(--green));color:#06140f;font-size:32px;font-weight:900;}
+    h1{margin:0;font-size:clamp(2rem,7vw,3rem);line-height:.96;letter-spacing:-.05em;font-weight:900;}
+    p{margin:12px auto 0;max-width:410px;color:var(--muted);line-height:1.48;font-weight:800;}
+    .actions{display:grid;gap:10px;margin-top:18px;}
+    a{color:inherit;text-decoration:none} .btn{min-height:58px;border-radius:20px;display:flex;align-items:center;justify-content:center;padding:13px 15px;font-weight:900;border:1px solid var(--line);background:rgba(255,255,255,.05);}
+    .primary{border:none;color:#06140f;background:linear-gradient(135deg,var(--gold),var(--green));}
+    .small{margin-top:12px;color:rgba(184,207,196,.72);font-size:.88rem;font-weight:800;}
   </style>
 </head>
-
 <body>
-
-<main class="card">
-  <div class="logo">🛒</div>
-  <h1>Comptoir déplacé</h1>
-  <p>L’accueil MON COMMERCE est maintenant le comptoir simple. Tu vas être ramené vers la bonne porte.</p>
-
+<main>
+  <div class="logo">🧭</div>
+  <h1>Porte déplacée.</h1>
+  <p>Cette ancienne porte ne porte plus le métier. Elle renvoie maintenant vers les portes propres du commerce.</p>
   <div class="actions">
-    <a class="btn primary" id="goIndex" href="./index.html">🏠 Ouvrir le comptoir</a>
-    <a class="btn green" id="goCaisse" href="./caisse.html">💰 Encaisser</a>
-    <a class="btn ghost" id="goArticles" href="./admin.html#articleList">📦 Articles</a>
-    <a class="btn ghost" id="goProfile" href="./profile.html">🏪 Régler ma fiche</a>
-    <a class="btn ghost" id="goAstouFiche" href="./fiche-astou.html">🛍️ Voir la fiche Astou</a>
-    <a class="btn ghost" id="goQr" href="./qr.html">🔳 Mon QR boutique</a>
+    <a class="btn primary" href="./hub.html" id="goHub">🧭 Ouvrir mes portes</a>
+    <a class="btn" href="./caisse.html">💰 Encaisser</a>
+    <a class="btn" href="./profile.html">🏪 Ma fiche commerce</a>
   </div>
-
-
-  <div class="voiceBox" id="posVoiceBox" aria-label="Alertes vocales DIGIY POS">
-    <div>
-      <div class="voiceTitle">🔔 Alertes vocales DIGIY POS</div>
-      <div class="voiceSub">
-        Ton comptoir parle métier : vente enregistrée, stock bas, total du jour prêt.
-        Cette porte est un sas ; le vrai moteur doit ensuite être posé sur la caisse ou le cockpit commerce.
-      </div>
-    </div>
-    <span class="voiceStatus" id="voiceStatus">Voix non activée</span>
-    <div class="voiceActions">
-      <button class="btn voiceMain" id="btnVoiceAlerts" type="button">🔔 Activer les alertes vocales</button>
-      <div class="voiceTests" aria-label="Tester les alertes POS">
-        <button class="voiceTest" data-pos-say="Vente enregistrée." type="button">💰 Vente</button>
-        <button class="voiceTest" data-pos-say="Stock bas. Produit à vérifier." type="button">📦 Stock</button>
-        <button class="voiceTest" data-pos-say="Total du jour prêt." type="button">📊 Total</button>
-      </div>
-    </div>
-  </div>
-
-
-  <div class="note">Ancien lien gardé pour compatibilité. Pas de double accueil, pas de bruit.</div>
+  <div class="small">Pas de double accueil. Pas de bruit. Une page = un sujet.</div>
 </main>
-
-<nav class="bottomNav" aria-label="Navigation MON COMMERCE">
-  <div class="bottomInner">
-    <a class="navItem active" href="./index.html"><span class="ico">🏠</span><span>Accueil</span></a>
-    <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
-    <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
-    <a class="navItem" href="./profile.html"><span class="ico">🏪</span><span>Réglage</span></a>
-    <a class="navItem" href="./fiche-astou.html"><span class="ico">🛍️</span><span>Astou</span></a>
-    <a class="navItem" href="./qr.html"><span class="ico">🔳</span><span>QR</span></a>
-  </div>
-</nav>
-
 <script>
 (function(){
   "use strict";
-
-  const SENSITIVE = [
-    "phone","tel","owner_phone","p_phone","subscription_phone","checkout_phone",
-    "pin","pin4","token","session_token","module"
-  ];
-
-  const SLUG_KEYS = ["digiy_pos_slug","digiy_pos_last_slug"];
-  const PHONE_KEYS = ["digiy_pos_phone","digiy_pos_last_phone"];
-  const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
-  const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
-
-  function normPhone(v){
-    return String(v || "").replace(/[^\d]/g,"").slice(0,15);
-  }
-
-  function normSlug(v){
-    return String(v || "")
-      .trim().toLowerCase()
-      .replace(/\s+/g,"-")
-      .replace(/[^a-z0-9-]/g,"")
-      .replace(/-+/g,"-")
-      .replace(/^-|-$/g,"");
-  }
-
-  function isPosSlug(v){
-    const s = normSlug(v);
-    if(!s) return false;
-    if(FORBIDDEN_SLUG_PREFIXES.some(p => s.startsWith(p))) return false;
-    return ALLOWED_SLUG_PREFIXES.some(p => s.startsWith(p));
-  }
-
-  function rememberThenClean(){
-    try{
-      const u = new URL(location.href);
-
-      const slug = normSlug(u.searchParams.get("slug") || "");
-      const phone = normPhone(
-        u.searchParams.get("phone") ||
-        u.searchParams.get("tel") ||
-        u.searchParams.get("owner_phone") ||
-        u.searchParams.get("p_phone") ||
-        ""
-      );
-
-      if(slug && isPosSlug(slug)){
-        SLUG_KEYS.forEach(k => {
-          try{
-            sessionStorage.setItem(k,slug);
-            localStorage.setItem(k,slug);
-          }catch(_){}
-        });
-      }
-
-      if(phone){
-        PHONE_KEYS.forEach(k => {
-          try{ sessionStorage.setItem(k,phone); }catch(_){}
-        });
-      }
-
-      let changed = false;
-
-      SENSITIVE.concat(["slug"]).forEach(k => {
-        if(u.searchParams.has(k)){
-          u.searchParams.delete(k);
-          changed = true;
-        }
-      });
-
-      if(changed){
-        history.replaceState({},document.title,u.pathname + u.search + u.hash);
-      }
-    }catch(_){}
-  }
-
-
-  /* =========================================================
-     DIGIY POS — MOTEUR VOIX MÉTIER V1
-     Le navigateur exige un clic humain avant de parler.
-     ========================================================= */
-  let posVoiceEnabled = false;
-  let posVoiceTouched = false;
-
-  function setVoiceStatus(txt){
-    const el = document.getElementById("voiceStatus");
-    if(el) el.textContent = txt;
-  }
-
-  function chooseVoice(){
-    try{
-      const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-      return voices.find(v => /^fr/i.test(v.lang || "") && /Google|Thomas|Amelie|Audrey|Daniel/i.test(v.name || "")) ||
-             voices.find(v => /^fr/i.test(v.lang || "")) ||
-             voices[0] ||
-             null;
-    }catch(_){
-      return null;
-    }
-  }
-
-  function speakPOS(text){
-    if(!("speechSynthesis" in window)){
-      setVoiceStatus("Voix indisponible sur ce navigateur");
-      return;
-    }
-    if(!posVoiceEnabled){
-      setVoiceStatus("Clique d’abord sur Activer les alertes vocales");
-      return;
-    }
-
-    try{
-      window.speechSynthesis.cancel();
-      const msg = new SpeechSynthesisUtterance(String(text || "").trim());
-      msg.lang = "fr-FR";
-      msg.rate = 0.88;
-      msg.pitch = 1.02;
-      msg.volume = 1;
-      const v = chooseVoice();
-      if(v) msg.voice = v;
-      msg.onstart = () => setVoiceStatus("DIGIY parle…");
-      msg.onend = () => setVoiceStatus("Alertes vocales actives");
-      window.speechSynthesis.speak(msg);
-    }catch(_){
-      setVoiceStatus("Voix bloquée par le navigateur");
-    }
-  }
-
-  function initPOSVoice(){
-    const btn = document.getElementById("btnVoiceAlerts");
-    if(btn){
-      btn.addEventListener("click", function(){
-        posVoiceTouched = true;
-        posVoiceEnabled = true;
-        try{ localStorage.setItem("digiy_pos_voice_enabled","1"); }catch(_){}
-        setVoiceStatus("Alertes vocales actives");
-        speakPOS("Alertes vocales POS activées. Vente enregistrée, stock bas, total du jour prêt.");
-      });
-    }
-
-    document.querySelectorAll("[data-pos-say]").forEach(function(el){
-      el.addEventListener("click", function(){
-        posVoiceTouched = true;
-        speakPOS(el.getAttribute("data-pos-say") || "");
-      });
-    });
-
-    try{
-      if(localStorage.getItem("digiy_pos_voice_enabled") === "1"){
-        posVoiceEnabled = true;
-        setVoiceStatus("Alertes vocales actives");
-      }
-    }catch(_){}
-
-    if("speechSynthesis" in window){
-      window.speechSynthesis.onvoiceschanged = function(){
-        chooseVoice();
-      };
-    }
-  }
-
-
   function go(){
-    const target = "./index.html";
-    setTimeout(function(){
-      if(posVoiceTouched) return;
-      try{ location.replace(target); }
-      catch(_){ location.href = target; }
-    },1800);
+    try{ location.replace("./hub.html"); }catch(_){ location.href="./hub.html"; }
   }
-
-  initPOSVoice();
-  rememberThenClean();
-  go();
+  if(window.DIGIY_MODULE_BRIDGE && typeof window.DIGIY_MODULE_BRIDGE.cleanUrl === "function"){
+    window.DIGIY_MODULE_BRIDGE.cleanUrl();
+  }
+  setTimeout(go, 900);
 })();
 </script>
-
 </body>
 </html>
+
 
