@@ -4,8 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#06140f"/>
-  <title>MON COMMERCE — Ma fiche commerce · moule propre</title>
-  <meta name="digiy-build" content="pos-profile-moule-safe-20260519"/>
+  <title>MON COMMERCE — Ma fiche commerce</title>
+  <meta name="digiy-build" content="pos-clean-one-page-one-topic-20260521"/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -18,10 +18,13 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./guard.js"></script>
+  <script src="./digiy-module-bridge.js?v=pos-clean-one-page-one-topic-20260521"></script>
+  <script src="./digiy-pos-memory.js?v=pos-clean-one-page-one-topic-20260521"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+  <script src="./oreille-metier-pos.js?v=pos-ear-20260521" defer></script>
 
   <style>
     :root{
@@ -430,7 +433,7 @@
       <div class="status warn" id="statusBox">Vérification de l’accès…</div>
 
       <div class="quick">
-        <a class="primary" href="#publicCard">🏪 Réglage</a>
+        <a class="primary" href="#publicCard">🏪 Ma fiche</a>
         <a href="./hub.html">🧭 HUB</a>
         <a href="./qr.html">🔳 QR</a>
         <button id="btnNotice" type="button">🎧 Notice</button>
@@ -439,8 +442,8 @@
 
     <main class="grid">
       <section class="card" id="publicCard">
-        <h2>Réglage client</h2>
-        <p class="desc">Remplis seulement ce qui aide le client à comprendre et te contacter.</p>
+        <h2>Ce que le client voit</h2>
+        <p class="desc">Nom, activité, repère, horaires, WhatsApp : seulement ce qui aide le client à venir vers toi.</p>
 
         <div class="formGrid">
           <div class="field">
@@ -660,8 +663,8 @@
   <div class="bottomInner">
     <a class="navItem" href="./hub.html"><span class="ico">🧭</span><span>HUB</span></a>
     <a class="navItem" href="./caisse.html"><span class="ico">💰</span><span>Caisse</span></a>
-    <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Articles</span></a>
-    <a class="navItem active" href="./profile.html"><span class="ico">🏪</span><span>Réglage</span></a>
+    <a class="navItem" href="./admin.html#articleList"><span class="ico">📦</span><span>Marchandises</span></a>
+    <a class="navItem active" href="./profile.html"><span class="ico">🏪</span><span>Fiche</span></a>
     <a class="navItem" href="./session.html"><span class="ico">🛡️</span><span>Session</span></a>
   </div>
 </nav>
@@ -1420,6 +1423,6 @@
 })();
 </script>
 
-<button id="btnProfileGuide" onclick="speakProfileGuide()">🎧 Mode d’emploi</button>
 </body>
 </html>
+
