@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>MON COMMERCE — HUB POS</title>
+  <title>MON COMMERCE — Mes portes</title>
   <meta name="theme-color" content="#1e7a46"/>
-  <meta name="description" content="MON COMMERCE PRO — HUB mobile terrain en pavés : caisse, marchandises, fiche, QR, actions utiles, accès et PAY."/>
+  <meta name="description" content="MON COMMERCE PRO — portes mobiles terrain : caisse, marchandises, fiche, QR, actions utiles, accès et argent."/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="digiy-build" content="pos-hub-container-driver-grand-gras-session-door-20260519"/>
+  <meta name="digiy-build" content="pos-clean-one-page-one-topic-20260521"/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -17,7 +17,9 @@
     window.DIGIY_LOGIN_URL = "./pin.html";
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./guard.js?v=pos-hub-container-driver-grand-gras-session-door-20260519"></script>
+  <script src="./guard.js?v=pos-clean-one-page-one-topic-20260521"></script>
+  <script src="./digiy-module-bridge.js?v=pos-clean-one-page-one-topic-20260521"></script>
+  <script src="./digiy-pos-memory.js?v=pos-clean-one-page-one-topic-20260521"></script>
 
   <link rel="preload" as="image" href="https://digiylyfe.net/wp-content/uploads/2026/05/metier-pro-1.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -461,6 +463,27 @@
       }
     }
 
+
+    .listenBtn{
+      min-height:52px;
+      width:max-content;
+      max-width:100%;
+      margin-top:12px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:13px 16px;
+      border-radius:999px;
+      border:1px solid rgba(196,151,63,.44);
+      background:linear-gradient(135deg,#fff0a8,#22c55e);
+      color:#052215;
+      font-size:15px;
+      font-weight:1000;
+      box-shadow:var(--shadow);
+    }
+    .listenBtn.playing{background:linear-gradient(135deg,#facc15,#f59e0b);}
+
     @media(prefers-reduced-motion:reduce){
       html{scroll-behavior:auto}
       .tile{transition:none}
@@ -471,42 +494,26 @@
 <body>
   <header class="topHeader">
     <a class="hdrBack" id="hdrBack" href="./caisse.html">← Caisse</a>
-    <div class="hdrTitle">HUB COMMERCE</div>
+    <div class="hdrTitle">MES PORTES</div>
     <div class="hdrPill warn" id="sessionPill">session…</div>
   </header>
 
   <main class="wrap">
     <section class="hubHead">
       <div class="eyebrow">🛒 MON COMMERCE</div>
-      <h1>Les gestes du comptoir.</h1>
+      <h1>Choisis ton geste.</h1>
       <div class="hubSub" id="hubSub">
-        Chaque pavé a un rôle : encaisser, préparer les marchandises, régler la fiche, partager le QR, agir vite.
+        Une porte = un geste. Tu ouvres, tu agis, tu reviens au comptoir quand c’est fait.
       </div>
       <div class="rule">
-        <b>Index</b> = porte courte. <b>HUB</b> = navigation. <b>Caisse</b> = comptoir. Pas de double accueil, pas de lien personnel dans le moule.
+        <b>Une page = un sujet.</b> La caisse encaisse. La fiche présente. Les marchandises se règlent à part. Le contact, l’argent et la relation client restent au pro.
       </div>
+      <button class="listenBtn" id="btnHubVoice" type="button">🎧 Écouter DIGIY</button>
     </section>
 
-    <section class="group" aria-label="Action immédiate POS">
+    <section class="group" aria-label="Action immédiate commerce">
       <div class="groupLabel">Action immédiate</div>
       <div class="tileGrid">
-        <a class="tile gold blasonTile" href="https://digiylyfe.com/" aria-label="DIGIYLYFE Métiers pro">
-          <div class="tileTop">
-            <img
-              class="tileLogoImg"
-              src="https://digiylyfe.net/wp-content/uploads/2026/05/metier-pro-1.png"
-              alt="DIGIYLYFE — Métiers pro"
-              loading="lazy"
-              decoding="async"
-            />
-            <div class="tileTag">DIGIY</div>
-          </div>
-          <div>
-            <b>Métiers pro</b>
-            <span>Le blason commun des portes métier.</span>
-          </div>
-        </a>
-
         <a class="tile primary metierTileClair" id="goCaisse" href="./caisse.html">
           <div class="tileTop">
             <div class="tileIcon">💰</div>
@@ -521,18 +528,18 @@
         <a class="tile gold" id="goArticles" href="./admin.html#articleList">
           <div class="tileTop">
             <div class="tileIcon">📦</div>
-            <div class="tileTag">Stock</div>
+            <div class="tileTag">Prix</div>
           </div>
           <div>
             <b>Marchandises</b>
-            <span>Articles, prix, stock, catégories.</span>
+            <span>Prix, stock, catégories.</span>
           </div>
         </a>
 
         <a class="tile blue" id="goActions" href="./actions.html">
           <div class="tileTop">
             <div class="tileIcon">⚡</div>
-            <div class="tileTag">Actions</div>
+            <div class="tileTag">Rapide</div>
           </div>
           <div>
             <b>Actions utiles</b>
@@ -543,7 +550,7 @@
         <a class="tile" id="goConfirm" href="./confirme-pro.html">
           <div class="tileTop">
             <div class="tileIcon">✅</div>
-            <div class="tileTag">Activité</div>
+            <div class="tileTag">Valider</div>
           </div>
           <div>
             <b>Confirmer</b>
@@ -559,7 +566,7 @@
         <a class="tile" id="goProfile" href="./profile.html">
           <div class="tileTop">
             <div class="tileIcon">🏪</div>
-            <div class="tileTag">Fiche</div>
+            <div class="tileTag">Client</div>
           </div>
           <div>
             <b>Coordonnées pro</b>
@@ -570,7 +577,7 @@
         <a class="tile" id="goQr" href="./qr.html">
           <div class="tileTop">
             <div class="tileIcon">🔳</div>
-            <div class="tileTag">QR</div>
+            <div class="tileTag">Partager</div>
           </div>
           <div>
             <b>Mon QR</b>
@@ -592,7 +599,7 @@
         <a class="tile pay" id="goPay" href="https://pro-pay.digiylyfe.com/admin.html">
           <div class="tileTop">
             <div class="tileIcon">💰</div>
-            <div class="tileTag">PAY</div>
+            <div class="tileTag">Argent</div>
           </div>
           <div>
             <b>Mon argent</b>
@@ -603,7 +610,7 @@
     </section>
 
     <section class="group" aria-label="Accès et maison POS">
-      <div class="groupLabel">Accès · session</div>
+      <div class="groupLabel">Accès propre</div>
       <div class="tileGrid">
         <a class="tile blue" id="goSession" href="./session.html">
           <div class="tileTop">
@@ -619,11 +626,11 @@
         <a class="tile" id="goPin" href="./pin.html">
           <div class="tileTop">
             <div class="tileIcon">🔐</div>
-            <div class="tileTag">PIN</div>
+            <div class="tileTag">Accès</div>
           </div>
           <div>
             <b>Mon accès</b>
-            <span>Ouvrir la session proprement.</span>
+            <span>Ouvrir l’accès proprement.</span>
           </div>
         </a>
 
@@ -633,8 +640,8 @@
             <div class="tileTag">HUB</div>
           </div>
           <div>
-            <b>HUB général</b>
-            <span>Retour aux portes DIGIY.</span>
+            <b>Toutes les portes</b>
+            <span>Retour à la grande maison.</span>
           </div>
         </a>
 
@@ -656,7 +663,7 @@
     <div class="bottomInner">
       <a class="active" href="./hub.html"><span class="bi">🧭</span><span>HUB</span></a>
       <a href="./caisse.html"><span class="bi">💰</span><span>Caisse</span></a>
-      <a href="./admin.html#articleList"><span class="bi">📦</span><span>Articles</span></a>
+      <a href="./admin.html#articleList"><span class="bi">📦</span><span>Marchandises</span></a>
       <a href="./profile.html"><span class="bi">🏪</span><span>Fiche</span></a>
       <a href="./session.html"><span class="bi">🛡️</span><span>Session</span></a>
     </div>
@@ -790,7 +797,63 @@
         const ok = !!(state && (state.access_ok || state.access || state.pin_session_ok));
         el.textContent = ok
           ? "Compte reconnu. Ouvre le bon pavé : caisse, marchandises, fiche, QR ou actions utiles."
-          : "Accès à vérifier. Les portes restent visibles, mais le PIN protège le commerce.";
+          : "Accès à vérifier. Les portes restent visibles, mais le code protège le commerce.";
+      }
+
+
+      const HUB_VOICE_TEXT = [
+        "Bienvenue dans Mon Commerce.",
+        "Ici, le hub oriente seulement.",
+        "Tu veux vendre : ouvre la caisse.",
+        "Tu veux régler tes prix ou ton stock : ouvre Marchandises.",
+        "Tu veux que le client te comprenne : ouvre ta fiche.",
+        "Tu veux partager : ouvre ton QR.",
+        "Une page, un sujet. Moins de bruit, plus d’action. Le pro garde son client, son argent et sa relation."
+      ].join(" ");
+
+      function chooseFrenchVoice(){
+        try{
+          const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+          return voices.find(v => /^fr/i.test(v.lang || "") && /Google|Thomas|Amelie|Audrey|Daniel/i.test(v.name || "")) ||
+                 voices.find(v => /^fr/i.test(v.lang || "")) || voices[0] || null;
+        }catch(_){ return null; }
+      }
+
+      let hubSpeaking = false;
+      function speakHub(){
+        const btn = $("btnHubVoice");
+        if(!("speechSynthesis" in window)){
+          if(btn) btn.textContent = "🎧 Audio indisponible";
+          return;
+        }
+        if(hubSpeaking){
+          try{ window.speechSynthesis.cancel(); }catch(_){}
+          hubSpeaking = false;
+          if(btn){ btn.textContent = "🎧 Écouter DIGIY"; btn.classList.remove("playing"); }
+          return;
+        }
+        try{
+          window.speechSynthesis.cancel();
+          const u = new SpeechSynthesisUtterance(HUB_VOICE_TEXT);
+          u.lang = "fr-FR"; u.rate = 0.86; u.pitch = 1.02; u.volume = 1;
+          const v = chooseFrenchVoice();
+          if(v) u.voice = v;
+          u.onstart = () => { hubSpeaking = true; if(btn){ btn.textContent = "⏹ Stop"; btn.classList.add("playing"); } };
+          const stop = () => { hubSpeaking = false; if(btn){ btn.textContent = "🎧 Écouter DIGIY"; btn.classList.remove("playing"); } };
+          u.onend = stop; u.onerror = stop;
+          window.speechSynthesis.speak(u);
+        }catch(_){
+          hubSpeaking = false;
+          if(btn) btn.textContent = "🎧 Réessayer";
+        }
+      }
+
+      function initHubVoice(){
+        const btn = $("btnHubVoice");
+        if(btn) btn.addEventListener("click", speakHub);
+        if("speechSynthesis" in window){
+          window.speechSynthesis.onvoiceschanged = chooseFrenchVoice;
+        }
       }
 
       async function boot(){
@@ -803,6 +866,7 @@
 
         cleanVisibleUrl();
         cleanInternalLinks();
+        initHubVoice();
       }
 
       boot();
@@ -810,3 +874,4 @@
   </script>
 </body>
 </html>
+
