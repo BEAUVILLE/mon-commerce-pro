@@ -1,11 +1,14 @@
 // guard.js — DIGIY POS PRO / MON COMMERCE
 // Doctrine : PIN une seule fois -> session locale fraîche 8h -> navigation interne directe
+// Rail ABOS : digiy_has_module_access_from_abos(phone, "POS") d'abord
+// Secours transition : digiy_has_access avec alias POS / COMMERCE
 // PRO = coffre sécurisé / PUBLIC = vitrine propre / RPC = pont contrôlé
 
 (function () {
   "use strict";
 
   const MODULE = "POS";
+  const MODULE_LOWER = "pos";
   const MODULE_ALIASES = ["POS", "POS_PRO", "COMMERCE", "CAISSE", "MON_COMMERCE"];
   const SESSION_KEY = "DIGIY_POS_PRO_SESSION_V1";
   const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8h
@@ -37,22 +40,23 @@
   }
 
   function normalizePhone(value) {
-    const raw = String(value || "").trim();
-    const cleaned = raw.replace(/[^\d+]/g, "");
-    const digits = cleaned.replace(/[^\d]/g, "");
-
+    const digits = String(value || "").replace(/[^\d]/g, "");
     if (!digits) return "";
-    return cleaned.startsWith("+") ? `+${digits}` : digits;
+    if (digits.startsWith("221") && digits.length === 12) return digits;
+    if (digits.length === 9) return "221" + digits;
+    return digits;
   }
 
   function normalizeSlug(value) {
     return String(value || "")
       .trim()
       .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "")
+      .replace(/[^a-z0-9-_]/g, "")
       .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "");
+      .replace(/^[-_]+|[-_]+$/g, "");
   }
 
   function isSessionFresh(session) {
@@ -63,12 +67,27 @@
     return now() - Number(session.validated_at) < SESSION_TTL_MS;
   }
 
+  function safeJsonParse(raw) {
+    try {
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function isSensitiveSlug(slug) {
+    return /\d{7,}/.test(String(slug || ""));
+  }
+
   function getStoredSession() {
     try {
-      const raw = localStorage.getItem(SESSION_KEY);
+      const raw =
+        sessionStorage.getItem(SESSION_KEY) ||
+        localStorage.getItem(SESSION_KEY);
+
       if (!raw) return null;
 
-      const session = JSON.parse(raw);
+      const session = safeJsonParse(raw);
       return isSessionFresh(session) ? session : null;
     } catch (_) {
       return null;
@@ -82,14 +101,19 @@
       phone: normalizePhone(session.phone),
       slug: normalizeSlug(session.slug || ""),
       role: session.role || "owner",
-      validated_at: session.validated_at || now()
+      access: true,
+      access_ok: true,
+      validated_at: session.validated_at || now(),
+      expires_at: session.expires_at || (now() + SESSION_TTL_MS)
     };
 
     currentSession = clean;
 
     try {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(clean));
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(clean));
+      const raw = JSON.stringify(clean);
+
+      localStorage.setItem(SESSION_KEY, raw);
+      sessionStorage.setItem(SESSION_KEY, raw);
 
       if (clean.slug) {
         localStorage.setItem("digiy_pos_slug", clean.slug);
@@ -97,9 +121,16 @@
       }
 
       if (clean.phone) {
-        localStorage.setItem("digiy_pos_phone", clean.phone);
         sessionStorage.setItem("digiy_pos_phone", clean.phone);
+
+        // On évite de garder le téléphone en clair longtemps dans les clés locales séparées.
+        try {
+          localStorage.removeItem("digiy_pos_phone");
+        } catch (_) {}
       }
+
+      window.DIGIY_POS_HUB_PHONE = clean.phone || "";
+      window.DIGIY_ACCESS = Object.assign({}, window.DIGIY_ACCESS || {}, clean);
     } catch (_) {}
 
     return clean;
@@ -111,6 +142,8 @@
     try {
       localStorage.removeItem(SESSION_KEY);
       sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem("digiy_pos_phone");
+      delete window.DIGIY_POS_HUB_PHONE;
     } catch (_) {}
   }
 
@@ -125,6 +158,12 @@
           changed = true;
         }
       });
+
+      const slug = normalizeSlug(url.searchParams.get("slug") || "");
+      if (slug && isSensitiveSlug(slug)) {
+        url.searchParams.delete("slug");
+        changed = true;
+      }
 
       if (changed) {
         const cleanUrl =
@@ -181,7 +220,50 @@
       }
     });
 
+    window.sb = client;
     return client;
+  }
+
+  function boolFromRpcData(data) {
+    const raw = Array.isArray(data) ? data[0] : data;
+
+    if (raw === true) return true;
+    if (raw === 1) return true;
+
+    if (typeof raw === "string") {
+      const txt = raw.trim().toLowerCase();
+
+      if (txt === "true" || txt === "t" || txt === "1" || txt === "yes" || txt === "ok") {
+        return true;
+      }
+
+      if (txt.startsWith("(")) {
+        const first = txt.replace(/^\(/, "").split(",")[0];
+        const token = String(first || "").trim().replace(/^"|"$/g, "").toLowerCase();
+        if (token === "t" || token === "true" || token === "1") return true;
+      }
+
+      return false;
+    }
+
+    if (raw && typeof raw === "object") {
+      if (raw.ok === true) return true;
+      if (raw.access === true) return true;
+      if (raw.access_ok === true) return true;
+      if (raw.has_access === true) return true;
+      if (raw.allowed === true) return true;
+      if (raw.active === true) return true;
+      if (raw.is_active === true) return true;
+      if (raw.subscribed === true) return true;
+      if (raw.valid === true) return true;
+
+      const vals = Object.values(raw);
+      if (vals.some((v) => v === true || v === 1 || v === "t" || v === "true")) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   async function tryRpc(name, payloads) {
@@ -190,6 +272,7 @@
     if (!sb) {
       return {
         ok: false,
+        data: null,
         error: "Supabase non prêt"
       };
     }
@@ -198,25 +281,44 @@
       try {
         const { data, error } = await sb.rpc(name, payload);
 
-        if (!error) {
-          return {
-            ok: true,
-            data
-          };
-        }
+        if (error) continue;
+
+        return {
+          ok: true,
+          data,
+          payload
+        };
       } catch (_) {}
     }
 
     return {
       ok: false,
+      data: null,
       error: "RPC non disponible ou signature différente"
     };
   }
 
-  async function checkAccess(phone) {
-    const cleanPhone = normalizePhone(phone);
-    if (!cleanPhone) return false;
+  async function tryRpcBoolean(name, payloads) {
+    const sb = getSupabaseClient();
 
+    if (!sb) return false;
+
+    for (const payload of payloads) {
+      try {
+        const { data, error } = await sb.rpc(name, payload);
+        if (error) continue;
+
+        if (boolFromRpcData(data)) {
+          return true;
+        }
+      } catch (_) {}
+    }
+
+    return false;
+  }
+
+  function buildAccessPayloads(phone) {
+    const cleanPhone = normalizePhone(phone);
     const payloads = [];
 
     MODULE_ALIASES.forEach((moduleCode) => {
@@ -225,17 +327,43 @@
       payloads.push({ input_phone: cleanPhone, input_module: moduleCode });
     });
 
-    const res = await tryRpc("digiy_has_access", payloads);
+    payloads.push({ p_phone: cleanPhone, p_module: MODULE_LOWER });
+    payloads.push({ phone: cleanPhone, module: MODULE_LOWER });
 
-    if (!res.ok) return false;
+    return payloads;
+  }
 
-    if (res.data === true) return true;
-    if (res.data && res.data.ok === true) return true;
-    if (res.data && res.data.has_access === true) return true;
-    if (res.data && res.data.active === true) return true;
-    if (res.data && res.data.access === true) return true;
-    if (res.data && res.data.allowed === true) return true;
-    if (res.data && res.data.valid === true) return true;
+  async function checkAccessFromAbos(phone) {
+    const cleanPhone = normalizePhone(phone);
+    if (!cleanPhone) return false;
+
+    return tryRpcBoolean(
+      "digiy_has_module_access_from_abos",
+      buildAccessPayloads(cleanPhone)
+    );
+  }
+
+  async function checkAccessLegacy(phone) {
+    const cleanPhone = normalizePhone(phone);
+    if (!cleanPhone) return false;
+
+    return tryRpcBoolean(
+      "digiy_has_access",
+      buildAccessPayloads(cleanPhone)
+    );
+  }
+
+  async function checkAccess(phone) {
+    const cleanPhone = normalizePhone(phone);
+    if (!cleanPhone) return false;
+
+    // 1. Vérité principale : rail ABOS central.
+    const abosOk = await checkAccessFromAbos(cleanPhone);
+    if (abosOk) return true;
+
+    // 2. Secours transition : ancien rail.
+    const legacyOk = await checkAccessLegacy(cleanPhone);
+    if (legacyOk) return true;
 
     return false;
   }
@@ -311,6 +439,18 @@
       } catch (_) {}
     }
 
+    try {
+      const { data, error } = await sb
+        .from("digiy_subscriptions_public")
+        .select("phone,slug,module")
+        .eq("phone", cleanPhone)
+        .limit(1);
+
+      if (!error && Array.isArray(data) && data[0] && data[0].slug) {
+        return normalizeSlug(data[0].slug);
+      }
+    } catch (_) {}
+
     return null;
   }
 
@@ -350,7 +490,7 @@
 
       const phone = normalizePhone(
         sessionStorage.getItem("digiy_pos_phone") ||
-          localStorage.getItem("digiy_pos_phone") ||
+          window.DIGIY_POS_HUB_PHONE ||
           ""
       );
 
@@ -385,8 +525,85 @@
     return saveSession({
       phone: entry.phone,
       slug: entry.slug || null,
-      validated_at: now()
+      validated_at: now(),
+      expires_at: now() + SESSION_TTL_MS
     });
+  }
+
+  function normalizeVerifyPayload(payload, fallbackPhone) {
+    let current = payload;
+
+    if (Array.isArray(current)) {
+      current = current[0] || null;
+    }
+
+    if (typeof current === "string") {
+      const txt = current.trim();
+
+      if (txt.startsWith("(") && txt.endsWith(")")) {
+        const inner = txt.slice(1, -1);
+        const parts = inner.split(",");
+        const first = String(parts[0] || "").trim().toLowerCase();
+        const phone = String(parts[2] || "").replace(/[^\d]/g, "");
+
+        if (first === "t" || first === "true" || first === "1") {
+          return {
+            ok: true,
+            phone: normalizePhone(phone || fallbackPhone)
+          };
+        }
+      }
+
+      try {
+        current = JSON.parse(txt);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    if (current === true) {
+      return {
+        ok: true,
+        phone: normalizePhone(fallbackPhone)
+      };
+    }
+
+    if (current && typeof current === "object") {
+      if (
+        current.ok === true ||
+        current.success === true ||
+        current.valid === true ||
+        current.is_valid === true ||
+        current.allowed === true ||
+        current.access === true ||
+        current.access_ok === true
+      ) {
+        return {
+          ok: true,
+          phone: normalizePhone(current.phone || current.p_phone || fallbackPhone),
+          slug: normalizeSlug(current.slug || current.pos_slug || current.owner_slug || "")
+        };
+      }
+
+      const vals = Object.values(current);
+      if (vals.length >= 3) {
+        const okLike =
+          vals[0] === true ||
+          vals[0] === "t" ||
+          vals[0] === "true" ||
+          vals[0] === 1;
+
+        if (okLike) {
+          return {
+            ok: true,
+            phone: normalizePhone(vals[2] || fallbackPhone),
+            slug: ""
+          };
+        }
+      }
+    }
+
+    return null;
   }
 
   async function verifyPin(phone, pin) {
@@ -400,46 +617,52 @@
       };
     }
 
-    const res = await tryRpc("digiy_pos_verify_pin", [
+    const posRes = await tryRpc("digiy_pos_verify_pin", [
       { p_phone: cleanPhone, p_pin: cleanPin },
       { phone: cleanPhone, pin: cleanPin },
       { input_phone: cleanPhone, input_pin: cleanPin }
     ]);
 
-    if (!res.ok) {
+    let parsed = posRes.ok ? normalizeVerifyPayload(posRes.data, cleanPhone) : null;
+
+    if (!parsed?.ok) {
+      const genericRes = await tryRpc("digiy_verify_pin", [
+        { p_phone: cleanPhone, p_module: MODULE, p_pin: cleanPin },
+        { p_phone: cleanPhone, p_module: MODULE_LOWER, p_pin: cleanPin }
+      ]);
+
+      parsed = genericRes.ok ? normalizeVerifyPayload(genericRes.data, cleanPhone) : null;
+    }
+
+    if (!parsed?.ok) {
       return {
         ok: false,
-        message: "Impossible de vérifier l’accès pour le moment."
+        message: "Code incorrect ou accès non actif."
       };
     }
 
-    const data = res.data || {};
+    const finalPhone = normalizePhone(parsed.phone || cleanPhone);
 
-    const success =
-      data === true ||
-      data.ok === true ||
-      data.valid === true ||
-      data.allowed === true ||
-      data.access === true;
-
-    if (!success) {
-      return {
-        ok: false,
-        message: data.message || "Code incorrect ou accès non actif."
-      };
-    }
-
-    let slug = data.slug || data.pos_slug || null;
+    let slug = normalizeSlug(parsed.slug || "");
 
     if (!slug) {
-      slug = await resolveSlugByPhone(data.phone || cleanPhone);
+      slug = await resolveSlugByPhone(finalPhone);
+    }
+
+    const accessOk = await checkAccess(finalPhone);
+    if (!accessOk) {
+      return {
+        ok: false,
+        message: "Abonnement POS / Mon commerce inactif."
+      };
     }
 
     const session = saveSession({
-      phone: data.phone || cleanPhone,
+      phone: finalPhone,
       slug,
-      role: data.role || "owner",
-      validated_at: now()
+      role: "owner",
+      validated_at: now(),
+      expires_at: now() + SESSION_TTL_MS
     });
 
     cleanSensitiveUrl();
@@ -482,6 +705,7 @@
 
   async function boot() {
     setPageState("loading");
+    cleanSensitiveUrl();
 
     const stored = getStoredSession();
 
@@ -519,7 +743,8 @@
         const session = saveSession({
           phone: fallback.phone,
           slug: fallback.slug || null,
-          validated_at: now()
+          validated_at: now(),
+          expires_at: now() + SESSION_TTL_MS
         });
 
         cleanSensitiveUrl();
@@ -587,6 +812,7 @@
   }
 
   window.DIGIY_GUARD = {
+    VERSION: "pos-guard-abos-central-v1-20260522",
     module: MODULE,
     publicName: "Mon commerce",
 
@@ -596,14 +822,21 @@
 
     verifyPin,
     loginWithPin,
+
     checkAccess,
+    checkAccessFromAbos,
+    checkAccessLegacy,
 
     resolvePhoneBySlug,
     resolveSlugByPhone,
 
     logout,
     buildInternalUrl,
-    cleanSensitiveUrl
+    cleanSensitiveUrl,
+
+    getSb() {
+      return getSupabaseClient();
+    }
   };
 
   document.addEventListener("DOMContentLoaded", function () {
