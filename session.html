@@ -3,26 +3,29 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>MON COMMERCE — HUB POS</title>
+  <title>MON COMMERCE — Ma session</title>
   <meta name="theme-color" content="#1e7a46"/>
-  <meta name="description" content="MON COMMERCE PRO — HUB mobile terrain en pavés : caisse, marchandises, fiche, QR, actions utiles, accès et PAY."/>
+  <meta name="description" content="MON COMMERCE PRO — état de session, accès protégé et nettoyage local sans exposer téléphone ni identifiant."/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="digiy-build" content="pos-hub-container-driver-grand-gras-session-20260519"/>
+  <meta name="digiy-build" content="pos-session-porte-oreille-20260524"/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
     window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
     window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
+    window.DIGIY_SUPABASE_KEY = window.DIGIY_SUPABASE_ANON_KEY;
+
     window.DIGIY_MODULE = "POS";
+    window.DIGIY_ABOS_MODULE = "POS";
     window.DIGIY_LOGIN_URL = "./pin.html";
   </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./guard.js?v=pos-hub-container-driver-grand-gras-session-20260519"></script>
-<script src="./digiy-module-bridge.js?v=bridge-20260521" defer></script>
-<script src="./digiy-pos-memory.js?v=pos-memory-20260521" defer></script>
-<script src="./oreille-metier-pos.js?v=pos-ear-20260521" defer></script>
 
-  <link rel="preload" as="image" href="https://digiylyfe.net/wp-content/uploads/2026/05/metier-pro-1.png"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./assets/js/digiy-abos-access.js?v=abos-20260522"></script>
+  <script src="./guard.js?v=pos-session-porte-oreille-20260524"></script>
+  <script src="./assets/js/digiy-module-bridge.js?v=bridge-20260521" defer></script>
+  <script src="./assets/js/digiy-pos-memory.js?v=pos-memory-20260521" defer></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
@@ -34,11 +37,14 @@
       --bg3:#0e4226;
       --bar:rgba(8,50,24,.96);
       --gold:#c4973f;
+      --gold2:#facc15;
       --green:#22c55e;
       --blue:#8b8cff;
+      --red:#fb7185;
       --line:rgba(255,255,255,.18);
       --text:#f0fff5;
       --muted:rgba(240,255,245,.76);
+      --soft:rgba(240,255,245,.58);
       --shadow:0 16px 40px rgba(0,0,0,.22);
       --r:18px;
       --max:960px;
@@ -47,7 +53,12 @@
     }
 
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+
+    html{
+      scroll-behavior:smooth;
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
+    }
 
     body{
       margin:0;
@@ -125,17 +136,9 @@
       text-overflow:ellipsis;
     }
 
-    .hdrPill.ok{
-      color:#bbf7d0;
-      border-color:rgba(34,197,94,.38);
-      background:rgba(34,197,94,.12);
-    }
-
-    .hdrPill.warn{
-      color:#fde68a;
-      border-color:rgba(245,158,11,.38);
-      background:rgba(245,158,11,.12);
-    }
+    .hdrPill.ok{color:#bbf7d0;border-color:rgba(34,197,94,.38);background:rgba(34,197,94,.12)}
+    .hdrPill.warn{color:#fde68a;border-color:rgba(245,158,11,.38);background:rgba(245,158,11,.12)}
+    .hdrPill.bad{color:#fecaca;border-color:rgba(251,113,133,.38);background:rgba(251,113,133,.10)}
 
     .wrap{
       width:min(var(--max),100%);
@@ -144,7 +147,7 @@
       gap:16px;
     }
 
-    .hubHead{
+    .head,.notice{
       padding:2px 2px 4px;
     }
 
@@ -165,7 +168,7 @@
       letter-spacing:-.05em;
     }
 
-    .hubSub{
+    .sub{
       color:var(--muted);
       font-size:17px;
       font-weight:1000;
@@ -187,27 +190,13 @@
 
     .rule b{color:#fff0a8}
 
-    .group{
-      display:grid;
-      gap:8px;
-    }
-
-    .groupLabel{
-      font-size:11px;
-      font-weight:1000;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-      color:rgba(240,255,245,.50);
-      padding:0 2px;
-    }
-
-    .tileGrid{
+    .grid{
       display:grid;
       grid-template-columns:repeat(4,minmax(0,1fr));
       gap:9px;
     }
 
-    .tile{
+    .card,.action{
       min-height:136px;
       display:flex;
       flex-direction:column;
@@ -218,26 +207,17 @@
       border:1px solid rgba(255,255,255,.15);
       background:rgba(255,255,255,.09);
       box-shadow:var(--shadow);
-      transition:transform .12s ease,background .12s ease,border-color .12s ease;
       -webkit-tap-highlight-color:transparent;
     }
 
-    .tile:hover{
-      transform:translateY(-1px);
-      background:rgba(255,255,255,.14);
-      border-color:rgba(255,255,255,.25);
-    }
-
-    .tile:active{transform:none}
-
-    .tileTop{
+    .cardTop,.actionTop{
       display:flex;
       justify-content:space-between;
       align-items:flex-start;
       gap:8px;
     }
 
-    .tileIcon{
+    .ico{
       width:48px;
       height:48px;
       border-radius:15px;
@@ -249,7 +229,7 @@
       flex:0 0 auto;
     }
 
-    .tileTag{
+    .tag{
       min-height:27px;
       display:inline-flex;
       align-items:center;
@@ -266,7 +246,7 @@
       white-space:nowrap;
     }
 
-    .tile b{
+    .card b,.action b{
       display:block;
       font-size:20px;
       font-weight:1000;
@@ -275,7 +255,7 @@
       color:#fff;
     }
 
-    .tile span{
+    .card span,.action span{
       display:block;
       margin-top:5px;
       color:var(--muted);
@@ -284,82 +264,39 @@
       line-height:1.28;
     }
 
-    .tile.primary{
-      border-color:rgba(34,197,94,.38);
-      background:rgba(34,197,94,.14);
+    .ok{border-color:rgba(34,197,94,.38);background:rgba(34,197,94,.14)}
+    .warn{border-color:rgba(245,158,11,.38);background:rgba(245,158,11,.12)}
+    .gold{border-color:rgba(196,151,63,.42);background:rgba(196,151,63,.12)}
+    .blue{border-color:rgba(139,140,255,.32);background:rgba(139,140,255,.12)}
+
+    .dangerBtn{
+      width:100%;
+      min-height:60px;
+      border-radius:18px;
+      border:1px solid rgba(251,113,133,.34);
+      background:rgba(251,113,133,.10);
+      color:#fecaca;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      font-size:16px;
+      font-weight:1000;
+      box-shadow:var(--shadow);
     }
 
-    .tile.primary .tileIcon{
-      background:rgba(34,197,94,.16);
-      border-color:rgba(34,197,94,.28);
+    .notice{
+      padding:14px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      color:var(--muted);
+      font-size:15px;
+      font-weight:1000;
+      line-height:1.45;
     }
 
-    .tile.gold{
-      border-color:rgba(196,151,63,.42);
-      background:rgba(196,151,63,.12);
-    }
-
-    .tile.gold .tileIcon,
-    .tile.pay .tileIcon{
-      background:rgba(196,151,63,.15);
-      border-color:rgba(196,151,63,.30);
-    }
-
-    .tile.blue{
-      border-color:rgba(139,140,255,.32);
-      background:rgba(139,140,255,.12);
-    }
-
-    .tile.pay{
-      border-color:rgba(196,151,63,.48);
-      background:linear-gradient(180deg,rgba(196,151,63,.18),rgba(255,255,255,.08));
-    }
-
-    .tile.pay .tileTag{
-      color:var(--gold);
-      border-color:rgba(196,151,63,.35);
-      background:rgba(196,151,63,.12);
-    }
-
-    .tileLogoImg{
-      width:96px;
-      height:96px;
-      object-fit:contain;
-      border-radius:24px;
-      background:#fff;
-      padding:8px;
-      box-shadow:0 12px 26px rgba(0,0,0,.24);
-      border:1px solid rgba(196,151,63,.34);
-      flex:0 0 auto;
-    }
-
-    .blasonTile{
-      min-height:168px!important;
-      border-color:rgba(196,151,63,.62)!important;
-      background:linear-gradient(180deg,rgba(255,240,168,.30),rgba(255,255,255,.15))!important;
-    }
-
-    .blasonTile b{color:#fffdf3!important}
-    .blasonTile span{color:rgba(255,248,220,.94)!important}
-    .blasonTile .tileTag{
-      color:#3a2a05!important;
-      border-color:rgba(196,151,63,.40)!important;
-      background:#fff0a8!important;
-    }
-
-    .metierTileClair{
-      border-color:rgba(255,240,168,.48)!important;
-      background:linear-gradient(180deg,rgba(255,240,168,.22),rgba(255,255,255,.14))!important;
-    }
-
-    .metierTileClair b{color:#fffdf3!important}
-    .metierTileClair span{color:rgba(255,248,220,.92)!important}
-    .metierTileClair .tileIcon{
-      background:#fff7d6!important;
-      color:#171717!important;
-      border-color:rgba(196,151,63,.38)!important;
-      box-shadow:0 10px 22px rgba(0,0,0,.14);
-    }
+    .notice b{color:#fff}
 
     .bottomBar{
       position:fixed;
@@ -405,13 +342,10 @@
       border-color:rgba(34,197,94,.32);
     }
 
-    .bottomInner .bi{
-      font-size:19px;
-      line-height:1;
-    }
+    .bottomInner .bi{font-size:19px;line-height:1}
 
     @media(max-width:860px){
-      .tileGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
 
     @media(max-width:520px){
@@ -423,251 +357,208 @@
         font-size:19px;
       }
 
-      .topHeader{
-        padding:0 10px;
-        gap:7px;
-      }
-
+      .topHeader{padding:0 10px;gap:7px}
       .hdrBack{font-size:13px}
       .hdrTitle{font-size:11px;letter-spacing:.12em}
       .hdrPill{font-size:11px;padding:6px 8px;max-width:34vw}
-
       h1{font-size:34px}
-      .hubSub{font-size:16px}
-
-      .tile{
-        min-height:132px;
-        padding:13px;
-      }
-
-      .tileIcon{
-        width:46px;
-        height:46px;
-        font-size:24px;
-      }
-
-      .tileLogoImg{width:92px;height:92px;border-radius:22px}
-
-      .tile b{
-        font-size:19px;
-        line-height:1.05;
-      }
-
-      .tile span{
-        font-size:13.5px;
-        line-height:1.25;
-      }
-
-      .tileTag{
-        font-size:9px;
-        padding:4px 7px;
-      }
+      .sub{font-size:16px}
+      .grid{gap:8px}
+      .card,.action{min-height:132px;padding:13px}
+      .ico{width:46px;height:46px;font-size:24px}
+      .card b,.action b{font-size:19px}
+      .card span,.action span{font-size:13.5px}
+      .tag{font-size:9px;padding:4px 7px}
+      .dangerBtn{font-size:15px}
     }
 
     @media(prefers-reduced-motion:reduce){
       html{scroll-behavior:auto}
-      .tile{transition:none}
     }
   </style>
 </head>
 
 <body>
   <header class="topHeader">
-    <a class="hdrBack" id="hdrBack" href="./caisse.html">← Caisse</a>
-    <div class="hdrTitle">HUB COMMERCE</div>
+    <a class="hdrBack" href="./hub.html">← HUB</a>
+    <div class="hdrTitle">Ma session</div>
     <div class="hdrPill warn" id="sessionPill">session…</div>
   </header>
 
   <main class="wrap">
-    <section class="hubHead">
+    <section class="head">
       <div class="eyebrow">🛒 MON COMMERCE</div>
-      <h1>Les gestes du comptoir.</h1>
-      <div class="hubSub" id="hubSub">
-        Chaque pavé a un rôle : encaisser, préparer les marchandises, régler la fiche, partager le QR, agir vite.
+      <h1>Ma session.</h1>
+      <div class="sub" id="sessionSub">
+        Ici on contrôle l’accès commerce sans afficher le téléphone, sans exposer l’identifiant,
+        sans toucher aux articles, au stock, à la caisse ni aux notes.
       </div>
       <div class="rule">
-        <b>Index</b> = porte courte. <b>HUB</b> = navigation. <b>Caisse</b> = comptoir. Pas de double accueil, pas de lien personnel dans le moule.
+        Règle POS : <b>on nettoie seulement l’accès local</b>. On ne supprime ni les ventes, ni les articles,
+        ni les notes, ni la fiche commerce.
       </div>
     </section>
 
-    <section class="group" aria-label="Action immédiate POS">
-      <div class="groupLabel">Action immédiate</div>
-      <div class="tileGrid">
-        <a class="tile gold blasonTile" href="https://digiylyfe.com/" aria-label="DIGIYLYFE Métiers pro">
-          <div class="tileTop">
-            <img
-              class="tileLogoImg"
-              src="https://digiylyfe.net/wp-content/uploads/2026/05/metier-pro-1.png"
-              alt="DIGIYLYFE — Métiers pro"
-              loading="lazy"
-              decoding="async"
-            />
-            <div class="tileTag">DIGIY</div>
-          </div>
-          <div>
-            <b>Métiers pro</b>
-            <span>Le blason commun des portes métier.</span>
-          </div>
-        </a>
+    <section class="grid" aria-label="État de session POS">
+      <article class="card warn" id="statusCard">
+        <div class="cardTop">
+          <div class="ico">🔐</div>
+          <div class="tag" id="statusTag">Contrôle</div>
+        </div>
+        <div>
+          <b id="statusTitle">Vérification</b>
+          <span id="statusText">Lecture de l’état de session…</span>
+        </div>
+      </article>
 
-        <a class="tile primary metierTileClair" id="goCaisse" href="./caisse.html">
-          <div class="tileTop">
-            <div class="tileIcon">💰</div>
-            <div class="tileTag">Caisse</div>
-          </div>
-          <div>
-            <b>Encaisser</b>
-            <span>Vendre, additionner, confirmer.</span>
-          </div>
-        </a>
+      <article class="card blue">
+        <div class="cardTop">
+          <div class="ico">🧾</div>
+          <div class="tag">Module</div>
+        </div>
+        <div>
+          <b>POS</b>
+          <span>Caisse, ventes, articles, stock, QR et fiche commerce.</span>
+        </div>
+      </article>
 
-        <a class="tile gold" id="goArticles" href="./admin.html#articleList">
-          <div class="tileTop">
-            <div class="tileIcon">📦</div>
-            <div class="tileTag">Stock</div>
-          </div>
-          <div>
-            <b>Marchandises</b>
-            <span>Articles, prix, stock, catégories.</span>
-          </div>
-        </a>
+      <article class="card gold">
+        <div class="cardTop">
+          <div class="ico">🧠</div>
+          <div class="tag">Local</div>
+        </div>
+        <div>
+          <b>Mémoire téléphone</b>
+          <span id="memoryText">Les repères restent côté appareil.</span>
+        </div>
+      </article>
 
-        <a class="tile blue" id="goActions" href="./actions.html">
-          <div class="tileTop">
-            <div class="tileIcon">⚡</div>
-            <div class="tileTag">Actions</div>
-          </div>
-          <div>
-            <b>Actions utiles</b>
-            <span>Dette, dépense, stock, commande.</span>
-          </div>
-        </a>
-
-        <a class="tile" id="goConfirm" href="./confirme-pro.html">
-          <div class="tileTop">
-            <div class="tileIcon">✅</div>
-            <div class="tileTag">Activité</div>
-          </div>
-          <div>
-            <b>Confirmer</b>
-            <span>Valider l’activité du commerce.</span>
-          </div>
-        </a>
-      </div>
+      <article class="card ok">
+        <div class="cardTop">
+          <div class="ico">🧭</div>
+          <div class="tag">Retour</div>
+        </div>
+        <div>
+          <b>HUB propre</b>
+          <span>Les pages internes reviennent au HUB, pas à l’ancien accueil.</span>
+        </div>
+      </article>
     </section>
 
-    <section class="group" aria-label="Identité commerce">
-      <div class="groupLabel">Identité · vitrine</div>
-      <div class="tileGrid">
-        <a class="tile" id="goProfile" href="./profile.html">
-          <div class="tileTop">
-            <div class="tileIcon">🏪</div>
-            <div class="tileTag">Fiche</div>
-          </div>
-          <div>
-            <b>Coordonnées pro</b>
-            <span>Nom, activité, infos visibles.</span>
-          </div>
-        </a>
+    <section class="grid" aria-label="Actions de session POS">
+      <a class="action ok" id="goHub" href="./hub.html">
+        <div class="actionTop">
+          <div class="ico">🧭</div>
+          <div class="tag">HUB</div>
+        </div>
+        <div>
+          <b>Mes portes</b>
+          <span>Retourner aux gestes du commerce.</span>
+        </div>
+      </a>
 
-        <a class="tile" id="goQr" href="./qr.html">
-          <div class="tileTop">
-            <div class="tileIcon">🔳</div>
-            <div class="tileTag">QR</div>
-          </div>
-          <div>
-            <b>Mon QR</b>
-            <span>Partager la porte boutique.</span>
-          </div>
-        </a>
+      <a class="action" id="goCaisse" href="./caisse.html">
+        <div class="actionTop">
+          <div class="ico">💰</div>
+          <div class="tag">Caisse</div>
+        </div>
+        <div>
+          <b>Ma caisse</b>
+          <span>Vendre, additionner, confirmer.</span>
+        </div>
+      </a>
 
-        <a class="tile" id="goPublic" href="https://mon-commerce.digiylyfe.com/">
-          <div class="tileTop">
-            <div class="tileIcon">🌍</div>
-            <div class="tileTag">Client</div>
-          </div>
-          <div>
-            <b>Côté client</b>
-            <span>Voir la façade publique.</span>
-          </div>
-        </a>
+      <a class="action gold" id="goOreille" href="./oreille.html">
+        <div class="actionTop">
+          <div class="ico">🎙️</div>
+          <div class="tag">Oreille</div>
+        </div>
+        <div>
+          <b>Oreille POS</b>
+          <span>Dicter vente, produit, quantité, prix.</span>
+        </div>
+      </a>
 
-        <a class="tile pay" id="goPay" href="https://pro-pay.digiylyfe.com/admin.html">
-          <div class="tileTop">
-            <div class="tileIcon">💰</div>
-            <div class="tileTag">PAY</div>
-          </div>
-          <div>
-            <b>Mon argent</b>
-            <span>Recettes, dettes, dépenses.</span>
-          </div>
-        </a>
-      </div>
+      <a class="action gold" id="goArticles" href="./admin.html#articleList">
+        <div class="actionTop">
+          <div class="ico">📦</div>
+          <div class="tag">Articles</div>
+        </div>
+        <div>
+          <b>Marchandises</b>
+          <span>Articles, prix, stock, catégories.</span>
+        </div>
+      </a>
+
+      <a class="action blue" id="goFiche" href="./profile.html">
+        <div class="actionTop">
+          <div class="ico">🏪</div>
+          <div class="tag">Fiche</div>
+        </div>
+        <div>
+          <b>Coordonnées pro</b>
+          <span>Nom, activité, infos visibles.</span>
+        </div>
+      </a>
+
+      <a class="action" id="goQr" href="./qr.html">
+        <div class="actionTop">
+          <div class="ico">🔳</div>
+          <div class="tag">QR</div>
+        </div>
+        <div>
+          <b>Mon QR</b>
+          <span>Partager la porte boutique.</span>
+        </div>
+      </a>
+
+      <a class="action gold" id="goPay" href="https://pro-pay.digiylyfe.com/admin.html">
+        <div class="actionTop">
+          <div class="ico">💰</div>
+          <div class="tag">PAY</div>
+        </div>
+        <div>
+          <b>Mon argent</b>
+          <span>Suivre ventes, dettes et mouvements.</span>
+        </div>
+      </a>
+
+      <a class="action" id="goPin" href="./pin.html">
+        <div class="actionTop">
+          <div class="ico">🔑</div>
+          <div class="tag">PIN</div>
+        </div>
+        <div>
+          <b>Rouvrir</b>
+          <span>Repasser par l’accès commerce.</span>
+        </div>
+      </a>
     </section>
 
-    <section class="group" aria-label="Accès et maison POS">
-      <div class="groupLabel">Accès · maison</div>
-      <div class="tileGrid">
-        <a class="tile blue" id="goSession" href="./session.html">
-          <div class="tileTop">
-            <div class="tileIcon">🛡️</div>
-            <div class="tileTag">Session</div>
-          </div>
-          <div>
-            <b>Ma session</b>
-            <span>État d’accès, nettoyage local.</span>
-          </div>
-        </a>
+    <button class="dangerBtn" id="btnClearSession" type="button">
+      🧹 Nettoyer seulement l’accès local
+    </button>
 
-        <a class="tile" id="goPin" href="./pin.html">
-          <div class="tileTop">
-            <div class="tileIcon">🔐</div>
-            <div class="tileTag">PIN</div>
-          </div>
-          <div>
-            <b>Mon accès</b>
-            <span>Ouvrir la session proprement.</span>
-          </div>
-        </a>
-
-        <a class="tile blue" id="goHubGeneral" href="https://digiy-hub.digiylyfe.com/">
-          <div class="tileTop">
-            <div class="tileIcon">🧭</div>
-            <div class="tileTag">HUB</div>
-          </div>
-          <div>
-            <b>HUB général</b>
-            <span>Retour aux portes DIGIY.</span>
-          </div>
-        </a>
-
-        <a class="tile" id="goSite" href="https://digiylyfe.com/">
-          <div class="tileTop">
-            <div class="tileIcon">🌍</div>
-            <div class="tileTag">Site</div>
-          </div>
-          <div>
-            <b>Site DIGIY</b>
-            <span>Maison publique DIGIYLYFE.</span>
-          </div>
-        </a>
-      </div>
+    <section class="notice" id="noticeBox">
+      Lecture en cours…
     </section>
   </main>
 
-  <nav class="bottomBar" aria-label="Navigation rapide MON COMMERCE">
+  <nav class="bottomBar" aria-label="Navigation POS">
     <div class="bottomInner">
-      <a class="active" href="./hub.html"><span class="bi">🧭</span><span>HUB</span></a>
+      <a href="./hub.html"><span class="bi">🧭</span><span>HUB</span></a>
       <a href="./caisse.html"><span class="bi">💰</span><span>Caisse</span></a>
       <a href="./admin.html#articleList"><span class="bi">📦</span><span>Articles</span></a>
-      <a href="./profile.html"><span class="bi">🏪</span><span>Fiche</span></a>
-      <a href="./session.html"><span class="bi">🛡️</span><span>Session</span></a>
+      <a href="./oreille.html"><span class="bi">🎙️</span><span>Oreille</span></a>
+      <a class="active" href="./session.html"><span class="bi">🔐</span><span>Session</span></a>
     </div>
   </nav>
 
   <script>
-    (() => {
+    (function(){
       "use strict";
+
+      const $ = (id) => document.getElementById(id);
 
       const SENSITIVE_KEYS = [
         "phone","tel","p_phone","owner_phone","subscription_phone","checkout_phone",
@@ -675,31 +566,44 @@
         "redirect_url","url","from","v"
       ];
 
-      const FORBIDDEN_SLUG_PREFIXES = ["loc-","explore-","driver-","market-","build-","jobs-","resa-","pay-"];
-      const ALLOWED_SLUG_PREFIXES = ["pos-","commerce-","mon-commerce-","caisse-"];
+      const SESSION_KEYS = [
+        "DIGIY_POS_PIN_SESSION",
+        "DIGIY_POS_SESSION",
+        "DIGIY_SESSION_POS",
+        "DIGIY_PIN_SESSION",
+        "DIGIY_ACCESS",
+        "digiy_pos_session",
+        "digiy_pos_pin_access",
+        "digiy_access",
+        "digiy_session"
+      ];
 
-      const $ = id => document.getElementById(id);
+      const SAFE_ACCESS_KEYS = [
+        "digiy_pos_slug",
+        "digiy_pos_last_slug",
+        "pos_slug",
+        "commerce_slug",
+        "mon_commerce_slug",
+        "digiy_last_slug",
+        "digiy_pos_phone",
+        "digiy_pos_last_phone",
+        "pos_phone",
+        "commerce_phone",
+        "digiy_phone",
+        "digiy_last_phone"
+      ];
 
-      function normSlug(v){
-        return String(v || "")
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g,"-")
-          .replace(/[^a-z0-9-]/g,"")
-          .replace(/-+/g,"-")
-          .replace(/^-|-$/g,"");
+      function read(key){
+        try{
+          return sessionStorage.getItem(key) || localStorage.getItem(key) || "";
+        }catch(_){
+          return "";
+        }
       }
 
-      function isAllowedPosSlug(v){
-        const s = normSlug(v);
-        if(!s) return false;
-        if(FORBIDDEN_SLUG_PREFIXES.some(prefix => s.startsWith(prefix))) return false;
-        return ALLOWED_SLUG_PREFIXES.some(prefix => s.startsWith(prefix));
-      }
-
-      function isSensitiveSlug(v){
-        const s = normSlug(v);
-        return /\d{7,}/.test(s) || (!!s && !isAllowedPosSlug(s));
+      function removeKey(key){
+        try{ sessionStorage.removeItem(key); }catch(_){}
+        try{ localStorage.removeItem(key); }catch(_){}
       }
 
       function cleanVisibleUrl(){
@@ -714,37 +618,9 @@
             }
           });
 
-          const s = normSlug(url.searchParams.get("slug") || "");
-          if(s && isSensitiveSlug(s)){
-            url.searchParams.delete("slug");
-            changed = true;
-          }
-
           if(changed){
             history.replaceState({}, document.title, url.pathname + url.search + url.hash);
           }
-        }catch(_){}
-      }
-
-      function cleanInternalLinks(){
-        try{
-          document.querySelectorAll("a[href]").forEach((link) => {
-            const href = link.getAttribute("href") || "";
-            if(!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
-
-            const url = new URL(href, location.href);
-            if(url.origin !== location.origin) return;
-
-            SENSITIVE_KEYS.forEach((key) => url.searchParams.delete(key));
-
-            const s = normSlug(url.searchParams.get("slug") || "");
-            if(s && isSensitiveSlug(s)){
-              url.searchParams.delete("slug");
-            }
-
-            const file = url.pathname.split("/").pop() || "index.html";
-            link.setAttribute("href","./" + file + (url.search || "") + (url.hash || ""));
-          });
         }catch(_){}
       }
 
@@ -766,51 +642,124 @@
 
           return guard.state || {};
         }catch(e){
-          console.warn("[POS HUB] guard", e);
+          console.warn("[POS SESSION] guard", e);
           return {};
         }
       }
 
-      function updatePill(state){
-        const el = $("sessionPill");
-        if(!el) return;
-
-        const ok = !!(state && (state.access_ok || state.access || state.pin_session_ok));
-
-        if(ok){
-          el.textContent = state.pin_session_ok ? "session ouverte" : "accès ouvert";
-          el.className = "hdrPill ok";
-          return;
+      function hasLocalSession(){
+        if(window.DIGIY_MODULE_BRIDGE && typeof window.DIGIY_MODULE_BRIDGE.readSession === "function"){
+          try{
+            const bridgeSession = window.DIGIY_MODULE_BRIDGE.readSession() || {};
+            if(
+              bridgeSession.slug ||
+              bridgeSession.phone ||
+              bridgeSession.access ||
+              bridgeSession.ok ||
+              bridgeSession.verified
+            ){
+              return true;
+            }
+          }catch(_){}
         }
 
-        el.textContent = "accès à vérifier";
-        el.className = "hdrPill warn";
+        return SESSION_KEYS.some((key) => !!read(key)) ||
+               SAFE_ACCESS_KEYS.some((key) => !!read(key));
       }
 
-      function updateHubSub(state){
-        const el = $("hubSub");
-        if(!el) return;
-        const ok = !!(state && (state.access_ok || state.access || state.pin_session_ok));
-        el.textContent = ok
-          ? "Compte reconnu. Ouvre le bon pavé : caisse, marchandises, fiche, QR ou actions utiles."
-          : "Accès à vérifier. Les portes restent visibles, mais le PIN protège le commerce.";
+      function hasGuardSession(state){
+        return !!(
+          state &&
+          (state.access_ok || state.access || state.pin_session_ok || state.ok || state.verified)
+        );
       }
 
-      async function boot(){
+      function memoryStatusText(){
+        const memory = window.DIGIY_POS_MEMORY || window.DIGIY_POS_STORE || window.DIGIY_POS_LOCAL;
+        if(memory && typeof memory.snapshot === "function"){
+          try{
+            const snap = memory.snapshot() || {};
+            if(snap.updated_at || snap.items || snap.sales || snap.count){
+              return "Mémoire POS locale prête.";
+            }
+          }catch(_){}
+        }
+
+        return "Mémoire locale disponible.";
+      }
+
+      function paint(ok){
+        const pill = $("sessionPill");
+        if(pill){
+          pill.textContent = ok ? "ouverte" : "à ouvrir";
+          pill.className = ok ? "hdrPill ok" : "hdrPill warn";
+        }
+
+        const statusCard = $("statusCard");
+        const statusTag = $("statusTag");
+        const statusTitle = $("statusTitle");
+        const statusText = $("statusText");
+        const memoryText = $("memoryText");
+        const noticeBox = $("noticeBox");
+        const sessionSub = $("sessionSub");
+
+        if(statusCard) statusCard.className = ok ? "card ok" : "card warn";
+        if(statusTag) statusTag.textContent = ok ? "OK" : "PIN";
+        if(statusTitle) statusTitle.textContent = ok ? "Accès reconnu" : "Accès à ouvrir";
+        if(statusText){
+          statusText.textContent = ok
+            ? "La session POS est gardée côté téléphone."
+            : "Aucune session POS active détectée.";
+        }
+
+        if(memoryText) memoryText.textContent = memoryStatusText();
+
+        if(sessionSub){
+          sessionSub.textContent = ok
+            ? "Accès commerce reconnu. Les identifiants restent dans le coffre local, pas dans l’écran."
+            : "Accès à ouvrir. Le PIN protège le commerce, la caisse, les articles et la fiche.";
+        }
+
+        if(noticeBox){
+          noticeBox.innerHTML = ok
+            ? "✅ Accès POS reconnu. Tu peux retourner à la caisse, aux articles ou ouvrir l’Oreille POS."
+            : "⚠️ Session fermée. Rouvre par le PIN commerce pour charger la vraie gestion.";
+        }
+      }
+
+      async function refresh(){
         cleanVisibleUrl();
-        cleanInternalLinks();
-
         const state = await waitGuard();
-        updatePill(state || {});
-        updateHubSub(state || {});
-
+        const ok = hasGuardSession(state) || hasLocalSession();
+        paint(ok);
         cleanVisibleUrl();
-        cleanInternalLinks();
       }
 
-      boot();
+      function clearAccessOnly(){
+        const ok = confirm("Nettoyer seulement l’accès local POS ? Les ventes, articles, notes et fiche ne seront pas supprimés.");
+        if(!ok) return;
+
+        SESSION_KEYS.concat(SAFE_ACCESS_KEYS).forEach(removeKey);
+
+        try{
+          window.DIGIY_MODULE_BRIDGE?.cleanUrl?.();
+        }catch(_){}
+
+        refresh();
+      }
+
+      $("btnClearSession")?.addEventListener("click", clearAccessOnly);
+
+      if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", refresh);
+      }else{
+        refresh();
+      }
+
+      setTimeout(refresh, 500);
     })();
   </script>
 </body>
 </html>
+
 
