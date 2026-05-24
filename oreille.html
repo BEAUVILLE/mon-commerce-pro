@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>Oreille POS — Mon commerce</title>
+  <meta name="theme-color" content="#14532d"/>
+  <meta name="description" content="Oreille POS DIGIYLYFE — dicter, formuler, copier et ranger une vente, un ticket ou une note de caisse."/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <meta name="digiy-build" content="pos-oreille-page-20260524"/>
+
+  <script>
+    window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
+    window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
+    window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
+    window.DIGIY_SUPABASE_KEY = window.DIGIY_SUPABASE_ANON_KEY;
+
+    window.DIGIY_MODULE = "POS";
+    window.DIGIY_ABOS_MODULE = "POS";
+    window.DIGIY_LOGIN_URL = "./pin.html";
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./assets/js/digiy-abos-access.js?v=abos-20260522"></script>
+  <script src="./guard.js?v=pos-oreille-page-20260524"></script>
+
+  <style>
+    :root{
+      --bg:#14532d;
+      --bg2:#166534;
+      --bg3:#052e16;
+      --bar:rgba(5,46,22,.96);
+      --gold:#facc15;
+      --green:#22c55e;
+      --text:#f8fff8;
+      --muted:rgba(248,255,248,.76);
+      --line:rgba(255,255,255,.16);
+      --shadow:0 18px 44px rgba(0,0,0,.26);
+      --r:20px;
+      --hdrH:52px;
+      --barH:78px;
+      --max:980px;
+      --ff:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    }
+
+    *{box-sizing:border-box}
+
+    html{
+      scroll-behavior:smooth;
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
+    }
+
+    body{
+      margin:0;
+      min-height:100dvh;
+      color:var(--text);
+      font-family:var(--ff);
+      font-size:19px;
+      font-weight:950;
+      background:
+        radial-gradient(620px 390px at 14% 0%,rgba(34,197,94,.18),transparent 58%),
+        radial-gradient(460px 300px at 96% 10%,rgba(250,204,21,.18),transparent 54%),
+        linear-gradient(180deg,var(--bg) 0%,var(--bg2) 56%,var(--bg3) 100%);
+      padding:
+        calc(var(--hdrH) + 14px)
+        12px
+        calc(var(--barH) + env(safe-area-inset-bottom,0px) + 18px);
+    }
+
+    a{color:inherit;text-decoration:none}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer;color:inherit}
+
+    .topHeader{
+      position:fixed;
+      top:0;
+      left:0;
+      right:0;
+      height:var(--hdrH);
+      z-index:100;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:0 14px;
+      background:var(--bar);
+      border-bottom:1px solid rgba(250,204,21,.22);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+
+    .hdrBack{
+      min-height:36px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:rgba(248,255,248,.74);
+      font-size:14px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .hdrTitle{
+      font-size:12px;
+      font-weight:1000;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--gold);
+      white-space:nowrap;
+    }
+
+    .hdrPill{
+      min-height:32px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.08);
+      color:var(--muted);
+      font-size:12px;
+      font-weight:1000;
+      white-space:nowrap;
+      max-width:38vw;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .hdrPill.ok{
+      color:#bbf7d0;
+      border-color:rgba(34,197,94,.38);
+      background:rgba(34,197,94,.12);
+    }
+
+    .hdrPill.warn{
+      color:#fde68a;
+      border-color:rgba(250,204,21,.38);
+      background:rgba(250,204,21,.12);
+    }
+
+    .wrap{
+      width:min(var(--max),100%);
+      margin:0 auto;
+      display:grid;
+      gap:16px;
+    }
+
+    .card,.guide{
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:var(--r);
+      background:rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+
+    .eyebrow{
+      color:#fde68a;
+      font-size:12px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-weight:1000;
+      margin-bottom:8px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:clamp(36px,8.5vw,58px);
+      font-weight:1000;
+      line-height:.92;
+      letter-spacing:-.055em;
+      color:#fff;
+    }
+
+    .lead{
+      color:var(--muted);
+      font-size:17px;
+      font-weight:1000;
+      line-height:1.38;
+      max-width:780px;
+    }
+
+    .rule{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:18px;
+      border:1px dashed rgba(255,255,255,.22);
+      background:rgba(0,0,0,.20);
+      color:rgba(248,255,248,.90);
+      font-size:14px;
+      font-weight:1000;
+      line-height:1.35;
+    }
+
+    .rule b{color:#fde68a}
+
+    .guide{
+      border-color:rgba(34,197,94,.30);
+      background:
+        radial-gradient(460px 180px at 100% 0%,rgba(250,204,21,.14),transparent 72%),
+        linear-gradient(180deg,rgba(255,255,255,.10),rgba(0,0,0,.16));
+      display:grid;
+      gap:10px;
+    }
+
+    .guide h2{
+      margin:0;
+      font-size:clamp(24px,6vw,38px);
+      line-height:.98;
+      letter-spacing:-.04em;
+      color:#fff;
+      font-weight:1000;
+    }
+
+    .guide p{
+      margin:0;
+      color:rgba(248,255,248,.82);
+      font-size:15px;
+      line-height:1.45;
+      font-weight:950;
+    }
+
+    .actions{
+      display:flex;
+      gap:9px;
+      flex-wrap:wrap;
+      margin-top:4px;
+    }
+
+    .btn{
+      min-height:56px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.16);
+      background:rgba(255,255,255,.08);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:12px 16px;
+      font-weight:1000;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    .btn.primary{
+      background:linear-gradient(135deg,#22c55e,#facc15);
+      color:#06130e;
+      border-color:rgba(34,197,94,.32);
+    }
+
+    .btn.danger{
+      background:rgba(251,113,133,.10);
+      border-color:rgba(251,113,133,.34);
+      color:#fecaca;
+    }
+
+    .oreilleShell{
+      scroll-margin-top:72px;
+    }
+
+    .bottomBar{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      height:var(--barH);
+      z-index:100;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
+      background:rgba(5,46,22,.97);
+      border-top:1px solid rgba(250,204,21,.18);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+
+    .bottomInner{
+      width:min(100%,760px);
+      height:100%;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:6px;
+    }
+
+    .bottomInner a{
+      min-height:58px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      align-content:center;
+      gap:3px;
+      color:rgba(248,255,248,.58);
+      font-size:11px;
+      font-weight:1000;
+      text-align:center;
+      border:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.04);
+    }
+
+    .bottomInner a.active{
+      color:#06130e;
+      background:linear-gradient(135deg,#22c55e,#facc15);
+      border-color:rgba(34,197,94,.32);
+    }
+
+    .bottomInner .bi{
+      font-size:19px;
+      line-height:1;
+    }
+
+    @media(max-width:520px){
+      body{
+        font-size:19px;
+        padding:
+          calc(var(--hdrH) + 12px)
+          10px
+          calc(var(--barH) + env(safe-area-inset-bottom,0px) + 16px);
+      }
+
+      .topHeader{
+        padding:0 10px;
+        gap:7px;
+      }
+
+      .hdrBack{font-size:13px}
+      .hdrTitle{font-size:11px;letter-spacing:.12em}
+      .hdrPill{font-size:11px;padding:6px 8px;max-width:34vw}
+      h1{font-size:36px}
+      .lead{font-size:16px}
+      .actions .btn{width:100%}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topHeader">
+    <a class="hdrBack" href="./hub.html">← HUB</a>
+    <div class="hdrTitle">OREILLE POS</div>
+    <div class="hdrPill warn" id="sessionPill">session…</div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="eyebrow">🧾 MON COMMERCE · OREILLE MÉTIER</div>
+      <h1>Produit, quantité, caisse.</h1>
+      <div class="lead">
+        Ici, le commerçant parle ou clique. DIGIY prépare une vente, un ticket,
+        une note de caisse ou une trace client : produit, quantité, prix, total,
+        mode de paiement, stock, client, téléphone et preuve.
+      </div>
+      <div class="rule">
+        <b>Règle :</b> POS prépare, mais ne valide jamais seul une vente, une remise,
+        un paiement ou une sortie de stock. Le commerçant vérifie et valide.
+      </div>
+    </section>
+
+    <section class="guide" aria-label="Lecteur guide Oreille POS">
+      <h2>🎧 Lecteur-guide POS</h2>
+      <p>
+        Écoute le guide avant de valider la caisse : POS prépare, mais le commerçant garde la main.
+        Un prix, un stock, un paiement ou un ticket ne doit jamais être confirmé automatiquement.
+      </p>
+
+      <div class="actions">
+        <button class="btn primary" type="button" id="posGuidePlay">🎧 Écouter le guide</button>
+        <button class="btn danger" type="button" id="posGuideStop">⏹ Arrêter</button>
+      </div>
+    </section>
+
+    <section class="card oreilleShell" id="oreille-pos-section">
+      <div id="digiy-oreille-pos"></div>
+    </section>
+  </main>
+
+  <nav class="bottomBar" aria-label="Navigation rapide POS">
+    <div class="bottomInner">
+      <a href="./hub.html"><span class="bi">🧭</span><span>HUB</span></a>
+      <a href="./dashboard-pro.html"><span class="bi">🏠</span><span>Accueil</span></a>
+      <a href="./caisse.html"><span class="bi">🧾</span><span>Caisse</span></a>
+      <a class="active" href="./oreille.html"><span class="bi">🎙️</span><span>Oreille</span></a>
+      <a href="./session.html"><span class="bi">🛡️</span><span>Session</span></a>
+    </div>
+  </nav>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const SENSITIVE_KEYS = [
+        "phone","tel","p_phone","owner_phone","owner_id","slug",
+        "pos_tel","pos_phone","commerce_phone","business_phone","whatsapp",
+        "module","return","redirect","redirect_url","url","from","v","pin","token","session_token"
+      ];
+
+      function normSlug(v){
+        return String(v || "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g,"-")
+          .replace(/[^a-z0-9-]/g,"")
+          .replace(/-+/g,"-")
+          .replace(/^-|-$/g,"");
+      }
+
+      function isSensitiveSlug(v){
+        return /\d{7,}/.test(String(v || ""));
+      }
+
+      function cleanVisibleUrl(){
+        try{
+          const url = new URL(location.href);
+          let changed = false;
+
+          SENSITIVE_KEYS.forEach((key) => {
+            if(url.searchParams.has(key)){
+              url.searchParams.delete(key);
+              changed = true;
+            }
+          });
+
+          const s = normSlug(url.searchParams.get("slug") || "");
+          if(s && isSensitiveSlug(s)){
+            url.searchParams.delete("slug");
+            changed = true;
+          }
+
+          if(changed){
+            history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+          }
+        }catch(_){}
+      }
+
+      async function waitGuard(){
+        try{
+          const guard = window.DIGIY_GUARD;
+          if(!guard) return {};
+
+          if(typeof guard.ready === "function"){
+            const out = guard.ready({ redirect:false, preserve_validation:true });
+            if(out && typeof out.then === "function") await out;
+          }else if(guard.ready && typeof guard.ready.then === "function"){
+            await guard.ready;
+          }
+
+          if(typeof guard.getSession === "function"){
+            return guard.getSession() || guard.state || {};
+          }
+
+          return guard.state || {};
+        }catch(e){
+          console.warn("[POS OREILLE] guard", e);
+          return {};
+        }
+      }
+
+      function updatePill(state){
+        const el = document.getElementById("sessionPill");
+        if(!el) return;
+
+        const ok = !!(state && (state.access_ok || state.access || state.pin_session_ok));
+
+        if(ok){
+          el.textContent = state.pin_session_ok ? "session ouverte" : "accès ouvert";
+          el.className = "hdrPill ok";
+        }else{
+          el.textContent = "accès à vérifier";
+          el.className = "hdrPill warn";
+        }
+      }
+
+      const POS_GUIDE_TEXT =
+        "Bienvenue dans Oreille POS DIGIYLYFE. " +
+        "Ici, le commerçant peut parler ou cliquer pour préparer une vente, un ticket ou une note de caisse. " +
+        "POS demande le produit, la quantité, le prix, le total, le client, le téléphone, le mode de paiement, le stock, le ticket ou la preuve. " +
+        "POS ne valide jamais seul une vente, une remise, un paiement ou une sortie de stock. " +
+        "Le commerçant doit vérifier le prix, la quantité, le stock, le paiement et le ticket avant de valider. " +
+        "L’Oreille prépare. DIGIY formule. Le commerçant relit. Le commerçant valide. POS range. " +
+        "Le terrain garde la main.";
+
+      function loadVoices(callback){
+        if(!("speechSynthesis" in window)){
+          callback([]);
+          return;
+        }
+
+        let voices = window.speechSynthesis.getVoices();
+
+        if(voices && voices.length){
+          callback(voices);
+          return;
+        }
+
+        let tries = 0;
+        const timer = window.setInterval(() => {
+          tries += 1;
+          voices = window.speechSynthesis.getVoices();
+
+          if((voices && voices.length) || tries > 12){
+            window.clearInterval(timer);
+            callback(voices || []);
+          }
+        }, 120);
+      }
+
+      function speakGuide(){
+        if(!("speechSynthesis" in window)){
+          alert("Lecture vocale non disponible sur ce navigateur.");
+          return;
+        }
+
+        window.speechSynthesis.cancel();
+
+        loadVoices((voices) => {
+          const u = new SpeechSynthesisUtterance(POS_GUIDE_TEXT);
+          u.lang = "fr-FR";
+          u.rate = 0.86;
+          u.pitch = 1.02;
+          u.volume = 1;
+
+          const preferred =
+            voices.find(v => /fr/i.test(v.lang || "") && /Google|Thomas|Daniel|Amelie|Audrey|Pauline/i.test(v.name || "")) ||
+            voices.find(v => /fr/i.test(v.lang || "")) ||
+            voices[0];
+
+          if(preferred) u.voice = preferred;
+
+          window.speechSynthesis.speak(u);
+        });
+      }
+
+      function stopGuide(){
+        if("speechSynthesis" in window){
+          window.speechSynthesis.cancel();
+        }
+      }
+
+      async function boot(){
+        cleanVisibleUrl();
+        const state = await waitGuard();
+        updatePill(state || {});
+        cleanVisibleUrl();
+      }
+
+      document.getElementById("posGuidePlay")?.addEventListener("click", speakGuide);
+      document.getElementById("posGuideStop")?.addEventListener("click", stopGuide);
+
+      if("speechSynthesis" in window){
+        window.speechSynthesis.onvoiceschanged = function(){};
+      }
+
+      window.addEventListener("pagehide", stopGuide);
+
+      boot();
+    })();
+  </script>
+
+  <script src="./assets/js/oreille-metier-core.js?v=20260524-core7" defer></script>
+  <script src="./assets/js/oreille-pos.js?v=20260524-pos1" defer></script>
+</body>
+</html>
