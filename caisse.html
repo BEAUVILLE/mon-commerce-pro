@@ -127,6 +127,24 @@
       .pos-day-step b{font-size:16px}
       .pos-day-step span{font-size:12px}
     }
+
+    .pos-day-zones{display:grid;gap:10px;margin-top:12px}
+    .pos-day-zone{padding:12px;border-radius:22px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+    .pos-day-zone-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;color:#f4c86a;font-size:15px;font-weight:1000;line-height:1.12}
+    .pos-day-zone-title small{color:rgba(255,255,255,.62);font-size:12px;font-weight:900;text-align:right}
+    .pos-day-zone-sub{margin:0 0 10px;color:rgba(255,255,255,.74);font-size:13.5px;font-weight:900;line-height:1.35}
+    .pos-zone-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    .pos-zone-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .pos-day-step.close.big{width:100%;min-height:92px;background:linear-gradient(135deg,rgba(244,200,106,.30),rgba(34,197,94,.18));border-color:rgba(244,200,106,.46)}
+    .pos-day-step.close.big b{font-size:19px;color:#f4c86a}
+    .pos-close-separate{margin-top:8px;padding:10px;border-radius:16px;background:rgba(0,0,0,.18);border:1px dashed rgba(244,200,106,.26);color:rgba(255,255,255,.80);font-size:13px;font-weight:900;line-height:1.35}
+    .pos-closure-landing{margin:0 0 14px;padding:14px;border-radius:24px;background:rgba(16,32,21,.88);border:1px solid rgba(244,200,106,.24);box-shadow:0 14px 34px rgba(0,0,0,.18);color:#fff}
+    .pos-closure-landing-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+    .pos-closure-landing h2{margin:0;color:#f4c86a;font-size:24px;line-height:1.05;font-weight:1000}
+    .pos-closure-landing p{margin:7px 0 0;color:rgba(255,255,255,.74);font-weight:900;line-height:1.35}
+    @media(max-width:760px){.pos-zone-grid,.pos-zone-grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){.pos-zone-grid,.pos-zone-grid.three{grid-template-columns:1fr 1fr}.pos-day-zone-title{display:block}.pos-day-zone-title small{display:block;text-align:left;margin-top:3px}.pos-closure-landing-head{display:block}}
+
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -156,55 +174,88 @@
   <main class="wrap">
     <section class="page active" id="page-caisse">
 
-
-      <section class="pos-day-map" id="posDayMap" aria-label="Parcours caisse du jour">
+      <section class="pos-day-map" id="posDayMap" aria-label="Repères humains de la caisse">
         <div class="pos-day-top">
           <div>
-            <div class="pos-day-kicker">🧭 Parcours caisse du jour</div>
-            <div class="pos-day-title">Le logiciel montre le chemin.</div>
+            <div class="pos-day-kicker">🧭 Repères caisse</div>
+            <div class="pos-day-title">Trois moments séparés.</div>
           </div>
-          <div class="pos-day-chip">Caisse ouverte · journée à suivre</div>
+          <div class="pos-day-chip">Le pro ne devine pas · il voit</div>
         </div>
 
         <div class="pos-day-sub">
-          DIGIY GO accélère la vente, mais l’écran garde les repères : vendre, contrôler, encaisser, suivre, noter, puis clôturer vers PAY.
+          DIGIY GO accélère la saisie, mais l’écran reste la carte. Encaisser une vente et clôturer la journée ne sont pas le même geste.
         </div>
 
-        <div class="pos-day-steps">
-          <a class="pos-day-step go" href="./action.html">
-            <b>1 · DIGIY GO</b>
-            <span>Dire une vente naturellement.</span>
-          </a>
+        <div class="pos-day-zones">
+          <div class="pos-day-zone">
+            <div class="pos-day-zone-title">🟢 Vente maintenant <small>ticket par ticket</small></div>
+            <p class="pos-day-zone-sub">Ici on vend : on dit la vente, on contrôle l’addition, on choisit le règlement, puis on encaisse le ticket.</p>
+            <div class="pos-zone-grid">
+              <a class="pos-day-step go" href="./action.html">
+                <b>DIGIY GO POS</b>
+                <span>Dire une vente naturellement.</span>
+              </a>
+              <button class="pos-day-step" type="button" onclick="openAddition()">
+                <b>Addition</b>
+                <span>Voir les lignes et le total.</span>
+              </button>
+              <button class="pos-day-step" type="button" onclick="confirmAddition()">
+                <b>Règlement</b>
+                <span>Cash, Wave, Orange ou Carte.</span>
+              </button>
+              <button class="pos-day-step" type="button" onclick="showPage('page-recu')">
+                <b>Ticket</b>
+                <span>Preuve de la vente.</span>
+              </button>
+            </div>
+          </div>
 
-          <button class="pos-day-step" type="button" onclick="openAddition()">
-            <b>2 · Addition</b>
-            <span>Voir les lignes et le total.</span>
-          </button>
+          <div class="pos-day-zone">
+            <div class="pos-day-zone-title">📊 Suivi de journée <small>pendant l’activité</small></div>
+            <p class="pos-day-zone-sub">Ici on pilote le magasin : marchandises, notes, ventes du jour, fiche. Ce n’est pas la clôture.</p>
+            <div class="pos-zone-grid">
+              <a class="pos-day-step" href="./admin.html">
+                <b>Marchandises</b>
+                <span>Prix, stock, alias.</span>
+              </a>
+              <button class="pos-day-step" type="button" onclick="showPage('page-notes')">
+                <b>Notes</b>
+                <span>Dette, dépense, stock, mémo.</span>
+              </button>
+              <button class="pos-day-step" type="button" onclick="showPage('page-stats')">
+                <b>Stats du jour</b>
+                <span>Ventes, total, historique.</span>
+              </button>
+              <a class="pos-day-step" href="./profile.html">
+                <b>Fiche pro</b>
+                <span>Coordonnées visibles.</span>
+              </a>
+            </div>
+          </div>
 
-          <button class="pos-day-step" type="button" onclick="confirmAddition()">
-            <b>3 · Encaisser</b>
-            <span>Choisir Cash, Wave, Orange ou Carte.</span>
-          </button>
-
-          <button class="pos-day-step" type="button" onclick="showPage('page-stats')">
-            <b>4 · Journée</b>
-            <span>Lire ventes, total et historique.</span>
-          </button>
-
-          <button class="pos-day-step" type="button" onclick="showPage('page-notes')">
-            <b>5 · Notes</b>
-            <span>Dette, dépense, stock ou note libre.</span>
-          </button>
-
-          <button class="pos-day-step close" type="button" onclick="window.DIGIY_COLLEGUE_POS && window.DIGIY_COLLEGUE_POS.ouvrirCloture ? window.DIGIY_COLLEGUE_POS.ouvrirCloture() : showPage('page-stats')">
-            <b>6 · Clôture PAY</b>
-            <span>Envoyer les totaux du jour à Mon argent.</span>
-          </button>
+          <div class="pos-day-zone">
+            <div class="pos-day-zone-title">🌙 Fin de journée <small>après les ventes</small></div>
+            <p class="pos-day-zone-sub">Ici on ne vend plus. On rassemble la trésorerie du jour par mode de paiement et on prépare le passage vers PAY.</p>
+            <button class="pos-day-step close big" type="button" onclick="window.DIGIY_COLLEGUE_POS && window.DIGIY_COLLEGUE_POS.ouvrirCloture ? window.DIGIY_COLLEGUE_POS.ouvrirCloture() : document.getElementById('posClosureLanding')?.scrollIntoView({behavior:'smooth',block:'start'})">
+              <b>Clôture caisse → PAY</b>
+              <span>Total Cash / Wave / Orange / Carte de la journée. Pas un ticket de vente.</span>
+            </button>
+            <div class="pos-close-separate">
+              Repère : <strong>Encaisser</strong> valide une vente. <strong>Clôturer</strong> ferme la journée et envoie les totaux à Mon argent PAY.
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div class="pos-day-rule">
-          Règle terrain : chaque vente nourrit la caisse. La clôture de journée nourrit PAY. Le pro ne doit pas mémoriser le logiciel : la route est visible.
+      <section class="pos-closure-landing" id="posClosureLanding" aria-label="Clôture caisse vers PAY">
+        <div class="pos-closure-landing-head">
+          <div>
+            <h2>🌙 Clôture caisse vers PAY</h2>
+            <p>Fin de journée seulement : la caisse résume les totaux par mode de paiement. PAY reçoit la trésorerie consolidée, pas les articles.</p>
+          </div>
         </div>
+        <div id="cloturePosBox"></div>
       </section>
 
       <section class="pos-voice-first" aria-label="DIGIY GO POS — voix au sommet">
