@@ -4,7 +4,7 @@
 */
 (function(){
   "use strict";
-  const VERSION="action-digiy-receiver-zone1-pos-quantite-lettres-20260527";
+  const VERSION="action-digiy-receiver-zone1-pos-mojibake-clean-20260527";
   const HOST=String(location.hostname||"").toLowerCase();
   const MODULE=HOST.includes("commerce-pro")?"POS":HOST.includes("pro-pay")?"PAY":"MODULE";
   const LATEST="DIGIY_INCOMING_ACTION";
@@ -13,11 +13,14 @@
 
   const NUMBER_WORDS={un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9,dix:10,onze:11,douze:12,treize:13,quatorze:14,quinze:15,seize:16,vingt:20,trente:30,quarante:40,cinquante:50};
   const NUMBER_WORD_RE="un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|onze|douze|treize|quatorze|quinze|seize|vingt|trente|quarante|cinquante";
+
   function fixText(s){return String(s||"").trim()
+    .replace(/Ã\u00a0/g,"à").replace(/Ã\s+/g,"à ").replace(/Ã$/g,"à")
     .replace(/Ã©/g,"é").replace(/Ã¨/g,"è").replace(/Ãª/g,"ê").replace(/Ã«/g,"ë")
     .replace(/Ã /g,"à").replace(/Ã¡/g,"á").replace(/Ã¢/g,"â").replace(/Ã¤/g,"ä")
     .replace(/Ã´/g,"ô").replace(/Ã¶/g,"ö").replace(/Ã¹/g,"ù").replace(/Ã»/g,"û").replace(/Ã¼/g,"ü")
-    .replace(/Ã®/g,"î").replace(/Ã¯/g,"ï").replace(/Ã§/g,"ç").replace(/Â/g,"")}
+    .replace(/Ã®/g,"î").replace(/Ã¯/g,"ï").replace(/Ã§/g,"ç")
+    .replace(/â\u20ac\u2122/g,"’").replace(/â€™/g,"’").replace(/Â/g,"")}
 
   function safe(s){return String(s||"").replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]})}
   function money(n){return (Number(n)||0).toLocaleString("fr-FR")+" FCFA"}
@@ -43,7 +46,7 @@
     .replace(/^\s*(pos|pose|poste|post)\s+/i,"")
     .replace(/\b(web|wêve|weve|wève|wavee|ouve|ouève)\b/gi,"Wave")
     .replace(/\bfrancs?\b/gi,"")
-    .replace(/(?:resultat|résultat|rÃ©sultat|total)\s*\d[\d\s.,]*/i,"")
+    .replace(/(?:resultat|résultat|total)\s*\d[\d\s.,]*/i,"")
     .replace(/\s+/g," ").trim()}
   function explicitTotal(s){const m=fixText(s).match(/(?:resultat|résultat|total)\s*(\d[\d\s.,]*)/i);return m?Number(m[1].replace(/[^\d]/g,""))||0:0}
   function channel(s,a){if(a&&a.channel)return a.channel;const n=norm(s);if(n.includes("wave")||n.includes("web")||n.includes("weve"))return"Wave";if(n.includes("cash")||n.includes("espece")||n.includes("liquide"))return"Cash";if(n.includes("orange money")||n.includes(" om "))return"Orange Money";return"À contrôler"}
@@ -52,7 +55,7 @@
     const ns=nums(raw);
     let q=Number(action.quantity)||wordNumber(action.quantity)||0, unit=Number(action.unitPrice)||0, total=Number(action.totalAmount||action.amount)||0;
     if(!q)q=quantityFromText(raw);
-    const um=raw.match(/(?:à|a|unite|unité|piece|pièce|prix)\s*(\d[\d\s.,]*)/i); if(!unit&&um)unit=Number(um[1].replace(/[^\d]/g,""))||0;
+    const um=raw.match(/(?:à|a|Ã\s*|Ã\u00a0|unite|unité|piece|pièce|prix)\s*(\d[\d\s.,]*)/i); if(!unit&&um)unit=Number(um[1].replace(/[^\d]/g,""))||0;
     const et=explicitTotal(raw); if(et)total=et;
     if(q&&ns.length>=1&&!unit)unit=ns.find(function(x){return x!==q&&x!==et})||ns[ns.length-1]||0;
     if(!q&&ns.length>=2&&ns[0]>0&&ns[0]<1000){q=ns[0];unit=unit||ns[1]}
@@ -60,7 +63,7 @@
     if(!total&&ns.length)total=ns[ns.length-1];
     let item=clean(raw)
       .replace(/^\s*vente\s+(de\s+)?/i,"")
-      .replace(/(?:à|a|unite|unité|piece|pièce|prix)\s*\d[\d\s.,]*/i,"")
+      .replace(/(?:à|a|Ã\s*|Ã\u00a0|unite|unité|piece|pièce|prix)\s*\d[\d\s.,]*/i,"")
       .replace(/\b(cash|wave|orange money|payer|paye|payé)\b/gi,"")
       .replace(/\s+/g," ").trim();
     item=removeQuantityPrefix(item);
