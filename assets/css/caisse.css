@@ -217,14 +217,31 @@ a{
   line-height:1.25;
 }
 
-.pos-voice-main-btn{
+.pos-voice-doctrine{
+  margin-top:12px;
+  color:rgba(255,255,255,.78);
+  font-size:14px;
+  font-weight:900;
+  text-align:center;
+}
+
+/* PUPITRE ACTION DIGIY */
+.action-digiy-console{
   margin-top:18px;
-  min-height:66px;
+  padding:14px;
+  border-radius:24px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(244,200,106,.24);
+}
+
+.action-digiy-main{
+  min-height:74px;
+  width:100%;
   display:flex;
   align-items:center;
   justify-content:center;
   border-radius:22px;
-  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  background:linear-gradient(135deg,#ffe8a8,#f4c86a);
   color:#102015;
   text-decoration:none;
   font-size:22px;
@@ -232,16 +249,43 @@ a{
   box-shadow:0 14px 28px rgba(244,200,106,.22);
 }
 
-.pos-voice-main-btn:active{
-  transform:scale(.985);
+.action-digiy-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:12px;
 }
 
-.pos-voice-doctrine{
-  margin-top:12px;
-  color:rgba(255,255,255,.78);
-  font-size:14px;
-  font-weight:900;
+.action-digiy-btn{
+  min-height:56px;
+  border-radius:18px;
+  border:1px solid rgba(244,200,106,.22);
+  background:#102015;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   text-align:center;
+  text-decoration:none;
+  font-size:15px;
+  font-weight:1000;
+  padding:10px;
+}
+
+.action-digiy-btn.primary{
+  background:#14532d;
+  color:#fff;
+  border-color:rgba(244,200,106,.38);
+}
+
+.action-digiy-btn.stop{
+  background:#7f1d1d;
+  color:#fff;
+}
+
+.action-digiy-btn:active,
+.action-digiy-main:active{
+  transform:scale(.985);
 }
 
 /* RÉSULTAT VENTE */
@@ -968,9 +1012,18 @@ select option{
     font-size:16px;
   }
 
-  .pos-voice-main-btn{
-    min-height:66px;
-    font-size:22px;
+  .action-digiy-main{
+    min-height:76px;
+    font-size:21px;
+  }
+
+  .action-digiy-buttons{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .action-digiy-btn{
+    min-height:58px;
+    font-size:14.5px;
   }
 
   .pos-departments{
