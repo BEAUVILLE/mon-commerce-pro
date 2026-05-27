@@ -6,7 +6,32 @@
   <title>MON COMMERCE — Caisse POS</title>
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#14532d">
+<style id="digiy-critical-caisse">
+  .page{
+    display:none!important;
+  }
 
+  .page.active{
+    display:block!important;
+  }
+
+  #additionOverlay{
+    display:none!important;
+  }
+
+  #additionOverlay.open{
+    display:flex!important;
+  }
+
+  #panierBar.hidden{
+    display:none!important;
+  }
+
+  #btnDemarrage,
+  .nav button[onclick="dismissDemarrage()"]{
+    display:none!important;
+  }
+</style>
   <link rel="stylesheet" href="./assets/css/caisse.css?v=caisse-pos-repo-aligne-20260521">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
