@@ -1,11 +1,14 @@
 /* DIGIY ACTION → CAISSE POS
    Petite passerelle séparée : lit la traçabilité ACTION POS et la met dans l’addition.
    Ne remplace pas caisse.html. Ne déclenche jamais encaisser().
+   V2 : une trace est consommée une seule fois, puis retirée du moule.
 */
 (function(){
   "use strict";
-  const VERSION = "action-trace-to-caisse-20260527-1";
+  const VERSION = "action-trace-to-caisse-20260527-2";
   const TRACE_KEYS = ["DIGIY_POS_CAISSE_TRACE", "caisse_action_last_trace"];
+  const CONSUMED_KEY = "caisse_action_consumed_trace_id";
+  const CONSUMED_AT_KEY = "caisse_action_consumed_trace_at";
   let loadedId = null;
 
   function readJSON(key, fallback){
@@ -21,6 +24,20 @@
       localStorage.removeItem("caisse_action_last_trace");
       localStorage.removeItem("caisse_action_trace_touch");
     }catch(_){}
+  }
+
+  function markConsumed(trace){
+    try{
+      localStorage.setItem(CONSUMED_KEY, String(trace && trace.id || ""));
+      localStorage.setItem(CONSUMED_AT_KEY, String(Date.now()));
+    }catch(_){}
+  }
+
+  function isConsumed(trace){
+    if(!trace || !trace.id) return false;
+    try{
+      return String(localStorage.getItem(CONSUMED_KEY) || "") === String(trace.id);
+    }catch(_){ return false; }
   }
 
   function toast(msg){
@@ -126,14 +143,29 @@
   function importTrace(){
     const trace = getTrace();
     if(!trace || !trace.id) return false;
-    if(loadedId === trace.id) return false;
+
+    if(isConsumed(trace)){
+      removeTrace();
+      return false;
+    }
+
+    if(loadedId === trace.id){
+      removeTrace();
+      return false;
+    }
+
     if(typeof cart === "undefined" || !Array.isArray(cart)){
       toast("Caisse pas encore prête pour ACTION.");
       return false;
     }
 
     const already = cart.find(i => String(i.actionTraceId || "") === String(trace.id));
-    if(already){ loadedId = trace.id; return false; }
+    if(already){
+      loadedId = trace.id;
+      markConsumed(trace);
+      removeTrace();
+      return false;
+    }
 
     const line = buildLine(trace);
     if(!line || !Number(line.price || 0)){
@@ -143,6 +175,8 @@
 
     cart.push(line);
     loadedId = trace.id;
+    markConsumed(trace);
+    removeTrace();
 
     try{ window.updatePanierBar && window.updatePanierBar(); }catch(_){}
     try{ window.renderAddition && window.renderAddition(); }catch(_){}
@@ -152,7 +186,7 @@
 
     setTimeout(function(){
       try{ window.openAddition && window.openAddition(); }catch(_){}
-      toast("Traçabilité ACTION chargée dans l’addition POS.");
+      toast("Traçabilité ACTION chargée une fois dans l’addition POS.");
     }, 120);
 
     return true;
@@ -168,6 +202,7 @@
   window.DIGIY_ACTION_TRACE_TO_CAISSE = {
     version: VERSION,
     importTrace,
-    clearTrace: removeTrace
+    clearTrace: removeTrace,
+    markConsumed
   };
 })();
