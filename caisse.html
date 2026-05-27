@@ -24,6 +24,7 @@
   <div class="overlay" id="additionOverlay"><div class="sheet"><div class="sheet-head"><div><h2 style="margin:0">Addition POS</h2><p style="margin:6px 0 0;color:var(--muted);font-weight:850">La caisse montre ici le contrôle avant encaissement.</p></div><button class="btn" onclick="closeAddition()">×</button></div><div id="additionItems"></div><div class="totals"><div class="toolbar"><input id="remiseVal" class="input" type="number" min="0" placeholder="Remise" oninput="updateTotals()"><select id="remiseType" class="select" onchange="updateTotals()"><option value="xof">FCFA</option><option value="pct">%</option></select></div><div class="total-row"><span>Sous-total</span><span id="subtotalEl">0 F</span></div><div class="total-row" id="remiseRow" style="display:none"><span>Remise</span><span id="remiseEl">- 0 F</span></div><div class="total-row big"><span>Total caisse</span><span id="totalEl">0 F</span></div></div><div class="actions"><button class="btn-danger" onclick="clearCart()">Vider</button><button class="primary-btn" onclick="confirmAddition()">Confirmer addition</button></div></div></div>
   <div class="toast" id="toast"></div>
   <script src="./assets/js/caisse-pos.js?v=restore-interface-20260527-1"></script>
-  <script src="./assets/js/action-trace-to-caisse.js?v=20260527-1"></script>
+<script src="./assets/js/action-trace-to-caisse.js?v=20260527-1"></script>
+<script src="./assets/js/collegue-pos.js?v=20260527-1"></script>
 </body>
 </html>
