@@ -2,11 +2,16 @@
    La caisse ne remplace pas le commerçant.
    Elle devient son collègue de comptoir.
    Elle parle seulement après un clic humain.
+
+   Pont PAY — doctrine 2026-05-27 :
+   - POS garde les tickets, les articles, les quantités, les stocks.
+   - PAY reçoit la trésorerie finale seulement par la Clôture caisse → PAY.
+   - L'ancien pont ticket-par-ticket est neutralisé ici, sans casser caisse-pos.js.
 */
 (function(){
   "use strict";
 
-  const VERSION = "collegue-pos-20260527-cloture-1";
+  const VERSION = "collegue-pos-20260527-cloture-only-2";
   const CLOTURE_PREFIX = "caisse_cloture_";
   const PAY_ACTION_URL = "https://pro-pay.digiylyfe.com/action.html";
 
@@ -17,6 +22,10 @@
     }catch(_){
       return fallback;
     }
+  }
+
+  function writeJSON(key, value){
+    try{ localStorage.setItem(key, JSON.stringify(value)); }catch(_){}
   }
 
   function money(n){
@@ -80,16 +89,6 @@
     return "cash";
   }
 
-  function modeLabel(mode){
-    return ({
-      cash:"Cash",
-      wave:"Wave",
-      orange:"Orange Money",
-      card:"Carte / TPE",
-      other:"Autres"
-    })[mode] || "Cash";
-  }
-
   function calculClotureJour(day){
     const target = String(day || todayISO()).slice(0,10);
     const list = ventes().filter(v => String(v.day || String(v.date || "").slice(0,10)) === target);
@@ -98,7 +97,7 @@
     list.forEach(v => {
       const mode = normalizeMode(v);
       const total = Number(v.total || v.totalAmount || v.amount || 0);
-      totals[totals.hasOwnProperty(mode) ? mode : "other"] += total;
+      totals[Object.prototype.hasOwnProperty.call(totals, mode) ? mode : "other"] += total;
     });
 
     const totalGeneral = Object.values(totals).reduce((s,n) => s + Number(n || 0), 0);
@@ -167,7 +166,7 @@
     const t = closure.totals || {};
     return [
       "Clôture caisse du " + closure.day + ".",
-             "Nombre de ventes : " + closure.count + ".",
+      "Nombre de ventes : " + closure.count + ".",
       "Cash : " + Math.round(t.cash || 0) + " francs.",
       "Wave : " + Math.round(t.wave || 0) + " francs.",
       "Orange Money : " + Math.round(t.orange || 0) + " francs.",
@@ -250,7 +249,7 @@
       </div>
 
       <div style="margin-top:12px;padding:12px;border-radius:18px;background:#102015;color:white;font-weight:900;line-height:1.35">
-        Option B validée : une clôture visible, plusieurs mouvements PAY derrière — Cash, Wave, Orange Money, Carte.
+        Route officielle : une clôture visible, plusieurs mouvements PAY derrière — Cash, Wave, Orange Money, Carte. Les tickets restent dans POS.
       </div>
     `;
 
@@ -337,7 +336,7 @@
   }
 
   function phraseAccueil(){
-         const total = totalJour();
+    const total = totalJour();
     const last = derniereVente();
     const low = stockBas();
 
@@ -415,7 +414,46 @@
     speak("Attention stock bas. " + noms + ".");
   }
 
+  function neutraliserPontTicketVersPay(){
+    const disabled = function(vente){
+      try{
+        const total = Number(vente && vente.total || 0);
+        const trace = {
+          id:"POS_TICKET_HELD_FOR_CLOSURE_" + Date.now(),
+          source:"POS",
+          target:"PAY",
+          status:"held_for_closure",
+          reason:"PAY reçoit uniquement la clôture caisse consolidée.",
+          total,
+          day:String(vente && vente.day || todayISO()).slice(0,10),
+          saleId: vente && vente.id ? vente.id : null,
+          createdAt:new Date().toISOString(),
+          safety:{
+            noPerTicketPay:true,
+            closureOnly:true,
+            posKeepsTickets:true,
+            payKeepsTreasuryByMode:true
+          }
+        };
+        const outbox = readJSON("DIGIY_PAY_POS_TICKET_HELD", []);
+        const list = Array.isArray(outbox) ? outbox : [];
+        list.unshift(trace);
+        writeJSON("DIGIY_PAY_POS_TICKET_HELD", list.slice(0,100));
+        localStorage.setItem("DIGIY_PAY_POS_TICKET_BRIDGE_DISABLED", "true");
+        localStorage.setItem("DIGIY_PAY_POS_TICKET_BRIDGE_REASON", "closure_only");
+      }catch(_){}
+      return false;
+    };
+
+    try{
+      window.sendPosReceiptToPay = disabled;
+      window.DIGIY_POS_PAY_TICKET_BRIDGE = "disabled_closure_only";
+    }catch(_){}
+  }
+
   function injectUI(){
+    neutraliserPontTicketVersPay();
+
     const page = document.getElementById("page-caisse");
     if(!page || document.getElementById("colleguePosBlock")) return;
 
@@ -442,23 +480,21 @@
       <div style="margin-top:12px;padding:12px;border-radius:18px;background:#102015;color:white;font-weight:900;line-height:1.35">
         Le matin, elle accueille. Pendant la journée, elle accompagne. En fin de journée, elle aide à clôturer la caisse vers PAY. Mais le pro garde la main.
       </div>
-
-      <div id="cloturePosBox" style="margin-top:12px"></div>
     `;
 
     const anchor =
-  page.querySelector(".pos-sale-panel") ||
-  page.querySelector(".pos-departments") ||
-  page.querySelector(".manual-products") ||
-  page.firstElementChild;
+      page.querySelector(".pos-sale-panel") ||
+      page.querySelector(".pos-departments") ||
+      page.querySelector(".manual-products") ||
+      page.firstElementChild;
 
-if(anchor && anchor.nextSibling){
-  page.insertBefore(box, anchor.nextSibling);
-}else if(anchor){
-  page.appendChild(box);
-}else{
-  page.appendChild(box);
-}
+    if(anchor && anchor.nextSibling){
+      page.insertBefore(box, anchor.nextSibling);
+    }else if(anchor){
+      page.appendChild(box);
+    }else{
+      page.appendChild(box);
+    }
 
     document.getElementById("btnCollegueStart")?.addEventListener("click", function(){
       speak(phraseAccueil());
@@ -475,7 +511,9 @@ if(anchor && anchor.nextSibling){
   }
 
   function boot(){
+    neutraliserPontTicketVersPay();
     setTimeout(injectUI, 250);
+    setTimeout(neutraliserPontTicketVersPay, 650);
   }
 
   if(document.readyState === "loading"){
@@ -494,6 +532,7 @@ if(anchor && anchor.nextSibling){
     stockBas: lireStockBas,
     ouvrirCloture: ouvrirCloture,
     calculClotureJour: calculClotureJour,
-    envoyerCloturePay: envoyerCloturePay
+    envoyerCloturePay: envoyerCloturePay,
+    neutraliserPontTicketVersPay: neutraliserPontTicketVersPay
   };
 })();
