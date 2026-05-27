@@ -3,324 +3,965 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="theme-color" content="#eefaf2"/>
-<title>MON COMMERCE — Actions utiles</title>
-<meta name="description" content="Actions utiles POS DIGIY : crédit client, ajout stock, dépense, commande, note rapide, validation au clic."/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+<meta name="theme-color" content="#0b1d12"/>
+<title>MON COMMERCE — ACTION POS</title>
+<meta name="description" content="ACTION POS DIGIY : parler une vente, retrouver les marchandises, préparer l’addition, validation humaine."/>
+
 <style>
 :root{
-  --bg:#eefaf2;--surface:#f8fff9;--card:#fff;--border:#cfe8d7;--text:#102318;--muted:#5f7468;
-  --green:#16a765;--gold:#7a4c00;--accent:#f5a623;--red:#d94b4b;--blue:#2878d8;
-  --shadow:0 8px 24px rgba(16,35,24,.08);--radius:18px;
-  --font:Outfit,'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  --bg:#0b1d12;
+  --deep:#06140d;
+  --panel:#102015;
+  --panel2:#14532d;
+  --gold:#f4c86a;
+  --gold2:#ffe8a8;
+  --green:#22c55e;
+  --white:#fff;
+  --soft:rgba(255,255,255,.86);
+  --muted:rgba(255,255,255,.64);
+  --line:rgba(244,200,106,.24);
+  --line2:rgba(255,255,255,.12);
+  --red:#7f1d1d;
+  --shadow:0 18px 48px rgba(0,0,0,.34);
+  --radius:24px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:var(--font);background:linear-gradient(180deg,#e9f8ee,#f7fff9 55%,#eefaf2);color:var(--text);min-height:100vh}
-a{text-decoration:none;color:inherit}button,input,select,textarea{font-family:inherit}button{cursor:pointer}
-.topbar{
-  position:sticky;top:0;z-index:30;background:rgba(248,255,249,.96);border-bottom:1px solid var(--border);
-  backdrop-filter:blur(12px);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px
+html{scroll-behavior:smooth}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 10% 0%,rgba(34,197,94,.16),transparent 34%),
+    radial-gradient(circle at 90% 4%,rgba(244,200,106,.20),transparent 30%),
+    linear-gradient(180deg,#06140d,#0b1d12 58%,#102015);
+  color:var(--white);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  padding-bottom:80px;
 }
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
-.logo{width:40px;height:40px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:950}
-.title{font-size:18px;font-weight:950;line-height:1.05}
-.sub{font-size:12px;color:var(--muted);font-weight:850;margin-top:2px}
-.wrap{padding:14px;max-width:980px;margin:0 auto}
-.link,.btn,.chip{
-  border:1px solid var(--border);background:#fff;border-radius:14px;padding:11px 13px;font-size:14px;font-weight:950;
-  display:inline-flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 4px 14px rgba(16,35,24,.04)
+a{text-decoration:none;color:inherit}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+.wrap{width:min(980px,calc(100% - 22px));margin:auto}
+
+.top{
+  position:sticky;
+  top:0;
+  z-index:30;
+  background:rgba(6,20,13,.94);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+  box-shadow:0 10px 28px rgba(0,0,0,.24);
 }
-.btn-main{background:var(--green);border-color:var(--green);color:#fff}
-.btn-gold{background:var(--accent);border-color:var(--accent);color:#000}
-.btn-danger{background:rgba(217,75,75,.12);border-color:rgba(217,75,75,.25);color:var(--red)}
-.btn-blue{background:#eaf3ff;border-color:#bcd7ff;color:#1557a6}
-.strip{display:flex;gap:8px;overflow-x:auto;padding:10px 0 14px}.strip::-webkit-scrollbar{display:none}
-.hero,.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
-.hero{padding:16px;background:linear-gradient(180deg,#fff8e8,#ffffff)}
-.kicker{display:inline-flex;background:#0f5132;color:#dcfce7;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:950;margin-bottom:10px}
-.hero h1{font-size:clamp(28px,7vw,54px);line-height:.96;letter-spacing:-.05em;margin:0 0 10px;font-weight:950}
-.hero p{color:#5b3b00;font-size:15px;line-height:1.45;font-weight:850}
-.grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:14px;align-items:start}
-.card-head{padding:13px 14px;border-bottom:1px solid var(--border);font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:950}
-.actions-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
-.action-btn{
-  width:100%;min-height:94px;border:1px solid var(--border);background:#fff;border-radius:18px;padding:13px;text-align:left;
-  display:flex;flex-direction:column;gap:7px;box-shadow:0 5px 16px rgba(16,35,24,.05)
+.topin{
+  min-height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 0;
 }
-.action-btn.active{border-color:var(--green);background:#e9f8ee}
-.action-icon{font-size:26px}.action-title{font-size:15px;font-weight:950}.action-desc{font-size:12px;color:var(--muted);font-weight:850;line-height:1.3}
-.form{padding:14px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}
-label{font-size:12px;font-weight:950;color:var(--muted)}
-input,select,textarea{
-  width:100%;border:1px solid var(--border);background:#fff;border-radius:14px;padding:13px 12px;
-  font-size:16px;font-weight:850;color:var(--text);outline:none
+.brand{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-width:0;
 }
-textarea{min-height:110px;resize:vertical;line-height:1.45}
-input:focus,select:focus,textarea:focus{border-color:var(--green)}
-.preview{padding:14px;background:#f8fff9;border-top:1px solid var(--border)}
-.preview-title{font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:950;color:var(--muted);margin-bottom:8px}
-.preview-box{border:1px dashed #b8e4c8;background:#fff;border-radius:16px;padding:13px;font-size:15px;font-weight:850;line-height:1.45;white-space:pre-wrap}
-.footer-actions{display:flex;gap:10px;flex-wrap:wrap;padding:14px;border-top:1px solid var(--border)}
-.list{padding:14px}.note{border:1px solid var(--border);border-radius:16px;padding:12px;margin-bottom:8px;background:#fff}
-.note-title{font-size:14px;font-weight:950}.note-text{font-size:13px;color:var(--muted);font-weight:850;line-height:1.4;margin-top:5px}.note-date{font-size:11px;color:var(--muted);font-weight:850;margin-top:7px}
+.logo{
+  width:48px;
+  height:48px;
+  border-radius:17px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#bbf7d0,var(--gold));
+  color:#102015;
+  font-size:24px;
+  font-weight:1000;
+}
+.brand strong{
+  display:block;
+  font-size:18px;
+  font-weight:1000;
+  line-height:1.05;
+}
+.brand small{
+  display:block;
+  margin-top:3px;
+  color:var(--gold);
+  font-size:11px;
+  font-weight:1000;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.toplinks{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+.link{
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  padding:9px 12px;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--line);
+  color:#fff;
+  font-size:13px;
+  font-weight:1000;
+}
+
+.hero{
+  min-height:calc(100vh - 92px);
+  margin:12px 0;
+  padding:22px 18px;
+  border-radius:30px;
+  background:
+    radial-gradient(circle at top right,rgba(244,200,106,.22),transparent 34%),
+    linear-gradient(145deg,#06140d,#0b1d12 46%,#14532d);
+  border:1px solid rgba(244,200,106,.28);
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.kicker{
+  color:var(--gold);
+  font-size:14px;
+  font-weight:1000;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+h1{
+  color:#fff;
+  font-size:clamp(46px,15vw,86px);
+  line-height:.85;
+  letter-spacing:-.075em;
+  font-weight:1000;
+}
+.lead{
+  margin-top:18px;
+  color:var(--soft);
+  font-size:18px;
+  line-height:1.36;
+  font-weight:850;
+}
+.example{
+  margin-top:18px;
+  padding:14px;
+  border-radius:20px;
+  background:rgba(255,255,255,.10);
+  border:1px solid var(--line2);
+  color:#fff;
+  font-size:18px;
+  font-weight:1000;
+  line-height:1.28;
+}
+
+.voicebox{
+  margin-top:18px;
+  padding:14px;
+  border-radius:24px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(244,200,106,.24);
+}
+textarea{
+  width:100%;
+  min-height:126px;
+  background:#06140d;
+  color:#fff;
+  border:1px solid rgba(244,200,106,.30);
+  border-radius:22px;
+  padding:16px;
+  outline:none;
+  resize:vertical;
+  font-size:18px;
+  line-height:1.42;
+  font-weight:850;
+}
+textarea::placeholder{color:rgba(255,255,255,.50)}
+.actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin-top:12px;
+}
+.btn{
+  min-height:58px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:10px;
+  color:#fff;
+  background:#102015;
+  border:1px solid rgba(244,200,106,.22);
+  font-weight:1000;
+}
+.btn.gold{
+  background:linear-gradient(135deg,#ffe8a8,#f4c86a);
+  color:#102015;
+}
+.btn.green{
+  background:linear-gradient(135deg,#bbf7d0,#22c55e);
+  color:#052e16;
+}
+.btn.red{
+  background:#7f1d1d;
+  color:#fff;
+}
+.btn:active{transform:scale(.985)}
+.status{
+  margin-top:12px;
+  padding:11px 12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.82);
+  font-size:14px;
+  line-height:1.35;
+  font-weight:900;
+}
+
+.panel{
+  margin:12px 0;
+  padding:16px;
+  border-radius:24px;
+  background:#102015;
+  color:#fff;
+  border:1px solid rgba(244,200,106,.20);
+  box-shadow:0 12px 30px rgba(0,0,0,.24);
+}
+.panel h2{
+  color:var(--gold);
+  font-size:24px;
+  line-height:1.05;
+  font-weight:1000;
+  letter-spacing:-.03em;
+  margin-bottom:7px;
+}
+.panel p{
+  color:rgba(255,255,255,.75);
+  font-size:14px;
+  line-height:1.36;
+  font-weight:850;
+}
+.result{
+  display:none;
+}
+.result.show{
+  display:block;
+}
+.lines{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:12px;
+}
+.line{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  align-items:center;
+  padding:12px;
+  border-radius:18px;
+  background:#0b1d12;
+  border:1px solid rgba(244,200,106,.18);
+}
+.line .qty{
+  color:var(--gold);
+  font-weight:1000;
+  font-size:18px;
+}
+.line b{
+  display:block;
+  font-size:16px;
+  font-weight:1000;
+}
+.line small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-weight:850;
+}
+.line .price{
+  color:var(--gold);
+  font-weight:1000;
+  white-space:nowrap;
+}
+.totalbox{
+  margin-top:12px;
+  padding:14px;
+  border-radius:20px;
+  background:linear-gradient(135deg,#14532d,#15803d);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  font-weight:1000;
+}
+.totalbox span:first-child{
+  color:#fff;
+}
+.totalbox span:last-child{
+  color:var(--gold);
+  font-size:28px;
+}
+.paymodes{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-top:12px;
+}
+.pay{
+  min-height:48px;
+  border-radius:16px;
+  background:#0b1d12;
+  color:#fff;
+  border:1px solid rgba(244,200,106,.22);
+  font-weight:1000;
+}
+.pay.active{
+  background:var(--gold);
+  color:#102015;
+}
+.dept{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin:12px 0;
+}
+.dept a,
+.dept button{
+  min-height:76px;
+  border:1px solid rgba(244,200,106,.18);
+  border-radius:20px;
+  background:#14532d;
+  color:#fff;
+  padding:12px;
+  text-align:left;
+  text-decoration:none;
+  font:inherit;
+  box-shadow:0 8px 20px rgba(0,0,0,.18);
+}
+.dept strong{display:block;margin-top:4px;font-size:15px;font-weight:1000}
+.dept span{display:block;margin-top:3px;color:var(--gold);font-size:12px;font-weight:900}
+details{
+  margin:12px 0;
+  border-radius:22px;
+  overflow:hidden;
+  border:1px solid rgba(244,200,106,.18);
+  background:#102015;
+  color:#fff;
+}
+summary{
+  list-style:none;
+  cursor:pointer;
+  padding:15px;
+  color:var(--gold);
+  font-size:16px;
+  font-weight:1000;
+}
+summary::-webkit-details-marker{display:none}
+.help{
+  padding:0 15px 15px;
+  color:var(--soft);
+  font-size:14px;
+  line-height:1.4;
+  font-weight:850;
+}
 .toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);
-  background:var(--green);color:white;padding:12px 18px;border-radius:999px;font-weight:950;
-  transition:.25s;z-index:99;box-shadow:0 10px 30px rgba(16,35,24,.2);white-space:nowrap
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%) translateY(40px);
+  opacity:0;
+  pointer-events:none;
+  width:min(520px,calc(100% - 28px));
+  background:#102015;
+  color:#fff;
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:14px 16px;
+  box-shadow:var(--shadow);
+  font-weight:900;
+  z-index:100;
+  text-align:center;
+  transition:.22s ease;
 }
-.toast.show{transform:translateX(-50%) translateY(0)}
-.help{padding:12px 14px;background:#fff8e8;border:1px solid #f1d89b;border-radius:18px;color:#5b3b00;font-weight:850;line-height:1.4;margin-bottom:14px}
-#btnActionsGuide{
-  position:fixed;bottom:24px;right:16px;z-index:200;background:linear-gradient(160deg,#fff8e8,#fff3d0);
-  border:1.5px solid #f1d89b;color:#7a4c00;border-radius:999px;padding:11px 18px;font-size:14px;
-  font-weight:950;box-shadow:0 8px 20px rgba(122,76,0,.22);display:inline-flex;align-items:center;gap:7px;
-  cursor:pointer;transition:transform .14s,box-shadow .14s;-webkit-tap-highlight-color:transparent
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
 }
-#btnActionsGuide:active{transform:scale(.95);box-shadow:0 4px 10px rgba(122,76,0,.14)}
-@media(max-width:780px){.grid{grid-template-columns:1fr}.actions-grid{grid-template-columns:1fr}.form{grid-template-columns:1fr}.link span{display:none}.wrap{padding:10px}}
+@media(max-width:680px){
+  .topin{min-height:64px}
+  .brand strong{font-size:16px}
+  .brand small{font-size:10px}
+  .link{font-size:12px;padding:8px 10px}
+  .hero{min-height:calc(100vh - 84px);padding:20px 16px}
+  h1{font-size:clamp(48px,18vw,78px)}
+  .actions{grid-template-columns:1fr 1fr}
+  .paymodes{grid-template-columns:1fr 1fr}
+  .dept{grid-template-columns:1fr 1fr}
+  .line{grid-template-columns:auto 1fr}
+  .line .price{grid-column:1/-1}
+}
 </style>
 </head>
+
 <body>
-<header class="topbar">
-  <div class="brand">
-    <div class="logo">⚡</div>
-    <div>
-      <div class="title">Actions utiles</div>
-      <div class="sub">Textes métier prêts · validation au clic</div>
+<header class="top">
+  <div class="wrap topin">
+    <a class="brand" href="./caisse.html">
+      <div class="logo">🎙️</div>
+      <div>
+        <strong>ACTION POS</strong>
+        <small>Voix caisse · addition préparée</small>
+      </div>
+    </a>
+
+    <div class="toplinks">
+      <a class="link" href="./caisse.html">💰 Caisse</a>
+      <a class="link" href="./admin.html">📦 Marchandises</a>
     </div>
   </div>
-  <a class="link" href="./caisse.html">💰 <span>Caisse</span></a>
 </header>
 
 <main class="wrap">
-  <div class="strip">
-    <a class="link" href="./caisse.html">← Caisse</a>
-    <a class="link" href="./admin.html">📦 Marchandises</a>
-    <a class="link" href="./profile.html">🏪 Coordonnées pro</a>
-    <a class="link" href="./caisse.html#notes">✍️ Notes</a>
-  </div>
-
   <section class="hero">
-    <div class="kicker">Le pro clique plus qu’il n’écrit</div>
-    <h1>Choisis l’action, DIGIY prépare le texte, tu valides.</h1>
-    <p>
-      Cette page sert aux gestes du comptoir qui ne sont pas une vente simple :
-      ajouter du stock, noter une dette client, une dépense, une commande, une taille, une couleur, une livraison ou une perte.
+    <div class="kicker">ACTION DIGIY · MON COMMERCE</div>
+    <h1>Dis la vente.</h1>
+
+    <p class="lead">
+      Le client parle. Le pro parle. DIGIY retrouve les marchandises, prépare l’addition,
+      puis le pro vérifie et valide dans la caisse.
     </p>
+
+    <div class="example">
+      “4 draps moyens, 2 serviettes, 1 peignoir”
+    </div>
+
+    <div class="voicebox">
+      <textarea id="voiceText" placeholder="Dis ou écris la vente ici…">4 draps moyens, 2 serviettes, 1 peignoir</textarea>
+
+      <div class="actions">
+        <button class="btn green" type="button" id="listenBtn">🎙️ Écouter</button>
+        <button class="btn red" type="button" id="stopBtn">⏹ Stop</button>
+        <button class="btn gold" type="button" id="prepareBtn">⚡ Préparer addition</button>
+        <button class="btn" type="button" id="clearBtn">🧹 Effacer</button>
+      </div>
+
+      <div class="status" id="statusBox">
+        Prêt. Le micro prépare un brouillon seulement. Rien n’est encaissé automatiquement.
+      </div>
+    </div>
   </section>
 
-  <div class="grid">
-    <section class="card">
-      <div class="card-head">Choisir une action</div>
-      <div class="actions-grid" id="actionGrid"></div>
-    </section>
+  <section class="panel result" id="resultBox">
+    <h2>🧾 Addition préparée</h2>
+    <p>Vérifie les lignes avant d’envoyer à la caisse. Les prix viennent de Marchandises quand ils sont trouvés.</p>
 
-    <section class="card">
-      <div class="card-head">Préparer la note</div>
-      <div class="form">
-        <div class="field">
-          <label>Client / personne</label>
-          <input id="client" placeholder="Ex : Awa"/>
-        </div>
-        <div class="field">
-          <label>Marchandise / sujet</label>
-          <input id="item" placeholder="Ex : robe stylée"/>
-        </div>
-        <div class="field">
-          <label>Montant FCFA</label>
-          <input id="amount" type="number" inputmode="numeric" placeholder="Ex : 10000"/>
-        </div>
-        <div class="field">
-          <label>Quantité</label>
-          <input id="qty" type="number" inputmode="numeric" placeholder="Ex : 12"/>
-        </div>
-        <div class="field">
-          <label>Date / délai</label>
-          <input id="dateInfo" placeholder="Ex : fin du mois"/>
-        </div>
-        <div class="field">
-          <label>Détail</label>
-          <input id="detail" placeholder="Ex : couleur bleue taille M"/>
-        </div>
-        <div class="field full">
-          <label>Texte préparé</label>
-          <textarea id="prepared" placeholder="DIGIY prépare ici le texte métier."></textarea>
-        </div>
-      </div>
-      <div class="preview">
-        <div class="preview-title">Aperçu avant validation</div>
-        <div class="preview-box" id="previewBox">Choisis une action à gauche.</div>
-      </div>
-      <div class="footer-actions">
-        <button class="btn btn-main" onclick="saveAction()">✅ Valider l’action</button>
-        <button class="btn" onclick="clearForm()">🧹 Vider</button>
-        <button class="btn btn-blue" onclick="renderPreview()">⚡ Préparer</button>
-      </div>
-    </section>
-  </div>
+    <div class="lines" id="linesBox"></div>
 
-  <section class="card">
-    <div class="card-head">Dernières notes gardées</div>
-    <div class="list" id="notesList"></div>
+    <div class="totalbox">
+      <span>Total préparé</span>
+      <span id="totalBox">0 F</span>
+    </div>
+
+    <div class="paymodes" aria-label="Mode de paiement">
+      <button class="pay active" type="button" data-pay="Cash">Cash</button>
+      <button class="pay" type="button" data-pay="Wave">Wave</button>
+      <button class="pay" type="button" data-pay="Orange Money">Orange</button>
+      <button class="pay" type="button" data-pay="Carte">Carte</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn green" type="button" id="sendBtn">✅ Envoyer à la caisse</button>
+      <button class="btn gold" type="button" id="copyBtn">📋 Copier résumé</button>
+      <button class="btn" type="button" id="editBtn">✏️ Modifier phrase</button>
+      <a class="btn" href="./caisse.html">← Retour caisse</a>
+    </div>
   </section>
+
+  <section class="dept" aria-label="Départements">
+    <a href="./admin.html">📦 <strong>Marchandises</strong><span>prix · stock · alias</span></a>
+    <a href="./caisse.html">💰 <strong>Caisse</strong><span>addition · paiement</span></a>
+    <a href="./caisse.html#notes">📝 <strong>Notes</strong><span>dette · dépense</span></a>
+    <a href="./caisse.html#stats">📊 <strong>Stats</strong><span>ventes · total</span></a>
+  </section>
+
+  <details>
+    <summary>🎓 Comment parler à ACTION POS</summary>
+    <div class="help">
+      <p><strong>Formule simple :</strong> quantité + marchandise + paiement si besoin.</p>
+      <br>
+      <p>Exemples :</p>
+      <p>• 4 draps moyens, 2 serviettes, 1 peignoir</p>
+      <p>• deux serviettes bain à 5000 cash</p>
+      <p>• ajoute une crème beauté paiement Wave</p>
+      <p>• 3 foutas et 1 robe plage</p>
+      <br>
+      <p>Important : les prix et les mots du terrain se règlent dans Marchandises. Le pro programme une fois, puis il parle.</p>
+    </div>
+  </details>
 </main>
 
 <div class="toast" id="toast"></div>
-<button id="btnActionsGuide" onclick="speakActionsGuide()">🎧 Mode d’emploi</button>
 
 <script>
-const ACTIONS = [
-  {key:"client_doit", icon:"🤝", title:"Client doit", desc:"Crédit / dette à récupérer", type:"client_doit", template:d=>`${d.client||"Client"} doit ${money(d.amount)}${d.item?" pour "+d.item:""}${d.dateInfo?" · "+d.dateInfo:""}.`},
-  {key:"stock_add", icon:"📦", title:"Ajouter stock", desc:"Entrée stock ou achat marchandise", type:"stock", template:d=>`Ajout stock : ${d.qty||0} ${d.item||"marchandise"}${d.amount?" · coût/prix "+money(d.amount):""}${d.detail?" · "+d.detail:""}.`},
-  {key:"depense", icon:"💸", title:"Dépense", desc:"Sortie d’argent du comptoir", type:"depense", template:d=>`Dépense : ${money(d.amount)}${d.item?" · "+d.item:""}${d.detail?" · "+d.detail:""}.`},
-  {key:"commande", icon:"📝", title:"Commande cliente", desc:"Demande à préparer", type:"commande", template:d=>`Commande cliente : ${d.client||"Cliente"} demande ${d.qty?d.qty+" ":""}${d.item||"marchandise"}${d.detail?" · "+d.detail:""}${d.dateInfo?" · pour "+d.dateInfo:""}.`},
-  {key:"taille_couleur", icon:"🎨", title:"Taille / couleur", desc:"Précision sur une vente", type:"autre", template:d=>`Note ${d.item||"marchandise"} : ${d.detail||"taille / couleur à préciser"}${d.client?" · "+d.client:""}.`},
-  {key:"remise", icon:"🏷️", title:"Remise donnée", desc:"Garder trace d’une réduction", type:"vente", template:d=>`Remise donnée : ${money(d.amount)}${d.item?" sur "+d.item:""}${d.client?" · "+d.client:""}.`},
-  {key:"livraison", icon:"🛵", title:"Livraison", desc:"Livraison à faire / suivie", type:"autre", template:d=>`Livraison : ${d.client||"Client"}${d.item?" · "+d.item:""}${d.detail?" · "+d.detail:""}${d.dateInfo?" · "+d.dateInfo:""}.`},
-  {key:"perte", icon:"⚠️", title:"Perte / casse", desc:"Article abîmé ou perdu", type:"stock", template:d=>`Perte / casse : ${d.qty||1} ${d.item||"marchandise"}${d.detail?" · "+d.detail:""}.`},
-  {key:"achat_fournisseur", icon:"🚚", title:"Achat fournisseur", desc:"Stock acheté chez fournisseur", type:"stock", template:d=>`Achat fournisseur : ${d.qty?d.qty+" ":""}${d.item||"marchandise"}${d.amount?" · "+money(d.amount):""}${d.detail?" · "+d.detail:""}.`},
-  {key:"autre", icon:"✍️", title:"Autre note", desc:"Information libre importante", type:"autre", template:d=>`${d.detail||"Note comptoir"}${d.client?" · "+d.client:""}${d.item?" · "+d.item:""}${d.amount?" · "+money(d.amount):""}.`}
-];
+(function(){
+  "use strict";
 
-let selected = ACTIONS[0];
-let toastTimer=null;
-function $(id){return document.getElementById(id)}
-function readJSON(key,fallback){try{const d=localStorage.getItem(key);return d?JSON.parse(d):fallback}catch(e){return fallback}}
-function saveJSON(key,val){localStorage.setItem(key,JSON.stringify(val))}
-function getNotes(){return readJSON("caisse_notes",[])}
-function saveNotes(n){saveJSON("caisse_notes",n)}
-function getProducts(){return readJSON("caisse_prods",[])}
-function saveProducts(p){saveJSON("caisse_prods",p)}
-function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function money(n){return Number(n||0)>0 ? Math.round(Number(n)).toLocaleString("fr-FR")+" F" : "montant à préciser"}
-function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2200)}
+  const TRACE_KEYS = ["DIGIY_POS_CAISSE_TRACE", "caisse_action_last_trace"];
+  const TOUCH_KEY = "caisse_action_trace_touch";
 
-function formData(){
-  return {
-    client:$("client").value.trim(),
-    item:$("item").value.trim(),
-    amount:Number($("amount").value||0),
-    qty:Number($("qty").value||0),
-    dateInfo:$("dateInfo").value.trim(),
-    detail:$("detail").value.trim()
+  const $ = id => document.getElementById(id);
+
+  const els = {
+    voiceText: $("voiceText"),
+    listenBtn: $("listenBtn"),
+    stopBtn: $("stopBtn"),
+    prepareBtn: $("prepareBtn"),
+    clearBtn: $("clearBtn"),
+    statusBox: $("statusBox"),
+    resultBox: $("resultBox"),
+    linesBox: $("linesBox"),
+    totalBox: $("totalBox"),
+    sendBtn: $("sendBtn"),
+    copyBtn: $("copyBtn"),
+    editBtn: $("editBtn"),
+    toast: $("toast")
   };
-}
 
-function renderActions(){
-  $("actionGrid").innerHTML=ACTIONS.map(a=>`
-    <button class="action-btn ${a.key===selected.key?"active":""}" onclick="selectAction('${a.key}')">
-      <div class="action-icon">${a.icon}</div>
-      <div class="action-title">${esc(a.title)}</div>
-      <div class="action-desc">${esc(a.desc)}</div>
-    </button>
-  `).join("");
-}
+  let recognition = null;
+  let selectedPay = "Cash";
+  let currentDraft = null;
+  let listenBuffer = "";
 
-function selectAction(key){
-  selected=ACTIONS.find(a=>a.key===key)||ACTIONS[0];
-  renderActions();
-  renderPreview();
-}
+  const NUMBER_WORDS = {
+    "un":1,"une":1,"deux":2,"trois":3,"quatre":4,"cinq":5,"six":6,"sept":7,"huit":8,"neuf":9,"dix":10,
+    "onze":11,"douze":12,"treize":13,"quatorze":14,"quinze":15,"seize":16,"vingt":20
+  };
 
-function renderPreview(){
-  const txt = selected.template(formData());
-  $("prepared").value = txt;
-  $("previewBox").textContent = txt;
-}
+  function toast(msg){
+    els.toast.textContent = msg;
+    els.toast.classList.add("show");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>els.toast.classList.remove("show"),2400);
+  }
 
-["client","item","amount","qty","dateInfo","detail","prepared"].forEach(id=>{
-  setTimeout(()=>{const el=$(id); if(el) el.addEventListener("input",()=> {
-    if(id==="prepared") $("previewBox").textContent=$("prepared").value || "Texte vide.";
-    else renderPreview();
-  })},0);
-});
+  function money(n){
+    return Math.round(Number(n)||0).toLocaleString("fr-FR") + " F";
+  }
 
-function normalize(v){return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim()}
-function maybeUpdateStock(){
-  if(selected.key!=="stock_add" && selected.key!=="achat_fournisseur") return false;
-  const d=formData();
-  if(!d.item || !d.qty) return false;
-  const items=getProducts();
-  if(!Array.isArray(items) || !items.length) return false;
-  const target=items.find(p=>normalize(p.name)===normalize(d.item)) || items.find(p=>normalize(p.name).includes(normalize(d.item)) || normalize(d.item).includes(normalize(p.name)));
-  if(!target) return false;
-  target.stock=Number(target.stock||0)+Number(d.qty||0);
-  saveProducts(items);
-  return true;
-}
+  function readJSON(key, fallback){
+    try{
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    }catch(_){
+      return fallback;
+    }
+  }
 
-function saveAction(){
-  const text=($("prepared").value||"").trim();
-  if(!text){toast("Prépare une action");return}
-  const d=formData();
-  const stockTouched=maybeUpdateStock();
-  const notes=getNotes();
-  notes.unshift({
-    id:Date.now(),
-    date:new Date().toISOString(),
-    type:selected.type||"autre",
-    amount:Number(d.amount||0),
-    text: text + (stockTouched ? "\nStock mis à jour automatiquement." : "")
+  function writeJSON(key, value){
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  function getProducts(){
+    const items = readJSON("caisse_prods", []);
+    return Array.isArray(items) ? items : [];
+  }
+
+  function normalize(v){
+    return String(v||"")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/[’']/g," ")
+      .replace(/[^a-z0-9\u0600-\u06FF]+/g," ")
+      .replace(/\s+/g," ")
+      .trim();
+  }
+
+  function singular(v){
+    const s = String(v||"").trim();
+    return s.length > 3 && s.endsWith("s") ? s.slice(0,-1) : s;
+  }
+
+  function tokens(v){
+    return normalize(v).split(" ").map(singular).filter(x=>x && x.length>1);
+  }
+
+  function numberFromWordOrDigit(v){
+    const n = normalize(v);
+    const d = n.match(/\b(\d{1,3})\b/);
+    if(d) return Number(d[1]);
+    const words = Object.keys(NUMBER_WORDS).join("|");
+    const w = n.match(new RegExp("\\b("+words+")\\b","i"));
+    if(w) return NUMBER_WORDS[w[1]] || 1;
+    return 1;
+  }
+
+  function stripQuantity(v){
+    let s = normalize(v);
+    Object.keys(NUMBER_WORDS).forEach(w=>{
+      s = s.replace(new RegExp("\\b"+w+"\\b","g")," ");
+    });
+    s = s.replace(/\b\d{1,3}\b/g," ");
+    return s.replace(/\s+/g," ").trim();
+  }
+
+  function getAliases(product){
+    const out = [];
+    if(product.name) out.push(product.name);
+    if(product.cat) out.push(product.cat);
+    if(Array.isArray(product.aliases)) out.push(...product.aliases);
+    if(typeof product.aliases === "string") out.push(...product.aliases.split(/[,;\n]/));
+    return out.map(x=>String(x||"").trim()).filter(Boolean);
+  }
+
+  function scoreProduct(segment, product){
+    const segNorm = stripQuantity(segment);
+    const segTokens = tokens(segNorm);
+    const aliases = getAliases(product);
+    let score = 0;
+
+    aliases.forEach(alias=>{
+      const aNorm = normalize(alias);
+      if(!aNorm) return;
+      if(segNorm === aNorm) score += 100;
+      if(segNorm.includes(aNorm)) score += 40;
+      if(aNorm.includes(segNorm) && segNorm.length > 2) score += 25;
+
+      const aTokens = tokens(aNorm);
+      aTokens.forEach(t=>{
+        if(segTokens.includes(t)) score += 10;
+        else if(segTokens.some(st=>st.includes(t) || t.includes(st))) score += 4;
+      });
+    });
+
+    return score;
+  }
+
+  function findProduct(segment){
+    const products = getProducts().filter(p=>p && p.published !== false);
+    let best = null;
+    let bestScore = 0;
+
+    products.forEach(p=>{
+      const s = scoreProduct(segment, p);
+      if(s > bestScore){
+        best = p;
+        bestScore = s;
+      }
+    });
+
+    return bestScore >= 10 ? best : null;
+  }
+
+  function detectPayment(text){
+    const n = normalize(text);
+    if(n.includes("wave") || n.includes("ouve") || n.includes("oueve")) return "Wave";
+    if(n.includes("orange")) return "Orange Money";
+    if(n.includes("carte") || n.includes("tpe")) return "Carte";
+    if(n.includes("cash") || n.includes("espece") || n.includes("liquide")) return "Cash";
+    return selectedPay || "Cash";
+  }
+
+  function splitSegments(text){
+    let s = String(text||"")
+      .replace(/\+/g,",")
+      .replace(/\bet\b/gi,",")
+      .replace(/\bak\b/gi,",")
+      .replace(/\s+avec\s+/gi,",")
+      .replace(/\s+plus\s+/gi,",");
+
+    return s.split(/[,;\n]/)
+      .map(x=>x.trim())
+      .filter(Boolean)
+      .filter(x=>!normalize(x).match(/^(cash|wave|orange|carte|tpe)$/));
+  }
+
+  function extractExplicitPrice(segment){
+    const s = normalize(segment);
+    const m = s.match(/\b(?:a|à|prix|unite|unité)\s*(\d[\d\s.]*)\b/i);
+    if(m) return Number(String(m[1]).replace(/[^\d]/g,"")) || 0;
+
+    const nums = [];
+    String(segment||"").replace(/\d[\d\s.]*/g, m2=>{
+      const n = Number(String(m2).replace(/[^\d]/g,""));
+      if(n > 100) nums.push(n);
+    });
+    return nums.length ? nums[nums.length - 1] : 0;
+  }
+
+  function cleanItemName(segment){
+    let s = normalize(segment);
+    Object.keys(NUMBER_WORDS).forEach(w=>{
+      s = s.replace(new RegExp("\\b"+w+"\\b","g")," ");
+    });
+    s = s.replace(/\b\d{1,3}\b/g," ");
+    s = s.replace(/\b(a|prix|unite|unité)\s*\d[\d\s.]*/g," ");
+    s = s.replace(/\b(cash|wave|orange|money|carte|tpe|espece|liquide)\b/g," ");
+    return s.replace(/\s+/g," ").trim();
+  }
+
+  function parseLine(segment){
+    const qty = Math.max(1, numberFromWordOrDigit(segment));
+    const product = findProduct(segment);
+    const explicitPrice = extractExplicitPrice(segment);
+
+    const name = product ? (product.name || "Marchandise") : cleanItemName(segment) || segment;
+    const unitPrice = explicitPrice || Number(product && product.price || 0);
+    const total = qty * unitPrice;
+
+    return {
+      id: product ? product.id : "action_" + Date.now() + "_" + Math.random().toString(16).slice(2),
+      item: name,
+      name,
+      quantity: qty,
+      qty,
+      unitPrice,
+      price: unitPrice,
+      total,
+      emoji: product ? (product.emoji || "📦") : "🎙️",
+      cat: product ? (product.cat || "ACTION DIGIY") : "ACTION DIGIY",
+      matched: !!product,
+      note: segment
+    };
+  }
+
+  function parseSale(text){
+    const segments = splitSegments(text);
+    const lines = segments.map(parseLine).filter(l=>l.item && l.quantity);
+    const total = lines.reduce((s,l)=>s+Number(l.total||0),0);
+    const channel = detectPayment(text);
+
+    return {
+      id: "ACTION_POS_" + Date.now(),
+      source: "ACTION_DIGIY_POS",
+      module: "POS",
+      action: "ADD_SALE",
+      status: "draft",
+      requiresHumanValidation: true,
+      createdAt: new Date().toISOString(),
+      rawText: text,
+      note: text,
+      channel,
+      items: lines,
+      quantity: lines[0] ? lines[0].quantity : 1,
+      item: lines[0] ? lines[0].item : "",
+      unitPrice: lines[0] ? lines[0].unitPrice : 0,
+      price: lines[0] ? lines[0].unitPrice : 0,
+      totalAmount: total,
+      amount: total,
+      currency: "XOF",
+      safety:{
+        noAutoPayment:true,
+        noAutoSale:true,
+        noAutoStockChange:true,
+        noAutoConfirmation:true
+      }
+    };
+  }
+
+  function renderDraft(draft){
+    currentDraft = draft;
+    els.resultBox.classList.add("show");
+
+    if(!draft.items.length){
+      els.linesBox.innerHTML = '<div class="line"><div class="qty">!</div><div><b>Aucune marchandise reconnue</b><small>Vérifie les mots du terrain dans Marchandises.</small></div><div class="price">—</div></div>';
+    }else{
+      els.linesBox.innerHTML = draft.items.map(line=>`
+        <div class="line">
+          <div class="qty">×${Number(line.quantity||1)}</div>
+          <div>
+            <b>${escapeHTML(line.name || line.item)}</b>
+            <small>${line.matched ? "Prix retrouvé dans Marchandises" : "À vérifier : produit non retrouvé"} · ${money(line.unitPrice)}</small>
+          </div>
+          <div class="price">${money(line.total)}</div>
+        </div>
+      `).join("");
+    }
+
+    els.totalBox.textContent = money(draft.totalAmount);
+    setStatus("Addition préparée. Vérifie avant d’envoyer à la caisse.");
+    window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+  }
+
+  function escapeHTML(v){
+    return String(v??"")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function setStatus(text){
+    els.statusBox.textContent = text;
+  }
+
+  function prepare(){
+    const text = els.voiceText.value.trim();
+    if(!text){
+      toast("Parle ou écris une vente.");
+      return;
+    }
+
+    const draft = parseSale(text);
+    renderDraft(draft);
+
+    if(!draft.items.length || !draft.totalAmount){
+      toast("Brouillon préparé, mais prix à vérifier.");
+    }else{
+      toast("Addition préparée.");
+    }
+  }
+
+  function sendToCaisse(){
+    if(!currentDraft) prepare();
+    if(!currentDraft) return;
+
+    if(!currentDraft.items.length){
+      toast("Aucune ligne à envoyer.");
+      return;
+    }
+
+    /*
+      Le bridge actuel de la caisse lit DIGIY_POS_CAISSE_TRACE.
+      On envoie le brouillon complet. Si le bridge est ancien, il utilisera la première ligne.
+      Si le bridge est multi-lignes, il lira items[].
+    */
+    const trace = {
+      ...currentDraft,
+      channel: selectedPay,
+      payment: selectedPay,
+      sentAt: new Date().toISOString()
+    };
+
+    TRACE_KEYS.forEach(key=>writeJSON(key, trace));
+    localStorage.setItem(TOUCH_KEY, String(Date.now()));
+
+    toast("Trace ACTION POS envoyée à la caisse.");
+    setTimeout(()=>{ location.href = "./caisse.html"; }, 420);
+  }
+
+  function copySummary(){
+    if(!currentDraft) prepare();
+    if(!currentDraft) return;
+
+    const text = [
+      "ACTION POS — Addition préparée",
+      ...currentDraft.items.map(i=>`${i.quantity} × ${i.name} — ${money(i.unitPrice)} = ${money(i.total)}`),
+      "Total : " + money(currentDraft.totalAmount),
+      "Paiement : " + selectedPay,
+      "Validation humaine obligatoire."
+    ].join("\n");
+
+    navigator.clipboard?.writeText(text)
+      .then(()=>toast("Résumé copié."))
+      .catch(()=>prompt("Copie le résumé :", text));
+  }
+
+  function clearAll(){
+    els.voiceText.value = "";
+    els.linesBox.innerHTML = "";
+    els.totalBox.textContent = "0 F";
+    els.resultBox.classList.remove("show");
+    currentDraft = null;
+    listenBuffer = "";
+    setStatus("Prêt. Le micro prépare un brouillon seulement. Rien n’est encaissé automatiquement.");
+  }
+
+  function setupPay(){
+    document.querySelectorAll(".pay").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        document.querySelectorAll(".pay").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedPay = btn.dataset.pay || "Cash";
+        if(currentDraft){
+          currentDraft.channel = selectedPay;
+          currentDraft.payment = selectedPay;
+        }
+      });
+    });
+  }
+
+  function setupSpeech(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){
+      els.listenBtn.disabled = true;
+      els.listenBtn.textContent = "🎙️ Micro non dispo";
+      setStatus("Micro non disponible sur ce navigateur. Tu peux écrire la vente.");
+      return;
+    }
+
+    recognition = new SR();
+    recognition.lang = "fr-FR";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = ()=>{
+      listenBuffer = "";
+      setStatus("J’écoute… parle naturellement.");
+      toast("Micro ouvert.");
+    };
+
+    recognition.onresult = e=>{
+      let finalText = "";
+      let interim = "";
+
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const tr = e.results[i][0].transcript;
+        if(e.results[i].isFinal) finalText += tr;
+        else interim += tr;
+      }
+
+      if(finalText.trim()) listenBuffer = (listenBuffer + " " + finalText).trim();
+
+      const visible = (listenBuffer + " " + interim).trim();
+      if(visible) els.voiceText.value = visible;
+    };
+
+    recognition.onerror = e=>{
+      setStatus(e.error === "not-allowed" ? "Permission micro refusée." : "Micro arrêté. Tu peux écrire.");
+    };
+
+    recognition.onend = ()=>{
+      setStatus("Écoute terminée. Tu peux préparer l’addition.");
+      if(els.voiceText.value.trim()) prepare();
+    };
+  }
+
+  els.listenBtn.addEventListener("click",()=>{
+    if(!recognition){
+      toast("Micro non disponible ici.");
+      return;
+    }
+
+    try{
+      els.voiceText.value = "";
+      currentDraft = null;
+      els.resultBox.classList.remove("show");
+      recognition.start();
+    }catch(_){
+      toast("Micro déjà lancé.");
+    }
   });
-  saveNotes(notes);
-  renderNotes();
-  toast(stockTouched ? "Action validée + stock mis à jour" : "Action validée");
-}
 
-function clearForm(){
-  ["client","item","amount","qty","dateInfo","detail","prepared"].forEach(id=>$(id).value="");
-  $("previewBox").textContent="Choisis une action à gauche.";
-}
+  els.stopBtn.addEventListener("click",()=>{
+    try{ recognition && recognition.stop(); }catch(_){}
+    try{ speechSynthesis && speechSynthesis.cancel(); }catch(_){}
+    setStatus("Stop.");
+  });
 
-function noteLabel(t){return({vente:"Vente",depense:"Dépense",client_doit:"Client doit",stock:"Stock / achat",commande:"Commande",autre:"Autre"}[t]||"Note")}
-function fmtDate(v){const d=new Date(v);return isNaN(d.getTime())?"":d.toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})+" "+d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}
-function renderNotes(){
-  const notes=getNotes().slice(0,8);
-  $("notesList").innerHTML=notes.length ? notes.map(n=>`
-    <div class="note">
-      <div class="note-title">${esc(noteLabel(n.type))}${Number(n.amount||0)? " · "+money(n.amount):""}</div>
-      <div class="note-text">${esc(n.text||"")}</div>
-      <div class="note-date">${esc(fmtDate(n.date))}</div>
-    </div>
-  `).join("") : '<div class="help" style="margin:0">Aucune note encore. Valide une action pour commencer.</div>';
-}
+  els.prepareBtn.addEventListener("click",prepare);
+  els.sendBtn.addEventListener("click",sendToCaisse);
+  els.copyBtn.addEventListener("click",copySummary);
+  els.clearBtn.addEventListener("click",clearAll);
+  els.editBtn.addEventListener("click",()=>els.voiceText.focus());
 
-const ACTIONS_GUIDE = [
-  "Tu es sur Actions utiles.",
-  "Cette page sert quand ce n'est pas une vente simple.",
-  "Tu choisis une action prête parmi dix modèles :",
-  "client doit, ajout de stock, dépense, commande cliente, taille ou couleur, remise donnée, livraison, perte ou casse, achat fournisseur, ou note libre.",
-  "DIGIY prépare le texte métier en une phrase.",
-  "Tu complètes seulement les champs utiles : client, marchandise, montant, quantité, date ou détail.",
-  "Le texte préparé s'affiche. Tu peux le modifier avant de valider si besoin.",
-  "Puis tu touches le bouton vert Valider l'action.",
-  "La note est gardée dans le téléphone et visible dans les Notes de la caisse.",
-  "Pour ajout stock ou achat fournisseur, si la marchandise existe déjà, le stock est augmenté automatiquement."
-].join(" ");
-
-let guideSpeaking=false;
-function speakActionsGuide(){
-  if(!("speechSynthesis" in window)){alert("Audio non disponible");return}
-  const btn=$("btnActionsGuide");
-  if(guideSpeaking){try{speechSynthesis.cancel()}catch(e){} guideSpeaking=false; btn.textContent="🎧 Mode d’emploi"; return}
-  try{
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(ACTIONS_GUIDE);
-    u.lang="fr-FR"; u.rate=.84; u.pitch=1.02;
-    const stop=()=>{guideSpeaking=false; btn.textContent="🎧 Mode d’emploi"};
-    u.onstart=()=>{guideSpeaking=true; btn.textContent="⏹ Stop"};
-    u.onend=stop; u.onerror=stop;
-    const speak=()=>{const fr=(speechSynthesis.getVoices()||[]).find(v=>/^fr/i.test(v.lang)); if(fr)u.voice=fr; try{speechSynthesis.speak(u)}catch(e){stop()}};
-    if(speechSynthesis.getVoices().length)speak(); else {speechSynthesis.onvoiceschanged=()=>{speechSynthesis.onvoiceschanged=null;speak()}; setTimeout(speak,120)}
-  }catch(e){guideSpeaking=false}
-}
-
-renderActions();
-renderPreview();
-renderNotes();
+  setupPay();
+  setupSpeech();
+  prepare();
+})();
 </script>
 </body>
 </html>
