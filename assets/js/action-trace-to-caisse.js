@@ -206,3 +206,193 @@
     markConsumed
   };
 })();
+
+/* DIGIY POS — PAGINATION PRODUITS 12 PAR PAGE
+   Add-on non destructif : il arrive après caisse-pos.js et remplace seulement l'affichage des produits.
+   Le panier, l'encaissement, les stats, les notes et PAY restent dans caisse-pos.js.
+*/
+(function(){
+  "use strict";
+
+  const VERSION = "pos-products-pagination-12-20260527-1";
+  const PAGE_SIZE = 12;
+  let productPage = 1;
+  let lastFilterKey = "";
+
+  function money(n){
+    if(typeof window.fmt === "function") return window.fmt(n);
+    return Math.round(Number(n)||0).toLocaleString("fr-FR") + " F";
+  }
+
+  function esc(v){
+    if(typeof window.esc === "function") return window.esc(v);
+    return String(v ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function getSelectedCategory(){
+    try{ if(typeof selCat !== "undefined") return selCat || "Tous"; }catch(_){}
+    return "Tous";
+  }
+
+  function getQuery(){
+    const input = document.getElementById("searchInput");
+    return String(input && input.value || "").toLowerCase().trim();
+  }
+
+  function filteredProducts(){
+    const q = getQuery();
+    const cat = getSelectedCategory();
+    const prods = (typeof window.getProds === "function") ? window.getProds() : [];
+    return (Array.isArray(prods) ? prods : []).filter(p => {
+      const okCat = cat === "Tous" || p.cat === cat;
+      const okQuery = !q || String(p.name || "").toLowerCase().includes(q);
+      return okCat && okQuery;
+    });
+  }
+
+  function ensurePager(grid){
+    let pager = document.getElementById("prodsPager");
+    if(!pager && grid){
+      pager = document.createElement("div");
+      pager.id = "prodsPager";
+      pager.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 0;padding:10px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;font-weight:1000";
+      grid.insertAdjacentElement("afterend", pager);
+    }
+    return pager;
+  }
+
+  function productCard(p){
+    return `
+      <div class="pcard${Number(p.stock)<=0 ? " oos" : ""}" onclick="addToCart(${Number(p.id)})">
+        <span class="stk-badge ${Number(p.stock)<=5 ? "stk-low" : "stk-ok"}">${Number(p.stock)||0}</span>
+        <div class="pcard-emoji">${esc(p.emoji || "📦")}</div>
+        <div class="pcard-name">${esc(p.name)}</div>
+        <div class="pcard-price">${money(p.price)}</div>
+      </div>`;
+  }
+
+  function renderPager(pager, totalPages, totalItems){
+    if(!pager) return;
+    if(totalPages <= 1){
+      pager.innerHTML = `<span>${totalItems} produit${totalItems>1?"s":""}</span>`;
+      return;
+    }
+
+    pager.innerHTML = `
+      <button class="btn" type="button" id="prodsPrev" ${productPage<=1 ? "disabled" : ""}>← Précédent</button>
+      <span>Page ${productPage}/${totalPages} · ${totalItems} produits</span>
+      <button class="btn" type="button" id="prodsNext" ${productPage>=totalPages ? "disabled" : ""}>Suivant →</button>
+    `;
+
+    const prev = document.getElementById("prodsPrev");
+    const next = document.getElementById("prodsNext");
+
+    if(prev){
+      prev.onclick = function(){
+        productPage = Math.max(1, productPage - 1);
+        renderProdsPaginated();
+      };
+    }
+
+    if(next){
+      next.onclick = function(){
+        productPage = Math.min(totalPages, productPage + 1);
+        renderProdsPaginated();
+      };
+    }
+  }
+
+  function renderProdsPaginated(){
+    const grid = document.getElementById("prodsGrid");
+    if(!grid) return;
+
+    const cat = getSelectedCategory();
+    const q = getQuery();
+    const key = cat + "::" + q;
+    if(key !== lastFilterKey){
+      productPage = 1;
+      lastFilterKey = key;
+    }
+
+    const items = filteredProducts();
+    const pager = ensurePager(grid);
+
+    if(!items.length){
+      grid.innerHTML = `<div style="grid-column:1/-1" class="no-data">Aucune marchandise encore. Va dans Marchandises pour programmer tes articles, ou charge un exemple métier si tu veux tester.</div>`;
+      if(pager) pager.innerHTML = "";
+      return;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+    if(productPage > totalPages) productPage = totalPages;
+
+    const start = (productPage - 1) * PAGE_SIZE;
+    const pageItems = items.slice(start, start + PAGE_SIZE);
+
+    grid.innerHTML = pageItems.map(productCard).join("");
+    renderPager(pager, totalPages, items.length);
+  }
+
+  function patchSearch(){
+    const input = document.getElementById("searchInput");
+    if(!input || input.dataset.paginationPatched === "1") return;
+    input.dataset.paginationPatched = "1";
+    input.addEventListener("input", function(){
+      productPage = 1;
+      setTimeout(renderProdsPaginated, 0);
+    });
+  }
+
+  function patchCats(){
+    const bar = document.getElementById("catsBar");
+    if(!bar || bar.dataset.paginationPatched === "1") return;
+    bar.dataset.paginationPatched = "1";
+    bar.addEventListener("click", function(){
+      productPage = 1;
+      setTimeout(renderProdsPaginated, 0);
+    }, true);
+  }
+
+  function patchGlobals(){
+    window.renderProds = renderProdsPaginated;
+    try{ renderProds = renderProdsPaginated; }catch(_){}
+
+    const oldBuildCats = window.buildCats;
+    if(typeof oldBuildCats === "function" && !oldBuildCats.__digiyPaginationPatched){
+      const wrapped = function(){
+        const out = oldBuildCats.apply(this, arguments);
+        patchCats();
+        productPage = 1;
+        setTimeout(renderProdsPaginated, 0);
+        return out;
+      };
+      wrapped.__digiyPaginationPatched = true;
+      window.buildCats = wrapped;
+      try{ buildCats = wrapped; }catch(_){}
+    }
+  }
+
+  function boot(){
+    patchGlobals();
+    patchSearch();
+    patchCats();
+    setTimeout(renderProdsPaginated, 80);
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+
+  window.DIGIY_POS_PRODUCTS_PAGINATION = {
+    version: VERSION,
+    pageSize: PAGE_SIZE,
+    render: renderProdsPaginated,
+    reset(){ productPage = 1; renderProdsPaginated(); },
+    next(){ productPage += 1; renderProdsPaginated(); },
+    prev(){ productPage = Math.max(1, productPage - 1); renderProdsPaginated(); }
+  };
+})();
