@@ -60,9 +60,37 @@
           “4 draps moyens, 2 serviettes, 1 peignoir”
         </div>
 
-        <a class="pos-voice-main-btn" href="./action.html" aria-label="Dire une vente avec ACTION DIGIY">
-          🎙️ Dire une vente
-        </a>
+        <div class="action-digiy-console">
+          <a class="action-digiy-main" href="./action.html" aria-label="Écouter et dire une vente avec ACTION DIGIY">
+            🎙️ Écouter / Dire une vente
+          </a>
+
+          <div class="action-digiy-buttons">
+            <a class="action-digiy-btn primary" href="./action.html">
+              🎙️ Ouvrir ACTION
+            </a>
+
+            <button class="action-digiy-btn" type="button" onclick="openAddition()">
+              🧾 Voir addition
+            </button>
+
+            <button class="action-digiy-btn" type="button" onclick="confirmAddition()">
+              💳 Règlement
+            </button>
+
+            <button class="action-digiy-btn" type="button" onclick="showPage('page-recu')">
+              📄 Facture
+            </button>
+
+            <button class="action-digiy-btn" type="button" onclick="document.querySelector('.manual-products')?.setAttribute('open','open'); document.querySelector('.manual-products')?.scrollIntoView({behavior:'smooth',block:'start'});">
+              📦 Marchandises
+            </button>
+
+            <button class="action-digiy-btn stop" type="button" onclick="window.speechSynthesis && speechSynthesis.cancel()">
+              ⏹ Stop voix
+            </button>
+          </div>
+        </div>
 
         <div class="pos-voice-doctrine">
           Quantité + produit → addition préparée → clic Total.
