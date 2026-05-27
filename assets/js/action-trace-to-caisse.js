@@ -396,3 +396,50 @@
     prev(){ productPage = Math.max(1, productPage - 1); renderProdsPaginated(); }
   };
 })();
+
+/* DIGIY POS — RETOUR HUB POS FIXE
+   La caisse peut scroller longtemps : le retour HUB doit rester visible.
+*/
+(function(){
+  "use strict";
+  const VERSION = "hub-pos-return-fixed-20260527-1";
+
+  function injectHubReturn(){
+    if(document.getElementById("digiyHubPosFloat")) return;
+
+    const a = document.createElement("a");
+    a.id = "digiyHubPosFloat";
+    a.href = "./hub.html";
+    a.setAttribute("aria-label", "Retourner au HUB POS");
+    a.textContent = "🧭 HUB POS";
+    a.style.cssText = [
+      "position:fixed",
+      "right:12px",
+      "top:78px",
+      "z-index:120",
+      "min-height:44px",
+      "display:inline-flex",
+      "align-items:center",
+      "justify-content:center",
+      "gap:6px",
+      "padding:10px 14px",
+      "border-radius:999px",
+      "background:linear-gradient(135deg,#ffe8a8,#f4c86a)",
+      "color:#102015",
+      "border:1px solid rgba(255,255,255,.55)",
+      "box-shadow:0 12px 28px rgba(0,0,0,.24)",
+      "font-weight:1000",
+      "font-size:14px",
+      "text-decoration:none"
+    ].join(";");
+
+    document.body.appendChild(a);
+  }
+
+  function boot(){ setTimeout(injectHubReturn, 120); }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+
+  window.DIGIY_POS_HUB_RETURN = { version: VERSION, inject: injectHubReturn };
+})();
