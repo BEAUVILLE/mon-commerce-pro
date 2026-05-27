@@ -207,10 +207,7 @@
   };
 })();
 
-/* DIGIY POS — PAGINATION PRODUITS 12 PAR PAGE
-   Add-on non destructif : il arrive après caisse-pos.js et remplace seulement l'affichage des produits.
-   Le panier, l'encaissement, les stats, les notes et PAY restent dans caisse-pos.js.
-*/
+/* DIGIY POS — PAGINATION PRODUITS 12 PAR PAGE */
 (function(){
   "use strict";
 
@@ -292,19 +289,8 @@
     const prev = document.getElementById("prodsPrev");
     const next = document.getElementById("prodsNext");
 
-    if(prev){
-      prev.onclick = function(){
-        productPage = Math.max(1, productPage - 1);
-        renderProdsPaginated();
-      };
-    }
-
-    if(next){
-      next.onclick = function(){
-        productPage = Math.min(totalPages, productPage + 1);
-        renderProdsPaginated();
-      };
-    }
+    if(prev){ prev.onclick = function(){ productPage = Math.max(1, productPage - 1); renderProdsPaginated(); }; }
+    if(next){ next.onclick = function(){ productPage = Math.min(totalPages, productPage + 1); renderProdsPaginated(); }; }
   }
 
   function renderProdsPaginated(){
@@ -314,10 +300,7 @@
     const cat = getSelectedCategory();
     const q = getQuery();
     const key = cat + "::" + q;
-    if(key !== lastFilterKey){
-      productPage = 1;
-      lastFilterKey = key;
-    }
+    if(key !== lastFilterKey){ productPage = 1; lastFilterKey = key; }
 
     const items = filteredProducts();
     const pager = ensurePager(grid);
@@ -333,7 +316,6 @@
 
     const start = (productPage - 1) * PAGE_SIZE;
     const pageItems = items.slice(start, start + PAGE_SIZE);
-
     grid.innerHTML = pageItems.map(productCard).join("");
     renderPager(pager, totalPages, items.length);
   }
@@ -342,20 +324,14 @@
     const input = document.getElementById("searchInput");
     if(!input || input.dataset.paginationPatched === "1") return;
     input.dataset.paginationPatched = "1";
-    input.addEventListener("input", function(){
-      productPage = 1;
-      setTimeout(renderProdsPaginated, 0);
-    });
+    input.addEventListener("input", function(){ productPage = 1; setTimeout(renderProdsPaginated, 0); });
   }
 
   function patchCats(){
     const bar = document.getElementById("catsBar");
     if(!bar || bar.dataset.paginationPatched === "1") return;
     bar.dataset.paginationPatched = "1";
-    bar.addEventListener("click", function(){
-      productPage = 1;
-      setTimeout(renderProdsPaginated, 0);
-    }, true);
+    bar.addEventListener("click", function(){ productPage = 1; setTimeout(renderProdsPaginated, 0); }, true);
   }
 
   function patchGlobals(){
@@ -377,69 +353,94 @@
     }
   }
 
-  function boot(){
-    patchGlobals();
-    patchSearch();
-    patchCats();
-    setTimeout(renderProdsPaginated, 80);
-  }
-
+  function boot(){ patchGlobals(); patchSearch(); patchCats(); setTimeout(renderProdsPaginated, 80); }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
 
-  window.DIGIY_POS_PRODUCTS_PAGINATION = {
-    version: VERSION,
-    pageSize: PAGE_SIZE,
-    render: renderProdsPaginated,
-    reset(){ productPage = 1; renderProdsPaginated(); },
-    next(){ productPage += 1; renderProdsPaginated(); },
-    prev(){ productPage = Math.max(1, productPage - 1); renderProdsPaginated(); }
-  };
+  window.DIGIY_POS_PRODUCTS_PAGINATION = { version: VERSION, pageSize: PAGE_SIZE, render: renderProdsPaginated, reset(){ productPage = 1; renderProdsPaginated(); }, next(){ productPage += 1; renderProdsPaginated(); }, prev(){ productPage = Math.max(1, productPage - 1); renderProdsPaginated(); } };
 })();
 
-/* DIGIY POS — RETOUR HUB POS FIXE
-   La caisse peut scroller longtemps : le retour HUB doit rester visible.
-*/
+/* DIGIY POS — RETOUR HUB POS FIXE */
 (function(){
   "use strict";
   const VERSION = "hub-pos-return-fixed-20260527-1";
 
   function injectHubReturn(){
     if(document.getElementById("digiyHubPosFloat")) return;
-
     const a = document.createElement("a");
     a.id = "digiyHubPosFloat";
     a.href = "./hub.html";
     a.setAttribute("aria-label", "Retourner au HUB POS");
     a.textContent = "🧭 HUB POS";
     a.style.cssText = [
-      "position:fixed",
-      "right:12px",
-      "top:78px",
-      "z-index:120",
-      "min-height:44px",
-      "display:inline-flex",
-      "align-items:center",
-      "justify-content:center",
-      "gap:6px",
-      "padding:10px 14px",
-      "border-radius:999px",
-      "background:linear-gradient(135deg,#ffe8a8,#f4c86a)",
-      "color:#102015",
-      "border:1px solid rgba(255,255,255,.55)",
-      "box-shadow:0 12px 28px rgba(0,0,0,.24)",
-      "font-weight:1000",
-      "font-size:14px",
-      "text-decoration:none"
+      "position:fixed","right:12px","top:78px","z-index:120","min-height:44px","display:inline-flex","align-items:center","justify-content:center","gap:6px","padding:10px 14px","border-radius:999px","background:linear-gradient(135deg,#ffe8a8,#f4c86a)","color:#102015","border:1px solid rgba(255,255,255,.55)","box-shadow:0 12px 28px rgba(0,0,0,.24)","font-weight:1000","font-size:14px","text-decoration:none"
     ].join(";");
-
     document.body.appendChild(a);
   }
 
   function boot(){ setTimeout(injectHubReturn, 120); }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+  window.DIGIY_POS_HUB_RETURN = { version: VERSION, inject: injectHubReturn };
+})();
+
+/* DIGIY POS — PAY PAR CLOTURE UNIQUEMENT
+   Encaisser garde la vente dans POS. Les traces PAY vente par vente sont nettoyées.
+   Le seul chemin officiel vers PAY devient : Clôture caisse → Envoyer à PAY.
+*/
+(function(){
+  "use strict";
+  const VERSION = "pos-pay-closure-only-20260527-1";
+  const KEYS = [
+    "DIGIY_PAY_ACTIONS",
+    "DIGIY_PAY_PENDING_ACTION",
+    "DIGIY_PAY_POS_OUTBOX",
+    "DIGIY_PAY_HANDOFF_URL",
+    "DIGIY_PAY_POS_TOUCH"
+  ];
+
+  function cleanupSalePayBridge(){
+    try{ KEYS.forEach(k => localStorage.removeItem(k)); }catch(_){}
+  }
+
+  function toast(msg){
+    if(typeof window.showToast === "function") window.showToast(msg);
+    else console.log("DIGIY POS:", msg);
+  }
+
+  function patchEncaisser(){
+    const original = window.encaisser;
+    if(typeof original !== "function" || original.__digiyClosureOnlyPatched) return false;
+
+    function encaisserClosureOnly(){
+      const out = original.apply(this, arguments);
+      setTimeout(function(){
+        cleanupSalePayBridge();
+        toast("✅ Vente gardée dans POS. PAY recevra la clôture du jour.");
+      }, 180);
+      return out;
+    }
+
+    encaisserClosureOnly.__digiyClosureOnlyPatched = true;
+    window.encaisser = encaisserClosureOnly;
+    try{ encaisser = encaisserClosureOnly; }catch(_){}
+    return true;
+  }
+
+  function boot(){
+    cleanupSalePayBridge();
+    if(!patchEncaisser()){
+      setTimeout(patchEncaisser, 250);
+      setTimeout(patchEncaisser, 800);
+    }
+  }
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
 
-  window.DIGIY_POS_HUB_RETURN = { version: VERSION, inject: injectHubReturn };
+  window.DIGIY_POS_PAY_CLOSURE_ONLY = {
+    version: VERSION,
+    cleanup: cleanupSalePayBridge,
+    patch: patchEncaisser
+  };
 })();
