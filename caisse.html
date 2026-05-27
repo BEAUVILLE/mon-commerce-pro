@@ -19,6 +19,116 @@
 
   <link rel="stylesheet" href="./assets/css/caisse.css?v=caisse-voix-sommet-20260527">
 
+
+  <style id="digiy-human-roadmap-caisse">
+    .pos-day-map{
+      margin:0 0 14px;
+      padding:16px;
+      border-radius:26px;
+      background:linear-gradient(145deg,rgba(244,200,106,.16),rgba(34,197,94,.10)),#102015;
+      border:1px solid rgba(244,200,106,.28);
+      box-shadow:0 14px 34px rgba(0,0,0,.22);
+      color:#fff;
+    }
+    .pos-day-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .pos-day-kicker{
+      color:#f4c86a;
+      font-size:12px;
+      font-weight:1000;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      margin-bottom:5px;
+    }
+    .pos-day-title{
+      font-size:clamp(25px,6vw,40px);
+      line-height:.95;
+      font-weight:1000;
+      letter-spacing:-.05em;
+    }
+    .pos-day-chip{
+      flex:0 0 auto;
+      min-height:38px;
+      padding:8px 11px;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(244,200,106,.24);
+      color:#f4c86a;
+      font-weight:1000;
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .pos-day-sub{
+      color:rgba(255,255,255,.78);
+      font-weight:900;
+      line-height:1.38;
+      margin-bottom:12px;
+      font-size:15px;
+    }
+    .pos-day-steps{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:9px;
+    }
+    .pos-day-step{
+      min-height:86px;
+      border-radius:20px;
+      padding:12px;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      text-align:left;
+      font:inherit;
+      text-decoration:none;
+      cursor:pointer;
+    }
+    .pos-day-step b{
+      display:block;
+      color:#fff;
+      font-size:17px;
+      font-weight:1000;
+      line-height:1.05;
+    }
+    .pos-day-step span{
+      display:block;
+      margin-top:5px;
+      color:rgba(255,255,255,.70);
+      font-size:12.5px;
+      font-weight:900;
+      line-height:1.25;
+    }
+    .pos-day-step.go{background:linear-gradient(135deg,rgba(34,197,94,.22),rgba(244,200,106,.16));border-color:rgba(244,200,106,.28)}
+    .pos-day-step.close{background:linear-gradient(135deg,rgba(244,200,106,.24),rgba(34,197,94,.18));border-color:rgba(244,200,106,.38)}
+    .pos-day-rule{
+      margin-top:12px;
+      padding:11px 12px;
+      border-radius:18px;
+      background:rgba(0,0,0,.18);
+      color:rgba(255,255,255,.82);
+      font-weight:900;
+      line-height:1.35;
+      font-size:13.5px;
+    }
+    @media(max-width:760px){.pos-day-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){
+      .pos-day-map{padding:14px;border-radius:24px}
+      .pos-day-top{display:block}
+      .pos-day-chip{display:inline-flex;margin-top:9px}
+      .pos-day-steps{grid-template-columns:1fr 1fr;gap:8px}
+      .pos-day-step{min-height:82px;padding:11px}
+      .pos-day-step b{font-size:16px}
+      .pos-day-step span{font-size:12px}
+    }
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./guard.js?v=pos-shell-20260527"></script>
   <script src="./assets/js/digiy-module-bridge.js?v=pos-shell-20260527"></script>
@@ -45,6 +155,57 @@
 
   <main class="wrap">
     <section class="page active" id="page-caisse">
+
+
+      <section class="pos-day-map" id="posDayMap" aria-label="Parcours caisse du jour">
+        <div class="pos-day-top">
+          <div>
+            <div class="pos-day-kicker">🧭 Parcours caisse du jour</div>
+            <div class="pos-day-title">Le logiciel montre le chemin.</div>
+          </div>
+          <div class="pos-day-chip">Caisse ouverte · journée à suivre</div>
+        </div>
+
+        <div class="pos-day-sub">
+          DIGIY GO accélère la vente, mais l’écran garde les repères : vendre, contrôler, encaisser, suivre, noter, puis clôturer vers PAY.
+        </div>
+
+        <div class="pos-day-steps">
+          <a class="pos-day-step go" href="./action.html">
+            <b>1 · DIGIY GO</b>
+            <span>Dire une vente naturellement.</span>
+          </a>
+
+          <button class="pos-day-step" type="button" onclick="openAddition()">
+            <b>2 · Addition</b>
+            <span>Voir les lignes et le total.</span>
+          </button>
+
+          <button class="pos-day-step" type="button" onclick="confirmAddition()">
+            <b>3 · Encaisser</b>
+            <span>Choisir Cash, Wave, Orange ou Carte.</span>
+          </button>
+
+          <button class="pos-day-step" type="button" onclick="showPage('page-stats')">
+            <b>4 · Journée</b>
+            <span>Lire ventes, total et historique.</span>
+          </button>
+
+          <button class="pos-day-step" type="button" onclick="showPage('page-notes')">
+            <b>5 · Notes</b>
+            <span>Dette, dépense, stock ou note libre.</span>
+          </button>
+
+          <button class="pos-day-step close" type="button" onclick="window.DIGIY_COLLEGUE_POS && window.DIGIY_COLLEGUE_POS.ouvrirCloture ? window.DIGIY_COLLEGUE_POS.ouvrirCloture() : showPage('page-stats')">
+            <b>6 · Clôture PAY</b>
+            <span>Envoyer les totaux du jour à Mon argent.</span>
+          </button>
+        </div>
+
+        <div class="pos-day-rule">
+          Règle terrain : chaque vente nourrit la caisse. La clôture de journée nourrit PAY. Le pro ne doit pas mémoriser le logiciel : la route est visible.
+        </div>
+      </section>
 
       <section class="pos-voice-first" aria-label="DIGIY GO POS — voix au sommet">
         <div class="pos-voice-mark">🎙️ DIGIY GO POS</div>
@@ -133,6 +294,12 @@
           📊
           <strong>Stats</strong>
           <span>ventes · total</span>
+        </button>
+
+        <button type="button" onclick="window.DIGIY_COLLEGUE_POS && window.DIGIY_COLLEGUE_POS.ouvrirCloture ? window.DIGIY_COLLEGUE_POS.ouvrirCloture() : showPage('page-stats')">
+          🌙
+          <strong>Clôture</strong>
+          <span>vers PAY</span>
         </button>
 
         <a href="./profile.html">
