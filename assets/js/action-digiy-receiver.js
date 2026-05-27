@@ -4,7 +4,7 @@
 */
 (function(){
   "use strict";
-  const VERSION="action-digiy-receiver-zone1-pos-mojibake-clean-20260527";
+  const VERSION="action-digiy-receiver-zone1-pos-voice-deux-de-clean-20260527";
   const HOST=String(location.hostname||"").toLowerCase();
   const MODULE=HOST.includes("commerce-pro")?"POS":HOST.includes("pro-pay")?"PAY":"MODULE";
   const LATEST="DIGIY_INCOMING_ACTION";
@@ -27,27 +27,37 @@
   function norm(s){return fixText(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[’']/g," ").replace(/[.,;:!?]/g," ").replace(/\s+/g," ").trim()}
   function nums(s){const a=[];fixText(s).replace(/\d[\d\s.,]*/g,function(m){const n=Number(String(m).replace(/[^\d]/g,""));if(n>0)a.push(n)});return a}
   function wordNumber(w){return NUMBER_WORDS[norm(w)]||0}
+  function looksLikeDeForDeux(s){
+    const n=norm(s);
+    return /^de\s+[a-z]+s\b/.test(n) && /\b(a|unite|piece|prix)\s*\d|\d[\d\s.,]*\s*(cash|wave|orange|om)?\b/i.test(n);
+  }
   function quantityFromText(s){
     const n=norm(s);
     const digit=n.match(/(?:^|\b)(\d{1,3})\s*(?:x\s+)?[a-z]/i);
     if(digit){const x=Number(digit[1]);if(x>0&&x<1000)return x}
     const word=n.match(new RegExp("(?:^|\\b)("+NUMBER_WORD_RE+")\\s+(?:x\\s+)?[a-z]","i"));
     if(word){const x=wordNumber(word[1]);if(x>0&&x<1000)return x}
+    if(looksLikeDeForDeux(s))return 2;
     return 0;
   }
   function removeQuantityPrefix(s){return String(s||"").trim()
     .replace(/^\s*\d{1,3}\s*(?:x\s*)?/i,"")
     .replace(new RegExp("^\\s*("+NUMBER_WORD_RE+")\\s*(?:x\\s*)?","i"),"")
+    .replace(/^\s*de\s+(?=[a-zA-ZÀ-ÿ]+s\b)/i,"")
     .trim()}
-  function clean(s){return fixText(s)
+  function clean(s){let t=fixText(s)
     .replace(/^\s*action\s+(digi\s+i|diji\s+i|dgi\s+i|dj|d\s*j|dji|digiy)\s*/i,"")
     .replace(/^\s*(note|ajoute|ajouter|prepare|prépare|cree|crée|mets|met)\s+/i,"")
     .replace(/\bmodule\s+(pos|pose|poste|post|pay|paie|paye)\b/gi," ")
     .replace(/^\s*(pos|pose|poste|post)\s+/i,"")
     .replace(/\b(web|wêve|weve|wève|wavee|ouve|ouève)\b/gi,"Wave")
+    .replace(/\ben\s+(cash|wave|orange money)\b/gi,"$1")
     .replace(/\bfrancs?\b/gi,"")
     .replace(/(?:resultat|résultat|total)\s*\d[\d\s.,]*/i,"")
-    .replace(/\s+/g," ").trim()}
+    .replace(/\s+/g," ").trim();
+    if(looksLikeDeForDeux(t))t=t.replace(/^de\s+/i,"deux ");
+    return t;
+  }
   function explicitTotal(s){const m=fixText(s).match(/(?:resultat|résultat|total)\s*(\d[\d\s.,]*)/i);return m?Number(m[1].replace(/[^\d]/g,""))||0:0}
   function channel(s,a){if(a&&a.channel)return a.channel;const n=norm(s);if(n.includes("wave")||n.includes("web")||n.includes("weve"))return"Wave";if(n.includes("cash")||n.includes("espece")||n.includes("liquide"))return"Cash";if(n.includes("orange money")||n.includes(" om "))return"Orange Money";return"À contrôler"}
   function parse(action){
@@ -64,7 +74,9 @@
     let item=clean(raw)
       .replace(/^\s*vente\s+(de\s+)?/i,"")
       .replace(/(?:à|a|Ã\s*|Ã\u00a0|unite|unité|piece|pièce|prix)\s*\d[\d\s.,]*/i,"")
+      .replace(/\ben\s+(cash|wave|orange money)\b/gi,"$1")
       .replace(/\b(cash|wave|orange money|payer|paye|payé)\b/gi,"")
+      .replace(/\ben\s*$/i,"")
       .replace(/\s+/g," ").trim();
     item=removeQuantityPrefix(item);
     if(!item)item="À préciser";
