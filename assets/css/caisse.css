@@ -939,9 +939,9 @@ select option{
   font-weight:850!important;
 }
 
-/* COLLÈGUE POS INJECTÉ PAR JS : PAS AU SOMMET */
+/* COLLÈGUE POS / CLÔTURE : visible, mais placé par le CSS repères humains */
 #colleguePosBlock{
-  display:none!important;
+  display:block!important;
 }
 
 /* DÉMARRAGE SUPPRIMÉ */
@@ -1124,3 +1124,312 @@ select option{
     box-shadow:none!important;
   }
 }
+
+/* =========================================================
+   PATCH DIGIY POS — REPÈRES HUMAINS + 2 COLONNES
+   Vert plus clair. Écriture blanche.
+   Gauche : DIGIY GO / addition / clôture.
+   Droite : marchandises visibles en scroll 2 colonnes.
+   ========================================================= */
+
+:root{
+  --bg:#2f7a5f;
+  --deep:#245f4b;
+  --panel:#2a6e55;
+  --panel2:#347b60;
+  --panel3:#3f8f70;
+  --gold:#f4c86a;
+  --gold2:#ffe8a8;
+  --green:#34d399;
+  --green2:#22c55e;
+  --white:#ffffff;
+  --soft:rgba(255,255,255,.88);
+  --muted:rgba(255,255,255,.76);
+  --line:rgba(255,255,255,.18);
+  --line2:rgba(255,255,255,.14);
+  --shadow:0 14px 34px rgba(0,0,0,.20);
+  --shadow2:0 10px 24px rgba(0,0,0,.18);
+}
+
+body{
+  background:
+    radial-gradient(circle at 12% 0%, rgba(244,200,106,.13), transparent 32%),
+    radial-gradient(circle at 92% 4%, rgba(255,255,255,.08), transparent 28%),
+    linear-gradient(180deg,#2f7a5f 0%,#347b60 54%,#245f4b 100%)!important;
+  color:#fff!important;
+}
+
+.top{
+  background:rgba(36,95,75,.94)!important;
+  border-bottom:1px solid rgba(255,255,255,.16)!important;
+}
+
+.brand small,
+.pos-voice-mark,
+.section-title,
+.pos-sale-head strong,
+.manual-products summary,
+.pos-secondary-tools summary{
+  color:var(--gold)!important;
+}
+
+.pos-voice-first,
+.pos-sale-panel,
+.manual-products,
+.pos-secondary-tools,
+.card,
+.hero,
+#colleguePosBlock{
+  background:rgba(42,110,85,.92)!important;
+  color:#fff!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:var(--shadow2)!important;
+}
+
+.pos-voice-first{
+  min-height:auto!important;
+  justify-content:flex-start!important;
+  background:
+    radial-gradient(circle at top right,rgba(244,200,106,.20),transparent 34%),
+    linear-gradient(145deg,#2a6e55,#347b60 58%,#3f8f70)!important;
+}
+
+.pos-voice-line,
+.pos-sale-head span,
+.pos-payment-hint,
+.note-text,
+.note-meta,
+.list-detail,
+.list-date,
+#colleguePosBlock p{
+  color:rgba(255,255,255,.84)!important;
+}
+
+.action-digiy-console,
+.pos-voice-example,
+.no-data,
+.pos-payment-hint{
+  background:rgba(255,255,255,.10)!important;
+  border-color:rgba(255,255,255,.16)!important;
+}
+
+.action-digiy-btn,
+.btn,
+.cat-pill,
+.pcard,
+.note-card,
+.list-card,
+.input,
+.select,
+textarea,
+#page-caisse input,
+#page-caisse select,
+#page-caisse textarea{
+  background:rgba(15,78,55,.92)!important;
+  color:#fff!important;
+  border-color:rgba(255,255,255,.18)!important;
+}
+
+.primary-btn,
+.action-digiy-main,
+.pay-mode-btn.active,
+.cat-pill.active{
+  background:linear-gradient(135deg,#ffe8a8,#f4c86a)!important;
+  color:#173a2d!important;
+}
+
+.pos-departments a,
+.pos-departments button{
+  background:rgba(52,123,96,.96)!important;
+  border-color:rgba(255,255,255,.16)!important;
+}
+
+.pos-departments span,
+.pcard-price,
+.bottom-bar b,
+.total-row.big span:last-child{
+  color:var(--gold2)!important;
+}
+
+/* Les marchandises doivent redevenir un repère visible, pas un secours caché. */
+.manual-products{
+  overflow:visible!important;
+}
+
+.manual-products > .card,
+.manual-products:not([open]) > .card{
+  display:block!important;
+}
+
+.manual-products summary{
+  position:sticky;
+  top:0;
+  z-index:5;
+  background:rgba(42,110,85,.96);
+  border-bottom:1px solid rgba(255,255,255,.14);
+}
+
+/* Le bloc Collègue POS / Clôture ne doit jamais être caché par le CSS. */
+#colleguePosBlock{
+  display:block!important;
+  margin:12px 0!important;
+}
+
+/* Carte visuelle de journée si elle existe dans le HTML recousu */
+.pos-day-map,
+.pos-route-journee,
+.pos-human-map{
+  display:grid;
+  gap:10px;
+  margin:12px 0;
+  padding:14px;
+  border-radius:24px;
+  background:rgba(42,110,85,.92);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:var(--shadow2);
+  color:#fff;
+}
+
+.pos-day-map-title,
+.pos-route-title,
+.pos-human-map-title{
+  color:var(--gold);
+  font-weight:1000;
+  font-size:20px;
+}
+
+.pos-day-map-grid,
+.pos-route-grid,
+.pos-human-map-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+
+.pos-day-step,
+.pos-route-step,
+.pos-human-map-step{
+  min-height:70px;
+  border-radius:18px;
+  padding:10px;
+  background:rgba(15,78,55,.88);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff;
+  font-weight:1000;
+}
+
+/* Grand écran / tablette : page coupée en deux */
+@media(min-width:900px){
+  #page-caisse.active{
+    display:grid!important;
+    grid-template-columns:minmax(340px,42%) minmax(430px,1fr);
+    gap:14px;
+    align-items:start;
+  }
+
+  .pos-voice-first{
+    grid-column:1;
+    position:sticky;
+    top:84px;
+    margin:12px 0 0!important;
+    max-height:calc(100vh - 96px);
+    overflow:auto;
+  }
+
+  .pos-voice-first h1{
+    font-size:clamp(38px,5vw,62px)!important;
+  }
+
+  .pos-sale-panel,
+  .pos-day-map,
+  .pos-route-journee,
+  .pos-human-map,
+  #colleguePosBlock,
+  .pos-departments,
+  .pos-secondary-tools{
+    grid-column:1;
+  }
+
+  .manual-products{
+    grid-column:2;
+    grid-row:1 / span 8;
+    position:sticky;
+    top:84px;
+    max-height:calc(100vh - 96px);
+    overflow:auto!important;
+    margin:12px 0 0!important;
+  }
+
+  .manual-products .card{
+    min-height:calc(100vh - 156px);
+  }
+
+  #prodsGrid,
+  .grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  .pcard{
+    min-height:118px!important;
+  }
+
+  .pos-departments{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  .pos-secondary-tools{
+    margin-bottom:24px!important;
+  }
+}
+
+/* Téléphone : la voix reste devant, les produits visibles juste après */
+@media(max-width:899px){
+  .pos-voice-first{
+    min-height:auto!important;
+  }
+
+  .manual-products{
+    display:block!important;
+  }
+
+  .manual-products > .card,
+  .manual-products:not([open]) > .card{
+    display:block!important;
+  }
+
+  .pos-day-map-grid,
+  .pos-route-grid,
+  .pos-human-map-grid{
+    grid-template-columns:1fr!important;
+  }
+}
+
+@media(max-width:560px){
+  #prodsGrid,
+  .grid{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+  }
+
+  .pcard{
+    min-height:112px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    text-align:center!important;
+  }
+
+  .stk-badge{
+    position:static!important;
+    grid-column:auto!important;
+  }
+}
+
+@media(max-width:420px){
+  #prodsGrid,
+  .grid{
+    grid-template-columns:1fr!important;
+  }
+}
+
