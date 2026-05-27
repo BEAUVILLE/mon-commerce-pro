@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#1e7a46"/>
   <meta name="description" content="MON COMMERCE PRO — état de session, accès protégé et nettoyage local sans exposer téléphone ni identifiant."/>
   <meta name="robots" content="noindex,nofollow"/>
-  <meta name="digiy-build" content="pos-session-porte-oreille-20260524"/>
+  <meta name="digiy-build" content="pos-session-digiy-go-20260527"/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -22,7 +22,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./assets/js/digiy-abos-access.js?v=abos-20260522"></script>
-  <script src="./guard.js?v=pos-session-porte-oreille-20260524"></script>
+  <script src="./guard.js?v=pos-session-digiy-go-20260527"></script>
   <script src="./assets/js/digiy-module-bridge.js?v=bridge-20260521" defer></script>
   <script src="./assets/js/digiy-pos-memory.js?v=pos-memory-20260521" defer></script>
 
@@ -468,13 +468,13 @@
         </div>
       </a>
 
-      <a class="action gold" id="goOreille" href="./oreille.html">
+      <a class="action gold" id="goOreille" href="./action.html">
         <div class="actionTop">
           <div class="ico">🎙️</div>
-          <div class="tag">Oreille</div>
+          <div class="tag">GO</div>
         </div>
         <div>
-          <b>Oreille POS</b>
+          <b>DIGIY GO POS</b>
           <span>Dicter vente, produit, quantité, prix.</span>
         </div>
       </a>
@@ -549,7 +549,7 @@
       <a href="./hub.html"><span class="bi">🧭</span><span>HUB</span></a>
       <a href="./caisse.html"><span class="bi">💰</span><span>Caisse</span></a>
       <a href="./admin.html#articleList"><span class="bi">📦</span><span>Articles</span></a>
-      <a href="./oreille.html"><span class="bi">🎙️</span><span>Oreille</span></a>
+      <a href="./action.html"><span class="bi">🎙️</span><span>GO</span></a>
       <a class="active" href="./session.html"><span class="bi">🔐</span><span>Session</span></a>
     </div>
   </nav>
@@ -722,7 +722,7 @@
 
         if(noticeBox){
           noticeBox.innerHTML = ok
-            ? "✅ Accès POS reconnu. Tu peux retourner à la caisse, aux articles ou ouvrir l’Oreille POS."
+            ? "✅ Accès POS reconnu. Tu peux retourner à la caisse, aux articles ou ouvrir DIGIY GO POS."
             : "⚠️ Session fermée. Rouvre par le PIN commerce pour charger la vraie gestion.";
         }
       }
@@ -761,5 +761,7 @@
   </script>
 </body>
 </html>
+
+
 
 
