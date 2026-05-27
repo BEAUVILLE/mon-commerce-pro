@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0b1d12"/>
+<title>AIDE ACTION POS — Parler à la caisse</title>
+
+<style>
+:root{
+  --bg:#0b1d12;
+  --deep:#06140d;
+  --panel:#102015;
+  --green:#14532d;
+  --gold:#f4c86a;
+  --gold2:#ffe8a8;
+  --white:#fff;
+  --soft:rgba(255,255,255,.86);
+  --muted:rgba(255,255,255,.64);
+  --line:rgba(244,200,106,.24);
+  --shadow:0 18px 48px rgba(0,0,0,.34);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at top right,rgba(244,200,106,.20),transparent 32%),
+    linear-gradient(180deg,#06140d,#0b1d12 58%,#102015);
+  color:var(--white);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+a{text-decoration:none;color:inherit}
+button{font:inherit;cursor:pointer;border:0}
+.wrap{width:min(960px,calc(100% - 22px));margin:auto}
+
+.top{
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:rgba(6,20,13,.94);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.topin{
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.brand strong{display:block;font-size:18px;font-weight:1000}
+.brand small{display:block;color:var(--gold);font-size:11px;font-weight:1000;text-transform:uppercase}
+.link{
+  min-height:40px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.06);
+  color:#fff;
+  padding:9px 12px;
+  font-size:13px;
+  font-weight:1000;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.hero{
+  margin:14px 0;
+  min-height:52vh;
+  padding:22px 18px;
+  border-radius:30px;
+  background:
+    radial-gradient(circle at top right,rgba(244,200,106,.22),transparent 34%),
+    linear-gradient(145deg,#06140d,#0b1d12 45%,#14532d);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.kicker{
+  color:var(--gold);
+  font-size:13px;
+  font-weight:1000;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:13px;
+}
+h1{
+  font-size:clamp(42px,12vw,82px);
+  line-height:.88;
+  letter-spacing:-.07em;
+  font-weight:1000;
+}
+.lead{
+  margin-top:16px;
+  color:var(--soft);
+  font-size:18px;
+  line-height:1.36;
+  font-weight:850;
+}
+.reader{
+  margin-top:18px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.btn{
+  min-height:60px;
+  border-radius:20px;
+  background:#102015;
+  color:#fff;
+  border:1px solid var(--line);
+  font-weight:1000;
+  padding:12px;
+}
+.btn.gold{
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  color:#102015;
+}
+
+.card{
+  margin:12px 0;
+  padding:16px;
+  border-radius:24px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:0 12px 30px rgba(0,0,0,.24);
+}
+.card h2{
+  color:var(--gold);
+  font-size:26px;
+  line-height:1.05;
+  font-weight:1000;
+  margin-bottom:10px;
+}
+.steps{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.step{
+  background:#0b1d12;
+  border:1px solid rgba(244,200,106,.18);
+  border-radius:20px;
+  padding:13px;
+}
+.num{
+  width:32px;
+  height:32px;
+  border-radius:999px;
+  background:var(--gold);
+  color:#102015;
+  display:grid;
+  place-items:center;
+  font-weight:1000;
+  margin-bottom:9px;
+}
+.step b{
+  display:block;
+  color:#fff;
+  font-size:16px;
+  line-height:1.08;
+  margin-bottom:7px;
+}
+.step p{
+  color:var(--muted);
+  font-size:13.5px;
+  line-height:1.38;
+  font-weight:850;
+}
+.examples{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.examples button{
+  border-radius:999px;
+  background:#0b1d12;
+  color:#fff;
+  border:1px solid rgba(244,200,106,.20);
+  padding:10px 12px;
+  font-size:14px;
+  font-weight:900;
+}
+.rule{
+  padding:13px;
+  border-radius:18px;
+  background:rgba(244,200,106,.10);
+  border:1px solid rgba(244,200,106,.22);
+  color:var(--soft);
+  line-height:1.42;
+  font-weight:850;
+}
+.rule strong{color:var(--gold)}
+@media(max-width:760px){
+  .steps{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+  .topin{align-items:flex-start;flex-direction:column;padding:10px 0}
+  .reader{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr}
+  h1{font-size:48px}
+}
+</style>
+</head>
+
+<body>
+<header class="top">
+  <div class="wrap topin">
+    <div class="brand">
+      <strong>🎓 Aide ACTION POS</strong>
+      <small>Parler à la caisse · exemples · lecteur</small>
+    </div>
+    <a class="link" href="./action.html">🎙️ Retour ACTION</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="kicker">DIGIY POS · Mode d’emploi vocal</div>
+    <h1>Parle comme au comptoir.</h1>
+    <p class="lead">
+      Pas besoin de chercher 200 produits. Dis quantité + marchandise.
+      DIGIY prépare l’addition. Le pro vérifie et valide.
+    </p>
+
+    <div class="reader">
+      <button class="btn gold" id="btnGuide" onclick="speakGuide()">🎧 Écouter l’aide</button>
+      <button class="btn" onclick="stopGuide()">⏹ Stop</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Le déroulé simple</h2>
+    <div class="steps">
+      <article class="step">
+        <div class="num">1</div>
+        <b>Je programme</b>
+        <p>Dans Marchandises : nom, prix, stock, catégorie et mots du terrain.</p>
+      </article>
+      <article class="step">
+        <div class="num">2</div>
+        <b>Je parle</b>
+        <p>Je dis la vente naturellement : quantité + marchandise.</p>
+      </article>
+      <article class="step">
+        <div class="num">3</div>
+        <b>DIGIY prépare</b>
+        <p>Il cherche les prix et prépare l’addition.</p>
+      </article>
+      <article class="step">
+        <div class="num">4</div>
+        <b>Je valide</b>
+        <p>Le pro vérifie, choisit le paiement, puis encaisse.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Phrases à prononcer</h2>
+    <div class="examples">
+      <button onclick="sayExample('4 draps moyens, 2 serviettes, 1 peignoir')">4 draps moyens, 2 serviettes, 1 peignoir</button>
+      <button onclick="sayExample('deux serviettes bain à 5000 cash')">deux serviettes bain à 5000 cash</button>
+      <button onclick="sayExample('3 foutas et 1 robe plage')">3 foutas et 1 robe plage</button>
+      <button onclick="sayExample('ajoute une crème beauté paiement Wave')">ajoute une crème beauté paiement Wave</button>
+      <button onclick="sayExample('1 parure lit et 2 coussins déco')">1 parure lit et 2 coussins déco</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Mots du terrain</h2>
+    <div class="rule">
+      <strong>Important :</strong> si DIGIY ne reconnaît pas un mot, ce n’est pas grave.
+      Va dans <strong>Marchandises</strong> et ajoute ce mot dans les alias.
+      Exemple : <strong>Drap moyen</strong> peut avoir les mots :
+      <strong>drap 2 places, draps moyens, sër, sheet</strong>.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Règle sacrée</h2>
+    <div class="rule">
+      ACTION POS prépare. La caisse contrôle. Le pro valide.
+      Rien n’est encaissé automatiquement.
+    </div>
+  </section>
+</main>
+
+<script>
+const GUIDE_TEXT = [
+  "Tu es sur l'aide ACTION POS.",
+  "Ici, tu apprends comment parler à la caisse.",
+  "La règle est simple : quantité plus marchandise.",
+  "Exemple : quatre draps moyens, deux serviettes, un peignoir.",
+  "Autre exemple : deux serviettes bain à cinq mille cash.",
+  "Diji i cherche les marchandises dans le catalogue.",
+  "Les prix viennent de la page Marchandises.",
+  "Si un produit n'est pas reconnu, ajoute son mot dans les alias de Marchandises.",
+  "Par exemple : Drap moyen peut aussi s'appeler drap deux places, sër, ou sheet.",
+  "Ensuite, ACTION POS prépare l'addition.",
+  "Le pro vérifie, choisit Cash, Wave, Orange Money ou Carte.",
+  "Puis il envoie à la caisse.",
+  "Rien n'est encaissé automatiquement.",
+  "La voix prépare. La caisse contrôle. Le pro valide."
+].join(" ");
+
+let speaking = false;
+
+function speak(text){
+  if(!("speechSynthesis" in window)){
+    alert(text);
+    return;
+  }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "fr-FR";
+  u.rate = 0.84;
+  u.pitch = 1.02;
+
+  const btn = document.getElementById("btnGuide");
+
+  u.onstart = () => {
+    speaking = true;
+    if(btn) btn.textContent = "⏹ Stop";
+  };
+
+  u.onend = () => {
+    speaking = false;
+    if(btn) btn.textContent = "🎧 Écouter l’aide";
+  };
+
+  u.onerror = u.onend;
+
+  const run = () => {
+    const fr = (speechSynthesis.getVoices() || []).find(v => /^fr/i.test(v.lang));
+    if(fr) u.voice = fr;
+    speechSynthesis.speak(u);
+  };
+
+  if(speechSynthesis.getVoices().length) run();
+  else{
+    speechSynthesis.onvoiceschanged = () => {
+      speechSynthesis.onvoiceschanged = null;
+      run();
+    };
+    setTimeout(run, 120);
+  }
+}
+
+function speakGuide(){
+  if(speaking){
+    stopGuide();
+    return;
+  }
+  speak(GUIDE_TEXT);
+}
+
+function stopGuide(){
+  if("speechSynthesis" in window) speechSynthesis.cancel();
+  speaking = false;
+  const btn = document.getElementById("btnGuide");
+  if(btn) btn.textContent = "🎧 Écouter l’aide";
+}
+
+function sayExample(text){
+  speak("Exemple à prononcer : " + text);
+}
+</script>
+</body>
+</html>
