@@ -446,12 +446,19 @@
       <div id="cloturePosBox" style="margin-top:12px"></div>
     `;
 
-    const anchor = page.querySelector(".hero");
-    if(anchor && anchor.nextSibling){
-      page.insertBefore(box, anchor.nextSibling);
-    }else{
-      page.appendChild(box);
-    }
+    const anchor =
+  page.querySelector(".pos-sale-panel") ||
+  page.querySelector(".pos-departments") ||
+  page.querySelector(".manual-products") ||
+  page.firstElementChild;
+
+if(anchor && anchor.nextSibling){
+  page.insertBefore(box, anchor.nextSibling);
+}else if(anchor){
+  page.appendChild(box);
+}else{
+  page.appendChild(box);
+}
 
     document.getElementById("btnCollegueStart")?.addEventListener("click", function(){
       speak(phraseAccueil());
