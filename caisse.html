@@ -5,34 +5,19 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>MON COMMERCE — Caisse POS</title>
   <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#14532d">
-<style id="digiy-critical-caisse">
-  .page{
-    display:none!important;
-  }
+  <meta name="theme-color" content="#0b1d12">
 
-  .page.active{
-    display:block!important;
-  }
+  <style id="digiy-critical-caisse">
+    .page{display:none!important}
+    .page.active{display:block!important}
+    #additionOverlay{display:none!important}
+    #additionOverlay.open{display:flex!important}
+    #panierBar.hidden{display:none!important}
+    #btnDemarrage,
+    .nav button[onclick="dismissDemarrage()"]{display:none!important}
+  </style>
 
-  #additionOverlay{
-    display:none!important;
-  }
-
-  #additionOverlay.open{
-    display:flex!important;
-  }
-
-  #panierBar.hidden{
-    display:none!important;
-  }
-
-  #btnDemarrage,
-  .nav button[onclick="dismissDemarrage()"]{
-    display:none!important;
-  }
-</style>
-  <link rel="stylesheet" href="./assets/css/caisse.css?v=caisse-pos-repo-aligne-20260521">
+  <link rel="stylesheet" href="./assets/css/caisse.css?v=caisse-voix-sommet-20260527">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./guard.js?v=pos-shell-20260527"></script>
@@ -50,75 +35,128 @@
           <small>MON COMMERCE · Caisse POS</small>
         </div>
       </div>
-      <div class="clock" id="clockEl">--:--</div>
-    </div>
 
-    <div class="wrap nav">
-      <button onclick="showPage('page-caisse')">💰 Caisse</button>
-      <button onclick="showPage('page-stats')">📊 Stats</button>
-      <button onclick="showPage('page-notes')">📝 Notes</button>
-      <a href="./admin.html" class="gold">📦 <span data-products-label>Marchandises</span></a>
-      <a href="./profile.html" class="green">🏪 Coordonnées pro</a>
-      <a href="./hub.html">🧭 HUB</a>
-      <button id="btnGuideAudio" onclick="speakGuide()">🎧 Guide</button>
-      <button id="btnCaisseNotice">🎧</button>
-      <button id="btnDemarrage" onclick="speakDemarrage()">🚀 Démarrage</button>
-      <button onclick="dismissDemarrage()">✓ Compris</button>
+      <div class="top-actions">
+        <div class="clock" id="clockEl">--:--</div>
+        <a class="top-link" href="./hub.html">🧭 HUB</a>
+      </div>
     </div>
   </header>
 
   <main class="wrap">
     <section class="page active" id="page-caisse">
-      <div class="action-zone" aria-label="ACTION DIGIY">
-        <div class="paves">
-          <a class="pave pave--action" href="./action.html" aria-label="Dire une vente avec ACTION DIGIY">
-            <span class="pave__ico">🎙️</span>
-            <span>
-              <strong>Dire une vente</strong>
-              <small>Quantité + produit → addition préparée</small>
-            </span>
-          </a>
-        </div>
 
-        <div class="panier-zone">
-          <small>ACTION DIGIY prépare l’addition. Le pro vérifie et valide.</small>
-        </div>
-      </div>
+      <section class="pos-voice-first" aria-label="ACTION DIGIY — voix au sommet">
+        <div class="pos-voice-mark">🎙️ ACTION DIGIY</div>
 
-      <div class="hero">
-        <h1>Caisse terrain.</h1>
-        <p>
-          Ajoute les marchandises, vérifie l’addition, puis encaisse seulement quand l’argent est reçu.
-          ACTION DIGIY peut déposer une traçabilité ici : la caisse doit montrer l’addition avant preuve finale.
+        <h1>Dis la vente.</h1>
+
+        <p class="pos-voice-line">
+          Le client parle. Le pro parle. DIGIY prépare l’addition.
+          Tu vérifies. Tu valides. Tu encaisses.
         </p>
-      </div>
 
-      <div class="card">
-        <div class="toolbar">
-          <input id="searchInput" class="input" placeholder="Chercher une marchandise…" oninput="renderProds()">
-          <input id="clientInput" class="input" placeholder="Nom du client (optionnel)">
+        <div class="pos-voice-example">
+          “4 draps moyens, 2 serviettes, 1 peignoir”
         </div>
 
-        <div id="catsBar" class="cats"></div>
+        <a class="pos-voice-main-btn" href="./action.html" aria-label="Dire une vente avec ACTION DIGIY">
+          🎙️ Dire une vente
+        </a>
 
-        <div class="section-title">
-          <span data-products-label>Marchandises</span>
+        <div class="pos-voice-doctrine">
+          Quantité + produit → addition préparée → clic Total.
+        </div>
+      </section>
+
+      <section class="pos-sale-panel" aria-label="Addition préparée">
+        <div class="pos-sale-head">
+          <div>
+            <strong>🧾 Addition préparée</strong>
+            <span>Les marchandises appelées apparaissent dans l’addition. Le moteur calcule derrière.</span>
+          </div>
         </div>
 
-        <div id="prodsGrid" class="grid"></div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <div class="section-title">🔔 Alertes vocales</div>
-        <p id="posVoiceStatus" style="font-weight:900;color:var(--muted)">Voix non activée</p>
-
-        <div class="actions">
-          <button class="btn" id="btnPosVoiceToggle">🔔 Activer la voix</button>
-          <button class="btn" id="btnPosVoiceSale">✅ Test vente</button>
-          <button class="btn" id="btnPosVoiceStock">📦 Test stock</button>
-          <button class="btn" id="btnPosVoiceTotal">📊 Total du jour</button>
+        <div class="pos-sale-actions">
+          <button class="primary-btn" type="button" onclick="openAddition()">🧾 Voir addition</button>
+          <button class="btn" type="button" onclick="confirmAddition()">💳 Règlement</button>
+          <button class="btn" type="button" onclick="showPage('page-recu')">📄 Facture</button>
         </div>
-      </div>
+
+        <div class="pos-payment-hint">
+          Cash · Wave · Orange Money · Carte — le pro choisit après vérification.
+        </div>
+      </section>
+
+      <section class="pos-departments" aria-label="Départements POS">
+        <a href="./admin.html">
+          📦
+          <strong>Marchandises</strong>
+          <span>prix · stock</span>
+        </a>
+
+        <button type="button" onclick="showPage('page-notes')">
+          📝
+          <strong>Note rapide</strong>
+          <span>dette · dépense</span>
+        </button>
+
+        <button type="button" onclick="showPage('page-stats')">
+          📊
+          <strong>Stats</strong>
+          <span>ventes · total</span>
+        </button>
+
+        <a href="./profile.html">
+          🏪
+          <strong>Fiche pro</strong>
+          <span>coordonnées</span>
+        </a>
+
+        <a href="./hub.html">
+          🧭
+          <strong>HUB</strong>
+          <span>retour</span>
+        </a>
+      </section>
+
+      <details class="manual-products">
+        <summary>📦 Ajouter une marchandise manuellement</summary>
+
+        <div class="card">
+          <div class="toolbar">
+            <input id="searchInput" class="input" placeholder="Chercher une marchandise…" oninput="renderProds()">
+            <input id="clientInput" class="input" placeholder="Nom du client (optionnel)">
+          </div>
+
+          <div id="catsBar" class="cats"></div>
+
+          <div class="section-title">
+            <span data-products-label>Marchandises</span>
+          </div>
+
+          <div id="prodsGrid" class="grid"></div>
+        </div>
+      </details>
+
+      <details class="pos-secondary-tools">
+        <summary>🔔 Alertes vocales et guide</summary>
+
+        <div class="card">
+          <div class="section-title">🔔 Alertes vocales</div>
+          <p id="posVoiceStatus" style="font-weight:900;color:var(--muted)">Voix non activée</p>
+
+          <div class="actions">
+            <button class="btn" id="btnPosVoiceToggle">🔔 Activer la voix</button>
+            <button class="btn" id="btnPosVoiceSale">✅ Test vente</button>
+            <button class="btn" id="btnPosVoiceStock">📦 Test stock</button>
+            <button class="btn" id="btnPosVoiceTotal">📊 Total du jour</button>
+            <button class="btn" id="btnGuideAudio" onclick="speakGuide()">🎧 Guide</button>
+            <button class="btn" id="btnCaisseNotice">🎧 Notice</button>
+          </div>
+        </div>
+      </details>
+
     </section>
 
     <section class="page" id="page-paiement">
@@ -187,7 +225,7 @@
     <section class="page" id="page-stats">
       <div class="hero">
         <h1>Stats.</h1>
-        <p>La preuve finale d’une vente enregistrée se retrouve ici dans l’historique.</p>
+        <p>Les ventes gardées dans ce téléphone. Le pro voit son terrain sans perdre la main.</p>
       </div>
 
       <div class="grid" style="margin-bottom:12px">
@@ -209,6 +247,7 @@
         <div class="actions">
           <button class="btn" onclick="debugStats()">🧪 Debug stockage</button>
           <button class="btn-danger" onclick="clearHistorique()">Effacer historique</button>
+          <button class="btn" onclick="showPage('page-caisse')">← Retour caisse</button>
         </div>
       </div>
     </section>
@@ -216,7 +255,10 @@
     <section class="page" id="page-notes">
       <div class="hero">
         <h1>Notes comptoir.</h1>
-        <p>Dette client, dépense, stock ou note libre : ça reste dans ce téléphone.</p>
+        <p>
+          Garde une dette client, une dépense, un stock ou une note rapide.
+          Le téléphone range, le pro garde la main.
+        </p>
       </div>
 
       <div class="card">
@@ -237,6 +279,7 @@
         <div class="actions">
           <button class="primary-btn" onclick="saveNote()">Garder note</button>
           <button class="btn-danger" onclick="clearNotes()">Effacer notes</button>
+          <button class="btn" onclick="showPage('page-caisse')">← Retour caisse</button>
         </div>
       </div>
 
