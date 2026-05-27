@@ -4,13 +4,13 @@
 */
 (function(){
   "use strict";
-  const VERSION="action-digiy-receiver-zone1-pos-proof-20260527";
+  const VERSION="action-digiy-receiver-zone1-pos-tracabilite-20260527";
   const HOST=String(location.hostname||"").toLowerCase();
   const MODULE=HOST.includes("commerce-pro")?"POS":HOST.includes("pro-pay")?"PAY":"MODULE";
   const LATEST="DIGIY_INCOMING_ACTION";
   const MODKEY="DIGIY_"+MODULE+"_INCOMING_ACTION";
   const VALID="DIGIY_"+MODULE+"_VALIDATED_ACTION";
-  const PROOF="DIGIY_POS_CAISSE_PROOF";
+  const TRACE="DIGIY_POS_CAISSE_TRACE";
 
   const NUMBER_WORDS={un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9,dix:10,onze:11,douze:12,treize:13,quatorze:14,quinze:15,seize:16,vingt:20,trente:30,quarante:40,cinquante:50};
   const NUMBER_WORD_RE="un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|onze|douze|treize|quatorze|quinze|seize|vingt|trente|quarante|cinquante";
@@ -83,12 +83,12 @@
     if(!item)item="À préciser";
     return {item,quantity:q||1,unitPrice:unit||0,total:total||0,note:clean(raw),channel:channel(raw,action)};
   }
-  function makeProof(data){
+  function makeTrace(data){
     const now=new Date();
     return {
-      id:"POS-PREUVE-"+Date.now(),
+      id:"POS-TRACE-"+Date.now(),
       createdAt:now.toISOString(),
-      status:"preuve_caisse_preparee",
+      status:"tracabilite_pos_preparee",
       module:"POS",
       item:data.item,
       quantity:Number(data.quantity||1),
@@ -96,21 +96,21 @@
       total:Number(data.total||0),
       channel:data.channel||"À contrôler",
       note:data.note||"",
-      warning:"Preuve POS préparée. Vente non enregistrée. Argent non confirmé."
+      warning:"Traçabilité POS préparée. Vente non enregistrée. Argent non confirmé."
     };
   }
-  function saveProof(proof){
+  function saveTrace(trace){
     try{
-      localStorage.setItem(PROOF,JSON.stringify(proof));
-      localStorage.setItem("caisse_action_last_proof",JSON.stringify(proof));
-      localStorage.setItem("caisse_action_proof_touch",String(Date.now()));
+      localStorage.setItem(TRACE,JSON.stringify(trace));
+      localStorage.setItem("caisse_action_last_trace",JSON.stringify(trace));
+      localStorage.setItem("caisse_action_trace_touch",String(Date.now()));
     }catch(e){}
   }
-  function renderProof(card,proof){
-    const old=card.querySelector("#dzProof");if(old)old.remove();
-    const box=document.createElement("div");box.id="dzProof";
+  function renderTrace(card,trace){
+    const old=card.querySelector("#dzTrace");if(old)old.remove();
+    const box=document.createElement("div");box.id="dzTrace";
     box.style.cssText="margin-top:12px;padding:14px;border-radius:18px;background:#ecfdf5;border:2px solid rgba(34,197,94,.35);color:#052e16;font-weight:900";
-    box.innerHTML='<div style="font-size:13px;color:#166534;font-weight:1000;letter-spacing:.08em;text-transform:uppercase">✅ PREUVE CAISSE POS</div><div style="font-size:24px;font-weight:1000;margin-top:4px">'+money(proof.total)+'</div><div style="margin-top:8px;line-height:1.45">'+safe(proof.quantity)+' × '+safe(proof.item)+' à '+money(proof.unitPrice)+'<br>Paiement annoncé : '+safe(proof.channel)+'</div><div style="margin-top:10px;padding:10px;border-radius:14px;background:#052e16;color:white">Preuve préparée dans POS. Vente non enregistrée. Argent non confirmé.</div>';
+    box.innerHTML='<div style="font-size:13px;color:#166534;font-weight:1000;letter-spacing:.08em;text-transform:uppercase">✅ TRAÇABILITÉ POS</div><div style="font-size:24px;font-weight:1000;margin-top:4px">'+money(trace.total)+'</div><div style="margin-top:8px;line-height:1.45">'+safe(trace.quantity)+' × '+safe(trace.item)+' à '+money(trace.unitPrice)+'<br>Paiement annoncé : '+safe(trace.channel)+'</div><div style="margin-top:10px;padding:10px;border-radius:14px;background:#052e16;color:white">Traçabilité préparée dans POS. Ce n’est pas encore la preuve caisse. Vente non enregistrée. Argent non confirmé.</div>';
     const actions=card.querySelector("#dzValidate")?.parentElement;
     if(actions)card.insertBefore(box,actions);else card.appendChild(box);
   }
@@ -124,7 +124,7 @@
     const card=document.createElement("section");card.id="digiyZone1";card.style.cssText="margin:14px auto;width:min(980px,calc(100% - 24px));border:2px solid rgba(250,204,21,.45);border-radius:24px;background:#fff8e8;color:#102015;padding:16px;box-shadow:0 18px 42px rgba(0,0,0,.24);font-family:system-ui";
     card.innerHTML='<div style="display:flex;justify-content:space-between;gap:12px"><div><div style="font-weight:1000;color:#8a6400">🎙️ ACTION DIGIY</div><h2 style="margin:4px 0 0;font-size:28px;line-height:1">Brouillon préparé</h2><p style="margin:8px 0 0;font-weight:900;color:#5b4b16">Première zone : comprendre, contrôler, puis seulement valider.</p></div><button id="dzClose" style="width:38px;height:38px;border:0;border-radius:99px;background:#102015;color:white;font-size:20px">×</button></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px"><div class="dz"><small>Module</small><b>'+safe(moduleName(data.primaryModule||data.module||MODULE))+'</b></div><div class="dz"><small>Geste</small><b>'+safe(actionName(data.action))+'</b></div><div class="dz"><small>Article / service</small><b>'+safe(data.item)+'</b></div><div class="dz"><small>Paiement</small><b>'+safe(data.channel)+'</b></div><div class="dz"><small>Quantité</small><b>'+safe(data.quantity)+'</b></div><div class="dz"><small>Prix unité</small><b>'+money(data.unitPrice)+'</b></div><div class="dz"><small>Total</small><b>'+money(data.total)+'</b></div><div class="dz"><small>Argent</small><b>À contrôler</b></div></div><div style="margin-top:12px;padding:12px;border-radius:18px;background:#102015;color:white;font-weight:900"><b>Note propre :</b><br>'+safe(data.note||"—")+'<br><br>Brouillon validé ≠ vente enregistrée ≠ argent confirmé.</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px"><button id="dzValidate" style="min-height:50px;border:0;border-radius:15px;background:linear-gradient(135deg,#22c55e,#facc15);font-weight:1000">✅ Valider brouillon</button><button id="dzCopy" style="min-height:50px;border:0;border-radius:15px;background:#eee;font-weight:1000">📋 Copier</button><button id="dzDelete" style="min-height:50px;border:0;border-radius:15px;background:#fee2e2;color:#7f1d1d;font-weight:1000">✖ Effacer</button></div><style>#digiyZone1 .dz{border:1px solid rgba(16,32,21,.14);background:white;border-radius:16px;padding:10px;min-height:74px}#digiyZone1 small{display:block;color:#6b5b21;font-weight:1000;margin-bottom:4px}#digiyZone1 b{font-weight:1000}@media(max-width:760px){#digiyZone1 div[style*="repeat(4"]{grid-template-columns:1fr 1fr!important}#digiyZone1 div[style*="repeat(3"]{grid-template-columns:1fr!important}}@media(max-width:430px){#digiyZone1 div[style*="repeat(4"]{grid-template-columns:1fr!important}}</style>';
     const target=document.querySelector("main")||document.body;target.insertBefore(card,target.firstChild);
-    card.querySelector("#dzClose").onclick=function(){card.remove()};card.querySelector("#dzDelete").onclick=function(){localStorage.removeItem(MODKEY);localStorage.removeItem(LATEST);localStorage.removeItem(VALID);localStorage.removeItem(PROOF);card.remove()};card.querySelector("#dzCopy").onclick=function(){navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(data,null,2));alert("Brouillon copié.")};card.querySelector("#dzValidate").onclick=function(){const validated=save(data,"draft_validated");const proof=makeProof(validated);saveProof(proof);renderProof(card,proof);this.textContent="✅ Preuve POS préparée";alert("Preuve POS préparée. La vente n'est pas encore enregistrée et l'argent n'est pas confirmé.")};
+    card.querySelector("#dzClose").onclick=function(){card.remove()};card.querySelector("#dzDelete").onclick=function(){localStorage.removeItem(MODKEY);localStorage.removeItem(LATEST);localStorage.removeItem(VALID);localStorage.removeItem(TRACE);card.remove()};card.querySelector("#dzCopy").onclick=function(){navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(data,null,2));alert("Brouillon copié.")};card.querySelector("#dzValidate").onclick=function(){const validated=save(data,"draft_validated");const trace=makeTrace(validated);saveTrace(trace);renderTrace(card,trace);this.textContent="✅ Traçabilité POS préparée";alert("Traçabilité POS préparée. Ce n'est pas encore la preuve caisse : la vente n'est pas enregistrée et l'argent n'est pas confirmé.")};
   }
   function boot(){const incoming=readUrl();if(!incoming)return;if(history&&history.replaceState)history.replaceState({},document.title,location.origin+location.pathname);mount(incoming);window.dispatchEvent(new CustomEvent("digiy:action-received",{detail:incoming}))}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
