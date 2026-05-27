@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#0b1d12"/>
-<title>AIDE ACTION POS — Parler à la caisse</title>
+<title>AIDE DIGIY GO POS — Parler à la caisse</title>
 
 <style>
 :root{
@@ -209,16 +209,16 @@ h1{
 <header class="top">
   <div class="wrap topin">
     <div class="brand">
-      <strong>🎓 Aide ACTION POS</strong>
+      <strong>🎓 Aide DIGIY GO POS</strong>
       <small>Parler à la caisse · exemples · lecteur</small>
     </div>
-    <a class="link" href="./action.html">🎙️ Retour ACTION</a>
+    <a class="link" href="./action.html">🎙️ Retour DIGIY GO</a>
   </div>
 </header>
 
 <main class="wrap">
   <section class="hero">
-    <div class="kicker">DIGIY POS · Mode d’emploi vocal</div>
+    <div class="kicker">DIGIY GO POS · Mode d’emploi vocal</div>
     <h1>Parle comme au comptoir.</h1>
     <p class="lead">
       Pas besoin de chercher 200 produits. Dis quantité + marchandise.
@@ -281,7 +281,7 @@ h1{
   <section class="card">
     <h2>Règle sacrée</h2>
     <div class="rule">
-      ACTION POS prépare. La caisse contrôle. Le pro valide.
+      DIGIY GO POS prépare. La caisse contrôle. Le pro valide.
       Rien n’est encaissé automatiquement.
     </div>
   </section>
@@ -289,7 +289,7 @@ h1{
 
 <script>
 const GUIDE_TEXT = [
-  "Tu es sur l'aide ACTION POS.",
+  "Tu es sur l'aide DIGIY GO POS.",
   "Ici, tu apprends comment parler à la caisse.",
   "La règle est simple : quantité plus marchandise.",
   "Exemple : quatre draps moyens, deux serviettes, un peignoir.",
@@ -298,7 +298,7 @@ const GUIDE_TEXT = [
   "Les prix viennent de la page Marchandises.",
   "Si un produit n'est pas reconnu, ajoute son mot dans les alias de Marchandises.",
   "Par exemple : Drap moyen peut aussi s'appeler drap deux places, sër, ou sheet.",
-  "Ensuite, ACTION POS prépare l'addition.",
+  "Ensuite, DIGIY GO POS prépare l'addition.",
   "Le pro vérifie, choisit Cash, Wave, Orange Money ou Carte.",
   "Puis il envoie à la caisse.",
   "Rien n'est encaissé automatiquement.",
@@ -313,7 +313,14 @@ function speak(text){
     return;
   }
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
+  const spokenText = String(text || "")
+    .replace(/\bDIGIY GO\b/g, "diji go")
+    .replace(/\bDIGIY\b/g, "diji i")
+    .replace(/\bDIGIYLYFE\b/g, "diji laïfe")
+    .replace(/\bWave\b/g, "Ouève")
+    .replace(/\bWhatsApp\b/g, "Ouatsap")
+    .replace(/\bQR\b/g, "Q R");
+  const u = new SpeechSynthesisUtterance(spokenText);
   u.lang = "fr-FR";
   u.rate = 0.84;
   u.pitch = 1.02;
@@ -369,3 +376,4 @@ function sayExample(text){
 </script>
 </body>
 </html>
+
