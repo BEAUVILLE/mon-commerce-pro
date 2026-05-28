@@ -3,17 +3,17 @@
    Elle devient son collègue de comptoir.
    Elle parle seulement après un clic humain.
 
-   Pont PAY — doctrine 2026-05-27 :
+   Pont PAY — doctrine 2026-05-28 :
    - POS garde les tickets, les articles, les quantités, les stocks.
    - PAY reçoit la trésorerie finale seulement par la Clôture caisse → PAY.
-   - L'ancien pont ticket-par-ticket est neutralisé ici, sans casser caisse-pos.js.
+   - La route officielle passe par ./pay-transition.html puis pro-pay/module-bridge.html.
 */
 (function(){
   "use strict";
 
-  const VERSION = "collegue-pos-20260527-cloture-only-2";
+  const VERSION = "collegue-pos-20260528-transition-pay";
   const CLOTURE_PREFIX = "caisse_cloture_";
-  const PAY_ACTION_URL = "https://pro-pay.digiylyfe.com/action.html";
+  const PAY_TRANSITION_URL = "./pay-transition.html";
 
   function readJSON(key, fallback){
     try{
@@ -146,8 +146,8 @@
   }
 
   function buildPayClosureUrl(closure){
-    const url = new URL(PAY_ACTION_URL);
-    url.searchParams.set("from", "POS_CLOSURE");
+    const url = new URL(PAY_TRANSITION_URL, window.location.href);
+    url.searchParams.set("from", "POS");
     url.searchParams.set("date", closure.day);
     url.searchParams.set("closureRef", closure.closureRef || closure.id || "");
     url.searchParams.set("count", String(closure.count || 0));
@@ -157,15 +157,38 @@
     url.searchParams.set("orange", String(Math.round(Number(closure.totals?.orange || 0))));
     url.searchParams.set("card", String(Math.round(Number(closure.totals?.card || 0))));
     url.searchParams.set("other", String(Math.round(Number(closure.totals?.other || 0))));
-    url.searchParams.set("category", "Clôture caisse POS");
-    url.searchParams.set("who", "MON COMMERCE POS");
     return url.toString();
+  }
+
+  function savePayBridge(closure){
+    const payload = {
+      source:"POS",
+      module:"POS",
+      target:"PAY",
+      type:"income",
+      typeLabel:"Recette",
+      amount:Number(closure.total || 0),
+      currency:"XOF",
+      channel:"Autre",
+      who:"MON COMMERCE POS",
+      category:"Clôture caisse POS",
+      note:phraseCloture(closure),
+      proofRef:(closure.closureRef || closure.id || "POS-CLOTURE") + "-total-" + Date.now(),
+      status:"draft",
+      requiresHumanValidation:true,
+      createdAt:new Date().toISOString(),
+      safety:{posKeepsTickets:true,payKeepsFinalMoney:true,noAutoPayment:true,humanValidationRequired:true}
+    };
+    writeJSON("DIGIY_POS_PAY_BRIDGE", payload);
+    writeJSON("DIGIY_PAY_PENDING_MOVEMENT", payload);
+    writeJSON("DIGIY_POS_LATEST_ACTION", payload);
+    return payload;
   }
 
   function phraseCloture(closure){
     const t = closure.totals || {};
     return [
-      "Clôture caisse du " + closure.day + ".",
+      "Clôture caisse POS " + closure.day + ".",
       "Nombre de ventes : " + closure.count + ".",
       "Cash : " + Math.round(t.cash || 0) + " francs.",
       "Wave : " + Math.round(t.wave || 0) + " francs.",
@@ -249,7 +272,7 @@
       </div>
 
       <div style="margin-top:12px;padding:12px;border-radius:18px;background:#102015;color:white;font-weight:900;line-height:1.35">
-        Route officielle : une clôture visible, plusieurs mouvements PAY derrière — Cash, Wave, Orange Money, Carte. Les tickets restent dans POS.
+        Route officielle : POS garde les articles. PAY reçoit la clôture consolidée. Le pro peut choisir le total ou un mode séparé dans la transition.
       </div>
     `;
 
@@ -282,6 +305,7 @@
     }
 
     const sent = saveCloture({...c, sentToPayAt:new Date().toISOString()}, "sent_to_pay");
+    savePayBridge(sent);
     toast("Clôture prête pour PAY.");
     location.href = buildPayClosureUrl(sent);
   }
