@@ -1,16 +1,28 @@
-/* DIGIY GO POS — vocabulaire métier caisse commerce
-   POS garde les articles, quantités, prix, stock, ticket. PAY reçoit seulement l'argent final.
+/* DIGIY GO POS — vocabulaire caisse commerce FR WO AR
+   POS garde articles, quantités, prix, stock, ticket. PAY reçoit seulement l'argent final.
 */
 (function(){
   "use strict";
   var vocab={
     module:"POS",
     label:"Mon commerce",
-    version:"pos-vocab-20260528",
-    doctrine:"Quantité + produit → addition préparée → clic Total. POS détaille la vente. PAY garde seulement l'argent final.",
-    intents:{sale:["vendre","vente","ajoute","mets","prends","client prend","facture","ticket","addition"],stock:["stock","reste","quantité","quantite","marchandise","arrivage","réassort","reassort"],discount:["remise","réduction","reduction","cadeau","prix spécial"],payment:["cash","espèces","especes","wave","orange money","carte","tpe"]},
-    fields:{quantity:["un","une","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","douzaine","carton","paquet"],product:["savon","serviette","drap","peignoir","fouta","crème","creme","sac","chaussure","riz","huile","sucre","article","produit"],unitPrice:["à","a","prix","unité","unite","pièce","piece"],total:["total","sous-total","addition"],client:["client","nom","pour"]},
-    examples:["deux serviettes de bain à 5000 cash","quatre draps moyens plus deux peignoirs","vente savon karité 3000 Wave","remise 1000 sur l'addition"],
+    version:"pos-vocab-fr-wo-ar-20260528",
+    languages:["fr","wo","ar"],
+    doctrine:"Le pro ou le client parle en français, wolof ou arabe. POS prépare l'addition article par article. Le pro valide. PAY reçoit seulement le total final.",
+    intents:{
+      sale:["vendre","vente","ajoute","mets","prends","client prend","facture","ticket","addition","jaay","jënd","jox","facture","بيع","فاتورة","إضافة","حساب"],
+      stock:["stock","reste","quantité","quantite","marchandise","arrivage","réassort","reassort","des","desit","stock","marsaandise","مخزون","باقي","كمية","بضاعة"],
+      discount:["remise","réduction","reduction","cadeau","prix spécial","waññi","cadeau","تخفيض","هدية","سعر خاص"],
+      payment:["cash","espèces","especes","wave","orange money","carte","tpe","xaalis","kesh","كاش","نقدا","وايف","أورنج موني","بطاقة"]
+    },
+    fields:{
+      quantity:["un","une","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","benn","ñaar","ñett","ñent","juróom","واحد","اثنين","ثلاثة","أربعة","خمسة","ستة","سبعة","ثمانية","تسعة","عشرة"],
+      product:["savon","serviette","drap","peignoir","fouta","crème","creme","sac","chaussure","riz","huile","sucre","article","produit","saabu","serviet","sëru","dara","mbubb","riz","diwlin","suukar","صابون","منشفة","ملاءة","كيس","حذاء","أرز","زيت","سكر","منتج"],
+      unitPrice:["à","a","prix","unité","unite","pièce","piece","njëg","unité","سعر","ثمن","وحدة","قطعة"],
+      total:["total","sous-total","addition","lépp","total","المجموع","الحساب"],
+      client:["client","nom","pour","kiliyaan","tur","زبون","اسم"]
+    },
+    examples:["deux serviettes de bain à 5000 cash","ñaar serviette 5000 cash","منشفتين بسعر 5000 كاش"],
     payBridge:{allowed:true,onlyAfterValidation:true,phrasePrefix:"recette commerce POS",forbidden:"Ne jamais envoyer le détail article par article dans PAY."},
     safety:["aucune vente automatique","aucun stock modifié sans clic pro","aucun paiement confirmé sans validation humaine"]
   };
