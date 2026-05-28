@@ -1,32 +1,4 @@
-/* DIGIY GO POS — vocabulaire caisse commerce FR WO AR
-   POS garde articles, quantités, prix, stock, ticket. PAY reçoit seulement l'argent final.
-*/
-(function(){
-  "use strict";
-  var vocab={
-    module:"POS",
-    label:"Mon commerce",
-    version:"pos-vocab-fr-wo-ar-20260528",
-    languages:["fr","wo","ar"],
-    doctrine:"Le pro ou le client parle en français, wolof ou arabe. POS prépare l'addition article par article. Le pro valide. PAY reçoit seulement le total final.",
-    intents:{
-      sale:["vendre","vente","ajoute","mets","prends","client prend","facture","ticket","addition","jaay","jënd","jox","facture","بيع","فاتورة","إضافة","حساب"],
-      stock:["stock","reste","quantité","quantite","marchandise","arrivage","réassort","reassort","des","desit","stock","marsaandise","مخزون","باقي","كمية","بضاعة"],
-      discount:["remise","réduction","reduction","cadeau","prix spécial","waññi","cadeau","تخفيض","هدية","سعر خاص"],
-      payment:["cash","espèces","especes","wave","orange money","carte","tpe","xaalis","kesh","كاش","نقدا","وايف","أورنج موني","بطاقة"]
-    },
-    fields:{
-      quantity:["un","une","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","benn","ñaar","ñett","ñent","juróom","واحد","اثنين","ثلاثة","أربعة","خمسة","ستة","سبعة","ثمانية","تسعة","عشرة"],
-      product:["savon","serviette","drap","peignoir","fouta","crème","creme","sac","chaussure","riz","huile","sucre","article","produit","saabu","serviet","sëru","dara","mbubb","riz","diwlin","suukar","صابون","منشفة","ملاءة","كيس","حذاء","أرز","زيت","سكر","منتج"],
-      unitPrice:["à","a","prix","unité","unite","pièce","piece","njëg","unité","سعر","ثمن","وحدة","قطعة"],
-      total:["total","sous-total","addition","lépp","total","المجموع","الحساب"],
-      client:["client","nom","pour","kiliyaan","tur","زبون","اسم"]
-    },
-    examples:["deux serviettes de bain à 5000 cash","ñaar serviette 5000 cash","منشفتين بسعر 5000 كاش"],
-    payBridge:{allowed:true,onlyAfterValidation:true,phrasePrefix:"recette commerce POS",forbidden:"Ne jamais envoyer le détail article par article dans PAY."},
-    safety:["aucune vente automatique","aucun stock modifié sans clic pro","aucun paiement confirmé sans validation humaine"]
-  };
-  window.DIGIY_GO_VOCABS=window.DIGIY_GO_VOCABS||{};
-  window.DIGIY_GO_VOCABS.POS=vocab;
-  window.DIGIY_GO_POS_VOCAB=vocab;
-})();
+/* DIGIY GO POS — vocabulaire caisse commerce FR WO AR + choix langue */
+(function(){"use strict";
+var vocab={module:"POS",label:"Mon commerce",version:"pos-lang-ui-20260528",languages:["fr","wo","ar"],doctrine:"Le pro ou le client parle en français, wolof ou arabe. POS prépare l'addition article par article. Le pro valide. PAY reçoit seulement le total final.",intents:{sale:["vendre","vente","ajoute","client prend","facture","ticket","addition","jaay","jënd","jox","بيع","فاتورة","حساب"],stock:["stock","reste","quantité","marchandise","arrivage","desit","marsaandise","مخزون","باقي","كمية"],discount:["remise","réduction","cadeau","waññi","تخفيض","هدية"],payment:["cash","espèces","wave","orange money","carte","xaalis","كاش","وايف","بطاقة"]},fields:{quantity:["un","une","deux","trois","quatre","cinq","six","sept","huit","neuf","dix","benn","ñaar","ñett","ñent","juróom","واحد","اثنين","ثلاثة","أربعة","خمسة"],product:["savon","serviette","drap","peignoir","fouta","crème","sac","chaussure","riz","huile","sucre","saabu","serviet","sëru","صابون","منشفة","أرز","زيت"],unitPrice:["à","prix","unité","pièce","njëg","سعر","وحدة","قطعة"],total:["total","sous-total","addition","lépp","المجموع","الحساب"],client:["client","nom","kiliyaan","tur","زبون","اسم"]},examples:["deux serviettes de bain à 5000 cash","ñaar serviette 5000 cash","منشفتين بسعر 5000 كاش"],payBridge:{allowed:true,onlyAfterValidation:true,phrasePrefix:"recette commerce POS",forbidden:"Ne jamais envoyer le détail article par article dans PAY."},safety:["aucune vente automatique","aucun stock modifié sans clic pro","aucun paiement confirmé sans validation humaine"]};
+function ui(v){var L={fr:{r:"fr-FR",d:"ltr",h:"Parle ou écris en français."},wo:{r:"fr-FR",d:"ltr",h:"Wolof : parle si le téléphone comprend, sinon écris ou dicte au clavier."},ar:{r:"ar-SA",d:"auto",h:"Parle ou écris en arabe."}};var K="DIGIY_GO_LANG_"+v.module;function cur(){return localStorage.getItem(K)||"fr"}function apply(x){localStorage.setItem(K,x);window.DIGIY_GO_LANG=x;window.DIGIY_GO_SPEECH_LANG=L[x].r;document.querySelectorAll("textarea,input").forEach(function(el){el.dir=L[x].d});var h=document.getElementById("digiyGoLangHint");if(h)h.textContent=L[x].h;document.querySelectorAll("[data-digiy-lang]").forEach(function(b){b.style.opacity=b.dataset.digiyLang===x?"1":".55"})}function patch(){["SpeechRecognition","webkitSpeechRecognition"].forEach(function(n){var O=window[n];if(!O||O.__digiyPatched)return;function W(){var rec=new O(),start=rec.start;rec.start=function(){try{rec.lang=L[cur()].r}catch(e){}return start.apply(rec,arguments)};return rec}W.__digiyPatched=true;W.prototype=O.prototype;window[n]=W})}function mount(){if(document.getElementById("digiyGoLangBox"))return;var host=document.querySelector("textarea")||document.querySelector("main")||document.body;var box=document.createElement("div");box.id="digiyGoLangBox";box.style.cssText="margin:12px 0;padding:12px;border-radius:18px;border:1px solid rgba(250,204,21,.35);background:rgba(0,0,0,.18);font-weight:1000";box.innerHTML='<div style="color:#fde68a;font-size:12px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px">Langue de travail</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"><button type="button" data-digiy-lang="fr">🇫🇷 Français</button><button type="button" data-digiy-lang="wo">🇸🇳 Wolof</button><button type="button" data-digiy-lang="ar">🇸🇦 العربية</button></div><div id="digiyGoLangHint" style="margin-top:8px;color:rgba(255,255,255,.78);font-size:13px"></div>';box.querySelectorAll("button").forEach(function(b){b.style.cssText="min-height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.1);color:inherit;font:inherit;cursor:pointer";b.onclick=function(){apply(b.dataset.digiyLang)}});host.parentNode.insertBefore(box,host);apply(cur())}patch();if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mount);else mount()}window.DIGIY_GO_VOCABS=window.DIGIY_GO_VOCABS||{};window.DIGIY_GO_VOCABS.POS=vocab;window.DIGIY_GO_POS_VOCAB=vocab;ui(vocab);})();
