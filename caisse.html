@@ -13,8 +13,8 @@
     #additionOverlay{display:none!important}
     #additionOverlay.open{display:flex!important}
     #panierBar.hidden{display:none!important}
-    #btnDemarrage,
-    .nav button[onclick="dismissDemarrage()"]{display:none!important}
+    /* btnDemarrage absent du HTML — règle conservée inerte (audit 20260530) */
+    /* #btnDemarrage, .nav button[onclick="dismissDemarrage()"]{display:none!important} */
   </style>
 
   <link rel="stylesheet" href="./assets/css/caisse.css?v=caisse-voix-sommet-20260527">
@@ -146,6 +146,18 @@
     @media(max-width:520px){.pos-zone-grid,.pos-zone-grid.three{grid-template-columns:1fr 1fr}.pos-day-zone-title{display:block}.pos-day-zone-title small{display:block;text-align:left;margin-top:3px}.pos-closure-landing-head{display:block}}
 
   </style>
+
+  <!-- CONFIG — Mon commerce / POS (patch audit 20260530) -->
+  <script>
+    window.DIGIY_SUPABASE_URL      = "https://wesqmwjjtsefyjnluosj.supabase.co";
+    window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
+    window.DIGIY_SUPABASE_ANON     = window.DIGIY_SUPABASE_ANON_KEY;
+    window.DIGIY_MODULE            = "POS";
+    window.DIGIY_ABOS_MODULE       = "POS";
+    window.DIGIY_MODULE_ALIASES    = ["POS","POS_PRO","COMMERCE","CAISSE","MON_COMMERCE"];
+    window.DIGIY_MODULE_LABEL      = "Mon commerce";
+    window.DIGIY_LOGIN_URL         = "./pin.html";
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./guard.js?v=pos-shell-20260527"></script>
@@ -598,5 +610,8 @@
   <script src="./assets/js/collegue-pos.js?v=20260527-cloture-only-2"></script>
 </body>
 </html>
+
+
+
 
 
