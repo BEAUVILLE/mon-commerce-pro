@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8"/>
+<meta name="robots" content="noindex,nofollow"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#04110d"/>
 <title>DIGIY — Confirme ton activité</title>
@@ -367,6 +368,17 @@ textarea.field{min-height:96px;resize:vertical;line-height:1.45}
   .qr-img{width:84px;height:84px}
 }
 </style>
+<script>
+  window.DIGIY_MODULE       = "POS";
+  window.DIGIY_ABOS_MODULE  = "POS";
+  window.DIGIY_MODULE_LABEL = "Mon commerce";
+  window.DIGIY_LOGIN_URL    = "./pin.html";
+  window.DIGIY_SUPABASE_URL      = window.DIGIY_SUPABASE_URL || "https://wesqmwjjtsefyjnluosj.supabase.co";
+  window.DIGIY_SUPABASE_ANON_KEY = window.DIGIY_SUPABASE_ANON_KEY || "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
+  window.DIGIY_SUPABASE_ANON     = window.DIGIY_SUPABASE_ANON_KEY;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./guard.js?v=pos-guard-20260531"></script>
 </head>
 <body>
 
@@ -1155,3 +1167,4 @@ init();
 </script>
 </body>
 </html>
+
