@@ -1,11 +1,12 @@
 /* DIGIY ACTION → CAISSE POS
    Petite passerelle séparée : lit la traçabilité ACTION POS et la met dans l’addition.
    Ne remplace pas caisse.html. Ne déclenche jamais encaisser().
-   V2 : une trace est consommée une seule fois, puis retirée du moule.
+   Version multi-lignes : une trace ACTION peut contenir items[] et charger plusieurs lignes.
 */
 (function(){
   "use strict";
-  const VERSION = "action-trace-to-caisse-20260527-2";
+
+  const VERSION = "action-trace-to-caisse-multilignes-20260602";
   const TRACE_KEYS = ["DIGIY_POS_CAISSE_TRACE", "caisse_action_last_trace"];
   const CONSUMED_KEY = "caisse_action_consumed_trace_id";
   const CONSUMED_AT_KEY = "caisse_action_consumed_trace_at";
@@ -15,7 +16,9 @@
     try{
       const raw = localStorage.getItem(key);
       return raw ? JSON.parse(raw) : fallback;
-    }catch(_){ return fallback; }
+    }catch(_){
+      return fallback;
+    }
   }
 
   function removeTrace(){
@@ -37,7 +40,9 @@
     if(!trace || !trace.id) return false;
     try{
       return String(localStorage.getItem(CONSUMED_KEY) || "") === String(trace.id);
-    }catch(_){ return false; }
+    }catch(_){
+      return false;
+    }
   }
 
   function toast(msg){
@@ -69,59 +74,122 @@
     const wanted = tokens((trace && (trace.item || trace.note)) || "");
     const prod = tokens((product && product.name) || "");
     if(!wanted.length || !prod.length) return 0;
+
     let s = 0;
+
     prod.forEach(t => {
       if(wanted.includes(t)) s += 4;
       else if(wanted.some(w => w.includes(t) || t.includes(w))) s += 2;
     });
-    wanted.forEach(t => { if(prod.includes(t)) s += 2; });
+
+    wanted.forEach(t => {
+      if(prod.includes(t)) s += 2;
+    });
+
     const tracePrice = Number(trace.unitPrice || 0);
     const productPrice = Number(product.price || 0);
+
     if(tracePrice && productPrice && tracePrice === productPrice) s += 6;
     if(norm(trace.item).includes(norm(product.name))) s += 5;
     if(norm(product.name).includes(norm(trace.item))) s += 4;
+
     return s;
   }
 
   function findProduct(trace){
     if(typeof window.getProds !== "function") return null;
+
     const prods = window.getProds() || [];
-    let best = null, bestScore = 0;
+    let best = null;
+    let bestScore = 0;
+
     prods.forEach(p => {
       const s = score(trace, p);
-      if(s > bestScore){ best = p; bestScore = s; }
+      if(s > bestScore){
+        best = p;
+        bestScore = s;
+      }
     });
+
     return bestScore >= 5 ? best : null;
   }
 
   function buildLine(trace){
     const product = findProduct(trace);
-    const qty = Math.max(1, Number(trace.quantity || 1));
+    const qty = Math.max(1, Number(trace.quantity || trace.qty || 1));
     const price = Number(trace.unitPrice || trace.price || 0);
+
     if(product){
       return {
         ...product,
         qty,
         price: price || Number(product.price || 0),
         actionTraceId: trace.id || "ACTION_TRACE",
+        actionTraceBatchId: trace.batchId || trace.parentId || trace.id || "ACTION_TRACE",
         actionTraceNote: trace.note || "",
         actionTraceSource: "ACTION_DIGIY"
       };
     }
+
     return {
       id: "action_trace_" + (trace.id || Date.now()),
       source_id: "ACTION_DIGIY",
-      name: trace.item || "Article ACTION",
-      cat: "ACTION DIGIY",
-      emoji: "🎙️",
+      name: trace.item || trace.name || "Article ACTION",
+      cat: trace.cat || "ACTION DIGIY",
+      emoji: trace.emoji || "🎙️",
       price,
       stock: 999999,
       published: true,
       qty,
       actionTraceId: trace.id || "ACTION_TRACE",
+      actionTraceBatchId: trace.batchId || trace.parentId || trace.id || "ACTION_TRACE",
       actionTraceNote: trace.note || "",
       actionTraceSource: "ACTION_DIGIY"
     };
+  }
+
+  function expandTraceLines(trace){
+    if(!trace || typeof trace !== "object") return [];
+
+    const batchId = trace.id || ("ACTION_BATCH_" + Date.now());
+
+    if(Array.isArray(trace.items) && trace.items.length){
+      return trace.items.map(function(item, index){
+        const qty = Number(item.quantity || item.qty || 1);
+        const unitPrice = Number(item.unitPrice || item.price || 0);
+
+        return {
+          ...trace,
+          ...item,
+          id: String(item.id || batchId + "_L" + (index + 1)),
+          parentId: batchId,
+          batchId,
+          item: item.item || item.name || trace.item || "Article ACTION",
+          name: item.name || item.item || trace.item || "Article ACTION",
+          quantity: qty,
+          qty,
+          unitPrice,
+          price: unitPrice,
+          total: Number(item.total || (qty * unitPrice) || 0),
+          note: item.note || trace.note || "",
+          channel: trace.channel || trace.payment || item.channel || ""
+        };
+      });
+    }
+
+    return [{
+      ...trace,
+      id: String(trace.id || batchId),
+      batchId,
+      parentId: batchId,
+      item: trace.item || trace.name || "Article ACTION",
+      name: trace.name || trace.item || "Article ACTION",
+      quantity: Number(trace.quantity || trace.qty || 1),
+      qty: Number(trace.quantity || trace.qty || 1),
+      unitPrice: Number(trace.unitPrice || trace.price || 0),
+      price: Number(trace.unitPrice || trace.price || 0),
+      channel: trace.channel || trace.payment || ""
+    }];
   }
 
   function getTrace(){
@@ -134,9 +202,12 @@
 
   function applyPayment(trace){
     if(typeof window.selPay !== "function" || !trace || !trace.channel) return;
+
     const m = String(trace.channel || "").toLowerCase();
+
     if(m.includes("wave")) window.selPay("wave");
     else if(m.includes("orange")) window.selPay("orange");
+    else if(m.includes("carte") || m.includes("tpe")) window.selPay("crd");
     else if(m.includes("cash") || m.includes("esp")) window.selPay("esp");
   }
 
@@ -159,21 +230,41 @@
       return false;
     }
 
-    const already = cart.find(i => String(i.actionTraceId || "") === String(trace.id));
-    if(already){
+    const expanded = expandTraceLines(trace);
+    const lines = [];
+    let skippedNoPrice = 0;
+
+    expanded.forEach(function(part){
+      const line = buildLine(part);
+      if(!line) return;
+
+      if(!Number(line.price || 0)){
+        skippedNoPrice++;
+        return;
+      }
+
+      const already = cart.find(i => String(i.actionTraceId || "") === String(line.actionTraceId || ""));
+      if(!already) lines.push(line);
+    });
+
+    if(!lines.length){
       loadedId = trace.id;
       markConsumed(trace);
       removeTrace();
+
+      toast(
+        skippedNoPrice
+          ? "Trace ACTION reçue, mais prix à vérifier dans Marchandises."
+          : "Trace ACTION déjà chargée."
+      );
+
       return false;
     }
 
-    const line = buildLine(trace);
-    if(!line || !Number(line.price || 0)){
-      toast("Trace ACTION reçue, prix à vérifier.");
-      return false;
-    }
+    lines.forEach(function(line){
+      cart.push(line);
+    });
 
-    cart.push(line);
     loadedId = trace.id;
     markConsumed(trace);
     removeTrace();
@@ -186,7 +277,16 @@
 
     setTimeout(function(){
       try{ window.openAddition && window.openAddition(); }catch(_){}
-      toast("Traçabilité ACTION chargée une fois dans l’addition POS.");
+
+      const msg = lines.length > 1
+        ? (lines.length + " lignes ACTION chargées une seule fois dans l’addition POS.")
+        : "Traçabilité ACTION chargée une fois dans l’addition POS.";
+
+      toast(
+        skippedNoPrice
+          ? msg + " Certaines lignes sans prix sont à reprogrammer."
+          : msg
+      );
     }, 120);
 
     return true;
@@ -196,8 +296,11 @@
     setTimeout(importTrace, 220);
   }
 
-  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
 
   window.DIGIY_ACTION_TRACE_TO_CAISSE = {
     version: VERSION,
@@ -218,7 +321,7 @@
 
   function money(n){
     if(typeof window.fmt === "function") return window.fmt(n);
-    return Math.round(Number(n)||0).toLocaleString("fr-FR") + " F";
+    return Math.round(Number(n) || 0).toLocaleString("fr-FR") + " F";
   }
 
   function esc(v){
@@ -232,7 +335,9 @@
   }
 
   function getSelectedCategory(){
-    try{ if(typeof selCat !== "undefined") return selCat || "Tous"; }catch(_){}
+    try{
+      if(typeof selCat !== "undefined") return selCat || "Tous";
+    }catch(_){}
     return "Tous";
   }
 
@@ -245,6 +350,7 @@
     const q = getQuery();
     const cat = getSelectedCategory();
     const prods = (typeof window.getProds === "function") ? window.getProds() : [];
+
     return (Array.isArray(prods) ? prods : []).filter(p => {
       const okCat = cat === "Tous" || p.cat === cat;
       const okQuery = !q || String(p.name || "").toLowerCase().includes(q);
@@ -254,19 +360,21 @@
 
   function ensurePager(grid){
     let pager = document.getElementById("prodsPager");
+
     if(!pager && grid){
       pager = document.createElement("div");
       pager.id = "prodsPager";
       pager.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 0;padding:10px;border-radius:18px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;font-weight:1000";
       grid.insertAdjacentElement("afterend", pager);
     }
+
     return pager;
   }
 
   function productCard(p){
     return `
-      <div class="pcard${Number(p.stock)<=0 ? " oos" : ""}" onclick="addToCart(${Number(p.id)})">
-        <span class="stk-badge ${Number(p.stock)<=5 ? "stk-low" : "stk-ok"}">${Number(p.stock)||0}</span>
+      <div class="pcard${Number(p.stock) <= 0 ? " oos" : ""}" onclick="addToCart(${Number(p.id)})">
+        <span class="stk-badge ${Number(p.stock) <= 5 ? "stk-low" : "stk-ok"}">${Number(p.stock) || 0}</span>
         <div class="pcard-emoji">${esc(p.emoji || "📦")}</div>
         <div class="pcard-name">${esc(p.name)}</div>
         <div class="pcard-price">${money(p.price)}</div>
@@ -275,22 +383,34 @@
 
   function renderPager(pager, totalPages, totalItems){
     if(!pager) return;
+
     if(totalPages <= 1){
-      pager.innerHTML = `<span>${totalItems} produit${totalItems>1?"s":""}</span>`;
+      pager.innerHTML = `<span>${totalItems} produit${totalItems > 1 ? "s" : ""}</span>`;
       return;
     }
 
     pager.innerHTML = `
-      <button class="btn" type="button" id="prodsPrev" ${productPage<=1 ? "disabled" : ""}>← Précédent</button>
+      <button class="btn" type="button" id="prodsPrev" ${productPage <= 1 ? "disabled" : ""}>← Précédent</button>
       <span>Page ${productPage}/${totalPages} · ${totalItems} produits</span>
-      <button class="btn" type="button" id="prodsNext" ${productPage>=totalPages ? "disabled" : ""}>Suivant →</button>
+      <button class="btn" type="button" id="prodsNext" ${productPage >= totalPages ? "disabled" : ""}>Suivant →</button>
     `;
 
     const prev = document.getElementById("prodsPrev");
     const next = document.getElementById("prodsNext");
 
-    if(prev){ prev.onclick = function(){ productPage = Math.max(1, productPage - 1); renderProdsPaginated(); }; }
-    if(next){ next.onclick = function(){ productPage = Math.min(totalPages, productPage + 1); renderProdsPaginated(); }; }
+    if(prev){
+      prev.onclick = function(){
+        productPage = Math.max(1, productPage - 1);
+        renderProdsPaginated();
+      };
+    }
+
+    if(next){
+      next.onclick = function(){
+        productPage = Math.min(totalPages, productPage + 1);
+        renderProdsPaginated();
+      };
+    }
   }
 
   function renderProdsPaginated(){
@@ -300,7 +420,11 @@
     const cat = getSelectedCategory();
     const q = getQuery();
     const key = cat + "::" + q;
-    if(key !== lastFilterKey){ productPage = 1; lastFilterKey = key; }
+
+    if(key !== lastFilterKey){
+      productPage = 1;
+      lastFilterKey = key;
+    }
 
     const items = filteredProducts();
     const pager = ensurePager(grid);
@@ -316,22 +440,33 @@
 
     const start = (productPage - 1) * PAGE_SIZE;
     const pageItems = items.slice(start, start + PAGE_SIZE);
+
     grid.innerHTML = pageItems.map(productCard).join("");
     renderPager(pager, totalPages, items.length);
   }
 
   function patchSearch(){
     const input = document.getElementById("searchInput");
+
     if(!input || input.dataset.paginationPatched === "1") return;
+
     input.dataset.paginationPatched = "1";
-    input.addEventListener("input", function(){ productPage = 1; setTimeout(renderProdsPaginated, 0); });
+    input.addEventListener("input", function(){
+      productPage = 1;
+      setTimeout(renderProdsPaginated, 0);
+    });
   }
 
   function patchCats(){
     const bar = document.getElementById("catsBar");
+
     if(!bar || bar.dataset.paginationPatched === "1") return;
+
     bar.dataset.paginationPatched = "1";
-    bar.addEventListener("click", function(){ productPage = 1; setTimeout(renderProdsPaginated, 0); }, true);
+    bar.addEventListener("click", function(){
+      productPage = 1;
+      setTimeout(renderProdsPaginated, 0);
+    }, true);
   }
 
   function patchGlobals(){
@@ -339,6 +474,7 @@
     try{ renderProds = renderProdsPaginated; }catch(_){}
 
     const oldBuildCats = window.buildCats;
+
     if(typeof oldBuildCats === "function" && !oldBuildCats.__digiyPaginationPatched){
       const wrapped = function(){
         const out = oldBuildCats.apply(this, arguments);
@@ -347,49 +483,106 @@
         setTimeout(renderProdsPaginated, 0);
         return out;
       };
+
       wrapped.__digiyPaginationPatched = true;
       window.buildCats = wrapped;
       try{ buildCats = wrapped; }catch(_){}
     }
   }
 
-  function boot(){ patchGlobals(); patchSearch(); patchCats(); setTimeout(renderProdsPaginated, 80); }
-  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
+  function boot(){
+    patchGlobals();
+    patchSearch();
+    patchCats();
+    setTimeout(renderProdsPaginated, 80);
+  }
 
-  window.DIGIY_POS_PRODUCTS_PAGINATION = { version: VERSION, pageSize: PAGE_SIZE, render: renderProdsPaginated, reset(){ productPage = 1; renderProdsPaginated(); }, next(){ productPage += 1; renderProdsPaginated(); }, prev(){ productPage = Math.max(1, productPage - 1); renderProdsPaginated(); } };
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+
+  window.DIGIY_POS_PRODUCTS_PAGINATION = {
+    version: VERSION,
+    pageSize: PAGE_SIZE,
+    render: renderProdsPaginated,
+    reset(){
+      productPage = 1;
+      renderProdsPaginated();
+    },
+    next(){
+      productPage += 1;
+      renderProdsPaginated();
+    },
+    prev(){
+      productPage = Math.max(1, productPage - 1);
+      renderProdsPaginated();
+    }
+  };
 })();
 
 /* DIGIY POS — RETOUR HUB POS FIXE */
 (function(){
   "use strict";
+
   const VERSION = "hub-pos-return-fixed-20260527-1";
 
   function injectHubReturn(){
     if(document.getElementById("digiyHubPosFloat")) return;
+
     const a = document.createElement("a");
     a.id = "digiyHubPosFloat";
     a.href = "./hub.html";
     a.setAttribute("aria-label", "Retourner au HUB POS");
     a.textContent = "🧭 HUB POS";
     a.style.cssText = [
-      "position:fixed","right:12px","top:78px","z-index:120","min-height:44px","display:inline-flex","align-items:center","justify-content:center","gap:6px","padding:10px 14px","border-radius:999px","background:linear-gradient(135deg,#ffe8a8,#f4c86a)","color:#102015","border:1px solid rgba(255,255,255,.55)","box-shadow:0 12px 28px rgba(0,0,0,.24)","font-weight:1000","font-size:14px","text-decoration:none"
+      "position:fixed",
+      "right:12px",
+      "top:78px",
+      "z-index:120",
+      "min-height:44px",
+      "display:inline-flex",
+      "align-items:center",
+      "justify-content:center",
+      "gap:6px",
+      "padding:10px 14px",
+      "border-radius:999px",
+      "background:linear-gradient(135deg,#ffe8a8,#f4c86a)",
+      "color:#102015",
+      "border:1px solid rgba(255,255,255,.55)",
+      "box-shadow:0 12px 28px rgba(0,0,0,.24)",
+      "font-weight:1000",
+      "font-size:14px",
+      "text-decoration:none"
     ].join(";");
+
     document.body.appendChild(a);
   }
 
-  function boot(){ setTimeout(injectHubReturn, 120); }
-  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
-  window.DIGIY_POS_HUB_RETURN = { version: VERSION, inject: injectHubReturn };
+  function boot(){
+    setTimeout(injectHubReturn, 120);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+
+  window.DIGIY_POS_HUB_RETURN = {
+    version: VERSION,
+    inject: injectHubReturn
+  };
 })();
 
-/* DIGIY POS — PAY PAR CLOTURE UNIQUEMENT
+/* DIGIY POS — PAY PAR CLÔTURE UNIQUEMENT
    Encaisser garde la vente dans POS. Les traces PAY vente par vente sont nettoyées.
    Le seul chemin officiel vers PAY devient : Clôture caisse → Envoyer à PAY.
 */
 (function(){
   "use strict";
+
   const VERSION = "pos-pay-closure-only-20260527-1";
   const KEYS = [
     "DIGIY_PAY_ACTIONS",
@@ -400,7 +593,9 @@
   ];
 
   function cleanupSalePayBridge(){
-    try{ KEYS.forEach(k => localStorage.removeItem(k)); }catch(_){}
+    try{
+      KEYS.forEach(k => localStorage.removeItem(k));
+    }catch(_){}
   }
 
   function toast(msg){
@@ -410,33 +605,44 @@
 
   function patchEncaisser(){
     const original = window.encaisser;
+
     if(typeof original !== "function" || original.__digiyClosureOnlyPatched) return false;
 
     function encaisserClosureOnly(){
       const out = original.apply(this, arguments);
+
       setTimeout(function(){
         cleanupSalePayBridge();
         toast("✅ Vente gardée dans POS. PAY recevra la clôture du jour.");
       }, 180);
+
       return out;
     }
 
     encaisserClosureOnly.__digiyClosureOnlyPatched = true;
     window.encaisser = encaisserClosureOnly;
-    try{ encaisser = encaisserClosureOnly; }catch(_){}
+
+    try{
+      encaisser = encaisserClosureOnly;
+    }catch(_){}
+
     return true;
   }
 
   function boot(){
     cleanupSalePayBridge();
+
     if(!patchEncaisser()){
       setTimeout(patchEncaisser, 250);
       setTimeout(patchEncaisser, 800);
     }
   }
 
-  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
-  else boot();
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
 
   window.DIGIY_POS_PAY_CLOSURE_ONLY = {
     version: VERSION,
