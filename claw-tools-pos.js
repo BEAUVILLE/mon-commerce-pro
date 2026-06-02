@@ -668,3 +668,13 @@
     window.DIGIY_GUARD ? "guard présent ✓" : "guard absent ✗"
   );
 })();
+
+
+
+
+
+
+
+
+
+
