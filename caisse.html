@@ -7,6 +7,20 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#0b1d12">
 
+
+  <!-- CONFIG — Mon commerce / POS -->
+  <script>
+    window.DIGIY_SUPABASE_URL      = "https://wesqmwjjtsefyjnluosj.supabase.co";
+    window.DIGIY_SUPABASE_ANON_KEY = "sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3";
+    window.DIGIY_SUPABASE_ANON     = window.DIGIY_SUPABASE_ANON_KEY;
+    window.DIGIY_SUPABASE_KEY      = window.DIGIY_SUPABASE_ANON_KEY;
+    window.DIGIY_MODULE            = "POS";
+    window.DIGIY_ABOS_MODULE       = "POS";
+    window.DIGIY_MODULE_ALIASES    = ["POS","POS_PRO","COMMERCE","CAISSE","MON_COMMERCE"];
+    window.DIGIY_MODULE_LABEL      = "Mon commerce";
+    window.DIGIY_LOGIN_URL         = "./pin.html";
+  </script>
+
   <style id="digiy-critical-caisse">
     .page{display:none!important}
     .page.active{display:block!important}
@@ -148,7 +162,7 @@
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./guard.js?v=pos-shell-20260527"></script>
+  <script src="./guard.js?v=pos-guard-20260531"></script>
   <script src="./assets/js/digiy-module-bridge.js?v=pos-shell-20260527"></script>
   <script src="./assets/js/digiy-pos-memory.js?v=pos-shell-20260527"></script>
 </head>
@@ -593,11 +607,13 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="./assets/js/caisse-pos.js?v=caisse-pos-repo-aligne-20260521"></script>
-  <script src="./assets/js/action-trace-to-caisse.js?v=20260527-2"></script>
-  <script src="./assets/js/collegue-pos.js?v=20260527-cloture-only-2"></script>
+  <script src="./assets/js/caisse-pos.js?v=caisse-pos-20260602"></script>
+  <script src="./assets/js/action-trace-to-caisse.js?v=multilignes-20260602"></script>
+  <script src="./assets/js/collegue-pos.js?v=cloture-20260602"></script>
 </body>
 </html>
+
+
 
 
 
