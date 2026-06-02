@@ -1,12 +1,15 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="theme-color" content="#0b1d12"/>
-<title>MON COMMERCE — ACTION POS</title>
-<meta name="description" content="ACTION POS DIGIY : parler une vente, retrouver les marchandises, préparer l’addition, validation humaine."/>
-<meta name="robots" content="noindex,nofollow"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#0b1d12"/>
+
+  <title>MON COMMERCE — ACTION POS</title>
+
+  <meta name="description" content="ACTION POS DIGIY : parler une vente, retrouver les marchandises, préparer l’addition, validation humaine."/>
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet"/>
+
   <!-- CONFIG — Mon commerce / POS (patch audit 20260530) -->
   <script>
     window.DIGIY_SUPABASE_URL      = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -18,11 +21,12 @@
     window.DIGIY_MODULE_LABEL      = "Mon commerce";
     window.DIGIY_LOGIN_URL         = "./pin.html";
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./guard.js?v=pos-guard-20260531"></script>
+  <script src="./assets/js/digiy-go-pos-vocab.js?v=20260528"></script>
 
-<script src="./assets/js/digiy-go-pos-vocab.js?v=20260528"></script>
-<style>
+  <style>
 :root{
   --bg:#0b1d12;
   --deep:#06140d;
