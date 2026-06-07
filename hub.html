@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#1e7a46"/>
   <meta name="description" content="MON COMMERCE PRO — portes mobiles terrain : caisse, DIGIY GO POS, marchandises, fiche, QR, actions utiles, accès et argent."/>
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet"/>
-  <meta name="digiy-build" content="pos-hub-porte-oreille-20260524"/>
+  <meta name="digiy-build" content="pos-hub-porte-oreille-lexique-caisse-wolof-20260607"/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -383,7 +383,7 @@
       height:100%;
       margin:0 auto;
       display:grid;
-      grid-template-columns:repeat(5,1fr);
+      grid-template-columns:repeat(6,1fr);
       gap:6px;
     }
 
@@ -510,7 +510,7 @@
         Une porte = un geste. Tu ouvres, tu agis, tu reviens au comptoir quand c’est fait.
       </div>
       <div class="rule">
-        <b>Une page = un sujet.</b> La caisse encaisse. La fiche présente. Les marchandises se règlent à part. Le contact, l’argent et la relation client restent au pro.
+        <b>Une page = un sujet.</b> La caisse encaisse. La fiche présente. Les marchandises se règlent à part. Le lexique Wolof aide le terrain. Le contact, l’argent et la relation client restent au pro.
       </div>
       <button class="listenBtn" id="btnHubVoice" type="button">🎧 Écouter DIGIY</button>
     </section>
@@ -559,6 +559,17 @@
           <div>
             <b>DIGIY GO POS</b>
             <span>Dire vente, produit, quantité, prix.</span>
+          </div>
+        </a>
+
+        <a class="tile gold" id="goLexiqueCaisse" href="https://mon-commerce.digiylyfe.com/lexique-caisse.html?v=lexique-caisse-v2-mobile-20260607">
+          <div class="tileTop">
+            <div class="tileIcon">🇸🇳</div>
+            <div class="tileTag">Wolof</div>
+          </div>
+          <div>
+            <b>Lexique Wolof caisse</b>
+            <span>Ouverture, vente, total, ticket, stock, fermeture.</span>
           </div>
         </a>
 
@@ -678,8 +689,9 @@
     <div class="bottomInner">
       <a class="active" href="./hub.html"><span class="bi">🧭</span><span>HUB</span></a>
       <a href="./caisse.html"><span class="bi">💰</span><span>Caisse</span></a>
-      <a href="./admin.html#articleList"><span class="bi">📦</span><span>Marchandises</span></a>
+      <a href="./admin.html#articleList"><span class="bi">📦</span><span>Stock</span></a>
       <a href="./profile.html"><span class="bi">🏪</span><span>Fiche</span></a>
+      <a href="https://mon-commerce.digiylyfe.com/lexique-caisse.html?v=lexique-caisse-v2-mobile-20260607"><span class="bi">🇸🇳</span><span>Wolof</span></a>
       <a href="./action.html"><span class="bi">🎙️</span><span>GO</span></a>
     </div>
   </nav>
@@ -811,7 +823,7 @@
         if(!el) return;
         const ok = !!(state && (state.access_ok || state.access || state.pin_session_ok));
         el.textContent = ok
-          ? "Compte reconnu. Ouvre le bon pavé : caisse, DIGIY GO POS, marchandises, fiche, QR ou actions utiles."
+          ? "Compte reconnu. Ouvre le bon pavé : caisse, DIGIY GO POS, marchandises, fiche, QR, lexique Wolof ou actions utiles."
           : "Accès à vérifier. Les portes restent visibles, mais le code protège le commerce.";
       }
 
@@ -823,6 +835,7 @@
         "Tu veux parler une vente au lieu de tout écrire : ouvre DIGIY GO POS.",
         "Tu veux régler tes prix ou ton stock : ouvre Marchandises.",
         "Tu veux que le client te comprenne : ouvre ta fiche.",
+        "Tu veux parler simplement avec le client en français et Wolof : ouvre le lexique Wolof caisse.",
         "Tu veux partager : ouvre ton QR.",
         "Une page, un sujet. Moins de bruit, plus d’action. Le pro garde son client, son argent et sa relation."
       ].join(" ");
@@ -892,6 +905,70 @@
   
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
