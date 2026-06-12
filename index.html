@@ -169,7 +169,7 @@
     <section class="head">
       <div class="eyebrow">🛒 MON COMMERCE</div>
       <h1>Choisis ton geste.</h1>
-      <div class="sub" id="hubSub">Le commerçant touche vite : encaisser, parler une vente, gérer le stock ou ouvrir PAY.</div>
+      <div class="sub" id="hubSub">Le commerçant touche vite : encaisser, parler une vente, gérer le stock ou ouvrir Mon argent.</div>
     </section>
 
     <section class="quick" aria-label="Départ rapide commerce">
@@ -192,7 +192,7 @@
       <div class="tileGrid">
         <a class="tile" href="./profile.html"><div class="tileTop"><div class="tileIcon">🏪</div><div class="tileTag">Fiche</div></div><div><b>Fiche</b><span>Infos visibles.</span></div></a>
         <a class="tile" href="./qr.html"><div class="tileTop"><div class="tileIcon">🔳</div><div class="tileTag">QR</div></div><div><b>QR</b><span>Partager la boutique.</span></div></a>
-        <a class="tile pay" href="https://pay.digiylyfe.com/"><div class="tileTop"><div class="tileIcon">💳</div><div class="tileTag">PAY</div></div><div><b>PAY</b><span>Module argent.</span></div></a>
+        <a class="tile pay" href="https://pay.digiylyfe.com/"><div class="tileTop"><div class="tileIcon">💳</div><div class="tileTag">PAY</div></div><div><b>Mon argent</b><span>Ouvre le module PAY.</span></div></a>
         <a class="tile gold" href="https://mon-commerce.digiylyfe.com/lexique-caisse.html?v=lexique-caisse-v2-mobile-20260607"><div class="tileTop"><div class="tileIcon">🇸🇳</div><div class="tileTag">Wolof</div></div><div><b>Wolof</b><span>Caisse terrain.</span></div></a>
         <a class="tile blue" href="https://mon-commerce.digiylyfe.com/"><div class="tileTop"><div class="tileIcon">🌍</div><div class="tileTag">Public</div></div><div><b>Client</b><span>Façade boutique.</span></div></a>
         <button class="tile" id="openPlus" type="button"><div class="tileTop"><div class="tileIcon">☰</div><div class="tileTag">Plus</div></div><div><b>Plus</b><span>Session · PIN · aide.</span></div></button>
@@ -206,7 +206,7 @@
       <a href="./caisse.html"><span class="bi">💰</span><span>Caisse</span></a>
       <a href="./action.html?mode=vente"><span class="bi">🎙️</span><span>Parler</span></a>
       <a href="./admin.html#articleList"><span class="bi">📦</span><span>Stock</span></a>
-      <a href="https://pay.digiylyfe.com/"><span class="bi">💳</span><span>PAY</span></a>
+      <a href="https://pay.digiylyfe.com/"><span class="bi">💳</span><span>Argent</span></a>
       <button id="openPlusBottom" type="button"><span class="bi">☰</span><span>Plus</span></button>
     </div>
   </nav>
@@ -270,7 +270,7 @@
       $("plusPanel")?.addEventListener("click", e => { if(e.target === $("plusPanel")) closePlus(); });
       document.addEventListener("keydown", e => { if(e.key === "Escape") closePlus(); });
 
-      const text = "Bienvenue dans Mon Commerce. Le menu sert à agir vite. Encaisser pour vendre. Parler pour dire une vente. Stock pour régler les prix et articles. PAY reste le module argent. Le commerçant vérifie et valide toujours.";
+      const text = "Bienvenue dans Mon Commerce. Le menu sert à agir vite. Encaisser pour vendre. Parler pour dire une vente. Stock pour régler les prix et articles. Mon argent ouvre le module PAY central. Le commerçant vérifie et valide toujours.";
       let speaking = false;
       function speak(){
         if(!("speechSynthesis" in window)) return;
