@@ -3,13 +3,11 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-
-  <title>MON COMMERCE — Menu pro</title>
-
+  <title>MON COMMERCE — Caisse tactile LINEA TVA</title>
   <meta name="theme-color" content="#1e7a46"/>
-  <meta name="description" content="MON COMMERCE PRO — menu compact terrain : encaisser, parler une vente, stock, fiche, QR, PAY et session."/>
+  <meta name="description" content="MON COMMERCE POS V2 — caisse tactile linge de maison en ouverture, menu secondaire caché."/>
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet"/>
-  <meta name="digiy-build" content="pos-menu-compact-plus-20260612"/>
+  <meta name="digiy-build" content="pos-v2-caisse-tactile-first-admin-linea-tva-20260613"/>
 
   <script>
     window.DIGIY_SUPABASE_URL = "https://wesqmwjjtsefyjnluosj.supabase.co";
@@ -17,14 +15,7 @@
     window.DIGIY_SUPABASE_ANON = window.DIGIY_SUPABASE_ANON_KEY;
     window.DIGIY_MODULE = "POS";
     window.DIGIY_ABOS_MODULE = "POS";
-    window.DIGIY_LOGIN_URL = "./pin.html";
   </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./guard.js?v=pos-guard-20260531"></script>
-  <script src="./assets/js/digiy-module-bridge.js?v=pos-clean-one-page-one-topic-20260521"></script>
-  <script src="./assets/js/digiy-pos-memory.js?v=pos-clean-one-page-one-topic-20260521"></script>
-  <script src="./assets/js/action-digiy-receiver.js?v=20260526-v2"></script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -32,260 +23,572 @@
 
   <style>
     :root{
-      --bg:#1e7a46;--bg2:#155a34;--bg3:#0e4226;
-      --bar:rgba(8,50,24,.96);
-      --gold:#c4973f;--gold2:#fff0a8;--green:#22c55e;--blue:#8b8cff;
-      --line:rgba(255,255,255,.18);--text:#f0fff5;--muted:rgba(240,255,245,.78);
-      --shadow:0 16px 40px rgba(0,0,0,.22);--r:18px;--max:920px;--hdrH:52px;--barH:78px;
+      --bg:#1e7a46;--bg2:#155a34;--bg3:#0e4226;--ink:#f0fff5;--muted:rgba(240,255,245,.76);
+      --bar:rgba(7,42,20,.97);--panel:rgba(255,255,255,.08);--panel2:rgba(255,255,255,.12);
+      --line:rgba(255,255,255,.15);--gold:#c4973f;--gold2:#fff0a8;--green:#22c55e;--red:#ef4444;
+      --shadow:0 18px 46px rgba(0,0,0,.24);--r:18px;--headerH:58px;--payH:96px;
     }
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+    html,body{margin:0;width:100%;min-height:100%;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
     body{
-      margin:0;min-height:100dvh;color:var(--text);
-      font-family:Outfit,system-ui,-apple-system,"Segoe UI",sans-serif;
-      font-size:18px;font-weight:950;
+      min-height:100dvh;color:var(--ink);font-family:Outfit,system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:950;
       background:
-        radial-gradient(600px 390px at 16% 0%,rgba(74,222,128,.18),transparent 58%),
-        radial-gradient(420px 280px at 92% 8%,rgba(196,151,63,.15),transparent 52%),
-        linear-gradient(180deg,var(--bg) 0%,var(--bg2) 60%,var(--bg3) 100%);
-      padding:calc(var(--hdrH) + 12px) 12px calc(var(--barH) + env(safe-area-inset-bottom,0px) + 14px);
+        radial-gradient(620px 360px at 12% -4%,rgba(74,222,128,.20),transparent 58%),
+        radial-gradient(520px 300px at 100% 0%,rgba(196,151,63,.20),transparent 52%),
+        linear-gradient(180deg,var(--bg) 0%,var(--bg2) 58%,var(--bg3) 100%);
     }
-    a{color:inherit;text-decoration:none}
-    button{font:inherit;color:inherit;cursor:pointer}
-    .topHeader{
-      position:fixed;top:0;left:0;right:0;height:var(--hdrH);z-index:100;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;
-      background:var(--bar);border-bottom:1px solid rgba(196,151,63,.26);
-      backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-    }
-    .hdrBack{color:rgba(240,255,245,.72);font-size:14px;font-weight:1000;white-space:nowrap}
-    .hdrTitle{font-size:12px;font-weight:1000;letter-spacing:.16em;text-transform:uppercase;color:var(--gold2);white-space:nowrap}
-    .hdrPill{
-      min-height:32px;display:inline-flex;align-items:center;justify-content:center;padding:6px 10px;border-radius:999px;
-      border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--muted);font-size:12px;font-weight:1000;white-space:nowrap;
-    }
-    .hdrPill.ok{color:#bbf7d0;border-color:rgba(34,197,94,.38);background:rgba(34,197,94,.12)}
-    .hdrPill.warn{color:#fde68a;border-color:rgba(245,158,11,.38);background:rgba(245,158,11,.12)}
+    a{color:inherit;text-decoration:none}button,input,select{font:inherit}button{cursor:pointer;color:inherit}input,select{color:#052215}
 
-    .wrap{width:min(var(--max),100%);margin:0 auto;display:grid;gap:12px}
-    .head{display:grid;gap:5px;padding:0 2px}
-    .eyebrow{color:var(--gold2);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:1000}
-    h1{margin:0;font-size:clamp(30px,7.5vw,48px);font-weight:1000;line-height:.94;letter-spacing:-.05em}
-    .sub{color:var(--muted);font-size:15px;font-weight:1000;line-height:1.28;max-width:760px}
+    .top{
+      height:var(--headerH);position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:8px 12px;background:var(--bar);border-bottom:1px solid rgba(196,151,63,.25);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)
+    }
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}.logo{width:40px;height:40px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#22c55e,#fff0a8);color:#052215;font-size:22px;box-shadow:0 10px 24px rgba(0,0,0,.20)}
+    .title{min-width:0}.title b{display:block;font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.title span{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+    .topActions{display:flex;align-items:center;gap:8px}.pill{height:38px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.08);padding:0 11px;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:1000;color:var(--muted);white-space:nowrap}.pill.gold{color:#052215;background:linear-gradient(135deg,#fff0a8,#c4973f);border-color:rgba(255,240,168,.5)}
 
-    .quick{
-      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;
-      border:1px solid rgba(255,255,255,.14);border-radius:22px;
-      background:rgba(255,255,255,.07);padding:10px;box-shadow:var(--shadow);
+    .screen{
+      position:fixed;top:var(--headerH);bottom:var(--payH);left:0;right:0;z-index:1;
+      padding:10px 10px 8px;display:grid;grid-template-columns:1.18fr .82fr;gap:10px;overflow:hidden;
     }
-    .qbtn{
-      min-height:104px;border-radius:18px;border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.09);display:flex;flex-direction:column;justify-content:space-between;
-      padding:12px;text-align:left;-webkit-tap-highlight-color:transparent;
-    }
-    .qbtn.hot{border-color:rgba(34,197,94,.40);background:rgba(34,197,94,.15)}
-    .qbtn.gold{border-color:rgba(196,151,63,.42);background:rgba(196,151,63,.14)}
-    .qico{font-size:28px;line-height:1}
-    .qbtn b{display:block;font-size:20px;line-height:1.02;font-weight:1000;color:#fff;letter-spacing:-.03em}
-    .qbtn span{display:block;margin-top:4px;font-size:12px;line-height:1.22;color:var(--muted);font-weight:1000}
+    .left,.right{min-height:0;display:grid;gap:8px}.left{grid-template-rows:auto auto minmax(0,1fr)}.right{grid-template-rows:auto minmax(0,1fr) auto}
 
-    .group{display:grid;gap:8px}
-    .groupLabel{font-size:11px;font-weight:1000;letter-spacing:.14em;text-transform:uppercase;color:rgba(240,255,245,.55);padding:0 2px}
-    .tileGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
-    .tile{
-      min-height:116px;display:flex;flex-direction:column;justify-content:space-between;gap:9px;
-      padding:13px;border-radius:18px;border:1px solid rgba(255,255,255,.15);
-      background:rgba(255,255,255,.09);box-shadow:0 14px 32px rgba(0,0,0,.18);
-    }
-    .tileTop{display:flex;justify-content:space-between;align-items:flex-start;gap:7px}
-    .tileIcon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);font-size:23px}
-    .tileTag{min-height:24px;padding:4px 7px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);color:var(--gold2);font-size:9px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
-    .tile b{display:block;font-size:18px;font-weight:1000;line-height:1.05;letter-spacing:-.02em;color:#fff}
-    .tile span{display:block;margin-top:4px;color:var(--muted);font-size:12.5px;font-weight:1000;line-height:1.22}
-    .tile.pay{border-color:rgba(196,151,63,.48);background:linear-gradient(180deg,rgba(196,151,63,.18),rgba(255,255,255,.08))}
-    .tile.gold{border-color:rgba(196,151,63,.42);background:rgba(196,151,63,.12)}
-    .tile.blue{border-color:rgba(139,140,255,.32);background:rgba(139,140,255,.12)}
+    .heroLine{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(196,151,63,.28);background:rgba(255,255,255,.08);border-radius:20px;padding:9px 10px;box-shadow:var(--shadow)}
+    .heroText{min-width:0}.eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold2);font-weight:1000}.h1{font-size:clamp(23px,4.5vw,38px);line-height:.94;letter-spacing:-.045em;font-weight:1000;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.heroText p{margin:3px 0 0;color:var(--muted);font-size:12px;line-height:1.18;font-weight:1000}.miniTotal{text-align:right;min-width:120px}.miniTotal span{display:block;font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}.miniTotal b{font-size:25px;letter-spacing:-.04em;color:#fff}
 
-    .bottomBar{
-      position:fixed;left:0;right:0;bottom:0;height:var(--barH);z-index:100;
-      padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));
-      background:rgba(6,38,18,.97);border-top:1px solid rgba(196,151,63,.18);backdrop-filter:blur(18px);
-    }
-    .bottomInner{width:min(100%,760px);height:100%;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-    .bottomInner a,.bottomInner button{
-      min-height:58px;border-radius:16px;display:grid;place-items:center;align-content:center;gap:3px;
-      color:rgba(240,255,245,.62);font-size:11px;font-weight:1000;text-align:center;border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.04);padding:0;
-    }
-    .bottomInner a.active{color:#052215;background:linear-gradient(135deg,#22c55e,#fff0a8);border-color:rgba(34,197,94,.32)}
-    .bi{font-size:19px;line-height:1}
+    .tools{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.toolBtn{min-height:46px;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.09);color:#fff;font-size:13px;font-weight:1000;display:flex;align-items:center;justify-content:center;gap:7px}.toolBtn.hot{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.42)}.toolBtn.warn{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.35)}
 
-    .overlay{
-      position:fixed;inset:0;z-index:220;display:none;background:rgba(4,22,12,.98);padding:18px 14px calc(24px + env(safe-area-inset-bottom,0px));overflow:auto;
-    }
-    .overlay.open{display:block}
-    .ovBox{width:min(760px,100%);margin:0 auto;display:grid;gap:12px}
-    .ovTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .ovTitle{font-size:34px;font-weight:1000;letter-spacing:-.05em;color:#fff;line-height:.95}
-    .closeBtn{width:44px;height:44px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);font-weight:1000}
-    .ovGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-    .ovLink{min-height:72px;border-radius:18px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.07);padding:13px;display:flex;align-items:center;gap:12px}
-    .ovLink .oico{font-size:24px}
-    .ovLink b{font-size:17px;font-weight:1000}
-    .ovLink span{font-size:12px;color:var(--muted);font-weight:1000;display:block;margin-top:2px}
+    .productsBox{min-height:0;border:1px solid rgba(255,255,255,.14);border-radius:20px;background:rgba(255,255,255,.07);padding:8px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:8px;box-shadow:var(--shadow)}
+    .tabs{display:flex;gap:7px;overflow:auto;padding-bottom:1px}.tab{flex:0 0 auto;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);border-radius:999px;color:var(--muted);padding:9px 11px;font-size:12px;font-weight:1000;white-space:nowrap}.tab.active{color:#052215;background:linear-gradient(135deg,#22c55e,#fff0a8);border-color:rgba(34,197,94,.35)}
+    .productGrid{min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(86px,1fr);gap:7px;padding-right:2px;overscroll-behavior:contain}.prod{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.10);border-radius:17px;padding:10px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:8px;-webkit-tap-highlight-color:transparent}.prod:active{transform:scale(.985)}.prod .ico{font-size:25px;line-height:1}.prod b{font-size:15px;line-height:1.03;color:#fff;letter-spacing:-.02em}.prod span{font-size:12px;color:var(--gold2);font-weight:1000}.prod small{display:block;font-size:10px;color:rgba(240,255,245,.62);font-weight:1000;margin-top:2px}.prod.low{border-color:rgba(245,158,11,.40);background:rgba(245,158,11,.10)}.prod.out{opacity:.45;filter:grayscale(.35)}
 
-    @media(max-width:640px){
-      .quick{grid-template-columns:1fr 1fr 1fr;gap:7px;padding:8px}
-      .qbtn{min-height:98px;padding:10px}
-      .qico{font-size:24px}
-      .qbtn b{font-size:17px}
-      .qbtn span{font-size:11px}
-      .tileGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-      .tile{min-height:104px;padding:10px}
-      .tileIcon{width:36px;height:36px;font-size:20px}
-      .tileTag{font-size:8px;padding:3px 6px}
-      .tile b{font-size:15.5px}
-      .tile span{font-size:11px}
-      h1{font-size:32px}
-      .sub{font-size:14px}
-      .ovGrid{grid-template-columns:1fr}
+    .ticketHead{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);border-radius:20px;padding:10px;display:grid;gap:7px;box-shadow:var(--shadow)}.ticketHeadTop{display:flex;align-items:center;justify-content:space-between;gap:10px}.ticketHead b{font-size:18px;color:#fff}.badge{border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);padding:6px 8px;font-size:11px;color:var(--gold2);font-weight:1000;white-space:nowrap}.customerRow{display:grid;grid-template-columns:1fr 1fr;gap:7px}.smallInput{width:100%;height:40px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.92);padding:0 10px;font-size:13px;font-weight:900;outline:none}
+    .cart{min-height:0;overflow:auto;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);border-radius:20px;padding:8px;display:grid;align-content:start;gap:7px;overscroll-behavior:contain}.empty{height:100%;min-height:140px;border:1px dashed rgba(255,255,255,.18);border-radius:16px;display:grid;place-items:center;text-align:center;color:rgba(240,255,245,.64);font-size:14px;line-height:1.25;padding:18px}.cartItem{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.09);border-radius:16px;padding:9px;display:grid;gap:7px}.cartTop{display:flex;justify-content:space-between;gap:8px}.cartName{font-size:14px;color:#fff;font-weight:1000;line-height:1.05}.cartPrice{font-size:12px;color:var(--gold2);white-space:nowrap}.qtyRow{display:grid;grid-template-columns:42px 1fr 42px 42px;gap:6px;align-items:center}.qtyBtn{height:38px;border-radius:13px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.10);font-size:18px;font-weight:1000}.qtyMid{text-align:center;font-size:13px;color:var(--muted)}.remove{height:38px;border-radius:13px;border:1px solid rgba(239,68,68,.34);background:rgba(239,68,68,.13);font-size:15px}
+    .rightFoot{display:grid;gap:7px}.payMethods{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.payMethod{height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:var(--muted);font-size:11px;font-weight:1000}.payMethod.active{color:#052215;background:linear-gradient(135deg,#22c55e,#fff0a8);border-color:rgba(34,197,94,.35)}
+    .quickAmounts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.amountBtn{height:38px;border-radius:13px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#fff;font-size:12px;font-weight:1000}
+
+    .payBar{position:fixed;left:0;right:0;bottom:0;height:var(--payH);z-index:110;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:rgba(5,31,14,.985);border-top:1px solid rgba(196,151,63,.22);display:grid;grid-template-columns:1fr 1.15fr;gap:8px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+    .totalBox{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);border-radius:18px;padding:9px 12px;display:flex;flex-direction:column;justify-content:center}.totalBox span{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}.totalBox b{font-size:clamp(24px,6vw,38px);line-height:1;color:#fff;letter-spacing:-.05em}.totalBox small{display:block;margin-top:3px;color:rgba(240,255,245,.76);font-size:10.5px;font-weight:1000;line-height:1.1}.validate{border:0;border-radius:18px;background:linear-gradient(135deg,#22c55e,#fff0a8);color:#052215;font-size:22px;font-weight:1000;letter-spacing:-.03em;box-shadow:0 14px 30px rgba(0,0,0,.25)}.validate:disabled{opacity:.45;filter:grayscale(.5)}
+
+    .overlay{position:fixed;inset:0;z-index:250;display:none;background:rgba(4,22,12,.98);padding:16px 12px calc(18px + env(safe-area-inset-bottom,0px));overflow:auto}.overlay.open{display:block}.ovBox{width:min(860px,100%);margin:0 auto;display:grid;gap:12px}.ovTop{display:flex;align-items:center;justify-content:space-between;gap:12px}.ovTitle{font-size:34px;font-weight:1000;letter-spacing:-.05em;line-height:.95;color:#fff}.close{width:46px;height:46px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);font-size:24px;color:#fff}.menuGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.menuCard{min-height:116px;border-radius:20px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);padding:13px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;text-align:left;color:#fff}.menuCard.gold{border-color:rgba(196,151,63,.45);background:rgba(196,151,63,.14)}.menuCard .ico{font-size:28px}.menuCard b{font-size:18px}.menuCard span{display:block;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.22}.panel{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.08);border-radius:20px;padding:12px;display:grid;gap:10px}.panelTitle{font-size:20px;color:#fff}.formGrid{display:grid;grid-template-columns:1.2fr .7fr .6fr .6fr;gap:8px}.input{height:46px;border-radius:15px;border:0;background:rgba(255,255,255,.94);padding:0 12px;font-size:15px;font-weight:900;outline:none}.actionBtn{height:46px;border-radius:15px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.10);color:#fff;font-size:14px;font-weight:1000}.actionBtn.hot{background:linear-gradient(135deg,#22c55e,#fff0a8);color:#052215;border:0}.actionBtn.gold{background:rgba(196,151,63,.16);border-color:rgba(196,151,63,.38)}.list{display:grid;gap:7px;max-height:300px;overflow:auto}.row{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);border-radius:15px;padding:9px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.row b{font-size:14px}.row span{font-size:12px;color:var(--muted)}.toast{position:fixed;left:50%;bottom:calc(var(--payH) + 16px);transform:translateX(-50%) translateY(20px);z-index:400;opacity:0;pointer-events:none;background:#052215;border:1px solid rgba(34,197,94,.35);color:#d1fae5;border-radius:999px;padding:12px 16px;font-size:13px;font-weight:1000;box-shadow:0 16px 40px rgba(0,0,0,.35);transition:.18s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    @media(max-width:760px){
+      :root{--headerH:56px;--payH:92px}.top{padding:7px 9px}.pill{height:38px;padding:0 9px}.pill .hideMob{display:none}.screen{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto;gap:8px;padding:8px 8px 6px}.left{grid-template-rows:auto auto minmax(0,1fr)}.right{grid-template-rows:auto minmax(0,1fr);min-height:0}.heroLine{padding:8px}.h1{font-size:25px}.heroText p{display:none}.miniTotal{display:none}.tools{grid-template-columns:repeat(3,1fr)}.toolBtn{min-height:42px;font-size:12px}.productsBox{border-radius:18px;padding:7px}.tab{font-size:11px;padding:8px 10px}.productGrid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:76px;gap:6px}.prod{padding:8px;border-radius:15px}.prod .ico{display:none}.prod b{font-size:14px}.prod span{font-size:12px}.ticketHead{display:none}.cart{max-height:132px;border-radius:18px}.empty{min-height:88px;font-size:12px;padding:12px}.cartItem{padding:7px}.qtyRow{grid-template-columns:36px 1fr 36px 36px}.qtyBtn,.remove{height:34px}.rightFoot{display:none}.payBar{grid-template-columns:.82fr 1.18fr;padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px))}.validate{font-size:19px}.totalBox{padding:8px 10px}.totalBox b{font-size:26px}.menuGrid{grid-template-columns:1fr 1fr}.formGrid{grid-template-columns:1fr 1fr}.overlay{padding:14px 10px calc(18px + env(safe-area-inset-bottom,0px))}.ovTitle{font-size:30px}.menuCard{min-height:104px;padding:12px}.menuCard b{font-size:16px}.menuCard span{font-size:11px}
     }
-    @media(max-width:380px){
-      .qbtn b{font-size:15.5px}
-      .tile b{font-size:14.5px}
-      .tile span{font-size:10.5px}
-    }
+    @media(max-width:390px){.brand .logo{width:36px;height:36px}.title b{font-size:11px}.title span{font-size:10px}.productGrid{grid-auto-rows:72px}.prod b{font-size:13px}.prod span{font-size:11px}.toolBtn{font-size:11px}.payBar{height:88px}.totalBox b{font-size:23px}.validate{font-size:17px}.cart{max-height:112px}.menuGrid{grid-template-columns:1fr}}
+    @media(min-width:980px){.screen{width:min(1120px,100%);left:50%;transform:translateX(-50%)}.payBar{width:min(1120px,100%);left:50%;transform:translateX(-50%);border-left:1px solid rgba(196,151,63,.18);border-right:1px solid rgba(196,151,63,.18);border-top-left-radius:22px;border-top-right-radius:22px}.top{padding-left:calc((100% - min(1120px,100%))/2 + 12px);padding-right:calc((100% - min(1120px,100%))/2 + 12px)}}
   </style>
 </head>
-
 <body>
-  <header class="topHeader">
-    <a class="hdrBack" href="./caisse.html">← Caisse</a>
-    <div class="hdrTitle">MON COMMERCE</div>
-    <div class="hdrPill warn" id="sessionPill">session…</div>
+  <header class="top">
+    <div class="brand">
+      <div class="logo">🧺</div>
+      <div class="title">
+        <b id="bizTitle">LINEA</b>
+        <span id="bizSub">Linge de maison · caisse tactile</span>
+      </div>
+    </div>
+    <div class="topActions">
+      <button class="pill" id="clearCart" type="button">🧹 <span class="hideMob">Effacer</span></button>
+      <button class="pill gold" id="openMenu" type="button">☰ Menu</button>
+    </div>
   </header>
 
-  <main class="wrap">
-    <section class="head">
-      <div class="eyebrow">🛒 MON COMMERCE</div>
-      <h1>Choisis ton geste.</h1>
-      <div class="sub" id="hubSub">Le commerçant touche vite : encaisser, parler une vente, gérer le stock ou ouvrir Mon argent.</div>
-    </section>
+  <main class="screen" aria-label="Caisse tactile linge de maison">
+    <section class="left" aria-label="Produits tactiles">
+      <div class="heroLine">
+        <div class="heroText">
+          <div class="eyebrow">MON COMMERCE · POS V2</div>
+          <div class="h1">Caisse tactile.</div>
+          <p id="bizLine">LINEA · Linge de maison · téléphone et adresse à renseigner dans Menu.</p>
+        </div>
+        <div class="miniTotal"><span>Total ticket</span><b id="miniTotal">0</b></div>
+      </div>
 
-    <section class="quick" aria-label="Départ rapide commerce">
-      <a class="qbtn hot" href="./caisse.html">
-        <span class="qico">💰</span>
-        <div><b>Encaisser</b><span>Vendre · total · confirmer</span></div>
-      </a>
-      <a class="qbtn gold" href="./action.html?mode=vente">
-        <span class="qico">🎙️</span>
-        <div><b>Parler</b><span>Dire vente · produit · prix</span></div>
-      </a>
-      <a class="qbtn" href="./admin.html#articleList">
-        <span class="qico">📦</span>
-        <div><b>Stock</b><span>Prix · articles · catégories</span></div>
-      </a>
-    </section>
+      <div class="tools" aria-label="Actions rapides">
+        <button class="toolBtn hot" id="addFree" type="button">➕ Montant</button>
+        <button class="toolBtn" id="addCustomProduct" type="button">🧺 Produit</button>
+        <button class="toolBtn warn" id="cancelLast" type="button">↩️ Annuler</button>
+      </div>
 
-    <section class="group" aria-label="Portes utiles commerce">
-      <div class="groupLabel">Portes utiles</div>
-      <div class="tileGrid">
-        <a class="tile" href="./profile.html"><div class="tileTop"><div class="tileIcon">🏪</div><div class="tileTag">Fiche</div></div><div><b>Fiche</b><span>Infos visibles.</span></div></a>
-        <a class="tile" href="./qr.html"><div class="tileTop"><div class="tileIcon">🔳</div><div class="tileTag">QR</div></div><div><b>QR</b><span>Partager la boutique.</span></div></a>
-        <a class="tile pay" href="https://pay.digiylyfe.com/"><div class="tileTop"><div class="tileIcon">💳</div><div class="tileTag">PAY</div></div><div><b>Mon argent</b><span>Ouvre le module PAY.</span></div></a>
-        <a class="tile gold" href="https://mon-commerce.digiylyfe.com/lexique-caisse.html?v=lexique-caisse-v2-mobile-20260607"><div class="tileTop"><div class="tileIcon">🇸🇳</div><div class="tileTag">Wolof</div></div><div><b>Wolof</b><span>Caisse terrain.</span></div></a>
-        <a class="tile blue" href="https://mon-commerce.digiylyfe.com/"><div class="tileTop"><div class="tileIcon">🌍</div><div class="tileTag">Public</div></div><div><b>Client</b><span>Façade boutique.</span></div></a>
-        <button class="tile" id="openPlus" type="button"><div class="tileTop"><div class="tileIcon">☰</div><div class="tileTag">Plus</div></div><div><b>Plus</b><span>Session · PIN · aide.</span></div></button>
+      <div class="productsBox">
+        <div class="tabs" id="tabs" aria-label="Catégories"></div>
+        <div class="productGrid" id="productGrid" aria-label="Boutons produits"></div>
       </div>
     </section>
+
+    <aside class="right" aria-label="Ticket de vente">
+      <div class="ticketHead">
+        <div class="ticketHeadTop"><b>Ticket en cours</b><span class="badge" id="itemCount">0 article</span></div>
+        <div class="customerRow">
+          <input class="smallInput" id="customerName" placeholder="Client (si dette)" autocomplete="off"/>
+          <input class="smallInput" id="note" placeholder="Note" autocomplete="off"/>
+        </div>
+      </div>
+
+      <div class="cart" id="cart"></div>
+
+      <div class="rightFoot">
+        <div class="payMethods" id="payMethods" aria-label="Mode paiement"></div>
+        <div class="quickAmounts" aria-label="Montants rapides">
+          <button class="amountBtn" data-amount="100">+100</button>
+          <button class="amountBtn" data-amount="500">+500</button>
+          <button class="amountBtn" data-amount="1000">+1 000</button>
+          <button class="amountBtn" data-amount="5000">+5 000</button>
+        </div>
+      </div>
+    </aside>
   </main>
 
-  <nav class="bottomBar" aria-label="Navigation rapide MON COMMERCE">
-    <div class="bottomInner">
-      <a class="active" href="./hub.html"><span class="bi">🧭</span><span>Menu</span></a>
-      <a href="./caisse.html"><span class="bi">💰</span><span>Caisse</span></a>
-      <a href="./action.html?mode=vente"><span class="bi">🎙️</span><span>Parler</span></a>
-      <a href="./admin.html#articleList"><span class="bi">📦</span><span>Stock</span></a>
-      <a href="https://pay.digiylyfe.com/"><span class="bi">💳</span><span>Argent</span></a>
-      <button id="openPlusBottom" type="button"><span class="bi">☰</span><span>Plus</span></button>
-    </div>
-  </nav>
+  <footer class="payBar">
+    <div class="totalBox"><span id="totalLabel">Total à encaisser</span><b id="total">0 FCFA</b><small id="taxLine">Sans TVA</small></div>
+    <button class="validate" id="validateSale" type="button" disabled>Valider vente</button>
+  </footer>
 
-  <section class="overlay" id="plusPanel" aria-label="Plus MON COMMERCE">
+  <section class="overlay" id="menuPanel" aria-label="Menu POS V2">
     <div class="ovBox">
       <div class="ovTop">
         <div>
           <div class="eyebrow">MON COMMERCE</div>
-          <div class="ovTitle">Plus.</div>
+          <div class="ovTitle">Menu.</div>
         </div>
-        <button class="closeBtn" id="closePlus" type="button" aria-label="Fermer">×</button>
+        <button class="close" id="closeMenu" type="button" aria-label="Fermer">×</button>
       </div>
 
-      <div class="ovGrid">
-        <a class="ovLink" href="./confirme-pro.html"><span class="oico">✅</span><div><b>Confirmer</b><span>Valider l’activité.</span></div></a>
-        <a class="ovLink" href="./session.html"><span class="oico">🛡️</span><div><b>Session</b><span>État d’accès.</span></div></a>
-        <a class="ovLink" href="./pin.html"><span class="oico">🔐</span><div><b>PIN</b><span>Ouvrir l’accès.</span></div></a>
-        <a class="ovLink" href="https://digiy-hub.digiylyfe.com/"><span class="oico">🧭</span><div><b>HUB général</b><span>Toutes les portes.</span></div></a>
-        <a class="ovLink" href="https://digiylyfe.com/"><span class="oico">🦅</span><div><b>Site DIGIY</b><span>Maison publique.</span></div></a>
-        <button class="ovLink" id="listenPlus" type="button"><span class="oico">🎧</span><div><b>Comprendre</b><span>Lecture courte.</span></div></button>
+      <div class="menuGrid">
+        <button class="menuCard gold" data-panel="admin" type="button"><span class="ico">🏪</span><div><b>Admin boutique</b><span>Enseigne, adresse, téléphone, TVA.</span></div></button>
+        <button class="menuCard" data-panel="sales" type="button"><span class="ico">💰</span><div><b>Caisse du jour</b><span>Ventes, entrées, sorties, dettes.</span></div></button>
+        <button class="menuCard" data-panel="products" type="button"><span class="ico">📦</span><div><b>Produits</b><span>Ajouter, prix, stock simple.</span></div></button>
+        <button class="menuCard" data-panel="pay" type="button"><span class="ico">💳</span><div><b>PAY</b><span>Température et trace argent.</span></div></button>
+        <button class="menuCard" data-panel="qr" type="button"><span class="ico">🔳</span><div><b>Fiche / QR</b><span>Lien public à partager.</span></div></button>
+        <button class="menuCard" data-panel="settings" type="button"><span class="ico">🛡️</span><div><b>Session</b><span>Exporter, importer, fermer.</span></div></button>
+        <button class="menuCard" id="listen" type="button"><span class="ico">🎧</span><div><b>Écouter</b><span>Lecture courte terrain.</span></div></button>
+      </div>
+
+      <div class="panel" id="panelAdmin" hidden>
+        <div class="panelTitle">🏪 Admin boutique</div>
+        <div class="formGrid">
+          <input class="input" id="bizName" placeholder="Enseigne / boutique" autocomplete="organization"/>
+          <input class="input" id="bizActivity" placeholder="Activité" autocomplete="off"/>
+          <input class="input" id="bizOwner" placeholder="Nom responsable" autocomplete="name"/>
+          <input class="input" id="bizPhone" placeholder="Téléphone" inputmode="tel" autocomplete="tel"/>
+          <input class="input" id="bizAddress" placeholder="Adresse / quartier" autocomplete="street-address"/>
+          <input class="input" id="bizCity" placeholder="Ville / zone" autocomplete="address-level2"/>
+          <select class="input" id="bizTaxMode" aria-label="TVA ou sans TVA">
+            <option value="none">Sans TVA</option>
+            <option value="vat">Avec TVA</option>
+          </select>
+          <input class="input" id="bizTaxRate" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="Taux TVA % (ex : 18)"/>
+          <input class="input" id="bizPublic" placeholder="Lien fiche publique" inputmode="url" autocomplete="url"/>
+          <button class="actionBtn hot" id="saveBusiness" type="button">Enregistrer admin</button>
+        </div>
+        <div class="list" id="businessPreview"></div>
+      </div>
+
+      <div class="panel" id="panelSales" hidden>
+        <div class="panelTitle">💰 Caisse du jour</div>
+        <div class="formGrid">
+          <input class="input" id="cashLabel" placeholder="Libellé sortie/entrée"/>
+          <input class="input" id="cashAmount" type="number" min="0" inputmode="numeric" placeholder="Montant"/>
+          <button class="actionBtn hot" id="addIncome" type="button">Entrée</button>
+          <button class="actionBtn" id="addExpense" type="button">Sortie</button>
+        </div>
+        <div class="list" id="salesList"></div>
+      </div>
+
+      <div class="panel" id="panelProducts" hidden>
+        <div class="panelTitle">📦 Produits</div>
+        <div class="formGrid">
+          <input class="input" id="newName" placeholder="Nom produit"/>
+          <input class="input" id="newPrice" type="number" min="0" inputmode="numeric" placeholder="Prix"/>
+          <input class="input" id="newStock" type="number" min="0" inputmode="numeric" placeholder="Stock"/>
+          <button class="actionBtn hot" id="saveProduct" type="button">Ajouter</button>
+        </div>
+        <div class="list" id="productList"></div>
+      </div>
+
+      <div class="panel" id="panelPay" hidden>
+        <div class="panelTitle">💳 PAY · température</div>
+        <div class="list" id="paySummary"></div>
+        <button class="actionBtn gold" id="openPayExternal" type="button">Ouvrir PAY externe</button>
+      </div>
+
+      <div class="panel" id="panelQr" hidden>
+        <div class="panelTitle">🔳 Fiche / QR</div>
+        <div class="list" id="qrBusinessPreview"></div>
+        <input class="input" id="publicLink" value="https://mon-commerce.digiylyfe.com/"/>
+        <div class="formGrid" style="grid-template-columns:1fr 1fr 1fr 1fr">
+          <button class="actionBtn hot" id="copyLink" type="button">Copier lien</button>
+          <button class="actionBtn" id="openPublic" type="button">Ouvrir fiche</button>
+          <button class="actionBtn" id="openOldQr" type="button">QR secours</button>
+          <button class="actionBtn" id="shareLink" type="button">Partager</button>
+        </div>
+      </div>
+
+      <div class="panel" id="panelSettings" hidden>
+        <div class="panelTitle">🛡️ Session / sauvegarde</div>
+        <div class="formGrid" style="grid-template-columns:1fr 1fr 1fr 1fr">
+          <button class="actionBtn hot" id="exportData" type="button">Exporter</button>
+          <button class="actionBtn" id="importDataBtn" type="button">Importer</button>
+          <button class="actionBtn" id="clearAll" type="button">Réinitialiser</button>
+          <button class="actionBtn" id="closeSession" type="button">Fermer session</button>
+        </div>
+        <input id="importFile" type="file" accept="application/json" hidden/>
+        <div class="list">
+          <div class="row"><div><b>Architecture V2</b><br><span>La caisse tactile est l’ouverture. Les autres fonctions restent ici, dans Menu.</span></div><span>OK</span></div>
+          <div class="row"><div><b>Secours anciens</b><br><span>Anciennes pages conservées seulement en dépannage manuel.</span></div><span>discret</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px">
+            <a class="actionBtn" href="./caisse.html" style="display:grid;place-items:center">Ancienne caisse</a>
+            <a class="actionBtn" href="./admin.html#articleList" style="display:grid;place-items:center">Ancien stock</a>
+            <a class="actionBtn" href="./profile.html" style="display:grid;place-items:center">Ancienne fiche</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
+  <div class="toast" id="toast">OK</div>
+
   <script>
     (() => {
       "use strict";
-
       const $ = id => document.getElementById(id);
+      const fmt = n => new Intl.NumberFormat("fr-FR").format(Math.max(0, Number(n)||0));
+      const money = n => `${fmt(n)} FCFA`;
+      const todayKey = () => new Date().toISOString().slice(0,10);
+      const uid = () => "digiy_" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+      const LS_PRODUCTS = "digiy_pos_v2_linge_products";
+      const LS_SALES = "digiy_pos_v2_linge_sales";
+      const LS_MOVES = "digiy_pos_v2_linge_moves";
+      const LS_BUSINESS = "digiy_pos_v2_linge_business";
 
-      async function waitGuard(){
-        try{
-          const guard = window.DIGIY_GUARD;
-          if(!guard) return {};
-          if(typeof guard.ready === "function"){
-            const out = guard.ready({ redirect:false, preserve_validation:true });
-            if(out && typeof out.then === "function") await out;
-          }else if(guard.ready && typeof guard.ready.then === "function"){
-            await guard.ready;
-          }
-          if(typeof guard.getSession === "function") return guard.getSession() || guard.state || {};
-          return guard.state || {};
-        }catch(e){ console.warn("[POS MENU] guard", e); return {}; }
+      const defaultBusiness = {
+        name:"LINEA",
+        activity:"Linge de maison",
+        owner:"",
+        phone:"",
+        address:"",
+        city:"",
+        taxMode:"none",
+        taxRate:18,
+        publicLink:"https://mon-commerce.digiylyfe.com/"
+      };
+
+      const seedProducts = [
+        {id:"p_drap_2p", name:"Drap 2 places", price:12000, stock:18, cat:"Draps", ico:"🛏️"},
+        {id:"p_drap_1p", name:"Drap 1 place", price:7500, stock:22, cat:"Draps", ico:"🛏️"},
+        {id:"p_drap_housse", name:"Drap-housse", price:9000, stock:16, cat:"Draps", ico:"🧺"},
+        {id:"p_parure", name:"Parure complète", price:25000, stock:8, cat:"Parures", ico:"✨"},
+        {id:"p_housse_couette", name:"Housse couette", price:18000, stock:10, cat:"Parures", ico:"☁️"},
+        {id:"p_taie", name:"Taie oreiller", price:2500, stock:40, cat:"Parures", ico:"⬜"},
+        {id:"p_serviette_bain", name:"Serviette bain", price:6500, stock:20, cat:"Serviettes", ico:"🧼"},
+        {id:"p_serviette_main", name:"Serviette main", price:2500, stock:34, cat:"Serviettes", ico:"🧽"},
+        {id:"p_peignoir", name:"Peignoir", price:15000, stock:7, cat:"Serviettes", ico:"🧥"},
+        {id:"p_couette", name:"Couette", price:30000, stock:6, cat:"Chambre", ico:"☁️"},
+        {id:"p_oreiller", name:"Oreiller", price:8000, stock:14, cat:"Chambre", ico:"🛌"},
+        {id:"p_protege_matelas", name:"Protège-matelas", price:11000, stock:11, cat:"Chambre", ico:"🛡️"},
+        {id:"p_nappe", name:"Nappe table", price:7000, stock:12, cat:"Table", ico:"🍽️"},
+        {id:"p_torchon", name:"Torchon", price:1000, stock:50, cat:"Table", ico:"◻️"},
+        {id:"p_lot_serviettes", name:"Lot serviettes", price:18000, stock:9, cat:"Lots", ico:"📦"},
+        {id:"p_lot_taies", name:"Lot taies x4", price:9000, stock:15, cat:"Lots", ico:"📦"}
+      ];
+      const payModes = ["Espèces","Wave","OM","Free","Dette"];
+      let products = load(LS_PRODUCTS, seedProducts);
+      let sales = load(LS_SALES, []);
+      let moves = load(LS_MOVES, []);
+      let business = {...defaultBusiness, ...load(LS_BUSINESS, {})};
+      let cart = [];
+      let activeCat = "Tout";
+      let payMode = "Espèces";
+
+      function load(key, fallback){
+        try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }catch(e){ return fallback; }
+      }
+      function save(){
+        localStorage.setItem(LS_PRODUCTS, JSON.stringify(products));
+        localStorage.setItem(LS_SALES, JSON.stringify(sales));
+        localStorage.setItem(LS_MOVES, JSON.stringify(moves));
+        localStorage.setItem(LS_BUSINESS, JSON.stringify(business));
+      }
+      function toast(msg){
+        const el = $("toast"); if(!el) return;
+        el.textContent = msg; el.classList.add("show");
+        clearTimeout(toast._t); toast._t = setTimeout(()=>el.classList.remove("show"), 1900);
+      }
+      function cats(){ return ["Tout", ...Array.from(new Set(products.map(p=>p.cat || "Autres")))]; }
+      function total(){ return cart.reduce((s,i)=>s + i.price*i.qty, 0); }
+      function isVatOn(){ return (business.taxMode || "none") === "vat"; }
+      function taxRate(){ return Math.max(0, Number(business.taxRate ?? 18) || 0); }
+      function taxInfo(amount){
+        const ttc = Math.max(0, Math.round(Number(amount)||0));
+        if(!isVatOn()) return {enabled:false, rate:0, ht:ttc, tax:0, ttc};
+        const rate = taxRate();
+        const ht = rate > 0 ? Math.round(ttc / (1 + rate/100)) : ttc;
+        return {enabled:true, rate, ht, tax:ttc - ht, ttc};
+      }
+      function taxLineText(amount){
+        const t = taxInfo(amount);
+        if(!t.enabled) return "Sans TVA · total simple";
+        return `HT ${money(t.ht)} · TVA ${String(t.rate).replace('.', ',')}% ${money(t.tax)} · TTC`;
+      }
+      function cartQty(){ return cart.reduce((s,i)=>s+i.qty,0); }
+      function productById(id){ return products.find(p=>p.id === id); }
+      function addToCart(product, qty=1){
+        if(!product) return;
+        if(Number(product.stock) <= 0){ toast("Stock épuisé"); return; }
+        const existing = cart.find(i=>i.id === product.id);
+        const currentQty = existing ? existing.qty : 0;
+        if(currentQty + qty > Number(product.stock || 0)){ toast("Stock insuffisant"); return; }
+        if(existing) existing.qty += qty;
+        else cart.push({id:product.id, name:product.name, price:Number(product.price)||0, qty, stockRef:true});
+        render();
+      }
+      function addFreeAmount(amount){
+        amount = Math.round(Number(amount)||0);
+        if(amount <= 0) return;
+        cart.push({id:uid(), name:"Montant libre", price:amount, qty:1, stockRef:false});
+        render();
+      }
+      function setQty(id, next){
+        const item = cart.find(i=>i.id===id); if(!item) return;
+        if(next <= 0){ cart = cart.filter(i=>i.id!==id); render(); return; }
+        if(item.stockRef){
+          const p = productById(id);
+          if(p && next > Number(p.stock||0)){ toast("Stock insuffisant"); return; }
+        }
+        item.qty = next; render();
+      }
+      function cancelLast(){ cart.pop(); render(); }
+      function clearCart(){ cart = []; render(); }
+
+      function validateSale(){
+        const sum = total();
+        if(sum <= 0 || cart.length === 0) return;
+        const sale = {
+          id:uid(), date:new Date().toISOString(), day:todayKey(), total:sum, payMode,
+          customer:($("customerName")?.value || "").trim(), note:($("note")?.value || "").trim(),
+          items:cart.map(i=>({...i}))
+        };
+        for(const item of cart){
+          if(item.stockRef){ const p = productById(item.id); if(p) p.stock = Math.max(0, Number(p.stock||0) - item.qty); }
+        }
+        sales.unshift(sale);
+        save(); clearCart();
+        if($("customerName")) $("customerName").value = "";
+        if($("note")) $("note").value = "";
+        toast(payMode === "Dette" ? "Dette enregistrée" : "Vente validée");
+        renderPanels();
       }
 
-      function updatePill(state){
-        const el = $("sessionPill");
-        if(!el) return;
-        const ok = !!(state && (state.access_ok || state.access || state.pin_session_ok));
-        el.textContent = ok ? (state.pin_session_ok ? "session ouverte" : "accès ouvert") : "accès à vérifier";
-        el.className = "hdrPill " + (ok ? "ok" : "warn");
+      function renderTabs(){
+        const el = $("tabs"); if(!el) return;
+        el.innerHTML = cats().map(cat => `<button class="tab ${cat===activeCat?'active':''}" data-cat="${escapeAttr(cat)}" type="button">${escapeHtml(cat)}</button>`).join("");
+        el.querySelectorAll(".tab").forEach(btn=>btn.addEventListener("click",()=>{ activeCat = btn.dataset.cat || "Tout"; renderProducts(); renderTabs(); }));
+      }
+      function renderProducts(){
+        const el = $("productGrid"); if(!el) return;
+        const list = products.filter(p => activeCat === "Tout" || (p.cat||"Autres") === activeCat);
+        el.innerHTML = list.map(p => {
+          const stock = Number(p.stock||0);
+          const cls = stock <= 0 ? "out" : stock <= 3 ? "low" : "";
+          return `<button class="prod ${cls}" data-id="${escapeAttr(p.id)}" type="button"><span class="ico">${escapeHtml(p.ico||'🧺')}</span><div><b>${escapeHtml(p.name)}</b><small>Stock ${fmt(stock)}</small></div><span>${money(p.price)}</span></button>`;
+        }).join("") || `<div class="empty">Aucun produit dans cette catégorie.</div>`;
+        el.querySelectorAll(".prod").forEach(btn=>btn.addEventListener("click",()=>addToCart(productById(btn.dataset.id))));
+      }
+      function renderCart(){
+        const el = $("cart"); if(!el) return;
+        if(cart.length === 0){ el.innerHTML = `<div class="empty">Touchez un produit linge de maison pour commencer le ticket.</div>`; }
+        else{
+          el.innerHTML = cart.map(i => `<div class="cartItem"><div class="cartTop"><div class="cartName">${escapeHtml(i.name)}</div><div class="cartPrice">${money(i.price*i.qty)}</div></div><div class="qtyRow"><button class="qtyBtn" data-minus="${escapeAttr(i.id)}" type="button">−</button><div class="qtyMid">${fmt(i.qty)} × ${money(i.price)}</div><button class="qtyBtn" data-plus="${escapeAttr(i.id)}" type="button">+</button><button class="remove" data-remove="${escapeAttr(i.id)}" type="button">×</button></div></div>`).join("");
+        }
+        el.querySelectorAll("[data-minus]").forEach(b=>b.addEventListener("click",()=>{ const item=cart.find(i=>i.id===b.dataset.minus); if(item) setQty(item.id,item.qty-1); }));
+        el.querySelectorAll("[data-plus]").forEach(b=>b.addEventListener("click",()=>{ const item=cart.find(i=>i.id===b.dataset.plus); if(item) setQty(item.id,item.qty+1); }));
+        el.querySelectorAll("[data-remove]").forEach(b=>b.addEventListener("click",()=>setQty(b.dataset.remove,0)));
+      }
+      function renderPayMethods(){
+        const el = $("payMethods"); if(!el) return;
+        el.innerHTML = payModes.map(m=>`<button class="payMethod ${m===payMode?'active':''}" data-pay="${escapeAttr(m)}" type="button">${escapeHtml(m)}</button>`).join("");
+        el.querySelectorAll(".payMethod").forEach(btn=>btn.addEventListener("click",()=>{ payMode = btn.dataset.pay || "Espèces"; renderPayMethods(); }));
+      }
+      function renderTotals(){
+        const sum = total();
+        if($("total")) $("total").textContent = money(sum);
+        if($("miniTotal")) $("miniTotal").textContent = fmt(sum);
+        if($("itemCount")) $("itemCount").textContent = cartQty() + (cartQty()>1 ? " articles" : " article");
+        if($("validateSale")) $("validateSale").disabled = sum <= 0;
+      }
+      function render(){ renderTabs(); renderProducts(); renderCart(); renderPayMethods(); renderTotals(); }
+
+      function daySales(){ return sales.filter(s=>s.day === todayKey()); }
+      function dayMoves(){ return moves.filter(m=>m.day === todayKey()); }
+      function stats(){
+        const ds = daySales(); const dm = dayMoves();
+        const salesPaid = ds.filter(s=>s.payMode !== "Dette").reduce((s,x)=>s+x.total,0);
+        const debts = ds.filter(s=>s.payMode === "Dette").reduce((s,x)=>s+x.total,0);
+        const income = dm.filter(m=>m.type === "income").reduce((s,x)=>s+x.amount,0);
+        const expense = dm.filter(m=>m.type === "expense").reduce((s,x)=>s+x.amount,0);
+        return {salesPaid, debts, income, expense, balance:salesPaid+income-expense, count:ds.length};
+      }
+      function renderPanels(){
+        const s = stats();
+        renderBusiness();
+        if($("salesList")){
+          const rows = [
+            `<div class="row"><div><b>Total caisse réelle</b><br><span>Ventes payées + entrées - sorties</span></div><b>${money(s.balance)}</b></div>`,
+            `<div class="row"><div><b>Dettes clients</b><br><span>À recevoir, pas dans la caisse</span></div><b>${money(s.debts)}</b></div>`,
+            ...daySales().slice(0,20).map(x=>`<div class="row"><div><b>${escapeHtml(x.payMode)} · ${x.items.length} ligne(s)</b><br><span>${new Date(x.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}${x.customer?' · '+escapeHtml(x.customer):''}</span>${x.taxEnabled?`<br><span>HT ${money(x.ht||0)} · TVA ${String(x.taxRate||0).replace('.', ',')}% ${money(x.tva||0)} · TTC</span>`:''}</div><b>${money(x.total)}</b></div>`),
+            ...dayMoves().slice(0,20).map(x=>`<div class="row"><div><b>${x.type==='income'?'Entrée':'Sortie'} · ${escapeHtml(x.label||'Mouvement')}</b><br><span>${new Date(x.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span></div><b>${money(x.amount)}</b></div>`)
+          ];
+          $("salesList").innerHTML = rows.join("");
+        }
+        if($("productList")){
+          $("productList").innerHTML = products.map(p=>`<div class="row"><div><b>${escapeHtml(p.name)}</b><br><span>${escapeHtml(p.cat||'Autres')} · Stock ${fmt(p.stock)}</span></div><b>${money(p.price)}</b></div>`).join("");
+        }
+        if($("paySummary")){
+          const mood = s.balance >= 50000 ? "🟢 Protège la réserve" : s.balance >= 15000 ? "🟡 Surveille la caisse" : "🔴 Encaisse d’abord";
+          $("paySummary").innerHTML = `
+            <div class="row"><div><b>Température PAY</b><br><span>${mood}</span></div><b>${money(s.balance)}</b></div>
+            <div class="row"><div><b>Ventes payées</b><br><span>Espèces, Wave, OM, Free</span></div><b>${money(s.salesPaid)}</b></div>
+            <div class="row"><div><b>Dettes à recevoir</b><br><span>Pas encore dans la main du pro</span></div><b>${money(s.debts)}</b></div>
+            <div class="row"><div><b>Conseiller PAY</b><br><span>${escapeHtml(payAdvice(s))}</span></div><span>terrain</span></div>`;
+        }
+      }
+      function businessHtml(){
+        const line1 = escapeHtml(business.name || "Enseigne");
+        const line2 = [business.activity, business.city].filter(Boolean).map(escapeHtml).join(" · ") || "Activité / zone à renseigner";
+        const line3 = [business.owner ? "Responsable : " + business.owner : "", business.phone ? "Tél : " + business.phone : ""].filter(Boolean).map(escapeHtml).join(" · ") || "Responsable et téléphone à compléter";
+        const line4 = business.address ? escapeHtml(business.address) : "Adresse à compléter";
+        const line5 = isVatOn() ? `Avec TVA · taux ${String(taxRate()).replace('.', ',')}% · prix saisis TTC` : "Sans TVA";
+        return `<div class="row"><div><b>${line1}</b><br><span>${line2}</span><br><span>${line3}</span><br><span>${line4}</span><br><span>${escapeHtml(line5)}</span></div><span>admin</span></div>`;
+      }
+      function renderBusiness(){
+        if($("bizTitle")) $("bizTitle").textContent = business.name || "MON COMMERCE";
+        if($("bizSub")) $("bizSub").textContent = `${business.activity || "Commerce"} · caisse tactile`;
+        if($("bizLine")) $("bizLine").textContent = `${business.name || "Mon commerce"} · ${business.activity || "Commerce"}${business.phone ? " · " + business.phone : ""}${business.city ? " · " + business.city : ""}`;
+        if($("bizName")) $("bizName").value = business.name || "";
+        if($("bizActivity")) $("bizActivity").value = business.activity || "";
+        if($("bizOwner")) $("bizOwner").value = business.owner || "";
+        if($("bizPhone")) $("bizPhone").value = business.phone || "";
+        if($("bizAddress")) $("bizAddress").value = business.address || "";
+        if($("bizCity")) $("bizCity").value = business.city || "";
+        if($("bizTaxMode")) $("bizTaxMode").value = business.taxMode || "none";
+        if($("bizTaxRate")) $("bizTaxRate").value = business.taxRate ?? 18;
+        if($("bizPublic")) $("bizPublic").value = business.publicLink || "";
+        if($("publicLink")) $("publicLink").value = business.publicLink || "https://mon-commerce.digiylyfe.com/";
+        if($("businessPreview")) $("businessPreview").innerHTML = businessHtml();
+        if($("qrBusinessPreview")) $("qrBusinessPreview").innerHTML = businessHtml();
+      }
+      function saveBusinessFromForm(){
+        business = {
+          name: ($("bizName")?.value || "").trim() || "MON COMMERCE",
+          activity: ($("bizActivity")?.value || "").trim() || "Commerce",
+          owner: ($("bizOwner")?.value || "").trim(),
+          phone: ($("bizPhone")?.value || "").trim(),
+          address: ($("bizAddress")?.value || "").trim(),
+          city: ($("bizCity")?.value || "").trim(),
+          taxMode: ($("bizTaxMode")?.value || "none") === "vat" ? "vat" : "none",
+          taxRate: Math.max(0, Number($("bizTaxRate")?.value || 18) || 18),
+          publicLink: ($("bizPublic")?.value || "").trim() || "https://mon-commerce.digiylyfe.com/"
+        };
+        save(); renderBusiness(); render(); renderPanels(); toast("Admin boutique enregistré");
       }
 
-      function openPlus(){ $("plusPanel")?.classList.add("open"); }
-      function closePlus(){ $("plusPanel")?.classList.remove("open"); }
+      function payAdvice(s){
+        if(s.debts > s.salesPaid && s.debts > 0) return "Les dettes montent plus vite que la caisse. Priorité : récupérer avant de racheter du stock.";
+        if(s.balance >= 50000) return "La caisse respire. Protège la réserve, puis prépare le réassort proprement.";
+        if(s.balance <= 0) return "Attention : sorties ou dettes mangent la journée. Encaisser d’abord, décider ensuite.";
+        return "La journée avance. Garde les ventes payées séparées des dettes clients.";
+      }
+      function showPanel(name){
+        ["Admin","Sales","Products","Pay","Qr","Settings"].forEach(n=>{ const el = $("panel"+n); if(el) el.hidden = true; });
+        const target = {admin:"panelAdmin",sales:"panelSales",products:"panelProducts",pay:"panelPay",qr:"panelQr",settings:"panelSettings"}[name];
+        if(target && $(target)) $(target).hidden = false;
+        renderPanels();
+      }
+      function openMenu(){ $("menuPanel")?.classList.add("open"); }
+      function closeMenu(){ $("menuPanel")?.classList.remove("open"); }
 
-      $("openPlus")?.addEventListener("click", openPlus);
-      $("openPlusBottom")?.addEventListener("click", openPlus);
-      $("closePlus")?.addEventListener("click", closePlus);
-      $("plusPanel")?.addEventListener("click", e => { if(e.target === $("plusPanel")) closePlus(); });
-      document.addEventListener("keydown", e => { if(e.key === "Escape") closePlus(); });
-
-      const text = "Bienvenue dans Mon Commerce. Le menu sert à agir vite. Encaisser pour vendre. Parler pour dire une vente. Stock pour régler les prix et articles. Mon argent ouvre le module PAY central. Le commerçant vérifie et valide toujours.";
-      let speaking = false;
+      function addProductFromForm(){
+        const name = ($("newName")?.value || "").trim();
+        const price = Math.round(Number($("newPrice")?.value || 0));
+        const stock = Math.round(Number($("newStock")?.value || 0));
+        if(!name || price <= 0){ toast("Nom et prix nécessaires"); return; }
+        products.push({id:uid(), name, price, stock:Math.max(0,stock), cat:"Ajoutés", ico:"🧺"});
+        save(); ["newName","newPrice","newStock"].forEach(id=>{ if($(id)) $(id).value=""; });
+        activeCat = "Ajoutés"; render(); renderPanels(); toast("Produit ajouté");
+      }
+      function addCashMove(type){
+        const amount = Math.round(Number($("cashAmount")?.value || 0));
+        const label = ($("cashLabel")?.value || "Mouvement caisse").trim();
+        if(amount <= 0){ toast("Montant nécessaire"); return; }
+        moves.unshift({id:uid(), type, amount, label, date:new Date().toISOString(), day:todayKey()});
+        save(); if($("cashAmount")) $("cashAmount").value=""; if($("cashLabel")) $("cashLabel").value="";
+        renderPanels(); toast(type === "income" ? "Entrée ajoutée" : "Sortie ajoutée");
+      }
+      function exportData(){
+        const blob = new Blob([JSON.stringify({business,products,sales,moves,exported_at:new Date().toISOString()}, null, 2)], {type:"application/json"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = "digiy-pos-linge-maison-sauvegarde.json"; a.click();
+        setTimeout(()=>URL.revokeObjectURL(a.href), 1200);
+      }
+      function importData(file){
+        const reader = new FileReader();
+        reader.onload = () => {
+          try{
+            const data = JSON.parse(reader.result);
+            if(data.business && typeof data.business === "object") business = {...defaultBusiness, ...data.business};
+            if(Array.isArray(data.products)) products = data.products;
+            if(Array.isArray(data.sales)) sales = data.sales;
+            if(Array.isArray(data.moves)) moves = data.moves;
+            save(); render(); renderPanels(); toast("Import terminé");
+          }catch(e){ toast("Import impossible"); }
+        };
+        reader.readAsText(file);
+      }
+      function resetAll(){
+        if(!confirm("Réinitialiser produits, ventes et mouvements locaux ?")) return;
+        products = seedProducts.map(p=>({...p})); sales = []; moves = []; cart = []; activeCat = "Tout"; save(); render(); renderPanels(); toast("Réinitialisé");
+      }
       function speak(){
         if(!("speechSynthesis" in window)) return;
-        if(speaking){ speechSynthesis.cancel(); speaking=false; return; }
+        if(speak.on){ speechSynthesis.cancel(); speak.on=false; return; }
         speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = "fr-FR"; u.rate = .86; u.pitch = 1.02;
-        u.onstart = () => speaking = true;
-        u.onend = u.onerror = () => speaking = false;
-        speechSynthesis.speak(u);
+        const text = "Mon Commerce ouvre directement sur la caisse tactile linge de maison. Le pro touche le produit, le ticket monte, il choisit le paiement et valide. Le reste se trouve dans Menu : admin boutique avec TVA ou sans TVA, caisse du jour, produits, PAY, fiche Q R et sauvegarde.";
+        const u = new SpeechSynthesisUtterance(text); u.lang="fr-FR"; u.rate=.86; u.pitch=1.02;
+        u.onstart=()=>speak.on=true; u.onend=u.onerror=()=>speak.on=false; speechSynthesis.speak(u);
       }
-      $("listenPlus")?.addEventListener("click", speak);
-      window.addEventListener("pagehide", () => { if("speechSynthesis" in window) speechSynthesis.cancel(); });
+      function escapeHtml(s){ return String(s ?? "").replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+      function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#96;'); }
 
-      waitGuard().then(updatePill);
+      $("openMenu")?.addEventListener("click", openMenu);
+      $("closeMenu")?.addEventListener("click", closeMenu);
+      $("menuPanel")?.addEventListener("click", e=>{ if(e.target === $("menuPanel")) closeMenu(); });
+      document.addEventListener("keydown", e=>{ if(e.key === "Escape") closeMenu(); });
+      $("clearCart")?.addEventListener("click", clearCart);
+      $("cancelLast")?.addEventListener("click", cancelLast);
+      $("validateSale")?.addEventListener("click", validateSale);
+      $("addFree")?.addEventListener("click", ()=>{ const v = prompt("Montant libre FCFA"); addFreeAmount(v); });
+      $("addCustomProduct")?.addEventListener("click", ()=>{ openMenu(); showPanel("products"); setTimeout(()=>$("newName")?.focus(),80); });
+      document.querySelectorAll(".amountBtn").forEach(b=>b.addEventListener("click",()=>addFreeAmount(b.dataset.amount)));
+      document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
+      $("saveBusiness")?.addEventListener("click", saveBusinessFromForm);
+      $("saveProduct")?.addEventListener("click", addProductFromForm);
+      $("addIncome")?.addEventListener("click",()=>addCashMove("income"));
+      $("addExpense")?.addEventListener("click",()=>addCashMove("expense"));
+      $("openPayExternal")?.addEventListener("click",()=>window.open("https://pay.digiylyfe.com/","_blank","noopener"));
+      $("copyLink")?.addEventListener("click", async()=>{ try{ await navigator.clipboard.writeText($("publicLink")?.value || location.href); toast("Lien copié"); }catch(e){ toast("Copie impossible"); }});
+      $("openPublic")?.addEventListener("click",()=>window.open($("publicLink")?.value || "https://mon-commerce.digiylyfe.com/","_blank","noopener"));
+      $("openOldQr")?.addEventListener("click",()=>window.open("./qr.html","_blank","noopener"));
+      $("shareLink")?.addEventListener("click", async()=>{ const url = $("publicLink")?.value || location.href; if(navigator.share){ try{ await navigator.share({title:"Linge de maison", url}); }catch(e){} } else { try{ await navigator.clipboard.writeText(url); toast("Lien copié"); }catch(e){} }});
+      $("exportData")?.addEventListener("click", exportData);
+      $("importDataBtn")?.addEventListener("click",()=>$("importFile")?.click());
+      $("importFile")?.addEventListener("change", e=>{ const f=e.target.files&&e.target.files[0]; if(f) importData(f); });
+      $("clearAll")?.addEventListener("click", resetAll);
+      $("closeSession")?.addEventListener("click",()=>{ try{ sessionStorage.clear(); localStorage.removeItem("digiy_pin_session_ok"); }catch(e){} toast("Session locale fermée"); });
+      $("listen")?.addEventListener("click", speak);
+      window.addEventListener("pagehide",()=>{ if("speechSynthesis" in window) speechSynthesis.cancel(); });
+
+      render(); renderPanels();
     })();
   </script>
 </body>
