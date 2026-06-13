@@ -100,7 +100,7 @@
         <div class="heroText">
           <div class="eyebrow">MON COMMERCE · POS V2</div>
           <div class="h1">Caisse tactile.</div>
-          <p id="bizLine">LINEA · Linge de maison · téléphone et adresse à renseigner dans Menu.</p>
+          <p id="bizLine">LINEA · Linge de maison · infos boutique à renseigner dans Menu.</p>
         </div>
         <div class="miniTotal"><span>Total ticket</span><b id="miniTotal">0</b></div>
       </div>
@@ -171,7 +171,7 @@
           <input class="input" id="bizName" placeholder="Enseigne / boutique" autocomplete="organization"/>
           <input class="input" id="bizActivity" placeholder="Activité" autocomplete="off"/>
           <input class="input" id="bizOwner" placeholder="Nom responsable" autocomplete="name"/>
-          <input class="input" id="bizPhone" placeholder="Téléphone" inputmode="tel" autocomplete="tel"/>
+          <input class="input" id="bizPhone" placeholder="Téléphone privé pro (non affiché)" inputmode="tel" autocomplete="tel"/>
           <input class="input" id="bizAddress" placeholder="Adresse / quartier" autocomplete="street-address"/>
           <input class="input" id="bizCity" placeholder="Ville / zone" autocomplete="address-level2"/>
           <select class="input" id="bizTaxMode" aria-label="TVA ou sans TVA">
@@ -456,7 +456,7 @@
       function businessHtml(){
         const line1 = escapeHtml(business.name || "Enseigne");
         const line2 = [business.activity, business.city].filter(Boolean).map(escapeHtml).join(" · ") || "Activité / zone à renseigner";
-        const line3 = [business.owner ? "Responsable : " + business.owner : "", business.phone ? "Tél : " + business.phone : ""].filter(Boolean).map(escapeHtml).join(" · ") || "Responsable et téléphone à compléter";
+        const line3 = business.owner ? escapeHtml("Responsable : " + business.owner) : "Responsable à compléter";
         const line4 = business.address ? escapeHtml(business.address) : "Adresse à compléter";
         const line5 = isVatOn() ? `Avec TVA · taux ${String(taxRate()).replace('.', ',')}% · prix saisis TTC` : "Sans TVA";
         return `<div class="row"><div><b>${line1}</b><br><span>${line2}</span><br><span>${line3}</span><br><span>${line4}</span><br><span>${escapeHtml(line5)}</span></div><span>admin</span></div>`;
@@ -464,7 +464,7 @@
       function renderBusiness(){
         if($("bizTitle")) $("bizTitle").textContent = business.name || "MON COMMERCE";
         if($("bizSub")) $("bizSub").textContent = `${business.activity || "Commerce"} · caisse tactile`;
-        if($("bizLine")) $("bizLine").textContent = `${business.name || "Mon commerce"} · ${business.activity || "Commerce"}${business.phone ? " · " + business.phone : ""}${business.city ? " · " + business.city : ""}`;
+        if($("bizLine")) $("bizLine").textContent = `${business.name || "Mon commerce"} · ${business.activity || "Commerce"}${business.city ? " · " + business.city : ""}`;
         if($("bizName")) $("bizName").value = business.name || "";
         if($("bizActivity")) $("bizActivity").value = business.activity || "";
         if($("bizOwner")) $("bizOwner").value = business.owner || "";
@@ -575,7 +575,7 @@
       $("saveProduct")?.addEventListener("click", addProductFromForm);
       $("addIncome")?.addEventListener("click",()=>addCashMove("income"));
       $("addExpense")?.addEventListener("click",()=>addCashMove("expense"));
-      $("openPayExternal")?.addEventListener("click",()=>window.open("https://pay.digiylyfe.com/","_blank","noopener"));
+      $("openPayExternal")?.addEventListener("click",()=>window.open("https://pro-pay.digiylyfe.com/","_blank","noopener"));
       $("copyLink")?.addEventListener("click", async()=>{ try{ await navigator.clipboard.writeText($("publicLink")?.value || location.href); toast("Lien copié"); }catch(e){ toast("Copie impossible"); }});
       $("openPublic")?.addEventListener("click",()=>window.open($("publicLink")?.value || "https://mon-commerce.digiylyfe.com/","_blank","noopener"));
       $("openOldQr")?.addEventListener("click",()=>window.open("./qr.html","_blank","noopener"));
@@ -593,6 +593,42 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
