@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>Accès • DIGIY</title>
   <meta name="theme-color" content="#020617"/>
+  <meta name="digiy-fix" content="pin-no-visible-phone-prefill-20260613"/>
 
   <!-- CONFIG — Mon commerce / POS -->
   <script>
@@ -103,11 +104,11 @@
 
   <!-- ETAPE 1 -->
   <div class="panel active" id="step1">
-    <label class="label" for="phoneInput">📱 Ton numéro de téléphone</label>
+    <label class="label" for="phoneInput">🔐 Identifiant privé d’accès</label>
     <div class="phone-wrap">
       <span class="phone-flag">🇸🇳</span>
       <input id="phoneInput" class="input" type="tel" inputmode="numeric"
-             placeholder="221 77 XXX XX XX" autocomplete="tel" maxlength="15"/>
+             placeholder="Ex : 22177XXXXXXX" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="15"/>
     </div>
     <div class="status" id="status1"></div>
     <button class="btn" id="btnContinue" type="button" style="margin-top:16px" disabled>Continuer →</button>
@@ -119,7 +120,7 @@
       <span class="phone-recap-num" id="phoneDisplay"></span>
       <button class="phone-recap-btn" id="btnBack" type="button">Modifier</button>
     </div>
-    <label class="label">🔢 Ton code secret (4 chiffres)</label>
+    <label class="label">🔢 Code secret privé (4 chiffres)</label>
     <div class="pin-dots" id="pinDots">
       <div class="dot" id="d0"></div>
       <div class="dot" id="d1"></div>
@@ -143,7 +144,7 @@
     <div class="status" id="status2"></div>
   </div>
 
-  <div class="note">Ton numéro et ton code ne sont jamais partagés.<br>DIGIY · 0% commission · 100% indépendance ∞</div>
+  <div class="note">Ton identifiant et ton code servent uniquement à ouvrir ton accès.<br>Ils ne sont jamais affichés publiquement. DIGIY · 0% commission · 100% indépendance ∞</div>
 </div>
 
 <script>
@@ -400,7 +401,7 @@ async function verifyPin(phone, pinCode){
   const cleanPin = String(pinCode || "").trim().replace(/\s+/g,"");
 
   if(!cleanPhone || !cleanPin){
-    return {ok:false, message:"Téléphone ou code manquant."};
+    return {ok:false, message:"Identifiant ou code manquant."};
   }
 
   /* 1) RPC métier POS si elle existe */
@@ -440,7 +441,7 @@ function writeSession(phone, sl, token){
   const raw = JSON.stringify(clean);
 
   SESSION_KEYS.forEach(k => { ls(k, raw); ss(k, raw); });
-  PHONE_KEYS.forEach(k => { ls(k, cleanPhone); ss(k, cleanPhone); });
+  /* Ne pas stocker le téléphone dans des clés séparées : cela évite tout préremplissage visible. */
 
   if(clean.slug){
     SLUG_KEYS.forEach(k => { ls(k, clean.slug); ss(k, clean.slug); });
@@ -471,23 +472,13 @@ function redirectClean(){
   }
 }
 
-/* Pré-remplissage discret si un ancien lien arrive avec ?phone= */
+/* Sécurité façade :
+   Ne jamais pré-remplir l'identifiant depuis l'URL, localStorage ou sessionStorage.
+   Le pro saisit son identifiant privé à chaque ouverture PIN.
+*/
 (function prefill(){
-  const fromUrl = normPhone(qp("phone") || qp("tel") || qp("owner_phone"));
-  const fromStorage = normPhone(
-    ss("digiy_pos_phone") ||
-    ls("digiy_pos_phone") ||
-    ss("digiy_caisse_phone") ||
-    ls("digiy_caisse_phone") ||
-    ls("digiy_phone")
-  );
-  const value = fromUrl || fromStorage;
-  if(value){
-    const phoneEl = $("phoneInput");
-    if(phoneEl){
-      phoneEl.value = value;
-    }
-  }
+  const phoneEl = $("phoneInput");
+  if(phoneEl) phoneEl.value = "";
   cleanUrlAfterPrefill();
 })();
 
@@ -512,7 +503,7 @@ async function goStep2(){
   const raw = normPhone(phoneEl.value);
   if(raw.length < 9){
     phoneEl.classList.add("err-field");
-    showSt("status1","❌ Numéro trop court.\nFormat attendu : 221 77 XXX XX XX","err");
+    showSt("status1","❌ Identifiant trop court.\nFormat attendu : 22177XXXXXXX","err");
     shake(phoneEl);
     return;
   }
@@ -536,7 +527,7 @@ function showStep2(){
   $("lbl2").className = "step-lbl active";
   $("conn").classList.add("done");
 
-  $("phoneDisplay").textContent = fmt(confirmedPhone);
+  $("phoneDisplay").textContent = "Identifiant privé saisi";
   pin = "";
   updateDots();
   updateEnterBtn();
@@ -645,6 +636,11 @@ async function doLogin(){
 </script>
 </body>
 </html>
+
+
+
+
+
 
 
 
