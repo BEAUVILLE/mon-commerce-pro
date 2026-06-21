@@ -7,15 +7,17 @@
 <meta name="theme-color" content="#1e7a46">
 <meta name="description" content="MON COMMERCE POS PRO — caisse tactile, produits, TVA, caisse du jour, PAY et QR public. Version stable avec porte QR visible.">
 <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
-<meta name="digiy-build" content="pos-pro-stable-hub-pin8h-20260621">
+<meta name="digiy-build" content="pos-pro-stable-hub-pin8h-antiboucle-20260621">
 <script>
-/* DIGIY — Session PIN 8h robuste
-   Objectif : garder l'accès PRO pendant 8h même après refresh/changement de page.
-   Compatible avec plusieurs anciens noms de clés localStorage/sessionStorage. */
+/* DIGIY — Session PIN 8h anti-boucle
+   Correction terrain : l'index ne redirige plus automatiquement en boucle.
+   Si la session est absente, un rideau PIN s'affiche avec un bouton vers pin.html.
+   Si pin.html revient avec une clé/URL OK, la session est gardée 8h. */
 (function(){
   const TTL_MS = 8 * 60 * 60 * 1000;
   const NOW = Date.now();
   const PIN_PAGE = './pin.html';
+  const HUB_PAGE = 'https://hub.digiylyfe.com/';
   const CANONICAL_KEY = 'digiy_pin_session_v1';
   const EXPIRY_KEYS = [
     'digiy_pin_until','digiy_pos_pin_until','digiy_access_until','digiy_pro_access_until',
@@ -27,16 +29,21 @@
     'digiy_cockpit_access_ok','digiy_session_ok','digiy_access_session','digiy_pos_session',
     'DIGIY_ACCESS_GRANTED','DIGIY_PIN_OK','SESSION_KEY'
   ];
+  const URL_OK_PARAMS = ['pin_ok','digiy_pin_ok','digiy_access','access','ok','auth','unlocked'];
+  const URL_EXP_PARAMS = ['expires','until','exp','expiresAt'];
+
   function safeGet(storage,key){ try{return storage.getItem(key)}catch(e){return null} }
   function safeSet(storage,key,val){ try{storage.setItem(key,val)}catch(e){} }
   function safeRemove(storage,key){ try{storage.removeItem(key)}catch(e){} }
+  function hasValue(v){ return v !== null && v !== undefined && String(v).trim() !== ''; }
   function looksOk(v){
-    if(v==null) return false;
+    if(!hasValue(v)) return false;
     const s=String(v).trim().toLowerCase();
-    return ['1','true','ok','yes','valid','granted','unlocked','open','pin_ok','access_ok'].includes(s) || s.includes('granted') || s.includes('pin_ok');
+    return ['1','true','ok','yes','valid','granted','unlocked','open','pin_ok','access_ok','success'].includes(s)
+      || s.includes('granted') || s.includes('pin_ok') || s.includes('access_ok') || s.includes('unlocked');
   }
   function asExpiry(raw){
-    if(!raw) return 0;
+    if(!hasValue(raw)) return 0;
     let v=raw;
     try{
       const obj=JSON.parse(raw);
@@ -49,17 +56,26 @@
     return Number.isFinite(d) ? d : 0;
   }
   function scan(storage){
-    const canonicalRaw = safeGet(storage,CANONICAL_KEY);
-    let best = asExpiry(canonicalRaw);
-    let hasTimedSession = !!canonicalRaw;
-    EXPIRY_KEYS.forEach(k=>{ const raw=safeGet(storage,k); if(raw) hasTimedSession=true; best = Math.max(best, asExpiry(raw)); });
+    let best = asExpiry(safeGet(storage,CANONICAL_KEY));
+    EXPIRY_KEYS.forEach(k=>{ best = Math.max(best, asExpiry(safeGet(storage,k))); });
     if(best > NOW) return best;
-    /* Important : si une session avec heure existe mais est expirée, on ne renouvelle pas avec un simple booléen. */
-    if(hasTimedSession) return 0;
     for(const k of OK_KEYS){
-      if(looksOk(safeGet(storage,k))) return NOW + TTL_MS;
+      const raw = safeGet(storage,k);
+      /* SESSION_KEY peut être un jeton opaque : s'il existe, on accepte et on normalise à 8h. */
+      if(k === 'SESSION_KEY' && hasValue(raw)) return NOW + TTL_MS;
+      if(looksOk(raw)) return NOW + TTL_MS;
     }
     return 0;
+  }
+  function scanUrl(){
+    try{
+      const u=new URL(location.href);
+      let best = 0;
+      URL_EXP_PARAMS.forEach(p=>{ best=Math.max(best, asExpiry(u.searchParams.get(p))); });
+      const directOk = URL_OK_PARAMS.some(p=>looksOk(u.searchParams.get(p)));
+      if(directOk && best <= NOW) best = NOW + TTL_MS;
+      return best;
+    }catch(e){ return 0; }
   }
   function persist(until){
     const payload = JSON.stringify({ok:true,expiresAt:until,savedAt:NOW,ttlHours:8});
@@ -68,27 +84,61 @@
       safeSet(storage,'digiy_pin_until',String(until));
       safeSet(storage,'digiy_pin_ok','1');
       safeSet(storage,'DIGIY_ACCESS_GRANTED','1');
+      safeSet(storage,'SESSION_KEY','DIGIY_PIN_8H');
     });
   }
   function cleanupUrl(){
     try{
       const u=new URL(location.href);
-      ['next'].forEach(p=>u.searchParams.delete(p));
-      if(u.href!==location.href) history.replaceState(null,'',u.pathname+u.search+u.hash);
+      [...URL_OK_PARAMS,...URL_EXP_PARAMS,'next'].forEach(p=>u.searchParams.delete(p));
+      const clean = u.pathname + (u.searchParams.toString()?('?'+u.searchParams.toString()):'') + u.hash;
+      if(clean !== location.pathname + location.search + location.hash) history.replaceState(null,'',clean);
     }catch(e){}
   }
-  function clearExpired(){
+  function clearExpiredOnly(){
     [localStorage,sessionStorage].forEach(storage=>{
-      [CANONICAL_KEY,...EXPIRY_KEYS,...OK_KEYS].forEach(k=>safeRemove(storage,k));
+      [CANONICAL_KEY,...EXPIRY_KEYS].forEach(k=>safeRemove(storage,k));
     });
   }
-  let until = Math.max(scan(localStorage), scan(sessionStorage));
-  if(until > NOW){ persist(until); cleanupUrl(); window.DIGIY_PIN_EXPIRES_AT = until; return; }
-  clearExpired();
-  try{
-    const next = location.pathname + location.search + location.hash;
-    location.replace(PIN_PAGE + '?next=' + encodeURIComponent(next));
-  }catch(e){ location.href = PIN_PAGE; }
+  function nextUrl(){ return location.pathname + location.search + location.hash; }
+  function pinUrl(){ return PIN_PAGE + '?next=' + encodeURIComponent(nextUrl()); }
+  function injectLock(){
+    document.documentElement.setAttribute('data-digiy-pin','locked');
+    const css = document.createElement('style');
+    css.textContent = `
+      body.digiy-pin-locked main,
+      body.digiy-pin-locked footer,
+      body.digiy-pin-locked nav.bottom{filter:blur(2px);pointer-events:none;user-select:none;}
+      .digiy-pin-lock{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:18px;background:rgba(3,18,10,.78);backdrop-filter:blur(10px);}
+      .digiy-pin-lock-card{width:min(460px,100%);border-radius:28px;border:1px solid rgba(255,240,168,.28);background:linear-gradient(180deg,rgba(14,66,38,.98),rgba(5,31,14,.98));box-shadow:0 24px 70px rgba(0,0,0,.42);padding:22px;color:#f0fff5;text-align:center;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;}
+      .digiy-pin-lock-card h2{margin:0 0 10px;color:#fff0a8;font-size:28px;line-height:1;letter-spacing:-.03em;}
+      .digiy-pin-lock-card p{margin:0 0 14px;color:rgba(240,255,245,.78);line-height:1.45;font-size:14px;}
+      .digiy-pin-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+      .digiy-pin-actions a,.digiy-pin-actions button{min-height:52px;border-radius:16px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;text-decoration:none;font:inherit;font-weight:1000;cursor:pointer;}
+      .digiy-pin-actions .gold{background:linear-gradient(135deg,#fff0a8,#c4973f);color:#052215;border:0;}
+      .digiy-pin-actions .plain{background:rgba(255,255,255,.08);color:#fff;}
+    `;
+    document.head.appendChild(css);
+    window.addEventListener('DOMContentLoaded',()=>{
+      document.body.classList.add('digiy-pin-locked');
+      const box=document.createElement('div');
+      box.className='digiy-pin-lock';
+      box.innerHTML = '<div class="digiy-pin-lock-card"><h2>🔐 Accès PRO</h2><p>Pas de boucle : la page reste stable. Entre le PIN, puis la session sera gardée pendant 8h sur cet appareil.</p><div class="digiy-pin-actions"><a class="gold" href="'+pinUrl().replace(/"/g,'&quot;')+'">Entrer le PIN</a><a class="plain" href="'+HUB_PAGE+'">← HUB</a></div></div>';
+      document.body.appendChild(box);
+    });
+  }
+
+  let until = Math.max(scan(localStorage), scan(sessionStorage), scanUrl());
+  if(until > NOW){
+    persist(until);
+    cleanupUrl();
+    window.DIGIY_PIN_EXPIRES_AT = until;
+    window.DIGIY_PIN_OK = true;
+    return;
+  }
+  clearExpiredOnly();
+  window.DIGIY_PIN_OK = false;
+  injectLock();
 })();
 </script>
 <style>
@@ -112,7 +162,8 @@ function validateSale(){const sum=total();if(sum<=0||!cart.length)return;const t
 function stats(){const ds=sales.filter(s=>s.day===today()),dm=moves.filter(m=>m.day===today());const paid=ds.filter(s=>s.payMode!=='Dette').reduce((a,b)=>a+b.total,0),debts=ds.filter(s=>s.payMode==='Dette').reduce((a,b)=>a+b.total,0),income=dm.filter(m=>m.type==='income').reduce((a,b)=>a+b.amount,0),expense=dm.filter(m=>m.type==='expense').reduce((a,b)=>a+b.amount,0);return{paid,debts,income,expense,balance:paid+income-expense,count:ds.length}}
 function renderTabs(){$('tabs').innerHTML=cats().map(c=>'<button class="tab '+(c===activeCat?'active':'')+'" onclick="activeCat=\''+esc(c)+'\';render()">'+esc(c)+'</button>').join('')}function renderProducts(){const list=products.filter(p=>activeCat==='Tout'||(p.cat||'Autres')===activeCat);$('productGrid').innerHTML=list.map(p=>'<button class="prod '+(Number(p.stock)<=0?'out':Number(p.stock)<=3?'low':'')+'" onclick="addToCart(\''+p.id+'\')"><b>'+esc(p.ico||'🧺')+' '+esc(p.name)+'</b><small>'+esc(p.cat||'Autres')+' · stock '+fmt(p.stock)+'</small><span>'+money(p.price)+'</span></button>').join('')||'<div class="item"><b>Aucun produit</b><small>Ajoute un produit dans le bloc Produits.</small></div>'}function renderCart(){if(!cart.length){$('cart').innerHTML='<div class="item"><b>Ticket vide</b><small>Touche un produit pour commencer.</small></div>'}else{$('cart').innerHTML=cart.map(i=>'<div class="item"><div class="itemTop"><div><b>'+esc(i.name)+'</b><small>'+fmt(i.qty)+' × '+money(i.price)+'</small></div><b>'+money(i.price*i.qty)+'</b></div><div class="cartBtns"><button class="mini" onclick="setQty(\''+i.id+'\','+(i.qty-1)+')">−</button><div class="mini" style="display:grid;place-items:center">'+fmt(i.qty)+'</div><button class="mini" onclick="setQty(\''+i.id+'\','+(i.qty+1)+')">+</button><button class="mini red" onclick="setQty(\''+i.id+'\',0)">×</button></div></div>').join('')}}function renderPay(){ $('payMethods').innerHTML=payModes.map(m=>'<button class="payMethod '+(m===payMode?'active':'')+'" onclick="payMode=\''+m+'\';render()">'+m+'</button>').join('')}function renderBiz(){['Name','Activity','Owner','Phone','City','Address','TaxRate','Public'].forEach(k=>{const id='biz'+k;const key=k==='TaxRate'?'taxRate':(k==='Public'?'publicLink':k.toLowerCase());if($(id))$(id).value=business[key]||''});if($('bizTaxMode'))$('bizTaxMode').value=business.taxMode||'none';$('bizTitle').textContent=business.name||'MON COMMERCE';$('bizSub').textContent=(business.activity||'Commerce')+' · QR visible';const link=business.publicLink||'https://mon-commerce.digiylyfe.com/';$('bizPreview').textContent='Enseigne : '+(business.name||'MON COMMERCE')+'\nActivité : '+(business.activity||'Commerce')+'\nResponsable : '+(business.owner||'À compléter')+'\nZone : '+(business.city||'À compléter')+'\nTVA : '+(isVat()?('Avec TVA '+business.taxRate+'% · prix TTC'):'Sans TVA')+'\nLien public : '+link+'\nQR : ./qr.html';$('openPublic').href=link}function renderPanels(){const s=stats();$('statSales').textContent=fmt(s.count);$('statBalance').textContent=fmt(s.balance);$('statDebts').textContent=fmt(s.debts);$('statCart').textContent=fmt(cart.reduce((a,b)=>a+b.qty,0));$('salesList').innerHTML='<div class="item"><b>Caisse réelle : '+money(s.balance)+'</b><small>Ventes payées + entrées - sorties.</small></div><div class="item"><b>Dettes : '+money(s.debts)+'</b><small>À recevoir, pas dans la main du pro.</small></div>'+sales.slice(0,20).map(x=>'<div class="item"><b>'+esc(x.payMode)+' · '+money(x.total)+'</b><small>'+new Date(x.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})+(x.customer?' · '+esc(x.customer):'')+'</small></div>').join('');$('productList').innerHTML=products.map(p=>'<div class="item"><b>'+esc(p.name)+' · '+money(p.price)+'</b><small>'+esc(p.cat||'Autres')+' · stock '+fmt(p.stock)+'</small></div>').join('');$('paySummary').innerHTML='<div class="item"><b>Température PAY : '+money(s.balance)+'</b><small>'+(s.balance>=50000?'Caisse respire. Protège la réserve.':s.balance>0?'Journée active. Sépare dettes et cash.':'Attention : encaisser avant de sortir.')+'</small></div><div class="item"><b>Dettes clients : '+money(s.debts)+'</b><small>Pas encore encaissé.</small></div>'}
 function render(){renderTabs();renderProducts();renderCart();renderPay();renderBiz();renderPanels();const sum=total();$('total').textContent=money(sum);$('taxLine').textContent=taxLine(sum);$('validateSale').disabled=sum<=0}
-function saveBusiness(){business={name:$('bizName').value.trim()||'MON COMMERCE',activity:$('bizActivity').value.trim()||'Commerce',owner:$('bizOwner').value.trim(),phone:$('bizPhone').value.trim(),city:$('bizCity').value.trim(),address:$('bizAddress').value.trim(),taxMode:$('bizTaxMode').value==='vat'?'vat':'none',taxRate:Number($('bizTaxRate').value||18),publicLink:$('bizPublic').value.trim()||'https://mon-commerce.digiylyfe.com/'};save();render();toast('Admin enregistré')}function cashMove(type){const amount=Math.round(Number($('cashAmount').value)||0),label=($('cashLabel').value||'Mouvement').trim();if(amount<=0){toast('Montant nécessaire');return}moves.unshift({id:uid(),type,amount,label,date:new Date().toISOString(),day:today()});$('cashAmount').value='';$('cashLabel').value='';save();render();toast(type==='income'?'Entrée ajoutée':'Sortie ajoutée')}function addProduct(){const name=$('newName').value.trim(),price=Math.round(Number($('newPrice').value)||0),stock=Math.round(Number($('newStock').value)||0),cat=$('newCat').value.trim()||'Ajoutés';if(!name||price<=0){toast('Nom et prix nécessaires');return}products.push({id:uid(),name,price,stock,cat,ico:'🧺'});activeCat=cat;['newName','newPrice','newStock','newCat'].forEach(id=>$(id).value='');save();render();toast('Produit ajouté')}async function copyLink(){try{await navigator.clipboard.writeText(business.publicLink||'https://mon-commerce.digiylyfe.com/');toast('Lien copié')}catch(e){toast('Copie impossible')}}async function shareLink(){const url=business.publicLink||'https://mon-commerce.digiylyfe.com/';if(navigator.share){try{await navigator.share({title:business.name||'Mon commerce',url})}catch(e){}}else copyLink()}function exportData(){const blob=new Blob([JSON.stringify({business,products,sales,moves},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='digiy-pos-export.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}function importData(e){const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result||'{}');if(d.business)business=Object.assign(business,d.business);if(Array.isArray(d.products))products=d.products;if(Array.isArray(d.sales))sales=d.sales;if(Array.isArray(d.moves))moves=d.moves;save();render();toast('Import OK')}catch(_){toast('Import impossible')}};r.readAsText(f)}function resetAll(){if(!confirm('Réinitialiser les données locales POS ?'))return;products=seedProducts.map(p=>Object.assign({},p));sales=[];moves=[];cart=[];save();render();toast('Réinitialisé')}function digiyLogout(){['digiy_pin_session_v1','digiy_pin_until','digiy_pos_pin_until','digiy_access_until','digiy_pro_access_until','digiy_pay_access_until','digiy_session_until','digiy_access_expires_at','digiy_expires_at','digiy_pin_expires_at','DIGIY_PIN_UNTIL','DIGIY_ACCESS_UNTIL','digiy_pin_ok','digiy_pos_pin_ok','digiy_access_ok','digiy_pro_access_ok','digiy_pay_access_ok','digiy_cockpit_access_ok','digiy_session_ok','digiy_access_session','digiy_pos_session','DIGIY_ACCESS_GRANTED','DIGIY_PIN_OK','SESSION_KEY'].forEach(k=>{try{localStorage.removeItem(k);sessionStorage.removeItem(k)}catch(e){}});location.href='./pin.html'}render();
+function saveBusiness(){business={name:$('bizName').value.trim()||'MON COMMERCE',activity:$('bizActivity').value.trim()||'Commerce',owner:$('bizOwner').value.trim(),phone:$('bizPhone').value.trim(),city:$('bizCity').value.trim(),address:$('bizAddress').value.trim(),taxMode:$('bizTaxMode').value==='vat'?'vat':'none',taxRate:Number($('bizTaxRate').value||18),publicLink:$('bizPublic').value.trim()||'https://mon-commerce.digiylyfe.com/'};save();render();toast('Admin enregistré')}function cashMove(type){const amount=Math.round(Number($('cashAmount').value)||0),label=($('cashLabel').value||'Mouvement').trim();if(amount<=0){toast('Montant nécessaire');return}moves.unshift({id:uid(),type,amount,label,date:new Date().toISOString(),day:today()});$('cashAmount').value='';$('cashLabel').value='';save();render();toast(type==='income'?'Entrée ajoutée':'Sortie ajoutée')}function addProduct(){const name=$('newName').value.trim(),price=Math.round(Number($('newPrice').value)||0),stock=Math.round(Number($('newStock').value)||0),cat=$('newCat').value.trim()||'Ajoutés';if(!name||price<=0){toast('Nom et prix nécessaires');return}products.push({id:uid(),name,price,stock,cat,ico:'🧺'});activeCat=cat;['newName','newPrice','newStock','newCat'].forEach(id=>$(id).value='');save();render();toast('Produit ajouté')}async function copyLink(){try{await navigator.clipboard.writeText(business.publicLink||'https://mon-commerce.digiylyfe.com/');toast('Lien copié')}catch(e){toast('Copie impossible')}}async function shareLink(){const url=business.publicLink||'https://mon-commerce.digiylyfe.com/';if(navigator.share){try{await navigator.share({title:business.name||'Mon commerce',url})}catch(e){}}else copyLink()}function exportData(){const blob=new Blob([JSON.stringify({business,products,sales,moves},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='digiy-pos-export.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}function importData(e){const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result||'{}');if(d.business)business=Object.assign(business,d.business);if(Array.isArray(d.products))products=d.products;if(Array.isArray(d.sales))sales=d.sales;if(Array.isArray(d.moves))moves=d.moves;save();render();toast('Import OK')}catch(_){toast('Import impossible')}};r.readAsText(f)}function resetAll(){if(!confirm('Réinitialiser les données locales POS ?'))return;products=seedProducts.map(p=>Object.assign({},p));sales=[];moves=[];cart=[];save();render();toast('Réinitialisé')}function digiyLogout(){['digiy_pin_session_v1','digiy_pin_until','digiy_pos_pin_until','digiy_access_until','digiy_pro_access_until','digiy_pay_access_until','digiy_session_until','digiy_access_expires_at','digiy_expires_at','digiy_pin_expires_at','DIGIY_PIN_UNTIL','DIGIY_ACCESS_UNTIL','digiy_pin_ok','digiy_pos_pin_ok','digiy_access_ok','digiy_pro_access_ok','digiy_pay_access_ok','digiy_cockpit_access_ok','digiy_session_ok','digiy_access_session','digiy_pos_session','DIGIY_ACCESS_GRANTED','DIGIY_PIN_OK','SESSION_KEY'].forEach(k=>{try{localStorage.removeItem(k);sessionStorage.removeItem(k)}catch(e){}});location.href='./pin.html?next='+encodeURIComponent(location.pathname+location.search+location.hash)}render();
 </script>
 </body>
 </html>
+
