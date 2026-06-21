@@ -481,8 +481,10 @@
 
         <div class="formGrid">
           <div class="field">
-            <label for="whatsapp">WhatsApp client</label>
-            <input id="whatsapp" inputmode="numeric" placeholder="Ex : indicatif + numéro WhatsApp"/>
+            <label for="whatsapp">WhatsApp client public</label>
+            <input id="whatsapp" inputmode="numeric" placeholder="Numéro public volontaire, sinon laisser vide"/>
+            <div class="hint">Le téléphone de session/PIN reste privé. Il n’est plus recopié automatiquement ici.</div>
+            <button class="btn blue" id="btnClearPublicPhone" type="button">🧹 Effacer téléphone public</button>
           </div>
 
           <div class="field">
@@ -554,7 +556,7 @@
         <div class="formGrid">
           <div class="field">
             <label for="qr_target_url">Lien ouvert par le QR</label>
-            <input id="qr_target_url" placeholder="https://votre-boutique.digiylyfe.com/"/>
+            <input id="qr_target_url" placeholder="https://votre-boutique.digiylyfe.com/fiche.html?slug=mon-commerce-..."/>
           </div>
 
           <div class="field">
@@ -943,7 +945,6 @@
   function data(){
     return {
       slug,
-      owner_phone: phone,
 
       display_name: safe($("display_name").value),
       shop_name: safe($("display_name").value),
@@ -951,6 +952,7 @@
       city: safe($("city").value),
       address: safe($("address").value),
       whatsapp: normPhone($("whatsapp").value),
+      public_whatsapp_confirmed: !!normPhone($("whatsapp").value),
       hours: safe($("hours").value),
       photo_url: safe($("photo_url").value),
       bio: safe($("bio").value),
@@ -985,12 +987,38 @@
     delete copy.url3_label;
     delete copy.qr_target_url;
     delete copy.qr_image_url;
+    delete copy.owner_phone;
+    delete copy.phone;
 
     return copy;
   }
 
   function localKey(){
-    return "DIGIY_POS_PROFILE_DRAFT:" + (slug || phone || "unknown");
+    return "DIGIY_POS_PROFILE_DRAFT:" + (slug || "public-draft");
+  }
+
+  function publicWhatsappFrom(row){
+    row = row || {};
+
+    const direct = normPhone(row.whatsapp || row.public_whatsapp || "");
+    const confirmed = row.public_whatsapp_confirmed === true || row.whatsapp_confirmed === true;
+
+    if(direct){
+      if(phone && direct === phone && !confirmed){
+        return "";
+      }
+      return direct;
+    }
+
+    const storedPublic = normPhone(storageGet("digiy_pos_public_whatsapp") || storageGet("digiy_pos_whatsapp") || "");
+    if(storedPublic){
+      if(phone && storedPublic === phone && !confirmed){
+        return "";
+      }
+      return storedPublic;
+    }
+
+    return "";
   }
 
   function apply(row){
@@ -1000,7 +1028,7 @@
     $("category").value = row.category || "";
     $("city").value = row.city || "";
     $("address").value = row.address || row.address_label || "";
-    $("whatsapp").value = row.whatsapp || row.phone || row.owner_phone || "";
+    $("whatsapp").value = publicWhatsappFrom(row);
     $("hours").value = row.hours || row.opening_hours || "";
     $("photo_url").value = row.photo_url || row.image_url || "";
     $("bio").value = row.bio || row.description || "";
@@ -1082,7 +1110,8 @@
         category: d.category || "",
         city: d.city || "",
         address: d.address || "",
-        whatsapp: d.whatsapp || phone || "",
+        whatsapp: d.whatsapp || "",
+        public_whatsapp_confirmed: !!d.whatsapp,
         hours: d.hours || "",
         photo_url: d.photo_url || "",
         bio: d.bio || "",
@@ -1116,7 +1145,6 @@
 
       localStorage.setItem("digiy_pos_qr_target_url", forcePublicUrl(d.qr_target_url));
       localStorage.setItem("digiy_pos_public_url", forcePublicUrl(d.qr_target_url));
-      localStorage.setItem("digiy_pos_public_url", forcePublicUrl(d.qr_target_url));
       localStorage.setItem("digiy_pos_qr_image_url", forceQrImage(d.qr_image_url));
 
       localStorage.setItem("digiy_pos_shop_name", d.display_name || "");
@@ -1142,9 +1170,7 @@
     }
 
     if(!d.whatsapp){
-      setStatus("saveBox","Ajoute le WhatsApp client.","err");
-      $("whatsapp").focus();
-      return;
+      setStatus("saveBox","WhatsApp public vide : la fiche s’enregistre sans numéro affiché.","warn");
     }
 
     if(d.photo_url && !validHttps(d.photo_url)){
@@ -1298,6 +1324,48 @@
     window.addEventListener("beforeunload",stop);
   }
 
+  function clearPublicPhone(){
+    try{
+      $("whatsapp").value = "";
+
+      ["digiy_pos_public_whatsapp","digiy_pos_whatsapp","digiy_pos_public_phone"].forEach(k=>{
+        try{ localStorage.removeItem(k); sessionStorage.removeItem(k); }catch(_){}
+      });
+
+      try{
+        const raw = localStorage.getItem(localKey());
+        if(raw){
+          const draft = JSON.parse(raw);
+          if(draft && typeof draft === "object"){
+            draft.whatsapp = "";
+            draft.public_whatsapp = "";
+            draft.public_whatsapp_confirmed = false;
+            delete draft.phone;
+            delete draft.owner_phone;
+            localStorage.setItem(localKey(),JSON.stringify(draft));
+          }
+        }
+      }catch(_){}
+
+      try{
+        const raw = localStorage.getItem("caisse_shop");
+        if(raw){
+          const shop = JSON.parse(raw);
+          if(shop && typeof shop === "object"){
+            shop.whatsapp = "";
+            shop.public_whatsapp_confirmed = false;
+            localStorage.setItem("caisse_shop",JSON.stringify(shop));
+          }
+        }
+      }catch(_){}
+
+      render();
+      setStatus("saveBox","Téléphone public effacé sur cet appareil. Le téléphone de session reste privé.","ok");
+    }catch(_){
+      setStatus("saveBox","Impossible d’effacer automatiquement. Vide le champ WhatsApp puis enregistre.","warn");
+    }
+  }
+
   function bind(){
     [
       "display_name","category","city","address","whatsapp","hours","photo_url","bio",
@@ -1314,6 +1382,8 @@
 
     $("btnSave").addEventListener("click",save);
     $("btnOpenPublic").addEventListener("click",openPublic);
+    const clearPhoneBtn = $("btnClearPublicPhone");
+    if(clearPhoneBtn) clearPhoneBtn.addEventListener("click",clearPublicPhone);
 
     setupNotice();
   }
@@ -1334,7 +1404,7 @@
     "Famille : choisis la catégorie qui correspond le mieux. Boutique, Alimentation, Beauté, Mode, Services.",
     "Ville ou zone : indique où tu es. Par exemple : Saly, Ngaparou, Somone, Mbour.",
     "Repère : dis comment te trouver. Par exemple : près de la pharmacie, route principale, face à l'hôtel.",
-    "WhatsApp client : ton numéro public avec l'indicatif pays, si tu veux être contacté directement depuis la fiche.",
+    "WhatsApp client public : numéro volontaire à afficher. Le téléphone de session ou de PIN reste privé.",
     "Horaires : quand tu es ouvert. Par exemple : huit heures à vingt-deux heures.",
     "Photo vitrine : si tu as une photo de ton commerce disponible sur Internet, colle son adresse ici. Elle doit commencer par h-t-t-p-s.",
     "Description : deux ou trois phrases pour expliquer ce que tu vends. Par exemple : commerce à Saly, produits utiles du quotidien et contact direct.",
@@ -1427,6 +1497,14 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 
