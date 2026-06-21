@@ -522,7 +522,7 @@
         <div class="formGrid">
           <div class="field">
             <label for="url2">URL 2</label>
-            <input id="url2" placeholder="https://mon-commerce.digiylyfe.com/"/>
+            <input id="url2" placeholder="https://votre-boutique.digiylyfe.com/"/>
           </div>
 
           <div class="field">
@@ -547,14 +547,14 @@
           <label>QR visible sur la fiche publique</label>
           <div class="hint">
             Le QR doit ouvrir la fiche publique, jamais le domaine PRO.
-            Le code force automatiquement <strong>mon-commerce.digiylyfe.com</strong> et garde le pro maître de son lien.
+            Le QR utilise le lien public enregistré pour ce commerce. Chaque pro garde son propre lien, sans moule imposé.
           </div>
         </div>
 
         <div class="formGrid">
           <div class="field">
             <label for="qr_target_url">Lien ouvert par le QR</label>
-            <input id="qr_target_url" placeholder="https://mon-commerce.digiylyfe.com/fiche.html?slug=mon-commerce-..."/>
+            <input id="qr_target_url" placeholder="https://votre-boutique.digiylyfe.com/"/>
           </div>
 
           <div class="field">
@@ -695,9 +695,6 @@
   const PUBLIC_ROOT = "https://mon-commerce.digiylyfe.com/";
 
   function defaultPublicUrl(){
-    if(slug){
-      return PUBLIC_ROOT + "fiche.html?slug=" + encodeURIComponent(slug);
-    }
     return PUBLIC_ROOT;
   }
 
@@ -750,6 +747,7 @@
 
     return raw
       .replace(/https?:\/\/mon-commerce-pro\.digiylyfe\.com\/[^\s\"']*/gi, defaultPublicUrl())
+      .replace(/https?:\/\/mon-commerce\.digiylyfe\.com\/[^\s\"']*/gi, defaultPublicUrl())
       .replace(/mon-commerce-pro\.digiylyfe\.com/gi, "mon-commerce.digiylyfe.com");
   }
 
@@ -766,11 +764,11 @@
       const oldTarget = storageGet("digiy_pos_qr_target_url");
       const oldImage = storageGet("digiy_pos_qr_image_url");
 
-      if(oldTarget && /mon-commerce-pro\.digiylyfe\.com/i.test(oldTarget)){
+      if(oldTarget && /(mon-commerce-pro|mon-commerce)\.digiylyfe\.com/i.test(oldTarget)){
         localStorage.setItem("digiy_pos_qr_target_url",forcePublicUrl(oldTarget));
       }
 
-      if(oldImage && /mon-commerce-pro\.digiylyfe\.com/i.test(oldImage)){
+      if(oldImage && /(mon-commerce-pro|mon-commerce)\.digiylyfe\.com/i.test(oldImage)){
         localStorage.setItem("digiy_pos_qr_image_url",forceQrImage(oldImage));
       }
     }catch(_){}
@@ -1117,6 +1115,8 @@
       localStorage.setItem("digiy_pos_link_3_label", d.url3_label || "");
 
       localStorage.setItem("digiy_pos_qr_target_url", forcePublicUrl(d.qr_target_url));
+      localStorage.setItem("digiy_pos_public_url", forcePublicUrl(d.qr_target_url));
+      localStorage.setItem("digiy_pos_public_url", forcePublicUrl(d.qr_target_url));
       localStorage.setItem("digiy_pos_qr_image_url", forceQrImage(d.qr_image_url));
 
       localStorage.setItem("digiy_pos_shop_name", d.display_name || "");
@@ -1427,6 +1427,14 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
 
