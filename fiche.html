@@ -317,8 +317,7 @@
     const phone = normPhone(
       param("phone") ||
       param("tel") ||
-      storageGet("digiy_pos_phone") ||
-      storageGet("digiy_pos_last_phone")
+      storageGet("digiy_pos_public_whatsapp")
     );
 
     const whatsapp = normPhone(param("whatsapp") || phone);
@@ -345,4 +344,6 @@
 </script>
 </body>
 </html>
+
+
 
