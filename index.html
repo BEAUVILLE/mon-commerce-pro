@@ -1,195 +1,74 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>DIGIY MON COMMERCE — Accueil</title>
-  <meta name="theme-color" content="#0e4226"/>
-  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet"/>
-  <meta name="description" content="Accueil simple DIGIY MON COMMERCE : carte de visite, caisse, produits, ventes, fiche, QR et partage."/>
-  <meta name="digiy-pos" content="pos-pro-carte-visite-astou-20260716"/>
-
-  <script>
-  /* Compatibilité avec la session PIN 8 h déjà utilisée par MON COMMERCE. */
-  (()=>{
-    "use strict";
-    const TTL=8*60*60*1000, NOW=Date.now();
-    const PIN="./pin.html", HUB="https://digiy-hub.digiylyfe.com/index.html";
-    const CANON="digiy_pin_session_v1";
-    const EXP=["digiy_pin_until","digiy_pos_pin_until","digiy_access_until","digiy_pro_access_until","digiy_session_until","digiy_access_expires_at","digiy_expires_at","digiy_pin_expires_at","DIGIY_PIN_UNTIL","DIGIY_ACCESS_UNTIL"];
-    const OK=["digiy_pin_ok","digiy_pos_pin_ok","digiy_access_ok","digiy_pro_access_ok","digiy_cockpit_access_ok","digiy_session_ok","digiy_access_session","digiy_pos_session","DIGIY_ACCESS_GRANTED","DIGIY_PIN_OK","SESSION_KEY"];
-    const URL_OK=["pin_ok","digiy_pin_ok","digiy_access","access","ok","auth","unlocked"];
-    const URL_EXP=["expires","until","exp","expiresAt"];
-    const get=(s,k)=>{try{return s.getItem(k)}catch(_){return null}};
-    const set=(s,k,v)=>{try{s.setItem(k,v)}catch(_){}};
-    const del=(s,k)=>{try{s.removeItem(k)}catch(_){}};
-    const present=v=>v!==null&&v!==undefined&&String(v).trim()!=="";
-    const isOk=v=>{if(!present(v))return false;const x=String(v).trim().toLowerCase();return ["1","true","ok","yes","valid","granted","unlocked","open","pin_ok","access_ok","success"].includes(x)||x.includes("granted")||x.includes("pin_ok")||x.includes("access_ok")||x.includes("unlocked")};
-    const expiry=raw=>{
-      if(!present(raw))return 0;let v=raw;
-      try{const o=JSON.parse(raw);if(o&&typeof o==="object")v=o.expiresAt||o.expires||o.until||o.exp||o.end||o.ttl||raw}catch(_){}
-      if(typeof v==="number")return v<10000000000?v*1000:v;
-      const x=String(v).trim();if(/^\d+$/.test(x)){const n=Number(x);return n<10000000000?n*1000:n}
-      const d=Date.parse(x);return Number.isFinite(d)?d:0;
-    };
-    const scan=s=>{
-      let best=expiry(get(s,CANON));EXP.forEach(k=>best=Math.max(best,expiry(get(s,k))));
-      if(best>NOW)return best;
-      for(const k of OK){const raw=get(s,k);if((k==="SESSION_KEY"&&present(raw))||isOk(raw))return NOW+TTL}
-      return 0;
-    };
-    const scanUrl=()=>{try{const u=new URL(location.href);let best=0;URL_EXP.forEach(k=>best=Math.max(best,expiry(u.searchParams.get(k))));if(URL_OK.some(k=>isOk(u.searchParams.get(k)))&&best<=NOW)best=NOW+TTL;return best}catch(_){return 0}};
-    const persist=until=>{const payload=JSON.stringify({ok:true,expiresAt:until,savedAt:NOW,ttlHours:8});[localStorage,sessionStorage].forEach(s=>{set(s,CANON,payload);set(s,"digiy_pin_until",String(until));set(s,"digiy_pin_ok","1");set(s,"DIGIY_ACCESS_GRANTED","1");set(s,"SESSION_KEY","DIGIY_PIN_8H")})};
-    const clean=()=>{try{const u=new URL(location.href);[...URL_OK,...URL_EXP,"next"].forEach(k=>u.searchParams.delete(k));history.replaceState({},document.title,u.pathname+(u.searchParams.toString()?"?"+u.searchParams.toString():"")+u.hash)}catch(_){}};
-    const next=()=>location.pathname+location.search+location.hash;
-    const pinUrl=()=>PIN+"?next="+encodeURIComponent(next());
-    let until=Math.max(scan(localStorage),scan(sessionStorage),scanUrl());
-    if(until>NOW){persist(until);clean();window.DIGIY_PIN_OK=true;window.DIGIY_PIN_EXPIRES_AT=until;return}
-    [localStorage,sessionStorage].forEach(s=>[CANON,...EXP].forEach(k=>del(s,k)));
-    window.DIGIY_PIN_OK=false;
-    document.documentElement.dataset.digiyPin="locked";
-    addEventListener("DOMContentLoaded",()=>{
-      document.body.classList.add("locked");
-      const box=document.createElement("div");box.className="lock";
-      box.innerHTML='<section class="lockCard"><h2>🔐 Accès PRO</h2><p>Entre ton PIN DIGIY. La session restera ouverte pendant 8 heures sur cet appareil.</p><div class="lockActions"><a class="gold" href="'+pinUrl().replace(/"/g,"&quot;")+'">Entrer le PIN</a><a href="'+HUB+'">← HUB</a></div></section>';
-      document.body.appendChild(box);
-    });
-  })();
-  </script>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+  <meta name="theme-color" content="#0e4226">
+  <meta name="digiy-build" content="pos-strict-pin-loader-20260716">
+  <title>MON COMMERCE — ouverture sécurisée</title>
   <style>
-    :root{--g:#1e7a46;--g2:#155a34;--g3:#0e4226;--gold:#c4973f;--gold2:#fff0a8;--ink:#f0fff5;--muted:rgba(240,255,245,.74);--line:rgba(255,255,255,.15)}
-    *{box-sizing:border-box}html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-    body{margin:0;min-height:100dvh;padding:22px 14px calc(28px + env(safe-area-inset-bottom,0px));display:grid;place-items:center;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:radial-gradient(760px 430px at 10% -8%,rgba(34,197,94,.25),transparent 60%),radial-gradient(650px 360px at 100% 0%,rgba(196,151,63,.22),transparent 58%),linear-gradient(180deg,var(--g),var(--g2) 55%,var(--g3))}
-    main{width:min(680px,100%)}.brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:22px;color:var(--gold2);font-weight:1000;letter-spacing:.12em;text-transform:uppercase;font-size:13px}.brand i{width:46px;height:46px;border-radius:17px;display:grid;place-items:center;background:linear-gradient(135deg,#22c55e,var(--gold2));color:#052215;font-style:normal;font-size:24px;letter-spacing:0}
-    .card{padding:24px;border:1px solid rgba(255,240,168,.24);border-radius:32px;background:rgba(255,255,255,.085);box-shadow:0 24px 60px rgba(0,0,0,.24);backdrop-filter:blur(12px)}
-    h1{margin:0 0 18px;text-align:center;font-size:clamp(40px,10vw,70px);line-height:.95;letter-spacing:-.055em;font-weight:1000}
-    .businessCard{margin:0 0 18px;padding:10px;border:1px solid rgba(255,240,168,.28);border-radius:24px;background:rgba(0,0,0,.16);box-shadow:0 15px 34px rgba(0,0,0,.20)}
-    .businessCardLink{display:block;border-radius:17px;overflow:hidden;background:#fff;line-height:0;transition:transform .16s ease,box-shadow .16s ease;-webkit-tap-highlight-color:transparent}
-    .businessCardLink:active{transform:scale(.985)}
-    .businessCardLink:focus-visible{outline:4px solid rgba(255,240,168,.65);outline-offset:3px}
-    .businessCardLink img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
-    .cardActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
-    .cardActions a,.cardActions button{min-height:52px;border-radius:16px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 12px;color:#fff;text-decoration:none;background:rgba(255,255,255,.08);font:inherit;font-size:15px;font-weight:1000;cursor:pointer}
-    .cardActions a{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#052215;border:0}
-    .cardActions button{background:rgba(34,197,94,.17);border-color:rgba(34,197,94,.40)}
-    nav{display:grid;gap:10px}
-    nav a,nav button{width:100%;min-height:62px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.09);color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px 16px;font:inherit;font-size:17px;font-weight:1000;cursor:pointer;-webkit-tap-highlight-color:transparent}
-    nav a:first-child{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#052215;border:0}nav a:nth-child(2){background:rgba(34,197,94,.17);border-color:rgba(34,197,94,.40)}nav button{background:linear-gradient(135deg,#22c55e,#bbf7d0);color:#052215;border:0}
-    #status{margin:14px 0 0;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,240,168,.28);background:rgba(0,0,0,.18);color:var(--gold2);text-align:center;line-height:1.4;font-size:14px;font-weight:900}#status[hidden]{display:none}.foot{margin:16px 0 0;text-align:center;color:var(--muted);font-size:12px;font-weight:850;line-height:1.45}
-    body.locked main{filter:blur(2px);pointer-events:none;user-select:none}.lock{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:18px;background:rgba(3,18,10,.78);backdrop-filter:blur(10px)}.lockCard{width:min(460px,100%);border-radius:28px;border:1px solid rgba(255,240,168,.28);background:linear-gradient(180deg,rgba(14,66,38,.98),rgba(5,31,14,.98));box-shadow:0 24px 70px rgba(0,0,0,.42);padding:22px;color:#f0fff5;text-align:center;font-weight:900}.lockCard h2{margin:0 0 10px;color:#fff0a8;font-size:28px}.lockCard p{margin:0;color:rgba(240,255,245,.78);line-height:1.45;font-size:14px}.lockActions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.lockActions a{min-height:52px;border-radius:16px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;text-decoration:none;color:#fff;font-weight:1000}.lockActions .gold{background:linear-gradient(135deg,#fff0a8,#c4973f);color:#052215;border:0}
-    @media(max-width:480px){.card{padding:17px;border-radius:26px}.businessCard{padding:7px;border-radius:20px}.cardActions{grid-template-columns:1fr}.cardActions a,.cardActions button{min-height:50px}nav a,nav button{min-height:59px;font-size:16px}.lockActions{grid-template-columns:1fr}}
+    *{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:20px;background:linear-gradient(180deg,#1e7a46,#0e4226);color:#f0fff5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.box{width:min(440px,100%);padding:24px;border:1px solid rgba(255,240,168,.28);border-radius:28px;background:rgba(5,31,14,.92);text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.35)}h1{margin:0 0 10px;color:#fff0a8;font-size:28px}p{margin:0;color:rgba(240,255,245,.78);line-height:1.5;font-weight:800}.spin{width:38px;height:38px;margin:18px auto;border:4px solid rgba(255,255,255,.16);border-top-color:#fff0a8;border-radius:50%;animation:s .8s linear infinite}a{display:inline-flex;min-height:50px;margin-top:16px;padding:0 18px;align-items:center;justify-content:center;border-radius:16px;background:linear-gradient(135deg,#fff0a8,#c4973f);color:#052215;text-decoration:none;font-weight:1000}@keyframes s{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
-  <main>
-    <div class="brand"><i>🧺</i><span>DIGIY MON COMMERCE</span></div>
-    <section class="card">
-      <h1>Bonjour commerçant.</h1>
-
-      <div class="businessCard">
-        <a class="businessCardLink" id="businessCardLink" href="https://mon-commerce.digiylyfe.com/fiche-astou.html" target="_blank" rel="noopener noreferrer" aria-label="Ouvrir la boutique publique Astou Boutique">
-          <img src="./carte-visite.png?v=20260716" alt="Carte de visite DIGIY MON COMMERCE — Astou Boutique" loading="eager" decoding="async"/>
-        </a>
-        <div class="cardActions">
-          <a id="openPublicCard" href="https://mon-commerce.digiylyfe.com/fiche-astou.html" target="_blank" rel="noopener noreferrer">Voir la boutique</a>
-          <button id="shareCard" type="button">Partager la carte</button>
-        </div>
-      </div>
-
-      <nav aria-label="Actions MON COMMERCE PRO">
-        <a href="./caisse.html">Ma caisse</a>
-        <a href="./produits.html">Mes produits</a>
-        <a href="./ventes.html">Mes ventes</a>
-        <a href="./profile.html">Ma fiche commerce</a>
-        <a href="./qr.html">Mon QR</a>
-        <button id="shareWhatsApp" type="button">Partager sur WhatsApp</button>
-      </nav>
-      <p id="status" role="status" aria-live="polite" hidden></p>
-    </section>
-    <p class="foot">Paiement direct au professionnel · 0 % commission DIGIY</p>
-  </main>
-
+  <main class="box"><h1>🔐 MON COMMERCE</h1><p id="msg">Vérification de la session PIN…</p><div class="spin" id="spin"></div><a id="login" href="./pin.html" hidden>Entrer le PIN</a></main>
   <script>
-  (()=>{
+  (async()=>{
     "use strict";
-    /* Compatibilité temporaire : les anciens boutons « Caisse » pointent encore vers index.html. */
-    try{
-      const ref=new URL(document.referrer);
-      const file=ref.pathname.split("/").pop().toLowerCase();
-      const oldCaissePages=["produits.html","ventes.html","admin.html","profile.html","pay.html"];
-      const nav=performance.getEntriesByType("navigation")[0];
-      if(ref.origin===location.origin&&oldCaissePages.includes(file)&&(!nav||nav.type==="navigate")){
-        location.replace("./caisse.html");return;
-      }
-    }catch(_){}
-
-    const DEFAULT_PUBLIC_URL="https://mon-commerce.digiylyfe.com/fiche-astou.html";
-    const CARD_PATH="./carte-visite.png";
-    const status=document.getElementById("status");
-    const setStatus=message=>{status.textContent=message||"";status.hidden=!message};
-    const read=key=>{try{return localStorage.getItem(key)||""}catch(_){return ""}};
+    const KEY="DIGIY_POS_PRO_SESSION_V1";
+    const TTL=8*60*60*1000;
+    const CLOCK=60*1000;
+    const MODULES=new Set(["POS","POS_PRO","COMMERCE","CAISSE","MON_COMMERCE"]);
+    const LEGACY=["digiy_pin_session_v1","digiy_pin_until","digiy_pos_pin_until","digiy_access_until","digiy_pro_access_until","digiy_pay_access_until","digiy_session_until","digiy_access_expires_at","digiy_expires_at","digiy_pin_expires_at","DIGIY_PIN_UNTIL","DIGIY_ACCESS_UNTIL","digiy_pin_ok","digiy_pos_pin_ok","digiy_access_ok","digiy_pro_access_ok","digiy_pay_access_ok","digiy_cockpit_access_ok","digiy_session_ok","digiy_access_session","digiy_pos_session","DIGIY_ACCESS_GRANTED","DIGIY_PIN_OK","SESSION_KEY"];
+    const BAD_QS=["pin_ok","digiy_pin_ok","digiy_access","access","ok","auth","unlocked","expires","until","exp","expiresAt"];
+    const SOURCE_COMMIT="abcfde48d1d4e9fc6335ebcb3edd4c90cc92f4c7";
+    const page=(location.pathname.split("/").pop()||"index.html").toLowerCase();
     const parse=raw=>{try{return JSON.parse(raw||"null")}catch(_){return null}};
-    const cleanPublic=value=>{
-      const raw=String(value||"").trim();if(!raw)return "";
-      try{
-        const url=new URL(raw);if(url.protocol!=="https:")return "";
-        const blocked=[location.hostname,"commerce-pro.digiylyfe.com","mon-commerce-pro.digiylyfe.com"];
-        return blocked.includes(url.hostname.toLowerCase())?"":url.toString();
-      }catch(_){return ""}
+    const get=(s,k)=>{try{return s.getItem(k)}catch(_){return null}};
+    const del=(s,k)=>{try{s.removeItem(k)}catch(_){}};
+    const valid=s=>{
+      if(!s||typeof s!=="object")return false;
+      const module=String(s.module||"").trim().toUpperCase();
+      const phone=String(s.phone||"").replace(/\D/g,"");
+      const validated=Number(s.validated_at||0),expires=Number(s.expires_at||0),now=Date.now();
+      const access=s.access===true||s.access_ok===true;
+      return MODULES.has(module)&&phone.length>=9&&access&&validated>0&&validated<=now+CLOCK&&now-validated<TTL&&expires>now&&expires<=validated+TTL+CLOCK;
     };
-    const publicUrl=()=>{
-      for(const key of ["digiy_pos_public_url","digiy_pos_qr_target_url"]){const url=cleanPublic(read(key));if(url)return url}
-      const business=parse(read("digiy_pos_stable_biz_v1"))||{};
-      return cleanPublic(business.publicLink||business.public_url||"")||DEFAULT_PUBLIC_URL;
-    };
-    const cardUrl=()=>new URL(CARD_PATH,location.href).href;
-    const syncPublicLinks=()=>{
-      const url=publicUrl();
-      document.getElementById("businessCardLink").href=url;
-      document.getElementById("openPublicCard").href=url;
-    };
-    syncPublicLinks();
-
-    document.getElementById("shareCard").addEventListener("click",async()=>{
-      const url=publicUrl();
-      const title="Astou Boutique — DIGIY MON COMMERCE";
-      const text="Découvrez Astou Boutique sur DIGIY MON COMMERCE.";
-      setStatus("Préparation du partage de la carte…");
-      try{
-        if(navigator.share){
-          try{
-            const response=await fetch(CARD_PATH,{cache:"no-store"});
-            if(response.ok){
-              const blob=await response.blob();
-              const file=new File([blob],"carte-visite-astou-boutique.png",{type:blob.type||"image/png"});
-              if(navigator.canShare&&navigator.canShare({files:[file]})){
-                await navigator.share({title,text:text+"\n"+url,files:[file]});
-                setStatus("Carte partagée.");
-                return;
-              }
-            }
-          }catch(error){
-            if(error&&error.name==="AbortError"){setStatus("");return}
-          }
-          await navigator.share({title,text,url});
-          setStatus("Lien de la carte partagé.");
-          return;
-        }
-      }catch(error){
-        if(error&&error.name==="AbortError"){setStatus("");return}
-      }
-      const message="Carte de visite Astou Boutique : "+cardUrl()+"\nVoir la boutique : "+url;
-      setStatus("Ouverture de WhatsApp…");
-      location.href="https://wa.me/?text="+encodeURIComponent(message);
-    });
-
-    document.getElementById("shareWhatsApp").addEventListener("click",()=>{
-      const url=publicUrl();
-      const message="Bonjour, voici la carte de visite Astou Boutique : "+cardUrl()+"\nBoutique publique : "+url;
-      setStatus("Ouverture de WhatsApp…");
-      location.href="https://wa.me/?text="+encodeURIComponent(message);
-    });
+    const cleanUrl=()=>{try{const u=new URL(location.href);let changed=false;BAD_QS.forEach(k=>{if(u.searchParams.has(k)){u.searchParams.delete(k);changed=true}});if(changed)history.replaceState({},document.title,u.pathname+(u.searchParams.toString()?"?"+u.searchParams.toString():"")+u.hash)}catch(_){}};
+    cleanUrl();
+    const session=[parse(get(sessionStorage,KEY)),parse(get(localStorage,KEY))].find(valid)||null;
+    if(!session){
+      [localStorage,sessionStorage].forEach(s=>{del(s,KEY);LEGACY.forEach(k=>del(s,k))});
+      const next=location.pathname+location.search+location.hash;
+      location.replace("./pin.html?next="+encodeURIComponent(next));
+      return;
+    }
+    window.DIGIY_PIN_OK=true;
+    window.DIGIY_PIN_EXPIRES_AT=Number(session.expires_at);
+    window.DIGIY_ACCESS=Object.assign({},window.DIGIY_ACCESS||{},session);
+    try{
+      const urls=[
+        `https://raw.githubusercontent.com/BEAUVILLE/mon-commerce-pro/${SOURCE_COMMIT}/${page}`,
+        `https://cdn.jsdelivr.net/gh/BEAUVILLE/mon-commerce-pro@${SOURCE_COMMIT}/${page}`
+      ];
+      let html="";
+      for(const url of urls){try{const r=await fetch(url,{cache:"no-store"});if(r.ok){html=await r.text();break}}catch(_){}}
+      if(!html)throw new Error("source indisponible");
+      let removed=0;
+      html=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,block=>{
+        const legacy=(block.includes("URL_OK_PARAMS")||/\bconst\s+URL_OK\s*=/.test(block))&&(block.includes("scanUrl")||block.includes("URL_EXP"));
+        if(legacy){removed++;return ""}return block;
+      });
+      if(removed!==1)throw new Error("garde historique non identifié");
+      html=html.replace(/\['digiy_pin_session_v1'/g,"['DIGIY_POS_PRO_SESSION_V1','digiy_pin_session_v1'");
+      document.open();document.write(html);document.close();
+    }catch(error){
+      document.getElementById("msg").textContent="Ouverture impossible. Aucun outil privé n’a été chargé.";
+      document.getElementById("spin").hidden=true;
+      document.getElementById("login").hidden=false;
+      console.error("[DIGIY POS STRICT]",error);
+    }
   })();
   </script>
 </body>
