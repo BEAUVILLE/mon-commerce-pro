@@ -1,0 +1,206 @@
+name: POS security hotfix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/security-hotfix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  close-pin-bypass:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Patch legacy guards
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          ROOT = Path('.')
+          WORKFLOW = Path('.github/workflows/security-hotfix.yml')
+          TTL = 8 * 60 * 60 * 1000
+
+          strict_guard = r'''<script>
+          /* DIGIY POS — garde stricte : seule la session créée après le vrai PIN est acceptée. */
+          (function(){
+            "use strict";
+            const KEY="DIGIY_POS_PRO_SESSION_V1";
+            const TTL=8*60*60*1000;
+            const CLOCK_SKEW=60*1000;
+            const PIN="./pin.html";
+            const MODULES=new Set(["POS","POS_PRO","COMMERCE","CAISSE","MON_COMMERCE"]);
+            const LEGACY=["digiy_pin_session_v1","digiy_pin_until","digiy_pos_pin_until","digiy_access_until","digiy_pro_access_until","digiy_pay_access_until","digiy_session_until","digiy_access_expires_at","digiy_expires_at","digiy_pin_expires_at","DIGIY_PIN_UNTIL","DIGIY_ACCESS_UNTIL","digiy_pin_ok","digiy_pos_pin_ok","digiy_access_ok","digiy_pro_access_ok","digiy_pay_access_ok","digiy_cockpit_access_ok","digiy_session_ok","digiy_access_session","digiy_pos_session","DIGIY_ACCESS_GRANTED","DIGIY_PIN_OK","SESSION_KEY"];
+            const URL_KEYS=["pin_ok","digiy_pin_ok","digiy_access","access","ok","auth","unlocked","expires","until","exp","expiresAt"];
+            const parse=raw=>{try{return JSON.parse(raw||"null")}catch(_){return null}};
+            const get=(store,key)=>{try{return store.getItem(key)}catch(_){return null}};
+            const del=(store,key)=>{try{store.removeItem(key)}catch(_){}};
+            const valid=session=>{
+              if(!session||typeof session!=="object")return false;
+              const module=String(session.module||"").trim().toUpperCase();
+              const phone=String(session.phone||"").replace(/\D/g,"");
+              const validated=Number(session.validated_at||0);
+              const expires=Number(session.expires_at||0);
+              const now=Date.now();
+              const access=session.access===true||session.access_ok===true;
+              return MODULES.has(module)&&phone.length>=9&&access&&validated>0&&validated<=now+CLOCK_SKEW&&now-validated<TTL&&expires>now&&expires<=validated+TTL+CLOCK_SKEW;
+            };
+            const candidates=[parse(get(sessionStorage,KEY)),parse(get(localStorage,KEY))];
+            const session=candidates.find(valid)||null;
+            try{
+              const url=new URL(location.href);
+              let changed=false;
+              URL_KEYS.forEach(key=>{if(url.searchParams.has(key)){url.searchParams.delete(key);changed=true}});
+              if(changed)history.replaceState({},document.title,url.pathname+(url.searchParams.toString()?"?"+url.searchParams.toString():"")+url.hash);
+            }catch(_){}
+            if(!session){
+              [localStorage,sessionStorage].forEach(store=>{del(store,KEY);LEGACY.forEach(key=>del(store,key))});
+              const next=location.pathname+location.search+location.hash;
+              location.replace(PIN+"?next="+encodeURIComponent(next));
+              return;
+            }
+            window.DIGIY_PIN_OK=true;
+            window.DIGIY_PIN_EXPIRES_AT=Number(session.expires_at);
+            window.DIGIY_ACCESS=Object.assign({},window.DIGIY_ACCESS||{},session);
+          })();
+          </script>'''
+
+          script_re = re.compile(r'<script>(?:(?!</script>).)*</script>', re.S)
+          patched_html = []
+          dangerous_before = []
+
+          for path in sorted(ROOT.rglob('*.html')):
+              if '.git' in path.parts:
+                  continue
+              text = path.read_text(encoding='utf-8')
+              if 'URL_OK_PARAMS' not in text and 'const URL_OK=' not in text and 'const URL_OK =' not in text:
+                  continue
+              dangerous_before.append(str(path))
+              replaced = 0
+              def replace_script(match):
+                  nonlocal replaced
+                  block = match.group(0)
+                  if 'URL_OK_PARAMS' in block or 'const URL_OK=' in block or 'const URL_OK =' in block:
+                      replaced += 1
+                      return strict_guard
+                  return block
+              new_text = script_re.sub(replace_script, text)
+              if replaced != 1:
+                  raise SystemExit(f'{path}: attendu 1 garde permissif, trouvé {replaced}')
+              new_text = new_text.replace("['digiy_pin_session_v1'", "['DIGIY_POS_PRO_SESSION_V1','digiy_pin_session_v1'")
+              path.write_text(new_text, encoding='utf-8')
+              patched_html.append(str(path))
+
+          if len(patched_html) < 5:
+              raise SystemExit(f'Trop peu de pages corrigées: {patched_html}')
+
+          guard_path = Path('guard.js')
+          guard = guard_path.read_text(encoding='utf-8')
+
+          fresh_re = re.compile(r'  function isSessionFresh\(session\) \{.*?\n  \}\n\n  function safeJsonParse', re.S)
+          fresh_new = '''  function isSessionFresh(session) {
+            if (!session || typeof session !== "object") return false;
+
+            const moduleCode = String(session.module || "").trim().toUpperCase();
+            const phone = normalizePhone(session.phone || "");
+            const validatedAt = Number(session.validated_at || 0);
+            const expiresAt = Number(session.expires_at || 0);
+            const current = now();
+            const accessOk = session.access === true || session.access_ok === true;
+
+            if (!MODULE_ALIASES.includes(moduleCode)) return false;
+            if (!phone || phone.length < 9) return false;
+            if (!accessOk || !validatedAt || !expiresAt) return false;
+            if (validatedAt > current + 60 * 1000) return false;
+            if (current - validatedAt >= SESSION_TTL_MS) return false;
+            if (expiresAt <= current) return false;
+            if (expiresAt > validatedAt + SESSION_TTL_MS + 60 * 1000) return false;
+
+            return true;
+          }
+
+          function safeJsonParse'''
+          guard, n_fresh = fresh_re.subn(fresh_new, guard, count=1)
+          if n_fresh != 1:
+              raise SystemExit(f'guard.js: isSessionFresh non remplacé ({n_fresh})')
+
+          boot_re = re.compile(r'  async function boot\(\) \{.*?\n  \}\n\n  function ready', re.S)
+          boot_new = '''  async function boot() {
+            setPageState("loading");
+            cleanSensitiveUrl();
+
+            const stored = getStoredSession();
+
+            if (stored) {
+              currentSession = stored;
+              setPageState("ready");
+              return {
+                ok: true,
+                session: stored,
+                source: "pin_session"
+              };
+            }
+
+            clearSession();
+            setPageState("locked");
+
+            return {
+              ok: false,
+              session: null,
+              message: "Session PIN absente ou expirée."
+            };
+          }
+
+          function ready'''
+          guard, n_boot = boot_re.subn(boot_new, guard, count=1)
+          if n_boot != 1:
+              raise SystemExit(f'guard.js: boot non remplacé ({n_boot})')
+
+          guard = guard.replace('VERSION: "pos-guard-abos-central-v1-20260522"', 'VERSION: "pos-guard-strict-pin-session-v2-20260716"')
+          guard_path.write_text(guard, encoding='utf-8')
+
+          remaining = []
+          for path in ROOT.rglob('*.html'):
+              text = path.read_text(encoding='utf-8')
+              if 'URL_OK_PARAMS' in text or 'const URL_OK=' in text or 'const URL_OK =' in text:
+                  remaining.append(str(path))
+          if remaining:
+              raise SystemExit(f'Gardes permissifs encore présents: {remaining}')
+
+          if 'const absorbed = await absorbUrlSessionIfPossible();' in guard or 'const fallback = readStorageEntry();' in guard:
+              raise SystemExit('guard.js appelle encore un chemin sans PIN')
+
+          print('Pages corrigées:')
+          for item in patched_html:
+              print(' -', item)
+          print('guard.js renforcé')
+          print('Motifs dangereux initiaux:', dangerous_before)
+
+          if WORKFLOW.exists():
+              WORKFLOW.unlink()
+          PY
+
+      - name: Validate diff
+        shell: bash
+        run: |
+          git diff --check
+          test ! -f .github/workflows/security-hotfix.yml
+          ! grep -R --include='*.html' -E 'URL_OK_PARAMS|const URL_OK ?=' .
+          ! grep -n 'const absorbed = await absorbUrlSessionIfPossible\|const fallback = readStorageEntry' guard.js
+          grep -R --include='*.html' -l 'DIGIY_POS_PRO_SESSION_V1' . | sort
+
+      - name: Commit and push hotfix
+        shell: bash
+        run: |
+          git config user.name "DIGIY Security Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "fix(pos): close legacy PIN bypass"
+          git push origin HEAD:main
