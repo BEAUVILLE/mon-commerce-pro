@@ -11,55 +11,15 @@ let _toastTimer = null;
    Le moule ne charge plus automatiquement les marchandises. Le pro garde la main.
 */
 const POS_PROFILE = window.POS_PROFILE || {
-  profileName: "Boutique Linge & Style",
-  productLabel: "Marchandise",
-  productLabelPlural: "Marchandises",
-  customerLabel: "Cliente",
-  customerLabelPlural: "Clientes",
-  noteLabel: "Note cliente",
-  starterProducts: [
-    {id:1, name:"Drap 2 places", cat:"Linge de maison", emoji:"🛏️", price:15000, stock:10},
-    {id:2, name:"Drap 1 place", cat:"Linge de maison", emoji:"🛏️", price:9000, stock:12},
-    {id:3, name:"Serviette bain", cat:"Serviettes", emoji:"🧺", price:5000, stock:20},
-    {id:4, name:"Serviette plage", cat:"Serviettes", emoji:"🏖️", price:7000, stock:16},
-    {id:5, name:"Fouta", cat:"Serviettes", emoji:"🌊", price:8000, stock:18},
-    {id:6, name:"Robe stylée", cat:"Robes", emoji:"👗", price:18000, stock:8},
-    {id:7, name:"Robe plage", cat:"Robes", emoji:"👗", price:12000, stock:10},
-    {id:8, name:"Tenue femme", cat:"Tenues", emoji:"✨", price:25000, stock:6},
-    {id:9, name:"Parure lit", cat:"Linge de maison", emoji:"🛌", price:22000, stock:7},
-    {id:10, name:"Coussin déco", cat:"Déco maison", emoji:"🛋️", price:6000, stock:14},
-    {id:11, name:"Nappe maison", cat:"Déco maison", emoji:"🍽️", price:10000, stock:9},
-    {id:12, name:"Crème beauté", cat:"Beauté", emoji:"🧴", price:3500, stock:15}
-  ],
-  trainingPhrases: [
-    "robe stylée 1 à 18000",
-    "2 serviettes bain à 5000",
-    "drap 2 places 1 à 15000",
-    "fouta 3 à 8000",
-    "parure lit 1 à 22000",
-    "ajoute 12 serviettes bain à 5000",
-    "Awa doit 10000 pour robe stylée",
-    "note couleur bleue taille M",
-    "va aux stats",
-    "ouvre les marchandises",
-    "nouvelle vente"
-  ],
-  aliases: [
-    "article = marchandise",
-    "articles = marchandises",
-    "serviettes = serviette",
-    "robes = robe",
-    "draps = drap",
-    "foutas = fouta",
-    "parures = parure",
-    "deux = 2",
-    "trois = 3",
-    "quatre = 4",
-    "bleu = bleue",
-    "taille moyenne = taille M",
-    "stat = stats",
-    "statistique = stats"
-  ]
+  profileName: "Commerce",
+  productLabel: "Article",
+  productLabelPlural: "Articles",
+  customerLabel: "Client",
+  customerLabelPlural: "Clients",
+  noteLabel: "Note client",
+  starterProducts: [],
+  trainingPhrases: [],
+  aliases: []
 };
 
 function profileWord(label, fallback){
