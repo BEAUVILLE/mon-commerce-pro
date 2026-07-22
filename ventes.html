@@ -5,28 +5,14 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
   <meta name="theme-color" content="#0e4226">
-  <meta name="digiy-build" content="pos-strict-pin-loader-20260716">
+  <meta name="digiy-build" content="pos-neutral-local-loader-20260722">
   <title>MON COMMERCE — ouverture sécurisée</title>
   <style>*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:20px;background:linear-gradient(180deg,#1e7a46,#0e4226);color:#f0fff5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.box{width:min(440px,100%);padding:24px;border:1px solid rgba(255,240,168,.28);border-radius:28px;background:rgba(5,31,14,.92);text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.35)}h1{margin:0 0 10px;color:#fff0a8;font-size:28px}p{margin:0;color:rgba(240,255,245,.78);line-height:1.5;font-weight:800}.spin{width:38px;height:38px;margin:18px auto;border:4px solid rgba(255,255,255,.16);border-top-color:#fff0a8;border-radius:50%;animation:s .8s linear infinite}a{display:inline-flex;min-height:50px;margin-top:16px;padding:0 18px;align-items:center;justify-content:center;border-radius:16px;background:linear-gradient(135deg,#fff0a8,#c4973f);color:#052215;text-decoration:none;font-weight:1000}@keyframes s{to{transform:rotate(360deg)}}</style>
 </head>
 <body>
   <main class="box"><h1>🔐 MON COMMERCE</h1><p id="msg">Vérification de la session PIN…</p><div class="spin" id="spin"></div><a id="login" href="./pin.html" hidden>Entrer le PIN</a></main>
-  <script>
-  (async()=>{
-    "use strict";
-    const KEY="DIGIY_POS_PRO_SESSION_V1",TTL=8*60*60*1000,CLOCK=60*1000;
-    const MODULES=new Set(["POS","POS_PRO","COMMERCE","CAISSE","MON_COMMERCE"]);
-    const LEGACY=["digiy_pin_session_v1","digiy_pin_until","digiy_pos_pin_until","digiy_access_until","digiy_pro_access_until","digiy_pay_access_until","digiy_session_until","digiy_access_expires_at","digiy_expires_at","digiy_pin_expires_at","DIGIY_PIN_UNTIL","DIGIY_ACCESS_UNTIL","digiy_pin_ok","digiy_pos_pin_ok","digiy_access_ok","digiy_pro_access_ok","digiy_pay_access_ok","digiy_cockpit_access_ok","digiy_session_ok","digiy_access_session","digiy_pos_session","DIGIY_ACCESS_GRANTED","DIGIY_PIN_OK","SESSION_KEY"];
-    const BAD_QS=["pin_ok","digiy_pin_ok","digiy_access","access","ok","auth","unlocked","expires","until","exp","expiresAt"];
-    const SOURCE_COMMIT="abcfde48d1d4e9fc6335ebcb3edd4c90cc92f4c7",page=(location.pathname.split("/").pop()||"index.html").toLowerCase();
-    const parse=raw=>{try{return JSON.parse(raw||"null")}catch(_){return null}},get=(s,k)=>{try{return s.getItem(k)}catch(_){return null}},del=(s,k)=>{try{s.removeItem(k)}catch(_){}};
-    const valid=s=>{if(!s||typeof s!=="object")return false;const module=String(s.module||"").trim().toUpperCase(),phone=String(s.phone||"").replace(/\D/g,""),validated=Number(s.validated_at||0),expires=Number(s.expires_at||0),now=Date.now(),access=s.access===true||s.access_ok===true;return MODULES.has(module)&&phone.length>=9&&access&&validated>0&&validated<=now+CLOCK&&now-validated<TTL&&expires>now&&expires<=validated+TTL+CLOCK};
-    try{const u=new URL(location.href);let changed=false;BAD_QS.forEach(k=>{if(u.searchParams.has(k)){u.searchParams.delete(k);changed=true}});if(changed)history.replaceState({},document.title,u.pathname+(u.searchParams.toString()?"?"+u.searchParams.toString():"")+u.hash)}catch(_){}
-    const session=[parse(get(sessionStorage,KEY)),parse(get(localStorage,KEY))].find(valid)||null;
-    if(!session){[localStorage,sessionStorage].forEach(s=>{del(s,KEY);LEGACY.forEach(k=>del(s,k))});location.replace("./pin.html?next="+encodeURIComponent(location.pathname+location.search+location.hash));return}
-    window.DIGIY_PIN_OK=true;window.DIGIY_PIN_EXPIRES_AT=Number(session.expires_at);window.DIGIY_ACCESS=Object.assign({},window.DIGIY_ACCESS||{},session);
-    try{const urls=[`https://raw.githubusercontent.com/BEAUVILLE/mon-commerce-pro/${SOURCE_COMMIT}/${page}`,`https://cdn.jsdelivr.net/gh/BEAUVILLE/mon-commerce-pro@${SOURCE_COMMIT}/${page}`];let html="";for(const url of urls){try{const r=await fetch(url,{cache:"no-store"});if(r.ok){html=await r.text();break}}catch(_){}}if(!html)throw new Error("source indisponible");let removed=0;html=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,block=>{const legacy=(block.includes("URL_OK_PARAMS")||/\bconst\s+URL_OK\s*=/.test(block))&&(block.includes("scanUrl")||block.includes("URL_EXP"));if(legacy){removed++;return ""}return block});if(removed!==1)throw new Error("garde historique non identifié");html=html.replace(/\['digiy_pin_session_v1'/g,"['DIGIY_POS_PRO_SESSION_V1','digiy_pin_session_v1'");document.open();document.write(html);document.close()}catch(error){document.getElementById("msg").textContent="Ouverture impossible. Aucun outil privé n’a été chargé.";document.getElementById("spin").hidden=true;document.getElementById("login").hidden=false;console.error("[DIGIY POS STRICT]",error)}
-  })();
-  </script>
+  <script src="./assets/js/pos-neutral-migration.js?v=20260722"></script>
+  <script>window.DIGIY_POS_PAGE={source:"ventes.html"};</script>
+  <script src="./assets/js/pos-secure-loader.js?v=pos-neutral-local-v1-20260722"></script>
 </body>
 </html>
