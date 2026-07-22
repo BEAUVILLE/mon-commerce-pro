@@ -1,6 +1,6 @@
 /* DIGIY MON COMMERCE — chargeur sécurisé partagé
- * Build: pos-neutral-local-v1-20260722
- * Ne modifie ni pin.html, ni guard.js, ni les RPC.
+ * Build: pos-cloud-profile-rpc-abos-v2-20260722
+ * Vérifie la session PIN, l'accès ABOS et branche la fiche publique sur la RPC sécurisée.
  */
 (function(){
   'use strict';
@@ -11,6 +11,8 @@
   const CLOCK=60*1000;
   const MODULES=new Set(['POS','POS_PRO','COMMERCE','CAISSE','MON_COMMERCE']);
   const SOURCE_COMMIT='abcfde48d1d4e9fc6335ebcb3edd4c90cc92f4c7';
+  const SUPABASE_URL='https://wesqmwjjtsefyjnluosj.supabase.co';
+  const SUPABASE_ANON='sb_publishable_tGHItRgeWDmGjnd0CK1DVQ_BIep4Ug3';
   const LEGACY=['digiy_pin_session_v1','digiy_pin_until','digiy_pos_pin_until','digiy_access_until','digiy_pro_access_until','digiy_pay_access_until','digiy_session_until','digiy_access_expires_at','digiy_expires_at','digiy_pin_expires_at','DIGIY_PIN_UNTIL','DIGIY_ACCESS_UNTIL','digiy_pin_ok','digiy_pos_pin_ok','digiy_access_ok','digiy_pro_access_ok','digiy_pay_access_ok','digiy_cockpit_access_ok','digiy_session_ok','digiy_access_session','digiy_pos_session','DIGIY_ACCESS_GRANTED','DIGIY_PIN_OK','SESSION_KEY'];
   const BAD_QS=['phone','tel','owner_phone','slug','commerce','pin','code','session','session_token','token','pin_ok','digiy_pin_ok','digiy_access','access','ok','auth','unlocked','expires','until','exp','expiresAt'];
 
@@ -46,6 +48,69 @@
     if(spin)spin.hidden=true;
     if(login)login.hidden=false;
     if(error)console.error('[DIGIY POS LOADER]',error);
+  }
+
+  function clearAccess(){
+    [localStorage,sessionStorage].forEach(store=>{
+      del(store,KEY);
+      LEGACY.forEach(key=>del(store,key));
+    });
+  }
+
+  function boolFromRpc(data){
+    const raw=Array.isArray(data)?data[0]:data;
+    if(raw===true||raw===1)return true;
+    if(typeof raw==='string'){
+      const value=raw.trim().toLowerCase();
+      return ['true','t','1','yes','ok'].includes(value);
+    }
+    if(raw&&typeof raw==='object'){
+      return ['has_access','access','access_ok','ok','allowed','active','is_active','subscribed','valid']
+        .some(key=>raw[key]===true);
+    }
+    return false;
+  }
+
+  async function rpc(name,payload){
+    const response=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+encodeURIComponent(name),{
+      method:'POST',
+      headers:{
+        apikey:SUPABASE_ANON,
+        Authorization:'Bearer '+SUPABASE_ANON,
+        'Content-Type':'application/json',
+        Accept:'application/json'
+      },
+      body:JSON.stringify(payload||{}),
+      cache:'no-store'
+    });
+    if(!response.ok)throw new Error(name+' '+response.status);
+    const text=await response.text();
+    return text?JSON.parse(text):null;
+  }
+
+  async function accessAllowed(phone){
+    const clean=String(phone||'').replace(/\D/g,'');
+    if(clean.length<9)return false;
+
+    for(const moduleCode of MODULES){
+      try{
+        if(boolFromRpc(await rpc('digiy_has_module_access_from_abos',{
+          p_phone:clean,
+          p_module:moduleCode
+        })))return true;
+      }catch(_){}
+    }
+
+    for(const moduleCode of MODULES){
+      try{
+        if(boolFromRpc(await rpc('digiy_has_access',{
+          p_phone:clean,
+          p_module:moduleCode
+        })))return true;
+      }catch(_){}
+    }
+
+    return false;
   }
 
   function neutralize(html,page){
@@ -91,9 +156,22 @@
       out=out.replace(/if\(navigator\.share\)\{\s*try\{[\s\S]*?await navigator\.share\(\{title,text,url\}\);\s*setStatus\("Lien de la carte partagé\."\);\s*return;\s*\}/,'if(navigator.share){await navigator.share({title,text,url});setStatus("Lien partagé.");return;}');
     }
 
+    if(page==='profile.html'){
+      const before=out;
+      out=out.replace(
+        /const\s*\{error\}\s*=\s*await\s+S\s*\.from\("digiy_pos_public_profiles"\)\s*\.upsert\(dbPayload\(d\),\{onConflict:"slug"\}\);/,
+        'const {error}=await S.rpc("digiy_pos_save_public_profile",{p_phone:phone,p_payload:dbPayload(d)});'
+      );
+      if(out===before)throw new Error('sauvegarde directe du profil non identifiée');
+      out=out.replace(
+        /Fiche enregistrée ✅ QR public gardé sur l’appareil\./g,
+        'Fiche enregistrée dans Supabase ✅ QR public prêt.'
+      );
+    }
+
     const bridge=`<script>(function(){'use strict';try{const read=k=>localStorage.getItem(k)||'';const parse=r=>{try{return JSON.parse(r||'null')}catch(_){return null}};const session=parse(sessionStorage.getItem('DIGIY_POS_PRO_SESSION_V1')||localStorage.getItem('DIGIY_POS_PRO_SESSION_V1'))||{};const slug=String(session.slug||read('digiy_pos_slug')||'').trim();const draft=slug?parse(read('DIGIY_POS_PROFILE_DRAFT:'+slug)):null;const stable=parse(read('digiy_pos_stable_biz_v1'))||{};const name=String(stable.name||(draft&&draft.display_name)||read('digiy_pos_shop_name')||'MON COMMERCE').trim()||'MON COMMERCE';const activity=String(stable.activity||(draft&&draft.category)||read('digiy_pos_activity')||'Commerce').trim()||'Commerce';const publicUrl=String(stable.publicLink||(draft&&draft.qr_target_url)||read('digiy_pos_public_url')||read('digiy_pos_qr_target_url')||'').trim();document.querySelectorAll('#bizTitle').forEach(el=>el.textContent=name);document.querySelectorAll('#bizSub').forEach(el=>el.textContent=activity+' · POS PRO');const neutral=document.getElementById('digiyNeutralCard');if(neutral)neutral.innerHTML='<span>'+name.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))+'</span><small style="font-size:14px;margin-top:10px">Carte publique DIGIY</small>';if(publicUrl){['businessCardLink','openPublicCard','openPublic'].forEach(id=>{const el=document.getElementById(id);if(el)el.href=publicUrl;});}if(!document.getElementById('digiyLocalNotice')&&['caisse.html','produits.html','ventes.html','admin.html'].includes(location.pathname.split('/').pop().toLowerCase())){const box=document.createElement('div');box.id='digiyLocalNotice';box.textContent='Données de caisse conservées sur cet appareil · utilise Exporter dans Admin pour ta sauvegarde.';box.style.cssText='width:min(1180px,calc(100% - 22px));margin:10px auto;padding:11px 13px;border:1px solid rgba(255,240,168,.3);border-radius:16px;background:rgba(0,0,0,.18);color:#fff0a8;text-align:center;font:900 12px/1.4 system-ui';const main=document.querySelector('main');if(main)main.before(box);} }catch(error){console.error('[DIGIY POS NEUTRAL]',error)}})();<\/script>`;
     out=out.replace(/<\/body>/i,bridge+'</body>');
-    out=out.replace(/<meta name="digiy-build"[^>]*>/i,'<meta name="digiy-build" content="pos-neutral-local-v1-20260722">');
+    out=out.replace(/<meta name="digiy-build"[^>]*>/i,'<meta name="digiy-build" content="pos-cloud-profile-rpc-abos-v2-20260722">');
     return out;
   }
 
@@ -101,9 +179,16 @@
     cleanUrl();
     const session=[parse(get(sessionStorage,KEY)),parse(get(localStorage,KEY))].find(valid)||null;
     if(!session){
-      [localStorage,sessionStorage].forEach(store=>{del(store,KEY);LEGACY.forEach(key=>del(store,key))});
+      clearAccess();
       const next=location.pathname+location.search+location.hash;
       location.replace('./pin.html?next='+encodeURIComponent(next));
+      return;
+    }
+
+    if(!(await accessAllowed(session.phone))){
+      clearAccess();
+      fail('Accès MON COMMERCE inactif. Entre un PIN lié à un abonnement POS actif.');
+      setTimeout(()=>location.replace('./pin.html'),900);
       return;
     }
 
