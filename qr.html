@@ -5,14 +5,135 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
   <meta name="theme-color" content="#0e4226">
-  <meta name="digiy-build" content="pos-neutral-local-loader-20260722">
-  <title>MON COMMERCE — ouverture sécurisée</title>
-  <style>*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:20px;background:linear-gradient(180deg,#1e7a46,#0e4226);color:#f0fff5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.box{width:min(440px,100%);padding:24px;border:1px solid rgba(255,240,168,.28);border-radius:28px;background:rgba(5,31,14,.92);text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.35)}h1{margin:0 0 10px;color:#fff0a8;font-size:28px}p{margin:0;color:rgba(240,255,245,.78);line-height:1.5;font-weight:800}.spin{width:38px;height:38px;margin:18px auto;border:4px solid rgba(255,255,255,.16);border-top-color:#fff0a8;border-radius:50%;animation:s .8s linear infinite}a{display:inline-flex;min-height:50px;margin-top:16px;padding:0 18px;align-items:center;justify-content:center;border-radius:16px;background:linear-gradient(135deg,#fff0a8,#c4973f);color:#052215;text-decoration:none;font-weight:1000}@keyframes s{to{transform:rotate(360deg)}}</style>
+  <meta name="digiy-build" content="pos-qr-generic-v2-20260722">
+  <title>MON COMMERCE — QR public</title>
+  <script>
+  (()=>{
+    'use strict';
+    const KEY='DIGIY_POS_PRO_SESSION_V1',TTL=8*60*60*1000,CLOCK=60*1000;
+    const MODULES=new Set(['POS','POS_PRO','COMMERCE','CAISSE','MON_COMMERCE']);
+    const parse=raw=>{try{return JSON.parse(raw||'null')}catch(_){return null}};
+    const get=(store,key)=>{try{return store.getItem(key)}catch(_){return null}};
+    const valid=s=>{if(!s||typeof s!=='object')return false;const module=String(s.module||'').trim().toUpperCase(),phone=String(s.phone||'').replace(/\D/g,''),validated=Number(s.validated_at||0),expires=Number(s.expires_at||0),now=Date.now(),access=s.access===true||s.access_ok===true;return MODULES.has(module)&&phone.length>=9&&access&&validated>0&&validated<=now+CLOCK&&now-validated<TTL&&expires>now&&expires<=validated+TTL+CLOCK};
+    try{const u=new URL(location.href);['phone','tel','owner_phone','slug','commerce','pin','code','session','session_token','token','pin_ok','digiy_pin_ok','digiy_access','access','ok','auth','unlocked','expires','until','exp','expiresAt'].forEach(k=>u.searchParams.delete(k));history.replaceState({},document.title,u.pathname+(u.searchParams.toString()?'?'+u.searchParams.toString():'')+u.hash)}catch(_){ }
+    const session=[parse(get(sessionStorage,KEY)),parse(get(localStorage,KEY))].find(valid)||null;
+    if(!session){location.replace('./pin.html?next='+encodeURIComponent(location.pathname+location.search+location.hash));return}
+    window.DIGIY_ACCESS=Object.assign({},window.DIGIY_ACCESS||{},session);
+    window.DIGIY_PIN_OK=true;
+    window.DIGIY_PIN_EXPIRES_AT=Number(session.expires_at);
+    document.documentElement.dataset.digiyAccess='ok';
+  })();
+  </script>
+  <script src="./assets/js/pos-neutral-migration.js?v=pos-qr-neutral-v2-20260722"></script>
+  <style>
+    :root{--bg:#06130f;--bg2:#0e4226;--card:rgba(255,255,255,.07);--line:rgba(255,255,255,.14);--text:#f8fafc;--muted:rgba(248,250,252,.76);--gold:#fff0a8;--gold2:#c4973f;--green:#22c55e;--shadow:0 20px 56px rgba(0,0,0,.34)}
+    *{box-sizing:border-box}html:not([data-digiy-access="ok"]) body{visibility:hidden}html,body{margin:0;min-height:100%}body{min-height:100dvh;padding:14px 14px 108px;color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(850px 480px at 5% -10%,rgba(255,240,168,.16),transparent 60%),radial-gradient(760px 430px at 100% 0%,rgba(34,197,94,.16),transparent 58%),linear-gradient(180deg,#1e7a46,var(--bg2) 55%,var(--bg))}a{color:inherit;text-decoration:none}button,input{font:inherit}.wrap{width:min(920px,100%);margin:0 auto}.hero,.card{border:1px solid var(--line);border-radius:28px;background:var(--card);box-shadow:var(--shadow);padding:18px}.card{margin-top:14px}.brand{display:flex;align-items:center;gap:12px}.logo{width:60px;height:60px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold),var(--green));color:#052215;font-size:30px;flex:0 0 auto}h1{margin:0;color:var(--gold);font-size:clamp(32px,7vw,52px);line-height:1;letter-spacing:-.045em}.sub{margin-top:8px;color:var(--muted);font-weight:850;line-height:1.5}.status{margin-top:14px;padding:12px 14px;border:1px solid rgba(255,240,168,.3);border-radius:18px;background:rgba(0,0,0,.18);color:var(--gold);font-weight:900;line-height:1.45}.status.ok{border-color:rgba(34,197,94,.38);color:#bbf7d0}.status.bad{border-color:rgba(239,68,68,.42);color:#fecaca}.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.72fr);gap:14px;align-items:start}.qrShell{display:grid;gap:12px;text-align:center}.qrBox{min-height:350px;display:grid;place-items:center;padding:18px;border:1px dashed rgba(255,240,168,.42);border-radius:24px;background:rgba(0,0,0,.14)}.qrImg{width:min(330px,100%);height:auto;padding:12px;border-radius:22px;background:#fff}.qrName{color:var(--gold);font-size:25px;font-weight:1000}.qrTarget{color:var(--muted);font-size:13px;font-weight:850;word-break:break-all;line-height:1.45}.field{display:grid;gap:7px}.field label{color:var(--gold);font-weight:1000}.input{width:100%;min-height:56px;border:1px solid rgba(255,255,255,.18);border-radius:17px;background:rgba(255,255,255,.95);color:#052215;padding:10px 12px;font-weight:850}.hint{color:var(--muted);font-size:13px;line-height:1.45;font-weight:800}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.btn{min-height:54px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.08);color:#fff;padding:10px 12px;font-weight:1000;cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center}.btn.gold{border:0;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#052215}.btn.green{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.16);color:#bbf7d0}.info{display:grid;gap:9px;margin-top:14px}.info div{padding:12px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.05);color:var(--muted);font-weight:850;line-height:1.45}.bottom{position:fixed;left:0;right:0;bottom:0;z-index:80;padding:7px 8px calc(7px + env(safe-area-inset-bottom,0px));background:rgba(3,18,13,.95);border-top:1px solid rgba(255,255,255,.1);backdrop-filter:blur(14px)}.bottomin{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.nav{min-height:59px;border-radius:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);font-size:11px;font-weight:1000;text-align:center;color:rgba(255,255,255,.78)}.nav span:first-child{font-size:19px}.nav.active{background:linear-gradient(135deg,var(--gold),var(--green));color:#052215}
+    @media(max-width:720px){.grid{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.hero,.card{padding:15px;border-radius:23px}.qrBox{min-height:300px}}
+  </style>
 </head>
 <body>
-  <main class="box"><h1>🔐 MON COMMERCE</h1><p id="msg">Vérification de la session PIN…</p><div class="spin" id="spin"></div><a id="login" href="./pin.html" hidden>Entrer le PIN</a></main>
-  <script src="./assets/js/pos-neutral-migration.js?v=20260722"></script>
-  <script>window.DIGIY_POS_PAGE={source:"qr.html"};</script>
-  <script src="./assets/js/pos-secure-loader.js?v=pos-neutral-local-v1-20260722"></script>
+  <div class="wrap">
+    <section class="hero">
+      <div class="brand"><div class="logo">🔳</div><div><h1 id="pageTitle">QR MON COMMERCE</h1><div class="sub">Un QR public propre, propre à chaque commerçant. Il n’ouvre jamais le PIN ni l’espace PRO.</div></div></div>
+      <div class="status" id="status" role="status" aria-live="polite">Préparation du QR…</div>
+    </section>
+
+    <section class="card grid">
+      <div class="qrShell">
+        <div class="qrBox"><a id="qrAnchor" href="#" target="_blank" rel="noopener noreferrer"><img id="qrImg" class="qrImg" alt="QR public MON COMMERCE"></a></div>
+        <div class="qrName" id="qrName">MON COMMERCE</div>
+        <div class="qrTarget" id="qrTarget">Lien public à préparer</div>
+      </div>
+
+      <div>
+        <div class="field"><label for="targetInput">Lien public ouvert par le QR</label><input class="input" id="targetInput" inputmode="url" autocomplete="off" placeholder="https://votre-boutique.digiylyfe.com/"><div class="hint">Colle uniquement une fiche ou une vitrine publique. Les domaines PRO et les pages PIN sont refusés.</div></div>
+        <div class="actions"><button class="btn gold" id="btnSave" type="button">💾 Enregistrer</button><button class="btn" id="btnProfile" type="button">🏪 Lien de ma fiche</button><button class="btn green" id="btnOpen" type="button">↗️ Tester le QR</button><button class="btn" id="btnCopy" type="button">📋 Copier</button><a class="btn" id="btnLarge" href="#" target="_blank" rel="noopener noreferrer">⬇️ QR grand</a><button class="btn" id="btnShare" type="button">📲 Partager</button></div>
+        <div class="info"><div><strong>Protection :</strong> le QR refuse les pages `pin.html`, les espaces PRO et les outils de gestion.</div><div><strong>Sauvegarde :</strong> le lien QR est conservé sur cet appareil et repris depuis « Ma fiche commerce ».</div><div><strong>Doctrine DIGIY :</strong> le client ouvre la fiche publique et contacte directement le professionnel.</div></div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="bottom" aria-label="Navigation MON COMMERCE"><div class="bottomin"><a class="nav" href="./index.html"><span>🏠</span><span>Accueil</span></a><a class="nav" href="./caisse.html"><span>🧾</span><span>Caisse</span></a><a class="nav" href="./profile.html"><span>🏪</span><span>Fiche</span></a><a class="nav active" href="./qr.html"><span>🔳</span><span>QR</span></a><a class="nav" href="https://digiy-hub.digiylyfe.com/index.html"><span>🧭</span><span>HUB</span></a></div></nav>
+
+  <script>
+  (()=>{
+    'use strict';
+    const ROOT='https://mon-commerce.digiylyfe.com/';
+    const QR_API='https://api.qrserver.com/v1/create-qr-code/';
+    const $=id=>document.getElementById(id);
+    const read=key=>{try{return localStorage.getItem(key)||''}catch(_){return ''}};
+    const write=(key,value)=>{try{localStorage.setItem(key,value)}catch(_){}};
+    const parse=raw=>{try{return JSON.parse(raw||'null')}catch(_){return null}};
+    const legacy=raw=>/(astou[-\s]?boutique\.digiylyfe\.com|fiche-astou\.html)/i.test(String(raw||''));
+    const session=window.DIGIY_ACCESS||{};
+    const slug=String(session.slug||read('digiy_pos_slug')||'').trim();
+    const draft=slug?parse(read('DIGIY_POS_PROFILE_DRAFT:'+slug)):null;
+    let business=parse(read('digiy_pos_stable_biz_v1'))||{};
+    const name=String(business.name||(draft&&draft.display_name)||read('digiy_pos_shop_name')||'MON COMMERCE').trim()||'MON COMMERCE';
+    const activity=String(business.activity||(draft&&draft.category)||read('digiy_pos_activity')||'Commerce').trim()||'Commerce';
+    let target='';
+
+    function cleanPublic(raw){
+      const value=String(raw||'').trim();
+      if(!value||legacy(value))return '';
+      try{
+        const url=new URL(value);
+        if(url.protocol!=='https:')return '';
+        const host=url.hostname.toLowerCase(),path=url.pathname.toLowerCase();
+        if(host.startsWith('pro-')||host.includes('commerce-pro')||host.includes('mon-commerce-pro'))return '';
+        if(['pin.html','cockpit.html','dashboard-pro.html','admin.html','produits.html','ventes.html','caisse.html','qr.html'].some(file=>path.includes(file)))return '';
+        ['phone','tel','owner_phone','pin','code','session','session_token','token','access','auth'].forEach(key=>url.searchParams.delete(key));
+        return url.toString();
+      }catch(_){return ''}
+    }
+
+    function profileTarget(){
+      const candidates=[
+        business.publicLink,
+        draft&&draft.qr_target_url,
+        read('digiy_pos_qr_target_url'),
+        read('digiy_pos_public_url')
+      ];
+      for(const candidate of candidates){const safe=cleanPublic(candidate);if(safe)return safe}
+      return ROOT;
+    }
+
+    function qrUrl(value,size){return QR_API+'?size='+size+'x'+size+'&margin=16&data='+encodeURIComponent(value)};
+    function setStatus(message,type=''){const el=$('status');el.textContent=message;el.className='status'+(type?' '+type:'')}
+
+    function saveTarget(value){
+      const safe=cleanPublic(value);
+      if(!safe){setStatus('Lien refusé : utilise une fiche publique HTTPS, jamais une page PRO ou PIN.','bad');return false}
+      target=safe;
+      write('digiy_pos_qr_target_url',target);
+      write('digiy_pos_public_url',target);
+      try{business=Object.assign({},business,{name:business.name||name,activity:business.activity||activity,publicLink:target});write('digiy_pos_stable_biz_v1',JSON.stringify(business))}catch(_){ }
+      render();
+      setStatus(target===ROOT?'QR générique prêt. Ajoute la fiche publique du commerçant pour un QR personnalisé.':'QR public personnalisé prêt.','ok');
+      return true;
+    }
+
+    function render(){
+      $('pageTitle').textContent='QR '+name;
+      $('qrName').textContent=name+' · '+activity;
+      $('qrTarget').textContent=target;
+      $('targetInput').value=target;
+      $('qrAnchor').href=target;
+      $('qrImg').src=qrUrl(target,720);
+      $('qrImg').alt='QR public '+name;
+      $('btnLarge').href=qrUrl(target,1200);
+    }
+
+    $('btnSave').addEventListener('click',()=>saveTarget($('targetInput').value));
+    $('targetInput').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();$('btnSave').click()}});
+    $('btnProfile').addEventListener('click',()=>{const value=profileTarget();$('targetInput').value=value;saveTarget(value)});
+    $('btnOpen').addEventListener('click',()=>window.open(target,'_blank','noopener,noreferrer'));
+    $('btnCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(target);setStatus('Lien public copié.','ok')}catch(_){setStatus('Copie impossible dans ce navigateur.','bad')}});
+    $('btnShare').addEventListener('click',async()=>{const text='Découvre '+name+' sur DIGIY MON COMMERCE.';try{if(navigator.share){await navigator.share({title:name,text,url:target});return}}catch(error){if(error&&error.name==='AbortError')return}location.href='https://wa.me/?text='+encodeURIComponent(text+'\n'+target)});
+
+    target=profileTarget();
+    saveTarget(target);
+  })();
+  </script>
 </body>
 </html>
